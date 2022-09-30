@@ -1,0 +1,41 @@
+export const chartTypes = {
+  line: 'Line',
+  bar: 'Bar',
+  row: 'Row',
+  stackedBar: 'StackedBar',
+  stackedRow: 'StackedRow',
+  stackedArea: 'StackedArea',
+  map: 'Map',
+  symbol: 'Symbol',
+  scatter: 'Scatter',
+  radar: 'Radar',
+  pie: 'Pie',
+};
+
+export const stackingOptions = {
+  percent: { value: 'percent', label: 'Percent' },
+  normal: { value: 'normal', label: 'Normal' },
+};
+
+export const dataSourceTypes = {
+  csv: { value: 'csv', label: 'CSV' },
+  dotStat: { value: 'dotStat', label: '.Stat' },
+};
+
+export const sortByOptions = {
+  none: { value: 'none', label: 'None (data order)' },
+  categoriesLabel: { value: 'categoriesLabel', label: 'Categories label' },
+  categoriesCode: { value: 'categoriesCode', label: 'Categories code' },
+  seriesValue: { value: 'seriesValue', label: 'Series value' },
+};
+
+export const sortOrderOptions = {
+  asc: { value: 'asc', label: 'Ascending' },
+  desc: { value: 'desc', label: 'Descending' },
+};
+
+export const mapTypes = {
+  normal: { value: 'normal', label: 'Choropleth' },
+  bubble: { value: 'bubble', label: 'Bubble' },
+  point: { value: 'point', label: 'Point' },
+};

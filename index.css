@@ -1,0 +1,28 @@
+.cb-container p,
+.cb-container ul {
+  margin: 0px;
+}
+
+.cb-footer div:not(:empty) {
+  padding: 5px 10px;
+  font-family: sans-serif;
+  font-size: 13px;
+  line-height: normal;
+}
+.cb-footer p {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.cb-footer p:last-of-type {
+  margin-bottom: 0px;
+}
+
+@keyframes cb-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cb-spinner-animation {
+  animation: cb-rotate 600ms infinite linear;
+}
