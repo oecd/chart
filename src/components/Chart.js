@@ -13,6 +13,7 @@ import { isNilOrEmpty } from '../utils/ramdaUtil';
 import ChartWithConfig from './ChartWithConfig';
 import Spinner from './Spinner';
 import { possibleVariables } from '../utils/configUtil';
+import { fetchJson } from '../utils/fetchUtil';
 
 const apiUrl =
   process.env.NEXT_PUBLIC_CHART_LIB_API_URL ||
@@ -63,10 +64,9 @@ const Chart = ({ chartId, ...otherProps }) => {
       }`;
 
       lastRequestedConfig.current = configParams;
-      const res = await fetch(
+      const config = await fetchJson(
         `${apiUrl}/api/public/chartConfig/${configParams}`,
       );
-      const config = await res.json();
 
       // discard result from outdated request(s)
       if (configParams === lastRequestedConfig.current) {

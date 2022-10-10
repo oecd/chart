@@ -1,6 +1,11 @@
 /* eslint-disable react/jsx-props-no-spreading, react/no-danger, react/no-this-in-sfc  */
 import React, { useState, useRef, useEffect, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons/faExpandArrowsAlt';
+import { faDownload } from '@fortawesome/free-solid-svg-icons/faDownload';
+import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
+import ReactTooltip from 'react-tooltip';
 import * as R from 'ramda';
 
 import {
@@ -98,6 +103,8 @@ const HighchartsChart = ({
   maxNumberOfDecimals,
   mapCountryDimension,
   onTitleParsed,
+  displayFooterAsTooltip,
+  onExpandChart,
   ...otherProps
 }) => {
   const chartForType = getChartForType(chartType);
@@ -266,6 +273,7 @@ const HighchartsChart = ({
     vars,
   ]);
 
+  const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);
   const [chartHeight, setChartHeight] = useState(height);
 
@@ -316,11 +324,16 @@ const HighchartsChart = ({
       : R.join('', nonEmpyFooterItems);
   }, [definition, note, source, vars, codeLabelMappingFromData]);
 
+  const headerRef = useRef(null);
   const footerRef = useRef(null);
 
   useEffect(() => {
-    const isThereEnoughSpaceForFooter =
-      height - footerRef.current.clientHeight >= minChartHeightForFooterDisplay;
+    const isThereEnoughSpaceForFooter = displayFooterAsTooltip
+      ? false
+      : height - footerRef.current.clientHeight >=
+        minChartHeightForFooterDisplay;
+
+    setHeaderHeight(headerRef.current.clientHeight);
 
     setFooterHeight(
       isThereEnoughSpaceForFooter ? footerRef.current.clientHeight : 0,
@@ -328,10 +341,22 @@ const HighchartsChart = ({
 
     setChartHeight(
       isThereEnoughSpaceForFooter
-        ? height - footerRef.current.clientHeight
-        : height,
+        ? height -
+            headerRef.current.clientHeight -
+            footerRef.current.clientHeight
+        : height - headerRef.current.clientHeight,
     );
-  }, [width, height, definition, note, source]);
+  }, [
+    width,
+    height,
+    title,
+    subtitle,
+    definition,
+    note,
+    source,
+    displayFooterAsTooltip,
+    footerHeight,
+  ]);
 
   const parsedTitle = useMemo(
     () =>
@@ -393,13 +418,19 @@ const HighchartsChart = ({
     }
   }, [onTitleParsed, parsedTitle]);
 
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  });
+
+  const chartRef = useRef(null);
+
   return (
-    <div className="cb-container">
+    <div className="cb-container" style={{ backgroundColor: '#fff' }}>
       {(isFetching || !R.isNil(errorMessage)) && (
         <div
           style={{
             display: 'flex',
-            height: chartHeight,
+            height,
             justifyContent: 'center',
             alignItems: 'center',
           }}
@@ -408,6 +439,87 @@ const HighchartsChart = ({
         </div>
       )}
 
+      <div
+        ref={headerRef}
+        style={
+          R.isNil(headerHeight) || isFetching || !R.isNil(errorMessage)
+            ? {
+                width,
+                position: 'fixed',
+                visibility: 'hidden',
+              }
+            : {}
+        }
+      >
+        <div style={{ display: 'flex', padding: '7px 10px 5px 10px' }}>
+          <div style={{ flex: '1 1 auto' }}>
+            {!R.isEmpty(parsedTitle) && (
+              <div
+                className="cb-title"
+                dangerouslySetInnerHTML={{
+                  __html: parsedTitle,
+                }}
+              />
+            )}
+            {!R.isEmpty(parsedSubtitle) && (
+              <div
+                className="cb-subtitle"
+                dangerouslySetInnerHTML={{
+                  __html: parsedSubtitle,
+                }}
+              />
+            )}
+          </div>
+          <div
+            className="cb-toolbar"
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              flexWrap: 'nowrap',
+            }}
+          >
+            {!R.isNil(footer) &&
+              (footerHeight === 0 || displayFooterAsTooltip) && (
+                <div style={{ marginLeft: '8px' }} data-tip={footer}>
+                  <FontAwesomeIcon icon={faInfoCircle} />
+                </div>
+              )}
+            <div
+              style={{ marginLeft: '8px', cursor: 'pointer' }}
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                if (chartRef.current?.chart.downloadCSV) {
+                  chartRef.current?.chart.downloadCSV();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && chartRef.current?.chart.downloadCSV) {
+                  chartRef.current?.chart.downloadCSV();
+                }
+              }}
+            >
+              <FontAwesomeIcon icon={faDownload} />
+            </div>
+            {onExpandChart && (
+              <div
+                style={{ marginLeft: '8px', cursor: 'pointer' }}
+                role="button"
+                tabIndex={0}
+                onClick={onExpandChart}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    onExpandChart();
+                  }
+                }}
+              >
+                <FontAwesomeIcon icon={faExpandArrowsAlt} />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {!R.isNil(footerHeight) &&
         chartHeight &&
         !isFetching &&
@@ -415,11 +527,10 @@ const HighchartsChart = ({
           <ChartForTypeComponent
             {...chartForType.props}
             key={`${id}-${chartForType.props.horizontal}`}
+            ref={chartRef}
             width={width}
             height={chartHeight}
             data={parsedData}
-            title={parsedTitle}
-            subtitle={parsedSubtitle}
             highlight={parsedHighlight}
             baseline={parsedBaseline}
             colorPalette={
@@ -459,6 +570,19 @@ const HighchartsChart = ({
           }}
         />
       </div>
+
+      <ReactTooltip
+        place="bottom"
+        effect="solid"
+        backgroundColor="#ffffff"
+        textColor="#333333"
+        border
+        borderColor="#333333"
+        className="cb-tooltip"
+        html
+        clickable
+        delayHide={300}
+      />
     </div>
   );
 };
@@ -495,6 +619,8 @@ HighchartsChart.propTypes = {
   maxNumberOfDecimals: PropTypes.string,
   mapCountryDimension: PropTypes.string,
   onTitleParsed: PropTypes.func,
+  displayFooterAsTooltip: PropTypes.bool,
+  onExpandChart: PropTypes.func,
 };
 
 HighchartsChart.defaultProps = {
@@ -522,6 +648,8 @@ HighchartsChart.defaultProps = {
   maxNumberOfDecimals: '',
   mapCountryDimension: '',
   onTitleParsed: null,
+  displayFooterAsTooltip: false,
+  onExpandChart: null,
 };
 
 export default memo(HighchartsChart);
