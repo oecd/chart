@@ -44,7 +44,7 @@ import {
   createFormatters,
 } from '../../utils/chartUtil';
 
-const minChartHeightForFooterDisplay = 200;
+const minChartHeightForFooterDisplay = 280;
 
 const chartByType = {
   [chartTypes.line]: { component: Line, props: {} },
