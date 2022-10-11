@@ -134,7 +134,9 @@ const Line = forwardRef(
             ...(hideXAxisLabels ? { enabled: false } : {}),
           },
           gridLineColor: '#cbcbcb',
-          lineColor: '#cbcbcb',
+          lineColor: 'transparent',
+          left: '5%',
+          width: '90%',
         },
 
         yAxis: {
@@ -142,6 +144,8 @@ const Line = forwardRef(
             enabled: false,
           },
           startOnTick: false,
+          gridLineColor: '#cbcbcb',
+          lineColor: '#cbcbcb',
           labels: {
             style: { fontSize: '12px', color: '#0c0c0c' },
             enabled: !hideYAxisLabels,
