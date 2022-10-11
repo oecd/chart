@@ -272,25 +272,38 @@ export const sortCSV =
     }
 
     if (sortBy === sortByOptions.seriesValue.value) {
-      const yIndex = R.compose(
-        R.when(R.equals(-1), R.always(0)),
-        R.when(R.equals(-1), () =>
-          R.findIndex(
-            R.equals(R.toUpper(sortSeries)),
-            R.map(R.toUpper, R.values(parsingHelperData.yDimensionLabelByCode)),
+      const seriesCodes = R.map(
+        R.toUpper,
+        R.keys(parsingHelperData.yDimensionLabelByCode),
+      );
+      const seriesLabels = R.map(
+        R.toUpper,
+        R.values(parsingHelperData.yDimensionLabelByCode),
+      );
+
+      const findSeriesIndexByCodeOrLabel = (codeOrLabel) =>
+        R.compose(
+          R.when(R.equals(-1), () =>
+            R.findIndex(R.equals(codeOrLabel), seriesLabels),
           ),
-        ),
-        () =>
-          R.findIndex(
-            R.equals(R.toUpper(sortSeries)),
-            R.map(R.toUpper, R.keys(parsingHelperData.yDimensionLabelByCode)),
-          ),
-      )();
+          () => R.findIndex(R.equals(codeOrLabel), seriesCodes),
+        )();
+
+      const yIndexes = R.compose(
+        R.when(R.isEmpty, R.always([0])),
+        R.reject(R.equals(-1)),
+        R.map(findSeriesIndexByCodeOrLabel),
+        R.split('|'),
+        R.toUpper,
+      )(sortSeries);
 
       return {
         data: R.prepend(
           R.head(data),
-          R.sort(orderFunc(R.nth(yIndex + 1)), R.tail(data)),
+          R.sort(
+            orderFunc(R.compose(R.sum, R.props(yIndexes), R.tail)),
+            R.tail(data),
+          ),
         ),
         parsingHelperData,
         ...rest,
