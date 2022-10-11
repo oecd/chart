@@ -362,7 +362,7 @@ export const createFormatters = ({
     ? {
         formatter: function formatPoint() {
           return numberFormat(
-            this.point.value || this.point.z,
+            this.point.value || this.point.z || this.point.y,
             maxNumberOfDecimals,
           );
         },
