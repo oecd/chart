@@ -117,6 +117,7 @@ const HighchartsChart = ({
       !isNilOrEmpty(dotStatUrl),
   );
   const [errorMessage, setErrorMessage] = useState(null);
+  const [noDataMessage, setNoDataMessage] = useState(null);
 
   const vars = useMemo(
     () =>
@@ -174,11 +175,13 @@ const HighchartsChart = ({
     ) {
       setIsFetching(false);
       setErrorMessage(null);
+      setNoDataMessage(null);
       setSdmxJson(null);
     } else {
       const getData = async () => {
         setIsFetching(true);
         setErrorMessage(null);
+        setNoDataMessage(null);
         try {
           lastRequestedDotStatUrlKey.current = `${finalDotStatUrl}|${dotStatLang}`;
 
@@ -217,6 +220,13 @@ const HighchartsChart = ({
 
     try {
       if (dataSourceType === dataSourceTypes.dotStat.value) {
+        const isEmpty = R.isEmpty(
+          R.path(['structure', 'dimensions', 'observation'], sdmxJson),
+        );
+        if (sdmxJson && isEmpty) {
+          setNoDataMessage('No data');
+          return emptyData;
+        }
         return sdmxJson
           ? R.compose(
               addAreCategoriesNumbersOrDates,
@@ -249,6 +259,7 @@ const HighchartsChart = ({
       });
 
       setErrorMessage(null);
+      setNoDataMessage(null);
 
       return data;
     } catch (e) {
@@ -520,10 +531,24 @@ const HighchartsChart = ({
         </div>
       </div>
 
+      {!R.isNil(noDataMessage) && (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: chartHeight,
+          }}
+        >
+          {noDataMessage}
+        </div>
+      )}
+
       {!R.isNil(footerHeight) &&
         chartHeight &&
         !isFetching &&
-        R.isNil(errorMessage) && (
+        R.isNil(errorMessage) &&
+        R.isNil(noDataMessage) && (
           <ChartForTypeComponent
             {...chartForType.props}
             key={`${id}-${chartForType.props.horizontal}`}
