@@ -224,7 +224,7 @@ const HighchartsChart = ({
           R.path(['structure', 'dimensions', 'observation'], sdmxJson),
         );
         if (sdmxJson && isEmpty) {
-          setNoDataMessage('No data');
+          setNoDataMessage('No data available');
           return emptyData;
         }
         return sdmxJson
@@ -437,23 +437,10 @@ const HighchartsChart = ({
 
   return (
     <div className="cb-container" style={{ backgroundColor: '#fff' }}>
-      {(isFetching || !R.isNil(errorMessage)) && (
-        <div
-          style={{
-            display: 'flex',
-            height,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {!R.isNil(errorMessage) ? errorMessage : <Spinner />}
-        </div>
-      )}
-
       <div
         ref={headerRef}
         style={
-          R.isNil(headerHeight) || isFetching || !R.isNil(errorMessage)
+          R.isNil(headerHeight)
             ? {
                 width,
                 position: 'fixed',
@@ -489,49 +476,56 @@ const HighchartsChart = ({
               flexWrap: 'nowrap',
             }}
           >
-            {!R.isNil(footer) &&
-              (footerHeight === 0 || displayFooterAsTooltip) && (
-                <div style={{ marginLeft: '8px' }} data-tip={footer}>
-                  <FontAwesomeIcon icon={faInfoCircle} />
+            {R.isNil(noDataMessage) && R.isNil(errorMessage) && !isFetching && (
+              <>
+                {!R.isNil(footer) &&
+                  (footerHeight === 0 || displayFooterAsTooltip) && (
+                    <div style={{ marginLeft: '8px' }} data-tip={footer}>
+                      <FontAwesomeIcon icon={faInfoCircle} />
+                    </div>
+                  )}
+                <div
+                  style={{ marginLeft: '8px', cursor: 'pointer' }}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    if (chartRef.current?.chart.downloadCSV) {
+                      chartRef.current?.chart.downloadCSV();
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (
+                      e.key === 'Enter' &&
+                      chartRef.current?.chart.downloadCSV
+                    ) {
+                      chartRef.current?.chart.downloadCSV();
+                    }
+                  }}
+                >
+                  <FontAwesomeIcon icon={faDownload} />
                 </div>
-              )}
-            <div
-              style={{ marginLeft: '8px', cursor: 'pointer' }}
-              role="button"
-              tabIndex={0}
-              onClick={() => {
-                if (chartRef.current?.chart.downloadCSV) {
-                  chartRef.current?.chart.downloadCSV();
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && chartRef.current?.chart.downloadCSV) {
-                  chartRef.current?.chart.downloadCSV();
-                }
-              }}
-            >
-              <FontAwesomeIcon icon={faDownload} />
-            </div>
-            {onExpandChart && (
-              <div
-                style={{ marginLeft: '8px', cursor: 'pointer' }}
-                role="button"
-                tabIndex={0}
-                onClick={onExpandChart}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    onExpandChart();
-                  }
-                }}
-              >
-                <FontAwesomeIcon icon={faExpandArrowsAlt} />
-              </div>
+                {onExpandChart && (
+                  <div
+                    style={{ marginLeft: '8px', cursor: 'pointer' }}
+                    role="button"
+                    tabIndex={0}
+                    onClick={onExpandChart}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        onExpandChart();
+                      }
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faExpandArrowsAlt} />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
       </div>
 
-      {!R.isNil(noDataMessage) && (
+      {(!R.isNil(noDataMessage) || !R.isNil(errorMessage) || isFetching) && (
         <div
           style={{
             display: 'flex',
@@ -540,7 +534,9 @@ const HighchartsChart = ({
             height: chartHeight,
           }}
         >
-          {noDataMessage}
+          {isFetching && <Spinner />}
+          {!R.isNil(errorMessage) && errorMessage}
+          {!R.isNil(noDataMessage) && noDataMessage}
         </div>
       )}
 
@@ -580,7 +576,8 @@ const HighchartsChart = ({
           R.isNil(footerHeight) ||
           footerHeight === 0 ||
           isFetching ||
-          !R.isNil(errorMessage)
+          !R.isNil(errorMessage) ||
+          !R.isNil(noDataMessage)
             ? {
                 width,
                 position: 'fixed',
