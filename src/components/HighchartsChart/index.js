@@ -335,6 +335,10 @@ const HighchartsChart = ({
       : R.join('', nonEmpyFooterItems);
   }, [definition, note, source, vars, codeLabelMappingFromData]);
 
+  const fakeFooterTooltip = R.isNil(footer) ? null : (
+    <div style={{ width: '20px' }} />
+  );
+
   const headerRef = useRef(null);
   const footerRef = useRef(null);
 
@@ -366,7 +370,6 @@ const HighchartsChart = ({
     note,
     source,
     displayFooterAsTooltip,
-    footerHeight,
   ]);
 
   const parsedTitle = useMemo(
@@ -476,34 +479,41 @@ const HighchartsChart = ({
               flexWrap: 'nowrap',
             }}
           >
-            {R.isNil(noDataMessage) && R.isNil(errorMessage) && !isFetching && (
+            {R.isNil(noDataMessage) && R.isNil(errorMessage) && (
               <>
                 {!R.isNil(footer) &&
-                  (footerHeight === 0 || displayFooterAsTooltip) && (
-                    <div style={{ marginLeft: '8px' }} data-tip={footer}>
-                      <FontAwesomeIcon icon={faInfoCircle} />
-                    </div>
-                  )}
-                <div
-                  style={{ marginLeft: '8px', cursor: 'pointer' }}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    if (chartRef.current?.chart.downloadCSV) {
-                      chartRef.current?.chart.downloadCSV();
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (
-                      e.key === 'Enter' &&
-                      chartRef.current?.chart.downloadCSV
-                    ) {
-                      chartRef.current?.chart.downloadCSV();
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon icon={faDownload} />
-                </div>
+                !isFetching &&
+                (footerHeight === 0 || displayFooterAsTooltip) ? (
+                  <div style={{ marginLeft: '4px' }} data-tip={footer}>
+                    <FontAwesomeIcon icon={faInfoCircle} />
+                  </div>
+                ) : (
+                  fakeFooterTooltip
+                )}
+                {isFetching ? (
+                  <div style={{ width: '24px' }} />
+                ) : (
+                  <div
+                    style={{ marginLeft: '8px', cursor: 'pointer' }}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      if (chartRef.current?.chart.downloadCSV) {
+                        chartRef.current?.chart.downloadCSV();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === 'Enter' &&
+                        chartRef.current?.chart.downloadCSV
+                      ) {
+                        chartRef.current?.chart.downloadCSV();
+                      }
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faDownload} />
+                  </div>
+                )}
                 {onExpandChart && (
                   <div
                     style={{ marginLeft: '8px', cursor: 'pointer' }}
