@@ -477,6 +477,7 @@ const HighchartsChart = ({
               display: 'flex',
               alignItems: 'flex-start',
               flexWrap: 'nowrap',
+              minHeight: '21px',
             }}
           >
             {R.isNil(noDataMessage) && R.isNil(errorMessage) && (
