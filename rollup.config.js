@@ -5,9 +5,8 @@ import commonjs from '@rollup/plugin-commonjs';
 import external from 'rollup-plugin-peer-deps-external';
 import json from '@rollup/plugin-json';
 import postcss from 'rollup-plugin-postcss';
+import { terser } from 'rollup-plugin-terser';
 import * as dotenv from 'dotenv';
-
-const packageJson = require('./package.json');
 
 dotenv.config();
 
@@ -19,14 +18,16 @@ export default [
     input: './src/index-with-css.js',
     output: [
       {
-        file: packageJson.main,
+        dir: 'dist/cjs',
         format: 'cjs',
         sourcemap: true,
+        entryFileNames: () => 'index.js',
       },
       {
-        file: packageJson.module,
+        dir: 'dist/esm',
         format: 'esm',
         sourcemap: true,
+        entryFileNames: () => 'index.js',
       },
     ],
     external: [/@babel\/runtime/],
@@ -46,6 +47,7 @@ export default [
       commonjs(),
       json(),
       postcss(),
+      terser(),
     ],
   },
 ];

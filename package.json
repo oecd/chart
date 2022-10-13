@@ -1,6 +1,6 @@
 {
   "name": "@oecd-pac/chart",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "OECD chart lib",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -65,7 +65,8 @@
     "react-dom": "^18.2.0",
     "rollup": "^2.79.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-postcss": "^4.0.2"
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-terser": "^7.0.2"
   },
   "peerDependencies": {
     "react": ">=16.8.0",

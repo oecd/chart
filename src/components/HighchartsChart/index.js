@@ -1,5 +1,13 @@
 /* eslint-disable react/jsx-props-no-spreading, react/no-danger, react/no-this-in-sfc  */
-import React, { useState, useRef, useEffect, useMemo, memo } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  memo,
+  lazy,
+  Suspense,
+} from 'react';
 import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons/faExpandArrowsAlt';
@@ -20,7 +28,6 @@ import Bar from './Bar';
 import Stacked from './Stacked';
 import Scatter from './Scatter';
 import Pie from './Pie';
-import MapChart from './MapChart';
 import NullComponent from '../NullComponent';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import { fixDotStatUrl, parseSdmxJson } from '../../utils/sdmxJsonUtil';
@@ -43,6 +50,9 @@ import {
   replaceVarsNameByVarsValue,
   createFormatters,
 } from '../../utils/chartUtil';
+
+// dynamic import for code splitting
+const MapChart = lazy(() => import('./MapChart'));
 
 const minChartHeightForFooterDisplay = 280;
 
@@ -556,28 +566,30 @@ const HighchartsChart = ({
         !isFetching &&
         R.isNil(errorMessage) &&
         R.isNil(noDataMessage) && (
-          <ChartForTypeComponent
-            {...chartForType.props}
-            key={`${id}-${chartForType.props.horizontal}`}
-            ref={chartRef}
-            width={width}
-            height={chartHeight}
-            data={parsedData}
-            highlight={parsedHighlight}
-            baseline={parsedBaseline}
-            colorPalette={
-              R.isEmpty(paletteColorsOverride)
-                ? colorPalette
-                : paletteColorsOverride
-            }
-            highlightColors={
-              R.isEmpty(highlightColorsOverride)
-                ? highlightColors
-                : highlightColorsOverride
-            }
-            formatters={formatters}
-            {...otherProps}
-          />
+          <Suspense fallback={null}>
+            <ChartForTypeComponent
+              {...chartForType.props}
+              key={`${id}-${chartForType.props.horizontal}`}
+              ref={chartRef}
+              width={width}
+              height={chartHeight}
+              data={parsedData}
+              highlight={parsedHighlight}
+              baseline={parsedBaseline}
+              colorPalette={
+                R.isEmpty(paletteColorsOverride)
+                  ? colorPalette
+                  : paletteColorsOverride
+              }
+              highlightColors={
+                R.isEmpty(highlightColorsOverride)
+                  ? highlightColors
+                  : highlightColorsOverride
+              }
+              formatters={formatters}
+              {...otherProps}
+            />
+          </Suspense>
         )}
 
       <div
