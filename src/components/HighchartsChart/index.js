@@ -81,6 +81,8 @@ const createDotStatHeaders = (lang) => ({
   'Accept-Language': isNilOrEmpty(lang) ? 'en' : R.toLower(lang),
 });
 
+const tooltipRandomId = Math.random().toString(36).slice(2, 7);
+
 const HighchartsChart = ({
   id,
   dataSourceType,
@@ -617,6 +619,7 @@ const HighchartsChart = ({
       </div>
 
       <ReactTooltip
+        uuid={tooltipRandomId}
         place="bottom"
         effect="solid"
         backgroundColor="#ffffff"

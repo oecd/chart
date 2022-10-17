@@ -19,6 +19,7 @@
     "**/test-results": true,
     "**/coverage": true,
     "**/dist": true,
+    "**/dist-browser": true,
     "**/.next": true,
     "**/out": true
   },

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Charts outside React App</title>
+  </head>
+  <body>
+    <div style="display: flex; justify-content: center">
+      <div>
+        <h2 style="padding: 10px; margin-bottom: 0px; text-align: center">
+          Charts outside React App
+        </h2>
+
+        <div style="display: flex; margin-top: 50px">
+          <div
+            style="width: 400px; height: 250px"
+            data-cb-id="5bc48e7e65"
+          ></div>
+          <div
+            style="width: 400px; height: 250px"
+            data-cb-id="8bcaba6045"
+          ></div>
+        </div>
+        <div style="display: flex; margin-top: 50px">
+          <div
+            style="width: 400px; height: 250px"
+            data-cb-id="91525bc3bb"
+          ></div>
+          <div
+            style="width: 400px; height: 250px"
+            data-cb-id="003a169f86"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+      crossorigin
+    ></script>
+
+    <script src="../dist-browser/chart-builder-1.0.7.js" crossorigin></script>
+    <script>
+      ChartBuilder.renderCharts();
+
+      setTimeout(() => {
+        const chartElements = document.querySelectorAll(
+          '[data-cb-id]:not([data-cb-id=""])',
+        );
+
+        chartElements[1].setAttribute('data-cb-id', '5221a65bac');
+        ChartBuilder.renderCharts();
+      }, 3000);
+
+      setTimeout(() => {
+        const chartElements = document.querySelectorAll(
+          '[data-cb-id]:not([data-cb-id=""])',
+        );
+
+        chartElements[1].setAttribute('data-cb-var1', 'FIN');
+        ChartBuilder.renderCharts();
+      }, 6000);
+    </script>
+  </body>
+</html>

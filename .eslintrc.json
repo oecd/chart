@@ -6,5 +6,8 @@
     "react/function-component-definition": "off",
     "react/forbid-prop-types": "off",
     "no-underscore-dangle": "off"
+  },
+  "env": {
+    "browser": true
   }
 }
