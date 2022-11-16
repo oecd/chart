@@ -32,7 +32,7 @@
   border-radius: 3px;
   font-family: 'Segoe UI';
   max-width: 300px;
-  z-index: 11;
+  z-index: 12;
 }
 .cb-tooltip p,
 .cb-tooltip ul {
