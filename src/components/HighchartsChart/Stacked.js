@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef, forwardRef } from 'react';
+import React, { useMemo, useEffect, useRef, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
@@ -46,6 +46,8 @@ const Stacked = forwardRef(
     },
     ref,
   ) => {
+    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
+
     const finalColorPalette = useMemo(
       () =>
         R.when(
@@ -62,10 +64,10 @@ const Stacked = forwardRef(
           data,
           finalColorPalette,
           highlightColors,
-          highlight,
+          parsedHighlight,
           baseline,
         ),
-      [data, finalColorPalette, highlightColors, highlight, baseline],
+      [data, finalColorPalette, highlightColors, parsedHighlight, baseline],
     );
 
     const chartType = R.cond([
@@ -254,7 +256,7 @@ Stacked.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesNumbersOrDates: PropTypes.bool.isRequired,
   }).isRequired,
-  highlight: PropTypes.array,
+  highlight: PropTypes.string,
   baseline: PropTypes.string,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
@@ -271,7 +273,7 @@ Stacked.propTypes = {
 Stacked.defaultProps = {
   horizontal: false,
   area: false,
-  highlight: [],
+  highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
@@ -281,4 +283,4 @@ Stacked.defaultProps = {
   optionsOverride: {},
 };
 
-export default Stacked;
+export default memo(Stacked);

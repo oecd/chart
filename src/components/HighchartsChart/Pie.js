@@ -1,4 +1,4 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
@@ -40,6 +40,8 @@ const Pie = forwardRef(
     },
     ref,
   ) => {
+    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
+
     const finalColorPalette = useMemo(
       () =>
         R.length(colorPalette) === 1
@@ -59,7 +61,7 @@ const Pie = forwardRef(
               const color =
                 getBaselineOrHighlightColor(
                   category,
-                  highlight,
+                  parsedHighlight,
                   baseline,
                   highlightColors,
                 ) || getListItemAtTurningIndex(xIdx, finalColorPalette);
@@ -69,7 +71,7 @@ const Pie = forwardRef(
           }),
           R.isEmpty(data.series) ? [] : [R.head(data.series)],
         ),
-      [data, finalColorPalette, highlightColors, highlight, baseline],
+      [data, finalColorPalette, highlightColors, parsedHighlight, baseline],
     );
 
     const defaultOptions = useMemo(
@@ -163,7 +165,7 @@ Pie.propTypes = {
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
   }).isRequired,
-  highlight: PropTypes.array,
+  highlight: PropTypes.string,
   baseline: PropTypes.string,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
@@ -176,7 +178,7 @@ Pie.propTypes = {
 };
 
 Pie.defaultProps = {
-  highlight: [],
+  highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
@@ -184,4 +186,4 @@ Pie.defaultProps = {
   optionsOverride: {},
 };
 
-export default Pie;
+export default memo(Pie);

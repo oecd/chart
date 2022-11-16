@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, forwardRef } from 'react';
+import React, { useMemo, useRef, useEffect, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
@@ -44,13 +44,15 @@ const Bar = forwardRef(
     },
     ref,
   ) => {
+    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
+
     const series = useMemo(
       () =>
         R.map((s) => {
           const seriesColor =
             getBaselineOrHighlightColor(
               s,
-              highlight,
+              parsedHighlight,
               baseline,
               highlightColors,
             ) || R.head(colorPalette);
@@ -62,7 +64,7 @@ const Bar = forwardRef(
 
               const baselineOrHighlightColor = getBaselineOrHighlightColor(
                 category,
-                highlight,
+                parsedHighlight,
                 baseline,
                 highlightColors,
               );
@@ -79,7 +81,7 @@ const Bar = forwardRef(
             showInLegend: s.code !== fakeMemberLatest.code,
           };
         }, data.series),
-      [data, colorPalette, highlightColors, highlight, baseline],
+      [data, colorPalette, highlightColors, parsedHighlight, baseline],
     );
 
     const updateNeededAfterChartHasBeenRenderedOnceDone = useRef(false);
@@ -249,7 +251,7 @@ Bar.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesNumbersOrDates: PropTypes.bool.isRequired,
   }).isRequired,
-  highlight: PropTypes.array,
+  highlight: PropTypes.string,
   baseline: PropTypes.string,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
@@ -265,7 +267,7 @@ Bar.propTypes = {
 
 Bar.defaultProps = {
   horizontal: false,
-  highlight: [],
+  highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
@@ -275,4 +277,4 @@ Bar.defaultProps = {
   optionsOverride: {},
 };
 
-export default Bar;
+export default memo(Bar);

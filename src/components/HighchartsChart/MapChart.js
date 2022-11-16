@@ -1,5 +1,5 @@
 /* eslint-disable react/no-this-in-sfc  */
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
@@ -94,6 +94,8 @@ const MapChart = forwardRef(
     },
     ref,
   ) => {
+    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
+
     const stepsHaveLabels = useMemo(
       () =>
         !isNilOrEmpty(mapColorValueSteps) &&
@@ -168,7 +170,7 @@ const MapChart = forwardRef(
 
                 const baselineOrHighlightColor = getBaselineOrHighlightColor(
                   { code: countryCode, label: getLabelFromMap(countryCode) },
-                  R.map(R.toUpper, highlight),
+                  R.map(R.toUpper, parsedHighlight),
                   R.toUpper(baseline),
                   highlightColors,
                 );
@@ -199,7 +201,7 @@ const MapChart = forwardRef(
         data,
         finalColorPalette,
         highlightColors,
-        highlight,
+        parsedHighlight,
         baseline,
       ],
     );
@@ -348,7 +350,7 @@ MapChart.propTypes = {
   mapDisplayCountriesName: PropTypes.bool,
   mapAutoShade: PropTypes.bool,
   mapColorValueSteps: PropTypes.array,
-  highlight: PropTypes.array,
+  highlight: PropTypes.string,
   baseline: PropTypes.string,
   hideLegend: PropTypes.bool,
   colorPalette: PropTypes.array.isRequired,
@@ -364,11 +366,11 @@ MapChart.defaultProps = {
   mapDisplayCountriesName: false,
   mapAutoShade: true,
   mapColorValueSteps: [],
-  highlight: [],
+  highlight: '',
   baseline: null,
   hideLegend: false,
   formatters: {},
   optionsOverride: {},
 };
 
-export default MapChart;
+export default memo(MapChart);

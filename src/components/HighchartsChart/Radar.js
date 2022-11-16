@@ -1,4 +1,4 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import HighchartsMore from 'highcharts/highcharts-more';
@@ -42,12 +42,14 @@ const Radar = forwardRef(
     },
     ref,
   ) => {
+    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
+
     const series = useMemo(
       () =>
         R.map((s) => {
           const highlightOrBaselineColor = getBaselineOrHighlightColor(
             s,
-            highlight,
+            parsedHighlight,
             baseline,
             highlightColors,
           );
@@ -73,7 +75,7 @@ const Radar = forwardRef(
             ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
           };
         }, data.series),
-      [data, colorPalette, highlightColors, highlight, baseline],
+      [data, colorPalette, highlightColors, parsedHighlight, baseline],
     );
 
     const defaultOptions = useMemo(
@@ -224,7 +226,7 @@ Radar.propTypes = {
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
   }).isRequired,
-  highlight: PropTypes.array,
+  highlight: PropTypes.string,
   baseline: PropTypes.string,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
@@ -237,7 +239,7 @@ Radar.propTypes = {
 };
 
 Radar.defaultProps = {
-  highlight: [],
+  highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
@@ -246,4 +248,4 @@ Radar.defaultProps = {
   optionsOverride: {},
 };
 
-export default Radar;
+export default memo(Radar);

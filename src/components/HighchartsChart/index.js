@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons/faExpandArrowsAlt';
 import { faDownload } from '@fortawesome/free-solid-svg-icons/faDownload';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
-import ReactTooltip from 'react-tooltip';
+import { FloatingPortal } from '@floating-ui/react-dom-interactions';
 import * as R from 'ramda';
 
 import {
@@ -50,6 +50,7 @@ import {
   replaceVarsNameByVarsValue,
   createFormatters,
 } from '../../utils/chartUtil';
+import useTooltipState from '../../hooks/useTooltipState';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -80,8 +81,6 @@ const createDotStatHeaders = (lang) => ({
   Accept: 'application/vnd.sdmx.data+json',
   'Accept-Language': isNilOrEmpty(lang) ? 'en' : R.toLower(lang),
 });
-
-const tooltipRandomId = Math.random().toString(36).slice(2, 7);
 
 const HighchartsChart = ({
   id,
@@ -117,6 +116,12 @@ const HighchartsChart = ({
   onTitleParsed,
   displayFooterAsTooltip,
   onExpandChart,
+  var1,
+  var2,
+  var3,
+  var1DefaultValue,
+  var2DefaultValue,
+  var3DefaultValue,
   ...otherProps
 }) => {
   const chartForType = getChartForType(chartType);
@@ -132,31 +137,12 @@ const HighchartsChart = ({
   const [noDataMessage, setNoDataMessage] = useState(null);
 
   const vars = useMemo(
-    () =>
-      R.zipObj(
-        possibleVariables,
-        R.map(
-          (varName) =>
-            isNilOrEmpty(R.prop(varName, otherProps))
-              ? R.prop(`${varName}DefaultValue`, otherProps) ?? ''
-              : R.prop(varName, otherProps),
-
-          possibleVariables,
-        ),
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      ...R.reduce(
-        (acc, varName) =>
-          R.concat(acc, [
-            R.prop(`${varName}DefaultValue`, otherProps),
-            R.prop(varName, otherProps),
-          ]),
-        [],
-        possibleVariables,
-      ),
-    ],
+    () => ({
+      var1: isNilOrEmpty(var1) ? var1DefaultValue ?? '' : var1,
+      var2: isNilOrEmpty(var2) ? var2DefaultValue ?? '' : var2,
+      var3: isNilOrEmpty(var3) ? var3DefaultValue ?? '' : var3,
+    }),
+    [var1, var2, var3, var1DefaultValue, var2DefaultValue, var3DefaultValue],
   );
 
   const finalDotStatUrl = useMemo(
@@ -190,10 +176,11 @@ const HighchartsChart = ({
       setNoDataMessage(null);
       setSdmxJson(null);
     } else {
+      setIsFetching(true);
+      setErrorMessage(null);
+      setNoDataMessage(null);
+
       const getData = async () => {
-        setIsFetching(true);
-        setErrorMessage(null);
-        setNoDataMessage(null);
         try {
           lastRequestedDotStatUrlKey.current = `${finalDotStatUrl}|${dotStatLang}`;
 
@@ -222,7 +209,55 @@ const HighchartsChart = ({
     }
   }, [dataSourceType, finalDotStatUrl, dotStatLang]);
 
-  const parsedData = useMemo(() => {
+  const parsedSDMXData = useMemo(() => {
+    if (dataSourceType === dataSourceTypes.csv.value) {
+      return null;
+    }
+
+    try {
+      const isEmpty = R.isEmpty(
+        R.path(['structure', 'dimensions', 'observation'], sdmxJson),
+      );
+      if (sdmxJson && isEmpty) {
+        setNoDataMessage('No data available');
+        return emptyData;
+      }
+      return sdmxJson
+        ? R.compose(
+            addAreCategoriesNumbersOrDates,
+            sortParsedDataOnYAxis(yAxisOrderOverride),
+            parseData,
+            sortCSV(sortBy, sortOrder, sortSeries),
+            pivotCSV(chartType, dataSourceType, pivotData),
+            parseSdmxJson({
+              chartType,
+              pivotData,
+              mapCountryDimension,
+              latestAvailableData,
+            }),
+          )(sdmxJson)
+        : emptyData;
+    } catch (e) {
+      setErrorMessage('An error occured :-(');
+      return emptyData;
+    }
+  }, [
+    dataSourceType,
+    chartType,
+    latestAvailableData,
+    mapCountryDimension,
+    pivotData,
+    sdmxJson,
+    sortBy,
+    sortOrder,
+    sortSeries,
+    yAxisOrderOverride,
+  ]);
+
+  const parsedCSVData = useMemo(() => {
+    if (dataSourceType === dataSourceTypes.dotStat.value) {
+      return null;
+    }
     if (
       !isNilOrEmpty(preParsedData) &&
       dataSourceType === dataSourceTypes.csv.value
@@ -231,31 +266,6 @@ const HighchartsChart = ({
     }
 
     try {
-      if (dataSourceType === dataSourceTypes.dotStat.value) {
-        const isEmpty = R.isEmpty(
-          R.path(['structure', 'dimensions', 'observation'], sdmxJson),
-        );
-        if (sdmxJson && isEmpty) {
-          setNoDataMessage('No data available');
-          return emptyData;
-        }
-        return sdmxJson
-          ? R.compose(
-              addAreCategoriesNumbersOrDates,
-              sortParsedDataOnYAxis(yAxisOrderOverride),
-              parseData,
-              sortCSV(sortBy, sortOrder, sortSeries),
-              pivotCSV(chartType, dataSourceType, pivotData),
-              parseSdmxJson({
-                chartType,
-                pivotData,
-                mapCountryDimension,
-                latestAvailableData,
-              }),
-            )(sdmxJson)
-          : emptyData;
-      }
-
       const data = createDataFromCSV({
         staticCsvData,
         chartType,
@@ -280,21 +290,26 @@ const HighchartsChart = ({
     }
   }, [
     dataSourceType,
-    staticCsvData,
-    csvCodeLabelMappingProjectLevel,
-    csvCodeLabelMapping,
     preParsedData,
-    sdmxJson,
-    latestAvailableData,
-    pivotData,
     chartType,
+    csvCodeLabelMapping,
+    csvCodeLabelMappingProjectLevel,
+    pivotData,
     sortBy,
     sortOrder,
     sortSeries,
-    yAxisOrderOverride,
-    mapCountryDimension,
+    staticCsvData,
     vars,
+    yAxisOrderOverride,
   ]);
+
+  const parsedData = useMemo(() => {
+    if (dataSourceType === dataSourceTypes.dotStat.value) {
+      return parsedSDMXData;
+    }
+
+    return parsedCSVData;
+  }, [dataSourceType, parsedSDMXData, parsedCSVData]);
 
   const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);
@@ -407,6 +422,7 @@ const HighchartsChart = ({
   const parsedHighlight = useMemo(
     () =>
       R.compose(
+        R.join('|'),
         R.reject(R.isEmpty),
         R.split('|'),
       )(replaceVarsNameByVarsValue(highlight, vars)),
@@ -444,11 +460,12 @@ const HighchartsChart = ({
     }
   }, [onTitleParsed, parsedTitle]);
 
-  useEffect(() => {
-    ReactTooltip.rebuild();
-  });
-
   const chartRef = useRef(null);
+
+  const downloadEnabled =
+    !isFetching && R.isNil(noDataMessage) && R.isNil(errorMessage);
+
+  const tooltipState = useTooltipState();
 
   return (
     <div className="cb-container" style={{ backgroundColor: '#fff' }}>
@@ -492,57 +509,79 @@ const HighchartsChart = ({
               minHeight: '21px',
             }}
           >
-            {R.isNil(noDataMessage) && R.isNil(errorMessage) && (
+            {!R.isNil(footer) &&
+            (footerHeight === 0 || displayFooterAsTooltip) ? (
               <>
-                {!R.isNil(footer) &&
-                !isFetching &&
-                (footerHeight === 0 || displayFooterAsTooltip) ? (
-                  <div style={{ marginLeft: '4px' }} data-tip={footer}>
-                    <FontAwesomeIcon icon={faInfoCircle} />
-                  </div>
-                ) : (
-                  fakeFooterTooltip
-                )}
-                {isFetching ? (
-                  <div style={{ width: '24px' }} />
-                ) : (
-                  <div
-                    style={{ marginLeft: '8px', cursor: 'pointer' }}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (chartRef.current?.chart.downloadCSV) {
-                        chartRef.current?.chart.downloadCSV();
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (
-                        e.key === 'Enter' &&
-                        chartRef.current?.chart.downloadCSV
-                      ) {
-                        chartRef.current?.chart.downloadCSV();
-                      }
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faDownload} />
-                  </div>
-                )}
-                {onExpandChart && (
-                  <div
-                    style={{ marginLeft: '8px', cursor: 'pointer' }}
-                    role="button"
-                    tabIndex={0}
-                    onClick={onExpandChart}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        onExpandChart();
-                      }
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faExpandArrowsAlt} />
-                  </div>
-                )}
+                <div
+                  style={{ marginLeft: '4px' }}
+                  ref={tooltipState.reference}
+                  {...tooltipState.getReferenceProps()}
+                >
+                  <FontAwesomeIcon icon={faInfoCircle} />
+                </div>
+                <FloatingPortal>
+                  {tooltipState.open && (
+                    <div
+                      ref={tooltipState.floating}
+                      {...tooltipState.getFloatingProps()}
+                      style={{
+                        position: tooltipState.strategy,
+                        top: tooltipState.y ?? 0,
+                        left: tooltipState.x ?? 0,
+                        visibility: R.isNil(tooltipState.x)
+                          ? 'hidden'
+                          : 'visible',
+                      }}
+                      className="cb-tooltip"
+                      dangerouslySetInnerHTML={{
+                        __html: footer,
+                      }}
+                    />
+                  )}
+                </FloatingPortal>
               </>
+            ) : (
+              fakeFooterTooltip
+            )}
+            <div
+              style={{
+                marginLeft: '8px',
+                cursor: downloadEnabled ? 'pointer' : 'default',
+                color: downloadEnabled ? '' : '#ddd',
+              }}
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                if (downloadEnabled && chartRef.current?.chart.downloadCSV) {
+                  chartRef.current?.chart.downloadCSV();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (
+                  downloadEnabled &&
+                  e.key === 'Enter' &&
+                  chartRef.current?.chart.downloadCSV
+                ) {
+                  chartRef.current?.chart.downloadCSV();
+                }
+              }}
+            >
+              <FontAwesomeIcon icon={faDownload} />
+            </div>
+            {onExpandChart && (
+              <div
+                style={{ marginLeft: '8px', cursor: 'pointer' }}
+                role="button"
+                tabIndex={0}
+                onClick={onExpandChart}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    onExpandChart();
+                  }
+                }}
+              >
+                <FontAwesomeIcon icon={faExpandArrowsAlt} />
+              </div>
             )}
           </div>
         </div>
@@ -571,7 +610,6 @@ const HighchartsChart = ({
           <Suspense fallback={null}>
             <ChartForTypeComponent
               {...chartForType.props}
-              key={`${id}-${chartForType.props.horizontal}`}
               ref={chartRef}
               width={width}
               height={chartHeight}
@@ -617,20 +655,6 @@ const HighchartsChart = ({
           }}
         />
       </div>
-
-      <ReactTooltip
-        uuid={tooltipRandomId}
-        place="bottom"
-        effect="solid"
-        backgroundColor="#ffffff"
-        textColor="#333333"
-        border
-        borderColor="#333333"
-        className="cb-tooltip"
-        html
-        clickable
-        delayHide={300}
-      />
     </div>
   );
 };
@@ -669,6 +693,12 @@ HighchartsChart.propTypes = {
   onTitleParsed: PropTypes.func,
   displayFooterAsTooltip: PropTypes.bool,
   onExpandChart: PropTypes.func,
+  var1: PropTypes.string,
+  var2: PropTypes.string,
+  var3: PropTypes.string,
+  var1DefaultValue: PropTypes.string,
+  var2DefaultValue: PropTypes.string,
+  var3DefaultValue: PropTypes.string,
 };
 
 HighchartsChart.defaultProps = {
@@ -698,6 +728,12 @@ HighchartsChart.defaultProps = {
   onTitleParsed: null,
   displayFooterAsTooltip: false,
   onExpandChart: null,
+  var1: null,
+  var2: null,
+  var3: null,
+  var1DefaultValue: null,
+  var2DefaultValue: null,
+  var3DefaultValue: null,
 };
 
 export default memo(HighchartsChart);

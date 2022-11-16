@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, forwardRef } from 'react';
+import React, { useMemo, useRef, useEffect, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
@@ -41,12 +41,14 @@ const Line = forwardRef(
     },
     ref,
   ) => {
+    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
+
     const series = useMemo(
       () =>
         R.map((s) => {
           const highlightOrBaselineColor = getBaselineOrHighlightColor(
             s,
-            highlight,
+            parsedHighlight,
             baseline,
             highlightColors,
           );
@@ -72,7 +74,7 @@ const Line = forwardRef(
             showInLegend: s.code !== fakeMemberLatest.code,
           };
         }, data.series),
-      [data, colorPalette, highlightColors, highlight, baseline],
+      [data, colorPalette, highlightColors, parsedHighlight, baseline],
     );
 
     const updateNeededAfterChartHasBeenRenderedOnceDone = useRef(false);
@@ -256,7 +258,7 @@ Line.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesNumbersOrDates: PropTypes.bool.isRequired,
   }).isRequired,
-  highlight: PropTypes.array,
+  highlight: PropTypes.string,
   baseline: PropTypes.string,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
@@ -270,7 +272,7 @@ Line.propTypes = {
 };
 
 Line.defaultProps = {
-  highlight: [],
+  highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
@@ -279,4 +281,4 @@ Line.defaultProps = {
   optionsOverride: {},
 };
 
-export default Line;
+export default memo(Line);

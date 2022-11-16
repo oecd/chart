@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, forwardRef } from 'react';
+import React, { useMemo, useRef, useEffect, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
@@ -75,6 +75,8 @@ const Scatter = forwardRef(
     },
     ref,
   ) => {
+    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
+
     const firstPaletteColor = R.head(colorPalette);
 
     const series = useMemo(
@@ -84,7 +86,7 @@ const Scatter = forwardRef(
 
           const seriesBaselineOrHighlightColor = getBaselineOrHighlightColor(
             s,
-            highlight,
+            parsedHighlight,
             baseline,
             highlightColors,
           );
@@ -102,7 +104,7 @@ const Scatter = forwardRef(
 
               const baselineOrHighlightColor = getBaselineOrHighlightColor(
                 category,
-                highlight,
+                parsedHighlight,
                 baseline,
                 highlightColors,
               );
@@ -148,7 +150,7 @@ const Scatter = forwardRef(
         firstPaletteColor,
         colorPalette,
         highlightColors,
-        highlight,
+        parsedHighlight,
         baseline,
       ],
     );
@@ -225,7 +227,7 @@ const Scatter = forwardRef(
                   const lineColor =
                     getBaselineOrHighlightColor(
                       category,
-                      highlight,
+                      parsedHighlight,
                       baseline,
                       highlightColors,
                     ) || firstPaletteColor;
@@ -356,7 +358,7 @@ Scatter.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesNumbersOrDates: PropTypes.bool.isRequired,
   }).isRequired,
-  highlight: PropTypes.array,
+  highlight: PropTypes.string,
   baseline: PropTypes.string,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
@@ -371,7 +373,7 @@ Scatter.propTypes = {
 
 Scatter.defaultProps = {
   symbolLayout: false,
-  highlight: [],
+  highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
@@ -380,4 +382,4 @@ Scatter.defaultProps = {
   optionsOverride: {},
 };
 
-export default Scatter;
+export default memo(Scatter);
