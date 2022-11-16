@@ -25,13 +25,17 @@
 
 .cb-tooltip {
   color: #333333;
-  background-color: #ffffff;
+  background-color: #ffffffe6;
   font-size: 13px;
   border: 1px solid #333333;
   padding: 5px 8px;
   border-radius: 3px;
   max-width: 300px;
   z-index: 11;
+}
+.cb-tooltip p,
+.cb-tooltip ul {
+  margin: 0px;
 }
 
 .cb-footer div:not(:empty) {
