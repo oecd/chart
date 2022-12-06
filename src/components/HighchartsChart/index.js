@@ -116,6 +116,8 @@ const HighchartsChart = ({
   onTitleParsed,
   displayFooterAsTooltip,
   onExpandChart,
+  onDownloadData,
+  onDataChange,
   var1,
   var2,
   var3,
@@ -308,8 +310,12 @@ const HighchartsChart = ({
       return parsedSDMXData;
     }
 
+    if (onDataChange && parsedCSVData !== emptyData) {
+      onDataChange(R.pick(['categories', 'series'], parsedCSVData));
+    }
+
     return parsedCSVData;
-  }, [dataSourceType, parsedSDMXData, parsedCSVData]);
+  }, [dataSourceType, parsedSDMXData, parsedCSVData, onDataChange]);
 
   const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);
@@ -554,6 +560,10 @@ const HighchartsChart = ({
               onClick={() => {
                 if (downloadEnabled && chartRef.current?.chart.downloadCSV) {
                   chartRef.current?.chart.downloadCSV();
+
+                  if (onDownloadData) {
+                    onDownloadData();
+                  }
                 }
               }}
               onKeyDown={(e) => {
@@ -693,6 +703,8 @@ HighchartsChart.propTypes = {
   onTitleParsed: PropTypes.func,
   displayFooterAsTooltip: PropTypes.bool,
   onExpandChart: PropTypes.func,
+  onDownloadData: PropTypes.func,
+  onDataChange: PropTypes.func,
   var1: PropTypes.string,
   var2: PropTypes.string,
   var3: PropTypes.string,
@@ -728,6 +740,8 @@ HighchartsChart.defaultProps = {
   onTitleParsed: null,
   displayFooterAsTooltip: false,
   onExpandChart: null,
+  onDownloadData: null,
+  onDataChange: null,
   var1: null,
   var2: null,
   var3: null,
