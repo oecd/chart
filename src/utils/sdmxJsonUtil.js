@@ -88,13 +88,18 @@ const getXAndYDimension = (
 
 export const fakeMemberLatest = { code: '_LATEST_', label: 'Latest' };
 
+const detectV8 = R.hasPath(['meta', 'schema']);
+
 export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
-  const {
-    dataSets,
-    structure: {
-      dimensions: { observation: dimensions },
-    },
-  } = sdmxJson;
+  const isV8 = detectV8(sdmxJson);
+
+  const dataSets = isV8
+    ? R.path(['data', 'dataSets'], sdmxJson)
+    : R.prop('dataSets', sdmxJson);
+
+  const dimensions = isV8
+    ? R.path(['data', 'structures', 0, 'dimensions', 'observation'], sdmxJson)
+    : R.path(['structure', 'dimensions', 'observation'], sdmxJson);
 
   const [xDimension, yDimension] = getXAndYDimension(dimensions, chartConfig);
 
