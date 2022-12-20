@@ -51,6 +51,7 @@ import {
   createFormatters,
 } from '../../utils/chartUtil';
 import useTooltipState from '../../hooks/useTooltipState';
+import CenteredContainer from '../CenteredContainer';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -118,12 +119,7 @@ const HighchartsChart = ({
   onExpandChart,
   onDownloadData,
   onDataChange,
-  var1,
-  var2,
-  var3,
-  var1DefaultValue,
-  var2DefaultValue,
-  var3DefaultValue,
+  vars,
   ...otherProps
 }) => {
   const chartForType = getChartForType(chartType);
@@ -138,29 +134,17 @@ const HighchartsChart = ({
   const [errorMessage, setErrorMessage] = useState(null);
   const [noDataMessage, setNoDataMessage] = useState(null);
 
-  const vars = useMemo(
-    () => ({
-      var1: isNilOrEmpty(var1) ? var1DefaultValue ?? '' : var1,
-      var2: isNilOrEmpty(var2) ? var2DefaultValue ?? '' : var2,
-      var3: isNilOrEmpty(var3) ? var3DefaultValue ?? '' : var3,
-    }),
-    [var1, var2, var3, var1DefaultValue, var2DefaultValue, var3DefaultValue],
-  );
-
   const finalDotStatUrl = useMemo(
     () =>
       R.reduce(
         (acc, varName) => {
           const varValue = R.prop(varName, vars);
-          if (!R.isEmpty(varValue)) {
-            return R.replace(
-              new RegExp(`{${varName}}`, 'gi'),
-              R.toUpper(R.replace(/\+/g, '|', varValue)),
-              acc,
-            );
-          }
 
-          return acc;
+          return R.replace(
+            new RegExp(`{${varName}}`, 'gi'),
+            R.toUpper(R.replace(/\|/g, '+', varValue)),
+            acc,
+          );
         },
         dotStatUrl,
         possibleVariables,
@@ -598,18 +582,11 @@ const HighchartsChart = ({
       </div>
 
       {(!R.isNil(noDataMessage) || !R.isNil(errorMessage) || isFetching) && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: chartHeight,
-          }}
-        >
+        <CenteredContainer height={chartHeight}>
           {isFetching && <Spinner />}
           {!R.isNil(errorMessage) && errorMessage}
           {!R.isNil(noDataMessage) && noDataMessage}
-        </div>
+        </CenteredContainer>
       )}
 
       {!R.isNil(footerHeight) &&
@@ -617,7 +594,13 @@ const HighchartsChart = ({
         !isFetching &&
         R.isNil(errorMessage) &&
         R.isNil(noDataMessage) && (
-          <Suspense fallback={null}>
+          <Suspense
+            fallback={
+              <CenteredContainer height={chartHeight}>
+                <Spinner />
+              </CenteredContainer>
+            }
+          >
             <ChartForTypeComponent
               {...chartForType.props}
               ref={chartRef}
@@ -646,11 +629,7 @@ const HighchartsChart = ({
         ref={footerRef}
         className="cb-footer"
         style={
-          R.isNil(footerHeight) ||
-          footerHeight === 0 ||
-          isFetching ||
-          !R.isNil(errorMessage) ||
-          !R.isNil(noDataMessage)
+          R.isNil(footerHeight) || footerHeight === 0
             ? {
                 width,
                 position: 'fixed',
@@ -705,12 +684,9 @@ HighchartsChart.propTypes = {
   onExpandChart: PropTypes.func,
   onDownloadData: PropTypes.func,
   onDataChange: PropTypes.func,
-  var1: PropTypes.string,
-  var2: PropTypes.string,
-  var3: PropTypes.string,
-  var1DefaultValue: PropTypes.string,
-  var2DefaultValue: PropTypes.string,
-  var3DefaultValue: PropTypes.string,
+  vars: PropTypes.object.isRequired,
+  controls: PropTypes.array,
+  displayControls: PropTypes.bool,
 };
 
 HighchartsChart.defaultProps = {
@@ -742,12 +718,8 @@ HighchartsChart.defaultProps = {
   onExpandChart: null,
   onDownloadData: null,
   onDataChange: null,
-  var1: null,
-  var2: null,
-  var3: null,
-  var1DefaultValue: null,
-  var2DefaultValue: null,
-  var3DefaultValue: null,
+  controls: [],
+  displayControls: true,
 };
 
 export default memo(HighchartsChart);

@@ -23,8 +23,42 @@ const App = () => (
 export default App;
 ```
 
-The only required prop is `chartId` but if the corresponding chart is configured to use variables, `var1`, `var2` and `var3` can be used as well:
+The only required prop is `chartId` but if the corresponding chart is configured to use variables, `var1`, `var2`, `var3`, `var4` and `var5` can be used as well:
 
 ```jsx
 <Chart chartId="xxxxxxx" var1="FRA" var2="USA" />
 ```
+
+## Note about sizing
+
+A chart does not have an intrinsic size (it can be any size) and therefore the `Chart` component cannot "guess" the desired size.
+
+The `Chart` component supports `width` and `height` props (numbers only) that can be omitted which allows two sizing strategies:
+
+> ### 1/ Omitting `width` / `height`:
+>
+> The chart will take as much space as it can (available space in the parent container):
+>
+> ```jsx
+> <div style={{ width: '100%', maxWidth: '400px', height: '300px' }}>
+>   <Chart chartId="xxxxxxx" />
+> </div>
+> ```
+>
+> - Pros: The size of the chart (including controls) is guaranteed.
+> - Cons: If the chart contains controls, it is not guaranteed that they will be displayed; The controls could stack (for instance when the width is very low) and the controls could be automatically hidden as they are considered less important than the chart itself.
+
+> ### 2/ Passing explicit `width` / `height`:
+>
+> It is important to note that `height` implicitly means "chart height" (without potential controls).
+>
+> When using this approach, the parent container has to use `minHeight` (not `height`):
+>
+> ```jsx
+> <div style={{ width: '100%', maxWidth: '400px', minHeight: '300px' }}>
+>   <Chart chartId="xxxxxxx" width={400} height={300} />
+> </div>
+> ```
+>
+> - Pros: The controls are guaranteed to be displayed (even if the total height of the chart + controls is more than the specified height (300 in the previous example).
+> - Cons: The total height of the chart + controls is not guaranteed

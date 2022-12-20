@@ -14,6 +14,7 @@ import ChartWithConfig from './ChartWithConfig';
 import Spinner from './Spinner';
 import { possibleVariables } from '../utils/configUtil';
 import { fetchJson } from '../utils/fetchUtil';
+import CenteredContainer from './CenteredContainer';
 
 const apiUrl =
   process.env.NEXT_PUBLIC_CHART_LIB_API_URL ||
@@ -128,7 +129,7 @@ const Chart = ({ chartId, ...otherProps }) => {
           R.assoc(
             varName,
             isNilOrEmpty(R.prop(varName, propsVars))
-              ? R.prop(varName, chartConfigData.chartConfig)
+              ? R.propOr(null, varName, chartConfigData.chartConfig)
               : R.replace(/\+/g, '|', R.prop(varName, propsVars)),
             acc,
           ),
@@ -144,17 +145,9 @@ const Chart = ({ chartId, ...otherProps }) => {
 
   if (chartConfigData.isLoading || chartConfigData.hasFetchFailed) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          width: '100%',
-          height: '100%',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
+      <CenteredContainer>
         {chartConfigData.isLoading ? <Spinner /> : 'Something went wrong :('}
-      </div>
+      </CenteredContainer>
     );
   }
 

@@ -1,3 +1,6 @@
+import 'rc-slider/assets/index.css';
+
+import './index.css';
 import * as chartConstant from './constants/chart';
 import * as configUtil from './utils/configUtil';
 import * as csvUtil from './utils/csvUtil';

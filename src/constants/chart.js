@@ -39,3 +39,8 @@ export const mapTypes = {
   bubble: { value: 'bubble', label: 'Bubble' },
   point: { value: 'point', label: 'Point' },
 };
+
+export const chartControlTypes = {
+  timeSlider: { value: 'timeSlider', label: 'Time slider' },
+  select: { value: 'select', label: 'Select' },
+};

@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 
-export const possibleVariables = ['var1', 'var2', 'var3'];
+export const possibleVariables = ['var1', 'var2', 'var3', 'var4', 'var5'];
 
 export const doesStringContainVariable = R.test(
   new RegExp(

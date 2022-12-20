@@ -18,14 +18,8 @@ const env = process.env.NODE_ENV || 'production';
 
 export default [
   {
-    input: './src/index-with-css.js',
+    input: './src/index.js',
     output: [
-      {
-        dir: 'dist/cjs',
-        format: 'cjs',
-        sourcemap: true,
-        entryFileNames: () => 'index.js',
-      },
       {
         dir: 'dist/esm',
         format: 'esm',
@@ -57,7 +51,7 @@ export default [
     input: './src/index-browser.js',
     output: [
       {
-        file: `dist-browser/chart-builder-${packageJson.version}.js`,
+        file: `dist-browser/oecd-pac-chart-${packageJson.version}.js`,
         format: 'iife',
         name: 'ChartBuilder',
         inlineDynamicImports: true,
