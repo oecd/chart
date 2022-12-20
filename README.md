@@ -35,30 +35,30 @@ A chart does not have an intrinsic size (it can be any size) and therefore the `
 
 The `Chart` component supports `width` and `height` props (numbers only) that can be omitted which allows two sizing strategies:
 
-> ### 1/ Omitting `width` / `height`:
->
-> The chart will take as much space as it can (available space in the parent container):
->
-> ```jsx
-> <div style={{ width: '100%', maxWidth: '400px', height: '300px' }}>
->   <Chart chartId="xxxxxxx" />
-> </div>
-> ```
->
-> - Pros: The size of the chart (including controls) is guaranteed.
-> - Cons: If the chart contains controls, it is not guaranteed that they will be displayed; The controls could stack (for instance when the width is very low) and the controls could be automatically hidden as they are considered less important than the chart itself.
+### Strategy 1: Omit `width` and `height`
 
-> ### 2/ Passing explicit `width` / `height`:
->
-> It is important to note that `height` implicitly means "chart height" (without potential controls).
->
-> When using this approach, the parent container has to use `minHeight` (not `height`):
->
-> ```jsx
-> <div style={{ width: '100%', maxWidth: '400px', minHeight: '300px' }}>
->   <Chart chartId="xxxxxxx" width={400} height={300} />
-> </div>
-> ```
->
-> - Pros: The controls are guaranteed to be displayed (even if the total height of the chart + controls is more than the specified height (300 in the previous example).
-> - Cons: The total height of the chart + controls is not guaranteed
+The chart will take as much space as it can (within the constraints of the parent container):
+
+```jsx
+<div style={{ width: '100%', maxWidth: '400px', height: '300px' }}>
+  <Chart chartId="xxxxxxx" />
+</div>
+```
+
+- Pro: The size of the chart (including controls) is guaranteed.
+- Cons: If the chart contains controls, it is not guaranteed that they will be displayed; the controls might stack (for instance, when the width is very low) and the controls may be automatically hidden as they are considered less important than the chart itself.
+
+### Strategy 2:  Pass `width` and `height` explicitly
+
+It is important to note that `height` implicitly means "chart height" (not including potential controls).
+
+When using this approach, the parent container has to use `minHeight` (not `height`):
+
+```jsx
+<div style={{ width: '100%', maxWidth: '400px', minHeight: '300px' }}>
+  <Chart chartId="xxxxxxx" width={400} height={300} />
+</div>
+```
+
+- Pros: The controls are guaranteed to be displayed (even if the total height of the chart + controls is more than the specified height (300 in the previous example).
+- Cons: The total height of the chart + controls is not guaranteed.
