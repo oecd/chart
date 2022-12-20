@@ -60,5 +60,5 @@ When using this approach, the parent container has to use `minHeight` (not `heig
 </div>
 ```
 
-- Pro: The controls are guaranteed to be displayed (even if the total height of the chart + controls is more than the specified height (300 in the previous example).
+- Pro: The controls are guaranteed to be displayed, even if the total height of the chart + controls is more than the specified height (300 in the previous example).
 - Con: The total height of the chart + controls is not guaranteed.
