@@ -28,7 +28,7 @@ const ChartControlTimeSlider = ({
       setCurrentRange({
         minCode: R.nth(min, steps),
         minIndex: min,
-        maxCode: R.nth(max - 1, steps),
+        maxCode: R.nth(max, steps),
         maxIndex: max,
       });
     },
@@ -38,7 +38,7 @@ const ChartControlTimeSlider = ({
   const onAfterRangeChange = useCallback(
     ([min, max]) => {
       changeVar(minVarName, R.nth(min, steps));
-      changeVar(maxVarName, R.nth(max - 1, steps));
+      changeVar(maxVarName, R.nth(max, steps));
     },
     [steps, minVarName, maxVarName, changeVar],
   );
@@ -54,7 +54,7 @@ const ChartControlTimeSlider = ({
         onAfterChange={onAfterRangeChange}
         range
         min={0}
-        max={R.isEmpty(steps) ? 1 : R.length(steps)}
+        max={R.isEmpty(steps) ? 0 : R.length(steps) - 1}
         value={[currentRange.minIndex, currentRange.maxIndex]}
         draggableTrack
         allowCross={false}
