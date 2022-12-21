@@ -1,6 +1,6 @@
 /* eslint-disable no-bitwise, no-nested-ternary */
 import Highcharts from 'highcharts';
-import { fromString } from 'css-color-converter';
+import { TinyColor, isReadable } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 
 import { codeOrLabelEquals, possibleVariables } from './configUtil';
@@ -26,10 +26,8 @@ const lightenColor = (color, percent) => {
     .slice(1)}`;
 };
 
-export const convertColorToHex = R.compose(
-  R.ifElse(R.isNil, R.always('rgba(0, 0, 0, 1)'), (c) => c.toHexString()),
-  fromString,
-);
+export const convertColorToHex = (color) =>
+  new TinyColor(color || 'black').toHex8String();
 
 export const createLighterColor = (color, percent) => {
   const hex = convertColorToHex(color);
@@ -44,6 +42,14 @@ export const createShadesFromColor = (color) => {
     return lightenColor(hex, percent);
   }, R.times(R.identity, 9));
 };
+
+export const makeColorReadableOnBackgroundColor = (color, backgroundColor) =>
+  R.reduceWhile(
+    (acc) => !isReadable(acc, backgroundColor),
+    (acc) => acc.darken(10),
+    new TinyColor(color || 'black'),
+    R.times(R.identity, 3),
+  ).toHexString();
 
 export const getListItemAtTurningIndex = (idx, list) =>
   R.nth(idx % R.length(list), list);
@@ -231,25 +237,14 @@ const roundNumber = (number, maxNumberOfDecimal) =>
     ? Number(Number(number).toFixed(maxNumberOfDecimal))
     : number;
 
-export const addColorAlpha = (color, alphaToAdd) =>
-  R.compose(
-    (c) => c.toHexString(),
-    fromString,
-    (c) => {
-      if (c) {
-        const alpha = R.compose(
-          R.when(R.gt(R.__, 1), R.always(1)),
-          R.when(R.lt(R.__, 0), R.always(0)),
-          R.add(alphaToAdd),
-          R.nth(3),
-        )(c.values);
-
-        return `rgba(${c.values[0]}, ${c.values[1]}, ${c.values[2]}, ${alpha})`;
-      }
-      return 'rgba(0, 0, 0, 1)';
-    },
-    fromString,
-  )(color);
+export const addColorAlpha = (color, alphaToAdd) => {
+  const colorObject = new TinyColor(color || 'black');
+  const newAlpha = R.compose(
+    R.when(R.gt(R.__, 1), R.always(1)),
+    R.when(R.lt(R.__, 0), R.always(0)),
+  )(colorObject.getAlpha() + alphaToAdd);
+  return colorObject.setAlpha(newAlpha).toHex8String();
+};
 
 export const isNumberOrDate = (x) =>
   isCastableToNumber(x) || isCastableToNumber(new Date(x));

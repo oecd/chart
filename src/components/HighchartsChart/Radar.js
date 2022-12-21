@@ -13,6 +13,7 @@ import * as R from 'ramda';
 import {
   deepMergeUserOptionsWithDefaultOptions,
   getBaselineOrHighlightColor,
+  makeColorReadableOnBackgroundColor,
 } from '../../utils/chartUtil';
 import { fakeMemberLatest } from '../../utils/sdmxJsonUtil';
 
@@ -55,6 +56,11 @@ const Radar = forwardRef(
           );
           const color = highlightOrBaselineColor || R.head(colorPalette);
 
+          const dataLabelColor = makeColorReadableOnBackgroundColor(
+            color,
+            'white',
+          );
+
           return {
             name: s.label,
             data: s.data,
@@ -71,7 +77,12 @@ const Radar = forwardRef(
             },
             color,
             showInLegend: s.code !== fakeMemberLatest.code,
-            dataLabels: { color },
+            dataLabels: {
+              color: dataLabelColor,
+              textShadow:
+                '0px -1px 3px white, 1px 0px 3px white, 0px 1px 3px white, -1px 0px 3px white, -1px -1px 3px white, 1px -1px 3px white, 1px 1px 3px white, -1px 1px 3px white',
+              textOutline: 'none',
+            },
             ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
           };
         }, data.series),
