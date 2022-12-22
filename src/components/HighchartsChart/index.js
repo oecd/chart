@@ -295,7 +295,9 @@ const HighchartsChart = ({
     }
 
     if (onDataChange && parsedCSVData !== emptyData) {
-      onDataChange(R.pick(['categories', 'series'], parsedCSVData));
+      onDataChange(
+        R.pick(['categories', 'series', 'otherDimensions'], parsedCSVData),
+      );
     }
 
     return parsedCSVData;
@@ -313,14 +315,20 @@ const HighchartsChart = ({
       note,
       source,
     ]);
+
     return doesAnyTextualDataContainVar
       ? R.compose(
           R.fromPairs,
           R.map(({ code, label }) => [R.toUpper(code), label]),
         )(
-          R.concat(
-            R.prop('categories', parsedData),
-            R.prop('series', parsedData),
+          R.reduce(
+            (acc, el) => R.concat(acc, el),
+            [],
+            [
+              R.prop('categories', parsedData),
+              R.prop('series', parsedData),
+              R.prop('otherDimensions', parsedData),
+            ],
           ),
         )
       : {};

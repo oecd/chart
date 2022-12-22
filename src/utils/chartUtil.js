@@ -307,11 +307,7 @@ export const replaceVarsNameByVarsValueUsingCodeLabelMapping = (
     (acc, varName) =>
       R.replace(
         new RegExp(`{${varName}}`, 'gi'),
-        R.propOr(
-          R.prop(varName, vars),
-          R.toUpper(R.prop(varName, vars)),
-          mapping,
-        ),
+        R.propOr('', R.toUpper(R.prop(varName, vars)), mapping),
         acc,
       ),
     string ?? '',

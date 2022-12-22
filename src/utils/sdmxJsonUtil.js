@@ -103,6 +103,14 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
 
   const [xDimension, yDimension] = getXAndYDimension(dimensions, chartConfig);
 
+  const otherDimensions = R.reject(
+    R.propSatisfies(
+      (id) => R.includes(id, [xDimension.id, yDimension.id]),
+      'id',
+    ),
+    dimensions,
+  );
+
   const observations = R.path([0, 'observations'], dataSets);
 
   const getXDimensionMemberCodeByIndex = (index) =>
@@ -156,6 +164,11 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
           [fakeMemberLatest.code]: fakeMemberLatest.label,
         }
       : createDimensionMemberLabelByCode(yDimension.values),
+    otherDimensionsLabelByCode: R.reduce(
+      (acc, d) => R.mergeRight(acc, createDimensionMemberLabelByCode(d.values)),
+      {},
+      otherDimensions,
+    ),
   };
 
   const yDimensionLabelByCode = createDimensionMemberLabelByCode(

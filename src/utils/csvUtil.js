@@ -14,6 +14,7 @@ import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
 export const emptyData = {
   categories: [],
   series: [],
+  otherDimensions: [],
   areCategoriesNumbersOrDates: false,
 };
 
@@ -46,7 +47,7 @@ const parseCSV = (csvString) =>
 
 export const parseData = ({ data, parsingHelperData, ...rest }) => {
   if (isNilOrEmpty(data)) {
-    return { categories: [], series: [], ...rest };
+    return { categories: [], series: [], otherDimensions: [], ...rest };
   }
 
   const categories = R.map(
@@ -69,7 +70,15 @@ export const parseData = ({ data, parsingHelperData, ...rest }) => {
     };
   }, R.tail(R.head(data)));
 
-  return { categories, series, ...rest };
+  const otherDimensions = R.map(
+    ([c, l]) => ({
+      code: `${c}`,
+      label: l,
+    }),
+    R.toPairs(parsingHelperData.otherDimensionsLabelByCode),
+  );
+
+  return { categories, series, otherDimensions, ...rest };
 };
 
 const shouldPivot = (
@@ -138,6 +147,8 @@ export const pivotCSV =
         const parsingHelperData = {
           xDimensionLabelByCode: rest.parsingHelperData.yDimensionLabelByCode,
           yDimensionLabelByCode: rest.parsingHelperData.xDimensionLabelByCode,
+          otherDimensionsLabelByCode:
+            rest.parsingHelperData.otherDimensionsLabelByCode,
         };
 
         return {
