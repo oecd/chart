@@ -112,6 +112,12 @@ const shouldPivot = (
   ) {
     return true;
   }
+  if (
+    R.length(R.head(data)) === 2 &&
+    R.includes(chartType, [chartTypes.line, chartTypes.radar])
+  ) {
+    return false;
+  }
 
   if (latestAvailableData) {
     return false;
