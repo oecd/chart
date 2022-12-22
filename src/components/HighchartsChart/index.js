@@ -359,6 +359,26 @@ const HighchartsChart = ({
   const headerRef = useRef(null);
   const footerRef = useRef(null);
 
+  const parsedTitle = useMemo(
+    () =>
+      replaceVarsNameByVarsValueUsingCodeLabelMapping(
+        title,
+        vars,
+        codeLabelMappingFromData,
+      ),
+    [title, vars, codeLabelMappingFromData],
+  );
+
+  const parsedSubtitle = useMemo(
+    () =>
+      replaceVarsNameByVarsValueUsingCodeLabelMapping(
+        subtitle,
+        vars,
+        codeLabelMappingFromData,
+      ),
+    [subtitle, vars, codeLabelMappingFromData],
+  );
+
   useEffect(() => {
     const isThereEnoughSpaceForFooter = displayFooterAsTooltip
       ? false
@@ -381,33 +401,13 @@ const HighchartsChart = ({
   }, [
     width,
     height,
-    title,
-    subtitle,
+    parsedTitle,
+    parsedSubtitle,
     definition,
     note,
     source,
     displayFooterAsTooltip,
   ]);
-
-  const parsedTitle = useMemo(
-    () =>
-      replaceVarsNameByVarsValueUsingCodeLabelMapping(
-        title,
-        vars,
-        codeLabelMappingFromData,
-      ),
-    [title, vars, codeLabelMappingFromData],
-  );
-
-  const parsedSubtitle = useMemo(
-    () =>
-      replaceVarsNameByVarsValueUsingCodeLabelMapping(
-        subtitle,
-        vars,
-        codeLabelMappingFromData,
-      ),
-    [subtitle, vars, codeLabelMappingFromData],
-  );
 
   const parsedHighlight = useMemo(
     () =>
