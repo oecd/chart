@@ -9,6 +9,7 @@ import { isNilOrEmpty } from '../../../utils/ramdaUtil';
 const ChartControlTimeSlider = ({
   label,
   frequency,
+  isRange,
   minVarName,
   maxVarName,
   vars,
@@ -19,28 +20,46 @@ const ChartControlTimeSlider = ({
   const [currentRange, setCurrentRange] = useState({
     minCode: vars[minVarName],
     minIndex: R.findIndex(R.equals(vars[minVarName]), steps) || 0,
-    maxCode: vars[maxVarName],
-    maxIndex: R.findIndex(R.equals(vars[maxVarName]), steps) || R.length(steps),
+    ...(isRange
+      ? {
+          maxCode: vars[maxVarName],
+          maxIndex:
+            R.findIndex(R.equals(vars[maxVarName]), steps) || R.length(steps),
+        }
+      : {}),
   });
 
   const onRangeChange = useCallback(
-    ([min, max]) => {
-      setCurrentRange({
-        minCode: R.nth(min, steps),
-        minIndex: min,
-        maxCode: R.nth(max, steps),
-        maxIndex: max,
-      });
+    (value) => {
+      if (isRange) {
+        const [min, max] = value;
+        setCurrentRange({
+          minCode: R.nth(min, steps),
+          minIndex: min,
+          maxCode: R.nth(max, steps),
+          maxIndex: max,
+        });
+      } else {
+        setCurrentRange({
+          minCode: R.nth(value, steps),
+          minIndex: value,
+        });
+      }
     },
-    [steps],
+    [isRange, steps],
   );
 
   const onAfterRangeChange = useCallback(
-    ([min, max]) => {
-      changeVar(minVarName, R.nth(min, steps));
-      changeVar(maxVarName, R.nth(max, steps));
+    (value) => {
+      if (isRange) {
+        const [min, max] = value;
+        changeVar(minVarName, R.nth(min, steps));
+        changeVar(maxVarName, R.nth(max, steps));
+      } else {
+        changeVar(minVarName, R.nth(value, steps));
+      }
     },
-    [steps, minVarName, maxVarName, changeVar],
+    [isRange, steps, minVarName, maxVarName, changeVar],
   );
 
   return (
@@ -52,10 +71,14 @@ const ChartControlTimeSlider = ({
       <Slider
         onChange={onRangeChange}
         onAfterChange={onAfterRangeChange}
-        range
+        range={isRange}
         min={0}
         max={R.isEmpty(steps) ? 0 : R.length(steps) - 1}
-        value={[currentRange.minIndex, currentRange.maxIndex]}
+        value={
+          isRange
+            ? [currentRange.minIndex, currentRange.maxIndex]
+            : currentRange.minIndex
+        }
         draggableTrack
         allowCross={false}
         disabled={R.isEmpty(steps)}
@@ -70,7 +93,9 @@ const ChartControlTimeSlider = ({
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         {R.isEmpty(steps)
           ? '-'
-          : `${currentRange.minCode || ''} - ${currentRange.maxCode || ''}`}
+          : `${currentRange.minCode || ''}${
+              isRange ? ` - ${currentRange.maxCode || ''}` : ''
+            }`}
       </div>
     </div>
   );
@@ -79,6 +104,7 @@ const ChartControlTimeSlider = ({
 ChartControlTimeSlider.propTypes = {
   label: PropTypes.string,
   frequency: PropTypes.object.isRequired,
+  isRange: PropTypes.bool.isRequired,
   minVarName: PropTypes.string.isRequired,
   maxVarName: PropTypes.string.isRequired,
   vars: PropTypes.object.isRequired,

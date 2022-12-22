@@ -8,6 +8,7 @@ import { generatePseudoRandomString } from '../../../utils/generalUtil';
 const ChartControlTimeSlider = ({
   label,
   frequencies,
+  isRange,
   minVarName,
   maxVarName,
   vars,
@@ -32,6 +33,7 @@ const ChartControlTimeSlider = ({
       isFirstRenderDone.current = true;
     }
   }, [
+    isRange,
     frequency.frequencyTypeCode,
     frequency.minCode,
     frequency.maxCode,
@@ -44,6 +46,7 @@ const ChartControlTimeSlider = ({
       key={componentKey}
       label={label}
       frequency={frequency}
+      isRange={isRange}
       minVarName={minVarName}
       maxVarName={maxVarName}
       vars={vars}
@@ -55,14 +58,16 @@ const ChartControlTimeSlider = ({
 ChartControlTimeSlider.propTypes = {
   label: PropTypes.string,
   frequencies: PropTypes.array.isRequired,
+  isRange: PropTypes.bool.isRequired,
   minVarName: PropTypes.string.isRequired,
-  maxVarName: PropTypes.string.isRequired,
+  maxVarName: PropTypes.string,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
 };
 
 ChartControlTimeSlider.defaultProps = {
   label: null,
+  maxVarName: '',
 };
 
 export default ChartControlTimeSlider;
