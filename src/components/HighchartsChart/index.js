@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-props-no-spreading, react/no-danger, react/no-this-in-sfc  */
+/* eslint-disable react/jsx-props-no-spreading, react/no-this-in-sfc  */
 import React, {
   useState,
   useRef,

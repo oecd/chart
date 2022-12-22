@@ -62,6 +62,10 @@ const ChartControlSelect = ({
         value={selectedOption}
         options={options || []}
         onChange={selectedOptionChanged}
+        // eslint-disable-next-line react/no-unstable-nested-components
+        formatOptionLabel={(o) => (
+          <span dangerouslySetInnerHTML={{ __html: o.label }} />
+        )}
         menuPlacement="auto"
         isMulti={multiple}
         closeMenuOnSelect={!multiple}

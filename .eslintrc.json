@@ -5,7 +5,8 @@
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "react/function-component-definition": "off",
     "react/forbid-prop-types": "off",
-    "no-underscore-dangle": "off"
+    "no-underscore-dangle": "off",
+    "react/no-danger": "off"
   },
   "env": {
     "browser": true
