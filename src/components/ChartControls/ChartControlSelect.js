@@ -12,6 +12,7 @@ const ChartControlSelect = ({
   options,
   placeholder,
   multiple,
+  noOptionMeansAllOptions,
   varName,
   vars,
   changeVar,
@@ -21,16 +22,27 @@ const ChartControlSelect = ({
   const selectedOptionChanged = useCallback(
     (value) => {
       if (multiple) {
-        changeVar(varName, R.join('|', R.map(R.prop('value'), value)));
+        if (noOptionMeansAllOptions && R.isEmpty(value)) {
+          changeVar(varName, R.join('|', R.map(R.prop('value'), options)));
+        } else {
+          changeVar(varName, R.join('|', R.map(R.prop('value'), value)));
+        }
       } else {
         changeVar(varName, value.value);
       }
     },
-    [changeVar, varName, multiple],
+    [changeVar, varName, multiple, noOptionMeansAllOptions, options],
   );
 
   const selectedOption = useMemo(() => {
     if (multiple) {
+      const optionsFromVar = R.split('|', vars[varName] ?? '');
+      if (noOptionMeansAllOptions) {
+        if (R.length(optionsFromVar) === R.length(options)) {
+          return [];
+        }
+      }
+
       return R.reduce(
         (acc, item) => {
           const option = R.find(
@@ -41,7 +53,7 @@ const ChartControlSelect = ({
           return option ? R.append(option, acc) : acc;
         },
         [],
-        R.split('|', vars[varName] ?? ''),
+        optionsFromVar,
       );
     }
 
@@ -49,7 +61,7 @@ const ChartControlSelect = ({
       R.compose(R.equals(R.toUpper(vars[varName])), R.toUpper, R.prop('value')),
       options || [],
     );
-  }, [vars, varName, options, multiple]);
+  }, [vars, varName, options, multiple, noOptionMeansAllOptions]);
 
   return (
     <div
@@ -83,6 +95,7 @@ ChartControlSelect.propTypes = {
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.string.isRequired,
   multiple: PropTypes.bool.isRequired,
+  noOptionMeansAllOptions: PropTypes.bool,
   varName: PropTypes.string.isRequired,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
@@ -90,6 +103,7 @@ ChartControlSelect.propTypes = {
 
 ChartControlSelect.defaultProps = {
   label: null,
+  noOptionMeansAllOptions: false,
 };
 
 export default ChartControlSelect;
