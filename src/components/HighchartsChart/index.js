@@ -17,6 +17,7 @@ import { FloatingPortal } from '@floating-ui/react-dom-interactions';
 import * as R from 'ramda';
 
 import {
+  apiUrl,
   chartTypes,
   dataSourceTypes,
   sortByOptions,
@@ -52,6 +53,7 @@ import {
 } from '../../utils/chartUtil';
 import useTooltipState from '../../hooks/useTooltipState';
 import CenteredContainer from '../CenteredContainer';
+import { fetchJson } from '../../utils/fetchUtil';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -125,7 +127,7 @@ const HighchartsChart = ({
   const chartForType = getChartForType(chartType);
   const ChartForTypeComponent = chartForType.component;
 
-  const lastRequestedDotStatUrlKey = useRef(null);
+  const lastRequestedDataKey = useRef(null);
   const [sdmxJson, setSdmxJson] = useState(null);
   const [isFetching, setIsFetching] = useState(
     dataSourceType === dataSourceTypes.dotStat.value &&
@@ -166,24 +168,19 @@ const HighchartsChart = ({
       setErrorMessage(null);
       setNoDataMessage(null);
 
-      const getData = async () => {
+      const getDotStatData = async () => {
         try {
-          lastRequestedDotStatUrlKey.current = `${finalDotStatUrl}|${dotStatLang}`;
+          lastRequestedDataKey.current = `${finalDotStatUrl}|${dotStatLang}`;
 
-          const response = await fetch(fixDotStatUrl(finalDotStatUrl), {
+          const newSdmxJson = await fetchJson(fixDotStatUrl(finalDotStatUrl), {
             headers: createDotStatHeaders(dotStatLang),
           });
 
           // discard result from outdated request(s)
           if (
-            lastRequestedDotStatUrlKey.current ===
-            `${finalDotStatUrl}|${dotStatLang}`
+            lastRequestedDataKey.current === `${finalDotStatUrl}|${dotStatLang}`
           ) {
-            if (R.prop('status', response) !== 200) {
-              setErrorMessage('An error occured :-(');
-            } else {
-              setSdmxJson(await response.json());
-            }
+            setSdmxJson(newSdmxJson);
             setIsFetching(false);
           }
         } catch (e) {
@@ -191,7 +188,7 @@ const HighchartsChart = ({
           setIsFetching(false);
         }
       };
-      getData();
+      getDotStatData();
     }
   }, [dataSourceType, finalDotStatUrl, dotStatLang]);
 
@@ -240,15 +237,18 @@ const HighchartsChart = ({
     yAxisOrderOverride,
   ]);
 
+  const [preParsedDataInternal, setPreParsedDataInternal] =
+    useState(preParsedData);
+
   const parsedCSVData = useMemo(() => {
     if (dataSourceType === dataSourceTypes.dotStat.value) {
       return null;
     }
     if (
-      !isNilOrEmpty(preParsedData) &&
+      !isNilOrEmpty(preParsedDataInternal) &&
       dataSourceType === dataSourceTypes.csv.value
     ) {
-      return preParsedData;
+      return preParsedDataInternal;
     }
 
     try {
@@ -276,7 +276,7 @@ const HighchartsChart = ({
     }
   }, [
     dataSourceType,
-    preParsedData,
+    preParsedDataInternal,
     chartType,
     csvCodeLabelMapping,
     csvCodeLabelMappingProjectLevel,
@@ -302,6 +302,48 @@ const HighchartsChart = ({
 
     return parsedCSVData;
   }, [dataSourceType, parsedSDMXData, parsedCSVData, onDataChange]);
+
+  useEffect(() => {
+    if (dataSourceType === dataSourceTypes.csv.value && preParsedDataInternal) {
+      const { varUsedForCSVFiltering, varValueUsedForCSVFiltering } =
+        preParsedDataInternal;
+      if (
+        R.toUpper(varValueUsedForCSVFiltering ?? '') !==
+        R.toUpper(vars[varUsedForCSVFiltering] ?? '')
+      ) {
+        const varsParam = R.join('/', R.reject(R.isEmpty, R.values(vars)));
+        const configParams = `${id}${
+          R.isEmpty(varsParam) ? '' : `/${varsParam}`
+        }`;
+
+        setIsFetching(true);
+        setErrorMessage(null);
+        setNoDataMessage(null);
+
+        const getCsvData = async () => {
+          try {
+            lastRequestedDataKey.current = configParams;
+
+            const newPreParsedData = await fetchJson(
+              `${apiUrl}/api/public/chartConfig/${configParams}?preParsedDataOnly`,
+            );
+
+            // discard result from outdated request(s)
+            if (lastRequestedDataKey.current === configParams) {
+              setPreParsedDataInternal(
+                R.prop('preParsedData', newPreParsedData),
+              );
+              setIsFetching(false);
+            }
+          } catch (e) {
+            setErrorMessage('An error occured :-(');
+            setIsFetching(false);
+          }
+        };
+        getCsvData();
+      }
+    }
+  }, [id, dataSourceType, vars, preParsedDataInternal]);
 
   const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);

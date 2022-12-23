@@ -233,6 +233,7 @@ const addParsingHelperData =
       parsingHelperData: {
         xDimensionLabelByCode,
         yDimensionLabelByCode,
+        otherDimensionsLabelByCode: codeLabelMapping,
       },
       ...rest,
     };
@@ -371,6 +372,7 @@ const filterCSV = (vars) => (data) => {
       '',
       R.nth(varColumnIndex, headerRow),
     ),
+    varValueUsedForCSVFiltering: R.toUpper(varValue),
   };
 };
 

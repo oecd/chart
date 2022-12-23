@@ -41,7 +41,7 @@ const ChartControlSelect = ({
           return option ? R.append(option, acc) : acc;
         },
         [],
-        R.split('|', vars[varName]),
+        R.split('|', vars[varName] ?? ''),
       );
     }
 

@@ -15,11 +15,7 @@ import Spinner from './Spinner';
 import { possibleVariables } from '../utils/configUtil';
 import { fetchJson } from '../utils/fetchUtil';
 import CenteredContainer from './CenteredContainer';
-
-const apiUrl =
-  process.env.NEXT_PUBLIC_CHART_LIB_API_URL ||
-  process.env.API_URL ||
-  'https://oecdch.art';
+import { apiUrl } from '../constants/chart';
 
 const Chart = ({ chartId, ...otherProps }) => {
   const [prevChartId, setPrevChartId] = useState(null);
@@ -28,7 +24,6 @@ const Chart = ({ chartId, ...otherProps }) => {
     isLoading: true,
     hasFetchFailed: false,
   });
-  const [prevPropsVars, setPrevPropsVars] = useState(null);
   const lastRequestedConfig = useRef(null);
 
   useEffect(() => {
@@ -48,10 +43,6 @@ const Chart = ({ chartId, ...otherProps }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...R.map(R.prop(R.__, otherProps), possibleVariables)],
   );
-
-  useEffect(() => {
-    setPrevPropsVars(propsVars);
-  }, [propsVars]);
 
   const getChartConfig = useCallback(async (id, vars) => {
     try {
@@ -92,31 +83,10 @@ const Chart = ({ chartId, ...otherProps }) => {
     }
     if (prevChartId !== chartId) {
       getChartConfig(chartId, propsVars);
-    } else if (prevPropsVars !== propsVars) {
-      const varNameUsedForCSVFiltering = R.path(
-        ['preParsedData', 'varUsedForCSVFiltering'],
-        chartConfigData.chartConfig,
-      );
-      if (varNameUsedForCSVFiltering) {
-        const prevPropValue = R.toUpper(
-          R.propOr('', varNameUsedForCSVFiltering, prevPropsVars),
-        );
-        const propValue = R.toUpper(
-          R.propOr('', varNameUsedForCSVFiltering, propsVars),
-        );
-        const currentConfigValue = R.toUpper(
-          R.propOr('', varNameUsedForCSVFiltering, chartConfigData.chartConfig),
-        );
-
-        if (prevPropValue !== propValue && propValue !== currentConfigValue) {
-          getChartConfig(chartId, propsVars);
-        }
-      }
     }
   }, [
     prevChartId,
     chartId,
-    prevPropsVars,
     propsVars,
     getChartConfig,
     chartConfigData.chartConfig,
