@@ -13,7 +13,7 @@ const createDimensionMemberLabelByCode = R.compose(
   R.map((m) => [m.id, m.name]),
 );
 
-const isTimeDimention = R.propEq('role', 'TIME_PERIOD');
+const isTimeDimension = R.propEq('role', 'TIME_PERIOD');
 
 const getXAndYDimension = (
   dimensions,
@@ -25,7 +25,7 @@ const getXAndYDimension = (
   );
 
   const timeDimension = latestAvailableData
-    ? R.find(isTimeDimention, dimensionsWithMoreThanOneMember)
+    ? R.find(isTimeDimension, dimensionsWithMoreThanOneMember)
     : null;
 
   if (chartType === chartTypes.map) {
@@ -134,7 +134,7 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
   );
 
   const finalLatestAvailableData =
-    chartConfig.latestAvailableData && isTimeDimention(yDimension);
+    chartConfig.latestAvailableData && isTimeDimension(yDimension);
 
   const series = R.compose(
     R.map(([k, v]) => R.prepend(k, v)),
@@ -157,6 +157,10 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
     }, {}),
   )(R.toPairs(observations));
 
+  const yDimensionLabelByCode = createDimensionMemberLabelByCode(
+    yDimension.values,
+  );
+
   const parsingHelperData = {
     xDimensionLabelByCode: createDimensionMemberLabelByCode(xDimension.values),
     yDimensionLabelByCode: finalLatestAvailableData
@@ -164,16 +168,18 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
           [fakeMemberLatest.code]: fakeMemberLatest.label,
         }
       : createDimensionMemberLabelByCode(yDimension.values),
-    otherDimensionsLabelByCode: R.reduce(
-      (acc, d) => R.mergeRight(acc, createDimensionMemberLabelByCode(d.values)),
-      {},
-      otherDimensions,
-    ),
+    otherDimensionsLabelByCode: R.compose(
+      R.when(
+        () => finalLatestAvailableData,
+        R.mergeRight(yDimensionLabelByCode),
+      ),
+      R.reduce(
+        (acc, d) =>
+          R.mergeRight(acc, createDimensionMemberLabelByCode(d.values)),
+        {},
+      ),
+    )(otherDimensions),
   };
-
-  const yDimensionLabelByCode = createDimensionMemberLabelByCode(
-    yDimension.values,
-  );
 
   const latestAvailableDataMapping = finalLatestAvailableData
     ? {
