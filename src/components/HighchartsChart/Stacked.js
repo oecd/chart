@@ -14,8 +14,7 @@ import {
   createStackedDatapoints,
   deepMergeUserOptionsWithDefaultOptions,
 } from '../../utils/chartUtil';
-import { stackingOptions } from '../../constants/chart';
-import { fakeMemberLatest } from '../../utils/sdmxJsonUtil';
+import { stackingOptions, fakeMemberLatest } from '../../constants/chart';
 
 if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);

@@ -16,7 +16,7 @@ import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
 } from '../../utils/chartUtil';
-import { fakeMemberLatest } from '../../utils/sdmxJsonUtil';
+import { fakeMemberLatest } from '../../constants/chart';
 
 if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);

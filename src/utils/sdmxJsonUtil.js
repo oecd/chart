@@ -1,5 +1,7 @@
 import * as R from 'ramda';
-import { chartTypes } from '../constants/chart';
+import { chartTypes, fakeMemberLatest } from '../constants/chart';
+import { parseCSV } from './csvUtil';
+import { createCodeLabelMap } from './generalUtil';
 import { isNilOrEmpty } from './ramdaUtil';
 
 export const fixDotStatUrl = (url) => {
@@ -8,10 +10,15 @@ export const fixDotStatUrl = (url) => {
   return parsedUrl.href;
 };
 
-const createDimensionMemberLabelByCode = R.compose(
-  R.fromPairs,
-  R.map((m) => [m.id, m.name]),
-);
+const createDimensionMemberLabelByCode = (members, codeLabelMapping) =>
+  R.compose(
+    R.when(
+      () => !isNilOrEmpty(codeLabelMapping),
+      R.mergeLeft(codeLabelMapping),
+    ),
+    R.fromPairs,
+    R.map((m) => [m.id, m.name]),
+  )(members);
 
 const isTimeDimension = R.propEq('role', 'TIME_PERIOD');
 
@@ -86,8 +93,6 @@ const getXAndYDimension = (
   ])(dimensionsWithMoreThanOneMember);
 };
 
-export const fakeMemberLatest = { code: '_LATEST_', label: 'Latest' };
-
 const detectV8 = R.hasPath(['meta', 'schema']);
 
 export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
@@ -157,17 +162,25 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
     }, {}),
   )(R.toPairs(observations));
 
+  const codeLabelMapping = createCodeLabelMap(
+    parseCSV(chartConfig.dotStatCodeLabelMapping),
+  );
+
   const yDimensionLabelByCode = createDimensionMemberLabelByCode(
     yDimension.values,
+    codeLabelMapping,
   );
 
   const parsingHelperData = {
-    xDimensionLabelByCode: createDimensionMemberLabelByCode(xDimension.values),
+    xDimensionLabelByCode: createDimensionMemberLabelByCode(
+      xDimension.values,
+      codeLabelMapping,
+    ),
     yDimensionLabelByCode: finalLatestAvailableData
       ? {
           [fakeMemberLatest.code]: fakeMemberLatest.label,
         }
-      : createDimensionMemberLabelByCode(yDimension.values),
+      : yDimensionLabelByCode,
     otherDimensionsLabelByCode: R.compose(
       R.when(
         () => finalLatestAvailableData,
@@ -175,7 +188,10 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
       ),
       R.reduce(
         (acc, d) =>
-          R.mergeRight(acc, createDimensionMemberLabelByCode(d.values)),
+          R.mergeRight(
+            acc,
+            createDimensionMemberLabelByCode(d.values, codeLabelMapping),
+          ),
         {},
       ),
     )(otherDimensions),

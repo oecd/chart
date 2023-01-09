@@ -8,6 +8,7 @@ import {
 } from '../constants/chart';
 import { isNumberOrDate } from './chartUtil';
 import { codeOrLabelEquals, possibleVariables } from './configUtil';
+import { createCodeLabelMap } from './generalUtil';
 
 import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
 
@@ -23,18 +24,22 @@ const parseRawCSV = (csvString) =>
 
 const cleanupCSV = R.compose(
   (data) => {
-    const numberOfSeries = R.length(R.reject(R.isNil, R.head(data)));
+    if (isNilOrEmpty(data)) {
+      return [];
+    }
+
+    const numberOfColumn = R.length(R.reject(R.isNil, R.head(data)));
 
     return R.map((row) => {
-      if (R.length(row) === numberOfSeries) {
+      if (R.length(row) === numberOfColumn) {
         return row;
       }
-      if (R.length(row) > numberOfSeries) {
-        return R.take(numberOfSeries, row);
+      if (R.length(row) > numberOfColumn) {
+        return R.take(numberOfColumn, row);
       }
       return R.concat(
         row,
-        R.times(R.always(null), numberOfSeries - R.length(row)),
+        R.times(R.always(null), numberOfColumn - R.length(row)),
       );
     }, data);
   },
@@ -42,8 +47,8 @@ const cleanupCSV = R.compose(
   R.prop('data'),
 );
 
-const parseCSV = (csvString) =>
-  R.compose(cleanupCSV, R.pick(['data']), parseRawCSV)(csvString);
+export const parseCSV = (csvString) =>
+  R.compose(cleanupCSV, R.pick(['data']), parseRawCSV)(csvString ?? '');
 
 export const parseData = ({ data, parsingHelperData, ...rest }) => {
   if (isNilOrEmpty(data)) {
@@ -180,12 +185,6 @@ const createCodeLabelMapping = (
   ) {
     return {};
   }
-
-  const createCodeLabelMap = R.compose(
-    R.fromPairs,
-    R.map(([c, l]) => [R.toUpper(c), l]),
-    R.reject(R.compose(R.lt(R.__, 2), R.length, R.reject(R.isNil))),
-  );
 
   const mappingProjectLevel = isNilOrEmpty(csvCodeLabelMappingProjectLevel)
     ? {}

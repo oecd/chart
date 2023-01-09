@@ -5,8 +5,7 @@ import * as R from 'ramda';
 
 import { codeOrLabelEquals, possibleVariables } from './configUtil';
 import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
-import { chartTypes } from '../constants/chart';
-import { fakeMemberLatest } from './sdmxJsonUtil';
+import { chartTypes, fakeMemberLatest } from '../constants/chart';
 
 const baselineColor = '#262639';
 

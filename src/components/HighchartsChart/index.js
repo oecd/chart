@@ -94,6 +94,7 @@ const HighchartsChart = ({
   staticCsvData,
   csvCodeLabelMappingProjectLevel,
   csvCodeLabelMapping,
+  dotStatCodeLabelMapping,
   preParsedData,
   pivotData,
   chartType,
@@ -217,6 +218,7 @@ const HighchartsChart = ({
               pivotData,
               mapCountryDimension,
               latestAvailableData,
+              dotStatCodeLabelMapping,
             }),
           )(sdmxJson)
         : emptyData;
@@ -235,6 +237,7 @@ const HighchartsChart = ({
     sortOrder,
     sortSeries,
     yAxisOrderOverride,
+    dotStatCodeLabelMapping,
   ]);
 
   const [preParsedDataInternal, setPreParsedDataInternal] =
@@ -707,6 +710,7 @@ HighchartsChart.propTypes = {
   staticCsvData: PropTypes.string,
   csvCodeLabelMappingProjectLevel: PropTypes.string,
   csvCodeLabelMapping: PropTypes.string,
+  dotStatCodeLabelMapping: PropTypes.string,
   preParsedData: PropTypes.object,
   pivotData: PropTypes.bool,
   chartType: PropTypes.oneOf(R.values(chartTypes)).isRequired,
@@ -748,6 +752,7 @@ HighchartsChart.defaultProps = {
   staticCsvData: '',
   csvCodeLabelMappingProjectLevel: null,
   csvCodeLabelMapping: null,
+  dotStatCodeLabelMapping: null,
   preParsedData: null,
   pivotData: false,
   title: null,

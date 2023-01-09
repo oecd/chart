@@ -21,13 +21,12 @@ import {
   getBaselineOrHighlightColor,
   createShadesFromColor,
 } from '../../utils/chartUtil';
-import { mapTypes } from '../../constants/chart';
+import { mapTypes, fakeMemberLatest } from '../../constants/chart';
 import {
   isNilOrEmpty,
   mapWithIndex,
   reduceWithIndex,
 } from '../../utils/ramdaUtil';
-import { fakeMemberLatest } from '../../utils/sdmxJsonUtil';
 
 // inspired example about "Logarithmic color axis with extension to emulate negative values"
 // https://api.highcharts.com/highmaps/colorAxis.type
