@@ -26,7 +26,7 @@ const lightenColor = (color, percent) => {
 };
 
 export const convertColorToHex = (color) =>
-  new TinyColor(color || 'black').toHex8String();
+  new TinyColor(color || 'black').toHexString();
 
 export const createLighterColor = (color, percent) => {
   const hex = convertColorToHex(color);
