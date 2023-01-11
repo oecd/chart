@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 const CenteredContainer = ({ height, children }) => (
   <div
     style={{
+      minHeight: 'inherit',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',

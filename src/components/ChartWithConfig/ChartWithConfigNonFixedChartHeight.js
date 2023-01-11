@@ -81,7 +81,11 @@ const ChartWithConfigNonFixedChartHeight = ({
         ref={controlsRef}
         style={{
           position: 'relative',
-          top: finalChartHeight || 0,
+          top:
+            finalChartHeight &&
+            chartContainerAutoSizerHeight !== finalChartHeight
+              ? finalChartHeight
+              : '-1000px',
           visibility:
             finalChartHeight &&
             chartContainerAutoSizerHeight !== finalChartHeight
