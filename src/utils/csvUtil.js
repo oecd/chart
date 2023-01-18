@@ -362,7 +362,7 @@ const filterCSV = (vars) => (data) => {
         R.compose(
           R.equals(R.toUpper(varValue)),
           R.toUpper,
-          R.toString,
+          (v) => `${v}`,
           R.nth(varColumnIndex),
         ),
       ),
