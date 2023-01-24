@@ -22,7 +22,7 @@ const createDimensionMemberLabelByCode = (members, codeLabelMapping) =>
 
 const isTimeDimension = R.either(
   R.propEq('role', 'TIME_PERIOD'),
-  R.compose(R.includes('TIME_PERIOD'), R.prop('roles')),
+  R.compose(R.includes('TIME_PERIOD'), R.propOr([], 'roles')),
 );
 
 const getXAndYDimension = (
@@ -143,6 +143,8 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
 
   const finalLatestAvailableData =
     chartConfig.latestAvailableData && isTimeDimension(yDimension);
+
+  console.log(finalLatestAvailableData);
 
   const series = R.compose(
     R.map(([k, v]) => R.prepend(k, v)),
