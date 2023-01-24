@@ -144,8 +144,6 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
   const finalLatestAvailableData =
     chartConfig.latestAvailableData && isTimeDimension(yDimension);
 
-  console.log(finalLatestAvailableData);
-
   const series = R.compose(
     R.map(([k, v]) => R.prepend(k, v)),
     R.toPairs,
