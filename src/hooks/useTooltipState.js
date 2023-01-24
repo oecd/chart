@@ -11,7 +11,7 @@ import {
   useDismiss,
   useRole,
   useInteractions,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 
 const useTooltipState = () => {
   const [open, setOpen] = useState(false);

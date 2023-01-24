@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons/faExpandArrowsAlt';
 import { faDownload } from '@fortawesome/free-solid-svg-icons/faDownload';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
-import { FloatingPortal } from '@floating-ui/react-dom-interactions';
+import { FloatingPortal } from '@floating-ui/react';
 import * as R from 'ramda';
 
 import {
