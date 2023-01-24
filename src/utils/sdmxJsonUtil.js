@@ -20,7 +20,10 @@ const createDimensionMemberLabelByCode = (members, codeLabelMapping) =>
     R.map((m) => [m.id, m.name]),
   )(members);
 
-const isTimeDimension = R.propEq('role', 'TIME_PERIOD');
+const isTimeDimension = R.either(
+  R.propEq('role', 'TIME_PERIOD'),
+  R.compose(R.includes('TIME_PERIOD'), R.prop('roles')),
+);
 
 const getXAndYDimension = (
   dimensions,
