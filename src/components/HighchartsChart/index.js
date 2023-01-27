@@ -7,11 +7,11 @@ import React, {
   memo,
   lazy,
   Suspense,
+  useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons/faExpandArrowsAlt';
-import { faDownload } from '@fortawesome/free-solid-svg-icons/faDownload';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
 import { FloatingPortal } from '@floating-ui/react';
 import * as R from 'ramda';
@@ -54,6 +54,7 @@ import {
 import useTooltipState from '../../hooks/useTooltipState';
 import CenteredContainer from '../CenteredContainer';
 import { fetchJson } from '../../utils/fetchUtil';
+import ExportButton from './ExportButton';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -120,6 +121,7 @@ const HighchartsChart = ({
   onTitleParsed,
   displayFooterAsTooltip,
   onExpandChart,
+  hideExpand,
   onDownloadData,
   onDataChange,
   vars,
@@ -505,10 +507,25 @@ const HighchartsChart = ({
 
   const chartRef = useRef(null);
 
-  const downloadEnabled =
+  const chartCanBedisplayed =
     !isFetching && R.isNil(noDataMessage) && R.isNil(errorMessage);
 
   const tooltipState = useTooltipState();
+
+  const [isInIframe, setIsInIframe] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [screenHeight, setScreenHeight] = useState(0);
+  useEffect(() => {
+    setIsInIframe(window.location !== window.parent.location);
+    setScreenHeight(window.screen.height);
+  }, []);
+  const openChartFullScreen = () => {
+    setIsFullScreen(true);
+    chartRef.current?.chart.fullscreen.open();
+  };
+  const fullscreenClose = useCallback(() => {
+    setIsFullScreen(false);
+  }, []);
 
   return (
     <div className="cb-container" style={{ backgroundColor: '#fff' }}>
@@ -544,7 +561,6 @@ const HighchartsChart = ({
             )}
           </div>
           <div
-            className="cb-toolbar"
             style={{
               display: 'flex',
               alignItems: 'flex-start',
@@ -556,6 +572,7 @@ const HighchartsChart = ({
             (footerHeight === 0 || displayFooterAsTooltip) ? (
               <>
                 <div
+                  className="cb-toolbar"
                   style={{ marginLeft: '4px' }}
                   ref={tooltipState.reference}
                   {...tooltipState.getReferenceProps()}
@@ -575,7 +592,7 @@ const HighchartsChart = ({
                           ? 'hidden'
                           : 'visible',
                       }}
-                      className="cb-tooltip"
+                      className="cb-floating cb-tooltip"
                       dangerouslySetInnerHTML={{
                         __html: footer,
                       }}
@@ -586,44 +603,30 @@ const HighchartsChart = ({
             ) : (
               fakeFooterTooltip
             )}
-            <div
-              style={{
-                marginLeft: '8px',
-                cursor: downloadEnabled ? 'pointer' : 'default',
-                color: downloadEnabled ? '' : '#ddd',
-              }}
-              role="button"
-              tabIndex={0}
-              onClick={() => {
-                if (downloadEnabled && chartRef.current?.chart.downloadCSV) {
-                  chartRef.current?.chart.downloadCSV();
-
-                  if (onDownloadData) {
-                    onDownloadData();
-                  }
-                }
-              }}
-              onKeyDown={(e) => {
-                if (
-                  downloadEnabled &&
-                  e.key === 'Enter' &&
-                  chartRef.current?.chart.downloadCSV
-                ) {
-                  chartRef.current?.chart.downloadCSV();
-                }
-              }}
-            >
-              <FontAwesomeIcon icon={faDownload} />
-            </div>
-            {onExpandChart && (
+            <ExportButton
+              chartRef={chartRef}
+              parsedTitle={parsedTitle}
+              parsedSubtitle={parsedSubtitle}
+              onDownloadData={onDownloadData}
+              disabled={!chartCanBedisplayed}
+              style={{ marginLeft: '8px' }}
+            />
+            {(onExpandChart || !isInIframe) && !hideExpand && (
               <div
-                style={{ marginLeft: '8px', cursor: 'pointer' }}
+                style={{ marginLeft: '8px' }}
+                className={
+                  chartCanBedisplayed ? 'cb-toolbar' : 'cb-toolbar-disabled'
+                }
                 role="button"
                 tabIndex={0}
-                onClick={onExpandChart}
+                onClick={onExpandChart || openChartFullScreen}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    onExpandChart();
+                    if (onExpandChart) {
+                      onExpandChart();
+                    } else {
+                      openChartFullScreen();
+                    }
                   }
                 }}
               >
@@ -634,7 +637,7 @@ const HighchartsChart = ({
         </div>
       </div>
 
-      {(!R.isNil(noDataMessage) || !R.isNil(errorMessage) || isFetching) && (
+      {!chartCanBedisplayed && (
         <CenteredContainer height={chartHeight}>
           {isFetching && <Spinner />}
           {!R.isNil(errorMessage) && errorMessage}
@@ -642,41 +645,41 @@ const HighchartsChart = ({
         </CenteredContainer>
       )}
 
-      {!R.isNil(footerHeight) &&
-        chartHeight &&
-        !isFetching &&
-        R.isNil(errorMessage) &&
-        R.isNil(noDataMessage) && (
-          <Suspense
-            fallback={
-              <CenteredContainer height={chartHeight}>
-                <Spinner />
-              </CenteredContainer>
+      {!R.isNil(footerHeight) && chartHeight && chartCanBedisplayed && (
+        <Suspense
+          fallback={
+            <CenteredContainer height={chartHeight}>
+              <Spinner />
+            </CenteredContainer>
+          }
+        >
+          <ChartForTypeComponent
+            {...chartForType.props}
+            ref={chartRef}
+            width={width}
+            height={isFullScreen ? screenHeight : chartHeight}
+            title={isFullScreen ? parsedTitle : ''}
+            subtitle={isFullScreen ? parsedSubtitle : ''}
+            data={parsedData}
+            highlight={parsedHighlight}
+            baseline={parsedBaseline}
+            colorPalette={
+              R.isEmpty(paletteColorsOverride)
+                ? colorPalette
+                : paletteColorsOverride
             }
-          >
-            <ChartForTypeComponent
-              {...chartForType.props}
-              ref={chartRef}
-              width={width}
-              height={chartHeight}
-              data={parsedData}
-              highlight={parsedHighlight}
-              baseline={parsedBaseline}
-              colorPalette={
-                R.isEmpty(paletteColorsOverride)
-                  ? colorPalette
-                  : paletteColorsOverride
-              }
-              highlightColors={
-                R.isEmpty(highlightColorsOverride)
-                  ? highlightColors
-                  : highlightColorsOverride
-              }
-              formatters={formatters}
-              {...otherProps}
-            />
-          </Suspense>
-        )}
+            highlightColors={
+              R.isEmpty(highlightColorsOverride)
+                ? highlightColors
+                : highlightColorsOverride
+            }
+            formatters={formatters}
+            fullscreenClose={fullscreenClose}
+            isFullScreen={isFullScreen}
+            {...otherProps}
+          />
+        </Suspense>
+      )}
 
       <div
         ref={footerRef}
@@ -736,6 +739,7 @@ HighchartsChart.propTypes = {
   onTitleParsed: PropTypes.func,
   displayFooterAsTooltip: PropTypes.bool,
   onExpandChart: PropTypes.func,
+  hideExpand: PropTypes.bool,
   onDownloadData: PropTypes.func,
   onDataChange: PropTypes.func,
   vars: PropTypes.object.isRequired,
@@ -771,6 +775,7 @@ HighchartsChart.defaultProps = {
   onTitleParsed: null,
   displayFooterAsTooltip: false,
   onExpandChart: null,
+  hideExpand: false,
   onDownloadData: null,
   onDataChange: null,
   controls: [],

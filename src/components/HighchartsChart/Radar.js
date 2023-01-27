@@ -6,6 +6,7 @@ import AccessibilityModule from 'highcharts/modules/accessibility';
 import BrokenAxisModule from 'highcharts/modules/broken-axis';
 import AnnotationsModule from 'highcharts/modules/annotations';
 import ExportingModule from 'highcharts/modules/exporting';
+import OfflineExportingModule from 'highcharts/modules/offline-exporting';
 import ExportDataModule from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
@@ -23,12 +24,15 @@ if (typeof Highcharts === 'object') {
   HighchartsMore(Highcharts);
   AccessibilityModule(Highcharts);
   ExportingModule(Highcharts);
+  OfflineExportingModule(Highcharts);
   ExportDataModule(Highcharts);
 }
 
 const Radar = forwardRef(
   (
     {
+      title,
+      subtitle,
       data,
       highlight,
       baseline,
@@ -39,6 +43,8 @@ const Radar = forwardRef(
       highlightColors,
       height,
       formatters,
+      fullscreenClose,
+      isFullScreen,
       optionsOverride,
     },
     ref,
@@ -99,12 +105,27 @@ const Radar = forwardRef(
           height,
           animation: false,
           spacingBottom: 5,
+          events: { fullscreenClose },
         },
 
         colors: colorPalette,
 
         title: {
-          text: '',
+          text: title,
+          align: 'left',
+          margin: 20,
+          style: {
+            color: '#333333',
+            fontWeight: 'bold',
+          },
+        },
+        subtitle: {
+          text: subtitle,
+          align: 'left',
+          style: {
+            color: '#737373',
+            fontWeight: 'bold',
+          },
         },
 
         credits: {
@@ -200,10 +221,14 @@ const Radar = forwardRef(
 
         exporting: {
           enabled: false,
+          sourceWidth: 600,
+          sourceHeight: 400,
           filename: `export-${new Date(Date.now()).toISOString()}`,
         },
       }),
       [
+        title,
+        subtitle,
         data,
         series,
         colorPalette,
@@ -212,6 +237,7 @@ const Radar = forwardRef(
         hideXAxisLabels,
         hideYAxisLabels,
         formatters,
+        fullscreenClose,
       ],
     );
 
@@ -226,13 +252,15 @@ const Radar = forwardRef(
         ref={ref}
         highcharts={Highcharts}
         options={mergedOptions}
-        immutable
+        immutable={!isFullScreen}
       />
     );
   },
 );
 
 Radar.propTypes = {
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
@@ -246,16 +274,22 @@ Radar.propTypes = {
   highlightColors: PropTypes.array.isRequired,
   height: PropTypes.number.isRequired,
   formatters: PropTypes.object,
+  fullscreenClose: PropTypes.func,
+  isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
 };
 
 Radar.defaultProps = {
+  title: '',
+  subtitle: '',
   highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
   hideYAxisLabels: false,
   formatters: {},
+  fullscreenClose: null,
+  isFullScreen: false,
   optionsOverride: {},
 };
 

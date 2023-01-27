@@ -5,11 +5,16 @@ import AccessibilityModule from 'highcharts/modules/accessibility';
 import BrokenAxisModule from 'highcharts/modules/broken-axis';
 import AnnotationsModule from 'highcharts/modules/annotations';
 import ExportingModule from 'highcharts/modules/exporting';
+import OfflineExportingModule from 'highcharts/modules/offline-exporting';
 import ExportDataModule from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
 
-import { forEachWithIndex, mapWithIndex } from '../../utils/ramdaUtil';
+import {
+  forEachWithIndex,
+  isNilOrEmpty,
+  mapWithIndex,
+} from '../../utils/ramdaUtil';
 import {
   addColorAlpha,
   deepMergeUserOptionsWithDefaultOptions,
@@ -23,6 +28,7 @@ if (typeof Highcharts === 'object') {
   BrokenAxisModule(Highcharts);
   AccessibilityModule(Highcharts);
   ExportingModule(Highcharts);
+  OfflineExportingModule(Highcharts);
   ExportDataModule(Highcharts);
   Highcharts.SVGRenderer.prototype.symbols.cross = (x, y, w, h) => [
     'M',
@@ -60,6 +66,8 @@ const Scatter = forwardRef(
   (
     {
       symbolLayout,
+      title,
+      subtitle,
       data,
       highlight,
       baseline,
@@ -71,6 +79,8 @@ const Scatter = forwardRef(
       width,
       height,
       formatters,
+      fullscreenClose,
+      isFullScreen,
       optionsOverride,
     },
     ref,
@@ -168,11 +178,13 @@ const Scatter = forwardRef(
           style: {
             fontFamily: 'Segoe UI',
           },
-          marginTop: 22,
+          marginTop:
+            isNilOrEmpty(title) && isNilOrEmpty(subtitle) ? 22 : undefined,
           height,
           animation: false,
           spacingBottom: 5,
           events: {
+            fullscreenClose,
             render: ({ target: chart }) => {
               if (
                 !hideXAxisLabels &&
@@ -249,7 +261,21 @@ const Scatter = forwardRef(
         colors: colorPalette,
 
         title: {
-          text: '',
+          text: title,
+          align: 'left',
+          margin: 20,
+          style: {
+            color: '#333333',
+            fontWeight: 'bold',
+          },
+        },
+        subtitle: {
+          text: subtitle,
+          align: 'left',
+          style: {
+            color: '#737373',
+            fontWeight: 'bold',
+          },
         },
 
         credits: {
@@ -317,12 +343,16 @@ const Scatter = forwardRef(
 
         exporting: {
           enabled: false,
+          sourceWidth: 600,
+          sourceHeight: 400,
           filename: `export-${new Date(Date.now()).toISOString()}`,
         },
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [
         data,
+        title,
+        subtitle,
         series,
         colorPalette,
         width,
@@ -331,6 +361,7 @@ const Scatter = forwardRef(
         hideXAxisLabels,
         hideYAxisLabels,
         formatters,
+        fullscreenClose,
       ],
     );
 
@@ -345,7 +376,7 @@ const Scatter = forwardRef(
         ref={ref}
         highcharts={Highcharts}
         options={mergedOptions}
-        immutable
+        immutable={!isFullScreen}
       />
     );
   },
@@ -353,6 +384,8 @@ const Scatter = forwardRef(
 
 Scatter.propTypes = {
   symbolLayout: PropTypes.bool,
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
@@ -368,17 +401,23 @@ Scatter.propTypes = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   formatters: PropTypes.object,
+  fullscreenClose: PropTypes.func,
+  isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
 };
 
 Scatter.defaultProps = {
   symbolLayout: false,
+  title: '',
+  subtitle: '',
   highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
   hideYAxisLabels: false,
   formatters: {},
+  fullscreenClose: null,
+  isFullScreen: false,
   optionsOverride: {},
 };
 

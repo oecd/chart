@@ -4,6 +4,7 @@ import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
 import AnnotationsModule from 'highcharts/modules/annotations';
 import ExportingModule from 'highcharts/modules/exporting';
+import OfflineExportingModule from 'highcharts/modules/offline-exporting';
 import ExportDataModule from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
@@ -20,12 +21,15 @@ if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);
   AccessibilityModule(Highcharts);
   ExportingModule(Highcharts);
+  OfflineExportingModule(Highcharts);
   ExportDataModule(Highcharts);
 }
 
 const Pie = forwardRef(
   (
     {
+      title,
+      subtitle,
       data,
       highlight,
       baseline,
@@ -36,6 +40,8 @@ const Pie = forwardRef(
       width,
       height,
       formatters,
+      fullscreenClose,
+      isFullScreen,
       optionsOverride,
     },
     ref,
@@ -83,10 +89,25 @@ const Pie = forwardRef(
           },
           height,
           animation: false,
+          events: { fullscreenClose },
         },
 
         title: {
-          text: '',
+          text: title,
+          align: 'left',
+          margin: 20,
+          style: {
+            color: '#333333',
+            fontWeight: 'bold',
+          },
+        },
+        subtitle: {
+          text: subtitle,
+          align: 'left',
+          style: {
+            color: '#737373',
+            fontWeight: 'bold',
+          },
         },
 
         credits: {
@@ -127,11 +148,15 @@ const Pie = forwardRef(
 
         exporting: {
           enabled: false,
+          sourceWidth: 600,
+          sourceHeight: 400,
           filename: `export-${new Date(Date.now()).toISOString()}`,
         },
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [
+        title,
+        subtitle,
         data,
         series,
         colorPalette,
@@ -140,6 +165,7 @@ const Pie = forwardRef(
         hideLegend,
         hideXAxisLabels,
         formatters,
+        fullscreenClose,
       ],
     );
 
@@ -154,13 +180,15 @@ const Pie = forwardRef(
         ref={ref}
         highcharts={Highcharts}
         options={mergedOptions}
-        immutable
+        immutable={!isFullScreen}
       />
     );
   },
 );
 
 Pie.propTypes = {
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
@@ -174,15 +202,21 @@ Pie.propTypes = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   formatters: PropTypes.object,
+  fullscreenClose: PropTypes.func,
+  isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
 };
 
 Pie.defaultProps = {
+  title: '',
+  subtitle: '',
   highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
   formatters: {},
+  fullscreenClose: null,
+  isFullScreen: false,
   optionsOverride: {},
 };
 

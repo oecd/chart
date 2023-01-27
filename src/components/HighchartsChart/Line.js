@@ -5,6 +5,7 @@ import AccessibilityModule from 'highcharts/modules/accessibility';
 import BrokenAxisModule from 'highcharts/modules/broken-axis';
 import AnnotationsModule from 'highcharts/modules/annotations';
 import ExportingModule from 'highcharts/modules/exporting';
+import OfflineExportingModule from 'highcharts/modules/offline-exporting';
 import ExportDataModule from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
@@ -15,12 +16,14 @@ import {
   makeColorReadableOnBackgroundColor,
 } from '../../utils/chartUtil';
 import { fakeMemberLatest } from '../../constants/chart';
+import { isNilOrEmpty } from '../../utils/ramdaUtil';
 
 if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);
   BrokenAxisModule(Highcharts);
   AccessibilityModule(Highcharts);
   ExportingModule(Highcharts);
+  OfflineExportingModule(Highcharts);
   ExportDataModule(Highcharts);
 }
 
@@ -28,6 +31,8 @@ const Line = forwardRef(
   (
     {
       data,
+      title,
+      subtitle,
       highlight,
       baseline,
       hideLegend,
@@ -38,6 +43,8 @@ const Line = forwardRef(
       width,
       height,
       formatters,
+      fullscreenClose,
+      isFullScreen,
       optionsOverride,
     },
     ref,
@@ -102,13 +109,15 @@ const Line = forwardRef(
           style: {
             fontFamily: 'Segoe UI',
           },
-          marginTop: 22,
+          marginTop:
+            isNilOrEmpty(title) && isNilOrEmpty(subtitle) ? 22 : undefined,
           height,
           animation: false,
           spacingBottom: 5,
           events: data.areCategoriesNumbersOrDates
-            ? {}
+            ? { fullscreenClose }
             : {
+                fullscreenClose,
                 render: ({ target: chart }) => {
                   if (
                     !hideXAxisLabels &&
@@ -135,7 +144,21 @@ const Line = forwardRef(
         colors: [R.head(colorPalette)],
 
         title: {
-          text: '',
+          text: title,
+          align: 'left',
+          margin: 20,
+          style: {
+            color: '#333333',
+            fontWeight: 'bold',
+          },
+        },
+        subtitle: {
+          text: subtitle,
+          align: 'left',
+          style: {
+            color: '#737373',
+            fontWeight: 'bold',
+          },
         },
 
         credits: {
@@ -231,11 +254,15 @@ const Line = forwardRef(
 
         exporting: {
           enabled: false,
+          sourceWidth: 600,
+          sourceHeight: 400,
           filename: `export-${new Date(Date.now()).toISOString()}`,
         },
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [
+        title,
+        subtitle,
         data,
         series,
         colorPalette,
@@ -245,6 +272,7 @@ const Line = forwardRef(
         hideXAxisLabels,
         hideYAxisLabels,
         formatters,
+        fullscreenClose,
       ],
     );
 
@@ -259,13 +287,15 @@ const Line = forwardRef(
         ref={ref}
         highcharts={Highcharts}
         options={mergedOptions}
-        immutable
+        immutable={!isFullScreen}
       />
     );
   },
 );
 
 Line.propTypes = {
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
@@ -281,16 +311,22 @@ Line.propTypes = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   formatters: PropTypes.object,
+  fullscreenClose: PropTypes.func,
+  isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
 };
 
 Line.defaultProps = {
+  title: '',
+  subtitle: '',
   highlight: '',
   baseline: null,
   hideLegend: false,
   hideXAxisLabels: false,
   hideYAxisLabels: false,
   formatters: {},
+  fullscreenClose: null,
+  isFullScreen: false,
   optionsOverride: {},
 };
 

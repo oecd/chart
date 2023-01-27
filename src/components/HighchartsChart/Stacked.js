@@ -5,6 +5,7 @@ import AccessibilityModule from 'highcharts/modules/accessibility';
 import BrokenAxisModule from 'highcharts/modules/broken-axis';
 import AnnotationsModule from 'highcharts/modules/annotations';
 import ExportingModule from 'highcharts/modules/exporting';
+import OfflineExportingModule from 'highcharts/modules/offline-exporting';
 import ExportDataModule from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
@@ -15,20 +16,31 @@ import {
   deepMergeUserOptionsWithDefaultOptions,
 } from '../../utils/chartUtil';
 import { stackingOptions, fakeMemberLatest } from '../../constants/chart';
+import { isNilOrEmpty } from '../../utils/ramdaUtil';
 
 if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);
   BrokenAxisModule(Highcharts);
   AccessibilityModule(Highcharts);
   ExportingModule(Highcharts);
+  OfflineExportingModule(Highcharts);
   ExportDataModule(Highcharts);
 }
+
+const calcMarginTop = (title, subtitle, horizontal) => {
+  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
+    return horizontal ? 32 : 22;
+  }
+  return undefined;
+};
 
 const Stacked = forwardRef(
   (
     {
       horizontal,
       area,
+      title,
+      subtitle,
       data,
       highlight,
       baseline,
@@ -41,6 +53,8 @@ const Stacked = forwardRef(
       height,
       stacking,
       formatters,
+      fullscreenClose,
+      isFullScreen,
       optionsOverride,
     },
     ref,
@@ -95,13 +109,16 @@ const Stacked = forwardRef(
           style: {
             fontFamily: 'Segoe UI',
           },
-          marginTop: horizontal ? 32 : 22,
+          marginTop: calcMarginTop(title, subtitle, horizontal),
           height,
           animation: false,
           spacingBottom: 5,
           events: data.areCategoriesNumbersOrDates
-            ? {}
+            ? {
+                fullscreenClose,
+              }
             : {
+                fullscreenClose,
                 render: ({ target: chart }) => {
                   if (!updateNeededAfterChartHasBeenRenderedOnceDone.current) {
                     // TODO:
@@ -133,7 +150,21 @@ const Stacked = forwardRef(
         colors: finalColorPalette,
 
         title: {
-          text: '',
+          text: title,
+          align: 'left',
+          margin: 20,
+          style: {
+            color: '#333333',
+            fontWeight: 'bold',
+          },
+        },
+        subtitle: {
+          text: subtitle,
+          align: 'left',
+          style: {
+            color: '#737373',
+            fontWeight: 'bold',
+          },
         },
 
         credits: {
@@ -211,12 +242,16 @@ const Stacked = forwardRef(
 
         exporting: {
           enabled: false,
+          sourceWidth: 600,
+          sourceHeight: 400,
           filename: `export-${new Date(Date.now()).toISOString()}`,
         },
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [
         horizontal,
+        title,
+        subtitle,
         data,
         series,
         finalColorPalette,
@@ -227,6 +262,7 @@ const Stacked = forwardRef(
         hideYAxisLabels,
         stacking,
         formatters,
+        fullscreenClose,
       ],
     );
 
@@ -241,7 +277,7 @@ const Stacked = forwardRef(
         ref={ref}
         highcharts={Highcharts}
         options={mergedOptions}
-        immutable
+        immutable={!isFullScreen}
       />
     );
   },
@@ -250,6 +286,8 @@ const Stacked = forwardRef(
 Stacked.propTypes = {
   horizontal: PropTypes.bool,
   area: PropTypes.bool,
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
@@ -266,12 +304,16 @@ Stacked.propTypes = {
   height: PropTypes.number.isRequired,
   stacking: PropTypes.string,
   formatters: PropTypes.object,
+  fullscreenClose: PropTypes.func,
+  isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
 };
 
 Stacked.defaultProps = {
   horizontal: false,
   area: false,
+  title: '',
+  subtitle: '',
   highlight: '',
   baseline: null,
   hideLegend: false,
@@ -279,6 +321,8 @@ Stacked.defaultProps = {
   hideYAxisLabels: false,
   stacking: stackingOptions.percent.value,
   formatters: {},
+  fullscreenClose: null,
+  isFullScreen: false,
   optionsOverride: {},
 };
 

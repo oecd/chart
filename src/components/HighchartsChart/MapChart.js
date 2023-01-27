@@ -8,6 +8,7 @@ import HighchartsMap from 'highcharts/modules/map';
 import map from '@highcharts/map-collection/custom/world-robinson-lowres.geo.json';
 import proj4 from 'proj4';
 import ExportingModule from 'highcharts/modules/exporting';
+import OfflineExportingModule from 'highcharts/modules/offline-exporting';
 import ExportDataModule from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
@@ -65,6 +66,7 @@ if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);
   AccessibilityModule(Highcharts);
   ExportingModule(Highcharts);
+  OfflineExportingModule(Highcharts);
   ExportDataModule(Highcharts);
   Highcharts.addEvent(
     Highcharts.Axis,
@@ -76,6 +78,8 @@ if (typeof Highcharts === 'object') {
 const MapChart = forwardRef(
   (
     {
+      title,
+      subtitle,
       data,
       mapType,
       mapDisplayCountriesName,
@@ -89,6 +93,8 @@ const MapChart = forwardRef(
       width,
       height,
       formatters,
+      fullscreenClose,
+      isFullScreen,
       optionsOverride,
     },
     ref,
@@ -215,8 +221,9 @@ const MapChart = forwardRef(
             fontFamily: 'Segoe UI',
           },
           height,
-          animation: true,
+          animation: !isFullScreen,
           spacingBottom: 5,
+          events: { fullscreenClose },
         },
 
         colors: finalColorPalette,
@@ -249,7 +256,21 @@ const MapChart = forwardRef(
         ])(),
 
         title: {
-          text: '',
+          text: title,
+          align: 'left',
+          margin: 20,
+          style: {
+            color: '#333333',
+            fontWeight: 'bold',
+          },
+        },
+        subtitle: {
+          text: subtitle,
+          align: 'left',
+          style: {
+            color: '#737373',
+            fontWeight: 'bold',
+          },
         },
 
         credits: {
@@ -302,11 +323,15 @@ const MapChart = forwardRef(
 
         exporting: {
           enabled: false,
+          sourceWidth: 600,
+          sourceHeight: 400,
           filename: `export-${new Date(Date.now()).toISOString()}`,
         },
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [
+        title,
+        subtitle,
         data,
         series,
         mapType,
@@ -318,6 +343,7 @@ const MapChart = forwardRef(
         height,
         hideLegend,
         formatters,
+        fullscreenClose,
       ],
     );
 
@@ -333,13 +359,15 @@ const MapChart = forwardRef(
         constructorType="mapChart"
         highcharts={Highcharts}
         options={mergedOptions}
-        immutable
+        immutable={!isFullScreen}
       />
     );
   },
 );
 
 MapChart.propTypes = {
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
@@ -357,10 +385,14 @@ MapChart.propTypes = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   formatters: PropTypes.object,
+  fullscreenClose: PropTypes.func,
+  isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
 };
 
 MapChart.defaultProps = {
+  title: '',
+  subtitle: '',
   mapType: mapTypes.normal.value,
   mapDisplayCountriesName: false,
   mapAutoShade: true,
@@ -369,6 +401,8 @@ MapChart.defaultProps = {
   baseline: null,
   hideLegend: false,
   formatters: {},
+  fullscreenClose: null,
+  isFullScreen: false,
   optionsOverride: {},
 };
 

@@ -5,11 +5,12 @@ import AccessibilityModule from 'highcharts/modules/accessibility';
 import BrokenAxisModule from 'highcharts/modules/broken-axis';
 import AnnotationsModule from 'highcharts/modules/annotations';
 import ExportingModule from 'highcharts/modules/exporting';
+import OfflineExportingModule from 'highcharts/modules/offline-exporting';
 import ExportDataModule from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
 
-import { mapWithIndex } from '../../utils/ramdaUtil';
+import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 import {
   deepMergeUserOptionsWithDefaultOptions,
   getBaselineOrHighlightColor,
@@ -21,13 +22,23 @@ if (typeof Highcharts === 'object') {
   BrokenAxisModule(Highcharts);
   AccessibilityModule(Highcharts);
   ExportingModule(Highcharts);
+  OfflineExportingModule(Highcharts);
   ExportDataModule(Highcharts);
 }
+
+const calcMarginTop = (title, subtitle, horizontal) => {
+  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
+    return horizontal ? 32 : 22;
+  }
+  return undefined;
+};
 
 const Bar = forwardRef(
   (
     {
       horizontal,
+      title,
+      subtitle,
       data,
       highlight,
       baseline,
@@ -40,6 +51,8 @@ const Bar = forwardRef(
       height,
       pivotValue,
       formatters,
+      fullscreenClose,
+      isFullScreen,
       optionsOverride,
     },
     ref,
@@ -97,13 +110,16 @@ const Bar = forwardRef(
           style: {
             fontFamily: 'Segoe UI',
           },
-          marginTop: horizontal ? 32 : 22,
+          marginTop: calcMarginTop(title, subtitle, horizontal),
           height,
           animation: false,
           spacingBottom: 5,
           events: data.areCategoriesNumbersOrDates
-            ? {}
+            ? {
+                fullscreenClose,
+              }
             : {
+                fullscreenClose,
                 render: ({ target: chart }) => {
                   if (!updateNeededAfterChartHasBeenRenderedOnceDone.current) {
                     // TODO:
@@ -134,7 +150,21 @@ const Bar = forwardRef(
         colors: colorPalette,
 
         title: {
-          text: '',
+          text: title,
+          align: 'left',
+          margin: 20,
+          style: {
+            color: '#333333',
+            fontWeight: 'bold',
+          },
+        },
+        subtitle: {
+          text: subtitle,
+          align: 'left',
+          style: {
+            color: '#737373',
+            fontWeight: 'bold',
+          },
         },
 
         credits: {
@@ -208,12 +238,16 @@ const Bar = forwardRef(
 
         exporting: {
           enabled: false,
+          sourceWidth: 600,
+          sourceHeight: 400,
           filename: `export-${new Date(Date.now()).toISOString()}`,
         },
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [
         horizontal,
+        title,
+        subtitle,
         data,
         series,
         colorPalette,
@@ -224,6 +258,7 @@ const Bar = forwardRef(
         hideYAxisLabels,
         pivotValue,
         formatters,
+        fullscreenClose,
       ],
     );
 
@@ -238,7 +273,7 @@ const Bar = forwardRef(
         ref={ref}
         highcharts={Highcharts}
         options={mergedOptions}
-        immutable
+        immutable={!isFullScreen}
       />
     );
   },
@@ -246,6 +281,8 @@ const Bar = forwardRef(
 
 Bar.propTypes = {
   horizontal: PropTypes.bool,
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
@@ -262,11 +299,15 @@ Bar.propTypes = {
   height: PropTypes.number.isRequired,
   pivotValue: PropTypes.number,
   formatters: PropTypes.object,
+  fullscreenClose: PropTypes.func,
+  isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
 };
 
 Bar.defaultProps = {
   horizontal: false,
+  title: '',
+  subtitle: '',
   highlight: '',
   baseline: null,
   hideLegend: false,
@@ -274,6 +315,8 @@ Bar.defaultProps = {
   hideYAxisLabels: false,
   pivotValue: 0,
   formatters: {},
+  fullscreenClose: null,
+  isFullScreen: false,
   optionsOverride: {},
 };
 
