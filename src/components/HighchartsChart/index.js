@@ -381,35 +381,38 @@ const HighchartsChart = ({
       : {};
   }, [title, subtitle, definition, note, source, parsedData]);
 
-  const footer = useMemo(() => {
-    const nonEmpyFooterItems = R.reject(
-      R.either(R.equals('<p></p>'), isNilOrEmpty),
-      [
-        replaceVarsNameByVarsValueUsingCodeLabelMapping(
-          definition,
-          vars,
-          codeLabelMappingFromData,
-        ),
-        replaceVarsNameByVarsValueUsingCodeLabelMapping(
-          note,
-          vars,
-          codeLabelMappingFromData,
-        ),
-        replaceVarsNameByVarsValueUsingCodeLabelMapping(
-          source,
-          vars,
-          codeLabelMappingFromData,
-        ),
-      ],
-    );
-    return R.isEmpty(nonEmpyFooterItems)
-      ? null
-      : R.join('', nonEmpyFooterItems);
-  }, [definition, note, source, vars, codeLabelMappingFromData]);
+  const parsedNoteAndSource = useMemo(() => {
+    const nonEmpyItems = R.reject(R.either(R.equals('<p></p>'), isNilOrEmpty), [
+      replaceVarsNameByVarsValueUsingCodeLabelMapping(
+        note,
+        vars,
+        codeLabelMappingFromData,
+      ),
+      replaceVarsNameByVarsValueUsingCodeLabelMapping(
+        source,
+        vars,
+        codeLabelMappingFromData,
+      ),
+    ]);
+    return R.isEmpty(nonEmpyItems) ? null : R.join('', nonEmpyItems);
+  }, [note, source, vars, codeLabelMappingFromData]);
 
-  const fakeFooterTooltip = R.isNil(footer) ? null : (
-    <div style={{ width: '20px' }} />
-  );
+  const parsedDefinition = useMemo(() => {
+    const definitionWithVars = replaceVarsNameByVarsValueUsingCodeLabelMapping(
+      definition,
+      vars,
+      codeLabelMappingFromData,
+    );
+
+    return R.either(R.equals('<p></p>'), isNilOrEmpty)(definitionWithVars)
+      ? null
+      : definitionWithVars;
+  }, [definition, vars, codeLabelMappingFromData]);
+
+  const fakeTooltipButton =
+    R.isNil(parsedNoteAndSource) && R.isNil(parsedDefinition) ? null : (
+      <div style={{ width: '20px' }} />
+    );
 
   const headerRef = useRef(null);
   const footerRef = useRef(null);
@@ -458,7 +461,6 @@ const HighchartsChart = ({
     height,
     parsedTitle,
     parsedSubtitle,
-    definition,
     note,
     source,
     displayFooterAsTooltip,
@@ -527,6 +529,10 @@ const HighchartsChart = ({
     setIsFullScreen(false);
   }, []);
 
+  const noteAndSourceShouldBeDisplayedInTooltip =
+    !R.isNil(parsedNoteAndSource) &&
+    (footerHeight === 0 || displayFooterAsTooltip);
+
   return (
     <div className="cb-container" style={{ backgroundColor: '#fff' }}>
       <div
@@ -568,8 +574,8 @@ const HighchartsChart = ({
               minHeight: '21px',
             }}
           >
-            {!R.isNil(footer) &&
-            (footerHeight === 0 || displayFooterAsTooltip) ? (
+            {noteAndSourceShouldBeDisplayedInTooltip ||
+            !R.isNil(parsedDefinition) ? (
               <>
                 <div
                   className="cb-toolbar"
@@ -594,14 +600,16 @@ const HighchartsChart = ({
                       }}
                       className="cb-floating cb-tooltip"
                       dangerouslySetInnerHTML={{
-                        __html: footer,
+                        __html: noteAndSourceShouldBeDisplayedInTooltip
+                          ? R.join('', [parsedDefinition, parsedNoteAndSource])
+                          : parsedDefinition,
                       }}
                     />
                   )}
                 </FloatingPortal>
               </>
             ) : (
-              fakeFooterTooltip
+              fakeTooltipButton
             )}
             <ExportButton
               chartRef={chartRef}
@@ -696,7 +704,7 @@ const HighchartsChart = ({
       >
         <div
           dangerouslySetInnerHTML={{
-            __html: footer,
+            __html: parsedNoteAndSource,
           }}
         />
       </div>
@@ -744,7 +752,6 @@ HighchartsChart.propTypes = {
   onDataChange: PropTypes.func,
   vars: PropTypes.object.isRequired,
   controls: PropTypes.array,
-  displayControls: PropTypes.bool,
 };
 
 HighchartsChart.defaultProps = {
@@ -779,7 +786,6 @@ HighchartsChart.defaultProps = {
   onDownloadData: null,
   onDataChange: null,
   controls: [],
-  displayControls: true,
 };
 
 export default memo(HighchartsChart);
