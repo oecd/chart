@@ -1,6 +1,6 @@
 {
   "name": "@oecd-pac/chart",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "OECD chart lib",
   "module": "dist/esm/index.js",
   "files": [
@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "lint": "eslint src/**/*.js",
-    "prebuild": "rimraf ./dist && rimraf ./dist-browser",
+    "prebuild": "rimraf ./dist",
     "build": "rollup -c"
   },
   "repository": {

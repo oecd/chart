@@ -49,7 +49,7 @@ module.exports = [
     input: './src/index-browser.js',
     output: [
       {
-        file: `dist-browser/oecd-chart-latest.js`,
+        file: `dist/oecd-chart-latest.js`,
         format: 'iife',
         name: 'ChartBuilder',
         inlineDynamicImports: true,
