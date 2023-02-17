@@ -38,7 +38,6 @@ const ChartWithConfigFixedChartHeight = ({
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: width || '100%',
           height: height || '100%',
         }}
       >

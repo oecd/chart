@@ -13,11 +13,12 @@ import { isNilOrEmpty } from '../utils/ramdaUtil';
 import ChartWithConfig from './ChartWithConfig';
 import Spinner from './Spinner';
 import { possibleVariables } from '../utils/configUtil';
+import { isCastableToNumber } from '../utils/chartUtil';
 import { fetchJson } from '../utils/fetchUtil';
 import CenteredContainer from './CenteredContainer';
 import { apiUrl } from '../constants/chart';
 
-const Chart = ({ chartId, ...otherProps }) => {
+const Chart = ({ chartId, width, height, ...otherProps }) => {
   const [prevChartId, setPrevChartId] = useState(null);
   const [chartConfigData, setChartConfigData] = useState({
     chartConfig: null,
@@ -109,6 +110,16 @@ const Chart = ({ chartId, ...otherProps }) => {
     [chartConfigData.chartConfig, propsVars],
   );
 
+  const finalWidth = useMemo(
+    () => (isCastableToNumber(width) ? Number(width) : width),
+    [width],
+  );
+
+  const finalHeight = useMemo(
+    () => (isCastableToNumber(height) ? Number(height) : null),
+    [height],
+  );
+
   if (!chartId) {
     return null;
   }
@@ -125,7 +136,9 @@ const Chart = ({ chartId, ...otherProps }) => {
     <ChartWithConfig
       {...R.omit(possibleVariables, chartConfigData.chartConfig)}
       {...finalVars}
-      {...R.omit(possibleVariables, otherProps)}
+      width={finalWidth}
+      height={finalHeight}
+      {...R.omit([width, height, ...possibleVariables], otherProps)}
     />
   );
 };
@@ -135,10 +148,14 @@ Chart.propTypes = {
   ...R.fromPairs(
     R.map((varName) => [varName, PropTypes.string], possibleVariables),
   ),
+  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  height: PropTypes.number,
 };
 
-Chart.defaultProps = R.fromPairs(
-  R.map((varName) => [varName, null], possibleVariables),
-);
+Chart.defaultProps = {
+  ...R.fromPairs(R.map((varName) => [varName, null], possibleVariables)),
+  width: null,
+  height: null,
+};
 
 export default Chart;
