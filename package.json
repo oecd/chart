@@ -1,6 +1,6 @@
 {
   "name": "@oecd-pac/chart",
-  "version": "1.4.2",
+  "version": "1.4.4",
   "description": "OECD chart lib",
   "module": "dist/esm/index.js",
   "files": [
@@ -37,7 +37,8 @@
     "ramda": "^0.28.0",
     "rc-slider": "^10.1.0",
     "react-resize-detector": "^8.0.3",
-    "react-select": "^5.7.0"
+    "react-select": "^5.7.0",
+    "react-to-webcomponent": "^2.0.0-alpha.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",

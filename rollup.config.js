@@ -9,8 +9,6 @@ const { terser } = require('rollup-plugin-terser');
 const nodePolyfills = require('rollup-plugin-polyfill-node');
 const dotenv = require('dotenv');
 
-const packageJson = require('./package.json');
-
 dotenv.config();
 
 const apiUrl = process.env.API_URL;
@@ -51,7 +49,7 @@ module.exports = [
     input: './src/index-browser.js',
     output: [
       {
-        file: `dist-browser/oecd-pac-chart-${packageJson.version}.js`,
+        file: `dist-browser/oecd-chart-latest.js`,
         format: 'iife',
         name: 'ChartBuilder',
         inlineDynamicImports: true,
