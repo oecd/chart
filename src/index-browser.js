@@ -6,5 +6,5 @@ import { Chart } from './index';
 
 customElements.define(
   'oecd-chart',
-  reactToWebComponent(Chart, React, ReactDOM),
+  reactToWebComponent(Chart, React, ReactDOM, { dashStyleAttributes: true }),
 );

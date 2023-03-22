@@ -5,7 +5,7 @@ const commonjs = require('@rollup/plugin-commonjs');
 const external = require('rollup-plugin-peer-deps-external');
 const json = require('@rollup/plugin-json');
 const postcss = require('rollup-plugin-postcss');
-const { terser } = require('rollup-plugin-terser');
+const terser = require('@rollup/plugin-terser');
 const nodePolyfills = require('rollup-plugin-polyfill-node');
 const dotenv = require('dotenv');
 

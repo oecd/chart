@@ -20,7 +20,7 @@ const ChartControlsFallback = ({ controls }) => {
               flex: '1',
               padding: '5px 10px',
               minWidth: '200px',
-              minHeight: '67px',
+              minHeight: '59px',
             }}
           />
         ),

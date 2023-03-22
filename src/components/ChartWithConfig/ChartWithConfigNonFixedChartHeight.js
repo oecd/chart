@@ -1,7 +1,8 @@
 /* eslint-disable react/jsx-props-no-spreading  */
 import React, { lazy, useMemo, Suspense } from 'react';
-import { useResizeDetector } from 'react-resize-detector';
 import PropTypes from 'prop-types';
+import { useResizeDetector } from 'react-resize-detector';
+import * as R from 'ramda';
 
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
@@ -14,7 +15,6 @@ const minChartHeightForControlsDisplay = 280;
 
 const ChartWithConfigNonFixedChartHeight = ({
   width,
-  height,
   vars,
   changeVar,
   controls,
@@ -50,7 +50,7 @@ const ChartWithConfigNonFixedChartHeight = ({
         position: 'relative',
         width: '100%',
         maxWidth: width || '100%',
-        height: height || '100%',
+        height: '100%',
       }}
     >
       <div
@@ -72,7 +72,7 @@ const ChartWithConfigNonFixedChartHeight = ({
               width={chartContainerAutoSizerWidth}
               height={finalChartHeight}
               vars={vars}
-              {...otherProps}
+              {...R.omit(['height'], otherProps)}
             />
           </div>
         )}
@@ -109,17 +109,16 @@ const ChartWithConfigNonFixedChartHeight = ({
 
 ChartWithConfigNonFixedChartHeight.propTypes = {
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   controls: PropTypes.array,
-  hideControls: PropTypes.bool.isRequired,
+  hideControls: PropTypes.bool,
 };
 
 ChartWithConfigNonFixedChartHeight.defaultProps = {
   width: null,
-  height: null,
   controls: [],
+  hideControls: false,
 };
 
 export default ChartWithConfigNonFixedChartHeight;

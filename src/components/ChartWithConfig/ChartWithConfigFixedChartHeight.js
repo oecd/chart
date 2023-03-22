@@ -30,7 +30,7 @@ const ChartWithConfigFixedChartHeight = ({
       style={{
         width: '100%',
         maxWidth: width || '100%',
-        height: height ? 'unset' : '100%',
+        height: 'unset',
       }}
     >
       <div
@@ -38,7 +38,7 @@ const ChartWithConfigFixedChartHeight = ({
         style={{
           position: 'relative',
           width: '100%',
-          height: height || '100%',
+          height,
         }}
       >
         <div
@@ -86,13 +86,14 @@ ChartWithConfigFixedChartHeight.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   controls: PropTypes.array,
-  hideControls: PropTypes.bool.isRequired,
+  hideControls: PropTypes.bool,
 };
 
 ChartWithConfigFixedChartHeight.defaultProps = {
   width: null,
   height: null,
   controls: [],
+  hideControls: false,
 };
 
 export default ChartWithConfigFixedChartHeight;

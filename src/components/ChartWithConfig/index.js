@@ -19,8 +19,6 @@ const ChartWithConfig = ({
   var3DefaultValue,
   var4DefaultValue,
   var5DefaultValue,
-  controls,
-  hideControls,
   ...otherProps
 }) => {
   const ChartWithConfigComponent = height
@@ -65,8 +63,6 @@ const ChartWithConfig = ({
       height={height}
       vars={vars}
       changeVar={changeVar}
-      controls={controls}
-      hideControls={hideControls}
       {...otherProps}
     />
   );
@@ -84,8 +80,6 @@ ChartWithConfig.propTypes = {
   var3DefaultValue: PropTypes.string,
   var4DefaultValue: PropTypes.string,
   var5DefaultValue: PropTypes.string,
-  controls: PropTypes.array,
-  hideControls: PropTypes.bool,
 };
 
 ChartWithConfig.defaultProps = {
@@ -100,8 +94,6 @@ ChartWithConfig.defaultProps = {
   var3DefaultValue: null,
   var4DefaultValue: null,
   var5DefaultValue: null,
-  controls: [],
-  hideControls: false,
 };
 
 export default ChartWithConfig;
