@@ -16,7 +16,24 @@
           Charts as Web Components
         </h2>
 
+        <div><oecd-control control-id="country" /></div>
+        <div><oecd-control control-id="variable" /></div>
+        <div><oecd-control control-id="time" /></div>
+
         <div style="display: flex; margin-top: 50px">
+          <div style="width: 400px; height: 300px">
+            <oecd-chart chart-id="d20d1f23c6" />
+          </div>
+          <div style="width: 400px; height: 300px">
+            <oecd-chart chart-id="d20d1f23c6" />
+          </div>
+        </div>
+
+        <div style="margin-top: 700px; width: 800px; min-height: 400px">
+          <oecd-chart chart-id="cc1cafad16" height="340" />
+        </div>
+
+        <div style="display: flex; margin-top: 550px">
           <div style="width: 400px; height: 250px">
             <oecd-chart chart-id="92df95bdc5" />
           </div>
@@ -30,19 +47,6 @@
           </div>
           <div style="width: 400px; height: 250px">
             <oecd-chart chart-id="8bcaba6045" />
-          </div>
-        </div>
-
-        <div style="margin-top: 500px; width: 800px; min-height: 400px">
-          <oecd-chart chart-id="cc1cafad16" height="340" />
-        </div>
-
-        <div style="display: flex; margin-top: 550px">
-          <div style="width: 400px; height: 250px">
-            <oecd-chart chart-id="92df95bdc5" />
-          </div>
-          <div style="width: 400px; height: 250px">
-            <oecd-chart chart-id="91525bc3bb" />
           </div>
         </div>
       </div>
@@ -60,27 +64,11 @@
     <script src="../dist/oecd-chart-latest.js" crossorigin></script>
 
     <script>
-      // var currentVar1 = 'AUS';
-      // var currentChart2Id = '003a169f86';
-      // var currentChart3Id = '91525bc3bb';
-
-      // setInterval(() => {
-      //   const chartElements = document.querySelectorAll('oecd-chart');
-
-      //   currentVar1 = currentVar1 === 'AUS' ? 'FRA' : 'AUS';
-
-      //   chartElements[0].setAttribute('var1', currentVar1);
-
-      //   currentChart2Id =
-      //     currentChart2Id === '003a169f86' ? '91525bc3bb' : '003a169f86';
-      //   currentChart3Id =
-      //     currentChart3Id === '91525bc3bb' ? '003a169f86' : '91525bc3bb';
-
-      //   chartElements[1].setAttribute('chart-id', currentChart2Id);
-      //   chartElements[2].setAttribute('chart-id', currentChart3Id);
-
-      //   chartElements[3].setAttribute('var1', currentVar1);
-      // }, 3000);
+      document.addEventListener('cbControlValueChange', ({ detail }) => {
+        const chartElements = document.querySelectorAll('oecd-chart');
+        chartElements[0].setAttribute(detail.varName, detail.varValue);
+        chartElements[1].setAttribute(detail.varName, detail.varValue);
+      });
     </script>
   </body>
 </html>

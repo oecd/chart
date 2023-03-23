@@ -65,10 +65,10 @@ const ChartControlSelect = ({
 
   return (
     <div
-      className="cb-controls-select"
+      className="cb-control cb-control-select"
       style={{ flex: '1', padding: '5px 10px', minWidth: '200px' }}
     >
-      <div className="cb-controls-label">{label}</div>
+      <div className="cb-control-label">{label}</div>
       <Select
         instanceId={selectInstanceId}
         value={selectedOption}

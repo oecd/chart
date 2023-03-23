@@ -74,14 +74,17 @@
 }
 
 .cb-controls {
-  font-family: 'Segoe UI';
   border-top: 1px solid #cbcbcb;
   background-color: #f6f6f6;
+}
+
+.cb-control {
+  font-family: 'Segoe UI';
   font-size: 14px;
   line-height: 1;
 }
 
-.cb-controls-label {
+.cb-control-label {
   display: flex;
   justify-content: center;
   margin-bottom: 2px;

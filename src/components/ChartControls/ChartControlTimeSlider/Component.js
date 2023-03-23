@@ -64,10 +64,10 @@ const ChartControlTimeSlider = ({
 
   return (
     <div
-      className="cb-controls-time-slider"
+      className="cb-control cb-control-time-slider"
       style={{ flex: '1', padding: '5px 10px', minWidth: '200px' }}
     >
-      {!isNilOrEmpty(label) && <div className="cb-controls-label">{label}</div>}
+      {!isNilOrEmpty(label) && <div className="cb-control-label">{label}</div>}
       <Slider
         onChange={onRangeChange}
         onAfterChange={onAfterRangeChange}

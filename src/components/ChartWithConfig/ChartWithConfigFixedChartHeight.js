@@ -1,14 +1,11 @@
 /* eslint-disable react/jsx-props-no-spreading  */
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import PropTypes from 'prop-types';
 
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
-import ChartControlsFallback from '../ChartControls/ChartControlsFallback';
-
-// dynamic import for code splitting
-const ChartControls = lazy(() => import('../ChartControls'));
+import ChartControls from '../ChartControls';
 
 const ChartWithConfigFixedChartHeight = ({
   width,
@@ -68,13 +65,7 @@ const ChartWithConfigFixedChartHeight = ({
       </div>
 
       {!isNilOrEmpty(controls) && !hideControls && (
-        <Suspense fallback={<ChartControlsFallback controls={controls} />}>
-          <ChartControls
-            controls={controls}
-            vars={vars}
-            changeVar={changeVar}
-          />
-        </Suspense>
+        <ChartControls controls={controls} vars={vars} changeVar={changeVar} />
       )}
     </div>
   );

@@ -1,11 +1,14 @@
 /* eslint-disable react/jsx-props-no-spreading  */
-import React, { useMemo } from 'react';
+import React, { useMemo, lazy, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
-import ChartControlTimeSlider from './ChartControlTimeSlider';
-import ChartControlSelect from './ChartControlSelect';
 import { chartControlTypes } from '../../constants/chart';
+import ChartControlFallback from './ChartControlFallback';
+
+// dynamic import for code splitting
+const ChartControlTimeSlider = lazy(() => import('./ChartControlTimeSlider'));
+const ChartControlSelect = lazy(() => import('./ChartControlSelect'));
 
 const controlByType = {
   [chartControlTypes.timeSlider.value]: ChartControlTimeSlider,
@@ -25,12 +28,17 @@ const ChartControls = ({ controls, vars, changeVar }) => {
       {R.map((c) => {
         const ControlComponent = getControlForType(c.type);
         return (
-          <ControlComponent
+          <Suspense
             key={`${c.type}-${c.label}`}
-            vars={vars}
-            changeVar={changeVar}
-            {...c}
-          />
+            fallback={<ChartControlFallback />}
+          >
+            <ControlComponent
+              key={`${c.type}-${c.label}`}
+              vars={vars}
+              changeVar={changeVar}
+              {...c}
+            />
+          </Suspense>
         );
       }, controls)}
     </div>
