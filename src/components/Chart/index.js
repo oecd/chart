@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading  */
-import React, { Fragment, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import LazyLoad from 'react-lazyload';
 import * as R from 'ramda';
@@ -9,8 +9,6 @@ import { possibleVariables } from '../../utils/configUtil';
 import { isCastableToNumber } from '../../utils/chartUtil';
 
 const Chart = ({ width, height, lazyLoad, ...otherProps }) => {
-  const Lazy = lazyLoad === false || lazyLoad === 'false' ? Fragment : LazyLoad;
-
   const finalWidth = useMemo(
     () => (isCastableToNumber(width) ? Number(width) : width),
     [width],
@@ -21,15 +19,21 @@ const Chart = ({ width, height, lazyLoad, ...otherProps }) => {
     [height],
   );
 
+  if (lazyLoad === false || lazyLoad === 'false') {
+    return (
+      <Component width={finalWidth} height={finalHeight} {...otherProps} />
+    );
+  }
+
   return (
-    <Lazy
+    <LazyLoad
       style={finalHeight ? { minHeight: finalHeight } : { height: '100%' }}
       once
       offset={100}
       resize
     >
       <Component width={finalWidth} height={finalHeight} {...otherProps} />
-    </Lazy>
+    </LazyLoad>
   );
 };
 
