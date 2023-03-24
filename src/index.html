@@ -16,37 +16,48 @@
           Charts as Web Components
         </h2>
 
-        <div><oecd-control control-id="country" /></div>
-        <div><oecd-control control-id="variable" /></div>
-        <div><oecd-control control-id="time" /></div>
-
-        <div style="display: flex; margin-top: 50px">
-          <div style="width: 400px; height: 300px">
-            <oecd-chart chart-id="d20d1f23c6" />
+        <div style="margin-top: 50px; padding: 20px; border: 1px solid black">
+          <div style="min-height: 59px">
+            <oecd-control control-id="country" />
           </div>
-          <div style="width: 400px; height: 300px">
-            <oecd-chart chart-id="d20d1f23c6" />
+          <div style="min-height: 59px">
+            <oecd-control control-id="variable" />
+          </div>
+          <div style="min-height: 59px"><oecd-control control-id="time" /></div>
+
+          <div style="display: flex; margin-top: 50px">
+            <div style="width: 400px; height: 300px">
+              <oecd-chart chart-id="d20d1f23c6" />
+            </div>
+            <div style="width: 400px; height: 300px">
+              <oecd-chart chart-id="d20d1f23c6" />
+            </div>
           </div>
         </div>
 
-        <div style="margin-top: 700px; width: 800px; min-height: 400px">
-          <oecd-chart chart-id="cc1cafad16" height="340" />
+        <div style="margin-top: 200px; padding: 20px; border: 1px solid black">
+          <div><oecd-control control-id="chart" /></div>
+          <div style="margin-top: 50px; width: 800px; height: 400px">
+            <oecd-chart />
+          </div>
         </div>
 
-        <div style="display: flex; margin-top: 550px">
-          <div style="width: 400px; height: 250px">
-            <oecd-chart chart-id="92df95bdc5" />
+        <div style="margin-top: 200px; padding: 20px; border: 1px solid black">
+          <div style="display: flex">
+            <div style="width: 400px; height: 250px">
+              <oecd-chart chart-id="92df95bdc5" />
+            </div>
+            <div style="width: 400px; height: 250px">
+              <oecd-chart chart-id="91525bc3bb" />
+            </div>
           </div>
-          <div style="width: 400px; height: 250px">
-            <oecd-chart chart-id="91525bc3bb" />
-          </div>
-        </div>
-        <div style="display: flex; margin-top: 50px">
-          <div style="width: 400px; height: 250px">
-            <oecd-chart chart-id="003a169f86" />
-          </div>
-          <div style="width: 400px; height: 250px">
-            <oecd-chart chart-id="8bcaba6045" />
+          <div style="display: flex; margin-top: 50px">
+            <div style="width: 400px; height: 250px">
+              <oecd-chart chart-id="003a169f86" />
+            </div>
+            <div style="width: 400px; height: 250px">
+              <oecd-chart chart-id="8bcaba6045" />
+            </div>
           </div>
         </div>
       </div>
@@ -66,8 +77,14 @@
     <script>
       document.addEventListener('cbControlValueChange', ({ detail }) => {
         const chartElements = document.querySelectorAll('oecd-chart');
-        chartElements[0].setAttribute(detail.varName, detail.varValue);
-        chartElements[1].setAttribute(detail.varName, detail.varValue);
+
+        if (detail.controlId === 'chart') {
+          // 'chart-id' is hardcoded because what is passed is camel cased (chartId)
+          chartElements[2].setAttribute('chart-id', detail.varValue);
+        } else {
+          chartElements[0].setAttribute(detail.varName, detail.varValue);
+          chartElements[1].setAttribute(detail.varName, detail.varValue);
+        }
       });
     </script>
   </body>

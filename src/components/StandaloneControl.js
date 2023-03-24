@@ -30,6 +30,10 @@ const StandaloneControl = ({ controlId }) => {
   const timeInitialMinVarValue = '2000';
   const timeMaxVarName = 'var4';
   const timeInitialMaxVarValue = '2010';
+
+  // CHART
+  const chartVarName = 'chartId';
+  const chartInitialVarValue = '91525bc3bb';
   // -------------------------------------------
 
   const [vars, setVars] = useState(
@@ -43,10 +47,16 @@ const StandaloneControl = ({ controlId }) => {
         R.always({ [variableVarName]: variableInitialVarValue }),
       ],
       [
-        R.T,
+        R.equals('time'),
         R.always({
           [timeMinVarName]: timeInitialMinVarValue,
           [timeMaxVarName]: timeInitialMaxVarValue,
+        }),
+      ],
+      [
+        R.T,
+        R.always({
+          [chartVarName]: chartInitialVarValue,
         }),
       ],
     ])(controlId),
@@ -129,6 +139,40 @@ const StandaloneControl = ({ controlId }) => {
       </Suspense>
     );
   }
+
+  if (controlId === 'chart') {
+    return (
+      <Suspense fallback={<ChartControlFallback />}>
+        <ChartControlSelect
+          label="Chart"
+          placeholder="Select a chart..."
+          multiple={false}
+          varName={chartVarName}
+          vars={vars}
+          options={[
+            {
+              value: '92df95bdc5',
+              label: 'Mix politique',
+            },
+            {
+              value: '91525bc3bb',
+              label: ' Climate mitigation technologies',
+            },
+            {
+              value: '003a169f86',
+              label: 'Climate related tax revenue',
+            },
+            {
+              value: '8bcaba6045',
+              label: ' Energy mix in total energy supply',
+            },
+          ]}
+          changeVar={changeVar}
+        />
+      </Suspense>
+    );
+  }
+
   return null;
 };
 
