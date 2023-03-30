@@ -7,6 +7,7 @@ const json = require('@rollup/plugin-json');
 const postcss = require('rollup-plugin-postcss');
 const terser = require('@rollup/plugin-terser');
 const nodePolyfills = require('rollup-plugin-polyfill-node');
+const externalGlobals = require('rollup-plugin-external-globals');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -35,7 +36,8 @@ module.exports = [
       external(),
       resolve(),
       babel({
-        // babel presets and plugins are configured in .babelrc.json
+        presets: ['@babel/preset-env', '@babel/preset-react'],
+        plugins: [['@babel/plugin-transform-runtime', { corejs: 3 }]],
         exclude: [/node_modules/],
         babelHelpers: 'runtime',
       }),
@@ -49,17 +51,12 @@ module.exports = [
     input: './src/index-browser.js',
     output: [
       {
-        file: `dist/oecd-chart-latest.js`,
-        format: 'iife',
-        name: 'ChartBuilder',
-        inlineDynamicImports: true,
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-        },
+        dir: 'dist/browser',
+        format: 'esm',
+        sourcemap: true,
+        entryFileNames: () => 'oecd-chart-latest.js',
       },
     ],
-    external: ['react', 'react-dom'],
     plugins: [
       replace({
         'process.env.NODE_ENV': JSON.stringify(env),
@@ -67,14 +64,20 @@ module.exports = [
         'process.env.NEXT_PUBLIC_CHART_LIB_API_URL': JSON.stringify(apiUrl),
         preventAssignment: true,
       }),
+      external(),
       resolve(),
       babel({
-        // babel presets and plugins are configured in .babelrc.json
+        presets: ['@babel/preset-env', '@babel/preset-react'],
         exclude: [/node_modules/],
-        babelHelpers: 'runtime',
+        babelHelpers: 'bundled',
       }),
       commonjs(),
       nodePolyfills(),
+      externalGlobals({
+        react: 'React',
+        'react-dom/client': 'ReactDOM',
+        'react-dom': 'ReactDOM',
+      }),
       json(),
       postcss(),
       terser(),
