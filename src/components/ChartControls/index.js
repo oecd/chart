@@ -17,7 +17,7 @@ const controlByType = {
 
 const getControlForType = R.prop(R.__, controlByType);
 
-const ChartControls = ({ controls, vars, changeVar }) => {
+const ChartControls = ({ controls, vars, changeVar, codeLabelMapping }) => {
   const validControls = useMemo(
     () => R.filter((c) => R.has(c.type, chartControlTypes), controls),
     [controls],
@@ -30,12 +30,13 @@ const ChartControls = ({ controls, vars, changeVar }) => {
         return (
           <Suspense
             key={`${c.type}-${c.label}`}
-            fallback={<ChartControlFallback />}
+            fallback={<ChartControlFallback {...c} />}
           >
             <ControlComponent
               key={`${c.type}-${c.label}`}
               vars={vars}
               changeVar={changeVar}
+              codeLabelMapping={codeLabelMapping}
               {...c}
             />
           </Suspense>
@@ -49,10 +50,12 @@ ChartControls.propTypes = {
   controls: PropTypes.array,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
+  codeLabelMapping: PropTypes.object,
 };
 
 ChartControls.defaultProps = {
   controls: [],
+  codeLabelMapping: null,
 };
 
 export default ChartControls;

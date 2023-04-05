@@ -1,7 +1,8 @@
 /* eslint-disable react/jsx-props-no-spreading  */
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import PropTypes from 'prop-types';
+import * as R from 'ramda';
 
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
@@ -21,6 +22,18 @@ const ChartWithConfigFixedChartHeight = ({
     height: autoSizerHeight,
     ref: chartContainerRef,
   } = useResizeDetector();
+
+  const [codeLabelMapping, setCodeLabelMapping] = useState(null);
+
+  const onDataReady = useMemo(
+    () =>
+      !isNilOrEmpty(controls) && !hideControls
+        ? (data) => {
+            setCodeLabelMapping(R.prop('codeLabelMapping', data));
+          }
+        : null,
+    [controls, hideControls],
+  );
 
   return (
     <div
@@ -57,6 +70,7 @@ const ChartWithConfigFixedChartHeight = ({
                 width={autoSizerWidth}
                 height={autoSizerHeight}
                 vars={vars}
+                onDataReady={onDataReady}
                 {...otherProps}
               />
             </div>
@@ -65,7 +79,12 @@ const ChartWithConfigFixedChartHeight = ({
       </div>
 
       {!isNilOrEmpty(controls) && !hideControls && (
-        <ChartControls controls={controls} vars={vars} changeVar={changeVar} />
+        <ChartControls
+          controls={controls}
+          vars={vars}
+          changeVar={changeVar}
+          codeLabelMapping={codeLabelMapping}
+        />
       )}
     </div>
   );

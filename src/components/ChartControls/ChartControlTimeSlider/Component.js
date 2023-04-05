@@ -90,7 +90,13 @@ const ChartControlTimeSlider = ({
           backgroundColor: '#bbbbbb',
         }}
       />
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <div
+        className="cb-control-label"
+        style={{
+          marginTop: '5px',
+          marginBottom: '0px',
+        }}
+      >
         {R.isEmpty(steps)
           ? '-'
           : `${currentRange.minCode || ''}${

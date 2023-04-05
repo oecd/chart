@@ -1,14 +1,25 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const ChartControlFallback = () => (
+import { isNilOrEmpty } from '../../utils/ramdaUtil';
+
+const ChartControlFallback = ({ label }) => (
   <div
     style={{
       flex: '1',
-      padding: '5px 10px',
+      padding: '0px 10px',
       minWidth: '200px',
-      minHeight: '59px',
+      minHeight: isNilOrEmpty(label) ? '43px' : '61px',
     }}
   />
 );
+
+ChartControlFallback.propTypes = {
+  label: PropTypes.string,
+};
+
+ChartControlFallback.defaultProps = {
+  label: null,
+};
 
 export default ChartControlFallback;

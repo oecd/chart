@@ -38,14 +38,12 @@ import {
   sortParsedDataOnYAxis,
   emptyData,
   addAreCategoriesNumbersOrDates,
+  addCodeLabelMapping,
   createDataFromCSV,
   pivotCSV,
 } from '../../utils/csvUtil';
 import Spinner from '../Spinner';
-import {
-  doesStringContainVariable,
-  possibleVariables,
-} from '../../utils/configUtil';
+import { possibleVariables } from '../../utils/configUtil';
 import {
   replaceVarsNameByVarsValueUsingCodeLabelMapping,
   replaceVarsNameByVarsValue,
@@ -123,7 +121,7 @@ const HighchartsChart = ({
   onExpandChart,
   hideExpand,
   onDownloadData,
-  onDataChange,
+  onDataReady,
   vars,
   ...otherProps
 }) => {
@@ -208,22 +206,26 @@ const HighchartsChart = ({
         setNoDataMessage('No data available');
         return emptyData;
       }
-      return sdmxJson
-        ? R.compose(
-            addAreCategoriesNumbersOrDates,
-            sortParsedDataOnYAxis(yAxisOrderOverride),
-            parseData,
-            sortCSV(sortBy, sortOrder, sortSeries),
-            pivotCSV(chartType, dataSourceType, pivotData),
-            parseSdmxJson({
-              chartType,
-              pivotData,
-              mapCountryDimension,
-              latestAvailableData,
-              dotStatCodeLabelMapping,
-            }),
-          )(sdmxJson)
-        : emptyData;
+
+      if (!sdmxJson) {
+        return null;
+      }
+
+      return R.compose(
+        addCodeLabelMapping,
+        addAreCategoriesNumbersOrDates,
+        sortParsedDataOnYAxis(yAxisOrderOverride),
+        parseData,
+        sortCSV(sortBy, sortOrder, sortSeries),
+        pivotCSV(chartType, dataSourceType, pivotData),
+        parseSdmxJson({
+          chartType,
+          pivotData,
+          mapCountryDimension,
+          latestAvailableData,
+          dotStatCodeLabelMapping,
+        }),
+      )(sdmxJson);
     } catch (e) {
       setErrorMessage('An error occured :-(');
       return emptyData;
@@ -299,14 +301,14 @@ const HighchartsChart = ({
       return parsedSDMXData;
     }
 
-    if (onDataChange && parsedCSVData !== emptyData) {
-      onDataChange(
-        R.pick(['categories', 'series', 'otherDimensions'], parsedCSVData),
-      );
-    }
-
     return parsedCSVData;
-  }, [dataSourceType, parsedSDMXData, parsedCSVData, onDataChange]);
+  }, [dataSourceType, parsedSDMXData, parsedCSVData]);
+
+  useEffect(() => {
+    if (onDataReady && parsedData) {
+      onDataReady(parsedData);
+    }
+  }, [parsedData, onDataReady]);
 
   useEffect(() => {
     if (dataSourceType === dataSourceTypes.csv.value && preParsedDataInternal) {
@@ -354,60 +356,33 @@ const HighchartsChart = ({
   const [footerHeight, setFooterHeight] = useState(null);
   const [chartHeight, setChartHeight] = useState(height);
 
-  const codeLabelMappingFromData = useMemo(() => {
-    const doesAnyTextualDataContainVar = R.any(doesStringContainVariable, [
-      title,
-      subtitle,
-      definition,
-      note,
-      source,
-    ]);
-
-    return doesAnyTextualDataContainVar
-      ? R.compose(
-          R.fromPairs,
-          R.map(({ code, label }) => [R.toUpper(code), label]),
-        )(
-          R.reduce(
-            (acc, el) => R.concat(acc, el),
-            [],
-            [
-              R.prop('categories', parsedData),
-              R.prop('series', parsedData),
-              R.prop('otherDimensions', parsedData),
-            ],
-          ),
-        )
-      : {};
-  }, [title, subtitle, definition, note, source, parsedData]);
-
   const parsedNoteAndSource = useMemo(() => {
     const nonEmpyItems = R.reject(R.either(R.equals('<p></p>'), isNilOrEmpty), [
       replaceVarsNameByVarsValueUsingCodeLabelMapping(
         note,
         vars,
-        codeLabelMappingFromData,
+        parsedData?.codeLabelMapping,
       ),
       replaceVarsNameByVarsValueUsingCodeLabelMapping(
         source,
         vars,
-        codeLabelMappingFromData,
+        parsedData?.codeLabelMapping,
       ),
     ]);
     return R.isEmpty(nonEmpyItems) ? null : R.join('', nonEmpyItems);
-  }, [note, source, vars, codeLabelMappingFromData]);
+  }, [note, source, vars, parsedData?.codeLabelMapping]);
 
   const parsedDefinition = useMemo(() => {
     const definitionWithVars = replaceVarsNameByVarsValueUsingCodeLabelMapping(
       definition,
       vars,
-      codeLabelMappingFromData,
+      parsedData?.codeLabelMapping,
     );
 
     return R.either(R.equals('<p></p>'), isNilOrEmpty)(definitionWithVars)
       ? null
       : definitionWithVars;
-  }, [definition, vars, codeLabelMappingFromData]);
+  }, [definition, vars, parsedData?.codeLabelMapping]);
 
   const fakeTooltipButton =
     R.isNil(parsedNoteAndSource) && R.isNil(parsedDefinition) ? null : (
@@ -422,9 +397,9 @@ const HighchartsChart = ({
       replaceVarsNameByVarsValueUsingCodeLabelMapping(
         title,
         vars,
-        codeLabelMappingFromData,
+        parsedData?.codeLabelMapping,
       ),
-    [title, vars, codeLabelMappingFromData],
+    [title, vars, parsedData?.codeLabelMapping],
   );
 
   const parsedSubtitle = useMemo(
@@ -432,9 +407,9 @@ const HighchartsChart = ({
       replaceVarsNameByVarsValueUsingCodeLabelMapping(
         subtitle,
         vars,
-        codeLabelMappingFromData,
+        parsedData?.codeLabelMapping,
       ),
-    [subtitle, vars, codeLabelMappingFromData],
+    [subtitle, vars, parsedData?.codeLabelMapping],
   );
 
   useEffect(() => {
@@ -489,15 +464,15 @@ const HighchartsChart = ({
         chartType,
         mapColorValueSteps,
         maxNumberOfDecimals,
-        latestYByXCode: parsedData.latestYByXCode,
-        latestYByXLabel: parsedData.latestYByXLabel,
+        latestYByXCode: parsedData?.latestYByXCode,
+        latestYByXLabel: parsedData?.latestYByXLabel,
       }),
     [
       chartType,
       mapColorValueSteps,
       maxNumberOfDecimals,
-      parsedData.latestYByXCode,
-      parsedData.latestYByXLabel,
+      parsedData?.latestYByXCode,
+      parsedData?.latestYByXLabel,
     ],
   );
 
@@ -510,7 +485,10 @@ const HighchartsChart = ({
   const chartRef = useRef(null);
 
   const chartCanBedisplayed =
-    !isFetching && R.isNil(noDataMessage) && R.isNil(errorMessage);
+    !isFetching &&
+    R.isNil(noDataMessage) &&
+    R.isNil(errorMessage) &&
+    !R.isNil(parsedData);
 
   const tooltipState = useTooltipState();
 
@@ -749,9 +727,8 @@ HighchartsChart.propTypes = {
   onExpandChart: PropTypes.func,
   hideExpand: PropTypes.bool,
   onDownloadData: PropTypes.func,
-  onDataChange: PropTypes.func,
+  onDataReady: PropTypes.func,
   vars: PropTypes.object.isRequired,
-  controls: PropTypes.array,
 };
 
 HighchartsChart.defaultProps = {
@@ -784,8 +761,7 @@ HighchartsChart.defaultProps = {
   onExpandChart: null,
   hideExpand: false,
   onDownloadData: null,
-  onDataChange: null,
-  controls: [],
+  onDataReady: null,
 };
 
 export default memo(HighchartsChart);

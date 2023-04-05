@@ -17,6 +17,7 @@ export const emptyData = {
   series: [],
   otherDimensions: [],
   areCategoriesNumbersOrDates: false,
+  codeLabelMapping: {},
 };
 
 const parseRawCSV = (csvString) =>
@@ -337,6 +338,22 @@ export const addAreCategoriesNumbersOrDates = (data) =>
     data,
   );
 
+export const addCodeLabelMapping = (data) =>
+  R.assoc(
+    'codeLabelMapping',
+    R.compose(
+      R.fromPairs,
+      R.map(({ code, label }) => [R.toUpper(code), label]),
+    )(
+      R.unnest([
+        R.prop('categories', data),
+        R.prop('series', data),
+        R.prop('otherDimensions', data),
+      ]),
+    ),
+    data,
+  );
+
 const filterCSV = (vars) => (data) => {
   const headerRow = R.head(data);
   const varColumnIndex = R.findIndex(
@@ -394,6 +411,7 @@ export const createDataFromCSV = ({
   }
 
   return R.compose(
+    addCodeLabelMapping,
     addAreCategoriesNumbersOrDates,
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,

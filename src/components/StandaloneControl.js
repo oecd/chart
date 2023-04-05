@@ -36,6 +36,8 @@ const StandaloneControl = ({ controlId }) => {
   const chartInitialVarValue = '91525bc3bb';
   // -------------------------------------------
 
+  // TODO: while doing "real" implem, codeLabelMapping keys must be transformed to upper case
+
   const [vars, setVars] = useState(
     R.cond([
       [
@@ -80,18 +82,26 @@ const StandaloneControl = ({ controlId }) => {
     return (
       <Suspense fallback={<ChartControlFallback />}>
         <ChartControlSelect
-          label="Countries"
-          placeholder="Highlight countries..."
+          label="COU"
+          placeholder="COU_PLACEHOLDER"
           multiple
           varName={countryVarName}
           vars={vars}
           options={[
-            { value: 'FRA', label: 'France' },
-            { value: 'BRA', label: 'Brazil' },
-            { value: 'MEX', label: 'Mexico' },
-            { value: 'USA', label: 'United States' },
+            { value: 'FRA' },
+            { value: 'BRA' },
+            { value: 'MEX' },
+            { value: 'USA' },
           ]}
           changeVar={changeVar}
+          codeLabelMapping={{
+            FRA: 'France',
+            BRA: 'Brazil',
+            MEX: 'Mexico',
+            USA: 'United States',
+            COU: 'Countries',
+            COU_PLACEHOLDER: 'Highlight countries...',
+          }}
         />
       </Suspense>
     );
@@ -101,22 +111,26 @@ const StandaloneControl = ({ controlId }) => {
     return (
       <Suspense fallback={<ChartControlFallback />}>
         <ChartControlSelect
-          label="Variable"
-          placeholder="Select a variable..."
+          label="VAR"
+          placeholder="VAR_PLACEHOLDER"
           multiple={false}
           varName={variableVarName}
           vars={vars}
           options={[
             {
               value: 'INDEX_1990',
-              label: 'Total GHG excl. LULUCF, Index 1990=100',
             },
             {
               value: 'INDEX_2000',
-              label: 'Total GHG excl. LULUCF, Index 2000=100',
             },
           ]}
           changeVar={changeVar}
+          codeLabelMapping={{
+            INDEX_1990: 'Total GHG excl. LULUCF, Index 1990=100',
+            INDEX_2000: 'Total GHG excl. LULUCF, Index 2000=100',
+            VAR: 'Variable',
+            VAR_PLACEHOLDER: 'Select a variable...',
+          }}
         />
       </Suspense>
     );
@@ -126,7 +140,7 @@ const StandaloneControl = ({ controlId }) => {
     return (
       <Suspense fallback={<ChartControlFallback />}>
         <ChartControlTimeSlider
-          label="Time"
+          label="TIME"
           frequencies={[
             { frequencyTypeCode: 'yearly', minCode: '1990', maxCode: '2015' },
           ]}
@@ -135,6 +149,7 @@ const StandaloneControl = ({ controlId }) => {
           maxVarName={timeMaxVarName}
           vars={vars}
           changeVar={changeVar}
+          codeLabelMapping={{ TIME: 'Time' }}
         />
       </Suspense>
     );
@@ -152,22 +167,24 @@ const StandaloneControl = ({ controlId }) => {
           options={[
             {
               value: '92df95bdc5',
-              label: 'Mix politique',
             },
             {
               value: '91525bc3bb',
-              label: ' Climate mitigation technologies',
             },
             {
               value: '003a169f86',
-              label: 'Climate related tax revenue',
             },
             {
               value: '8bcaba6045',
-              label: ' Energy mix in total energy supply',
             },
           ]}
           changeVar={changeVar}
+          codeLabelMapping={{
+            '92DF95BDC5': 'Mix politique',
+            '91525BC3BB': 'Climate mitigation technologies',
+            '003A169F86': 'Climate related tax revenue',
+            '8BCABA6045': 'Energy mix in total energy supply',
+          }}
         />
       </Suspense>
     );

@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useResizeDetector } from 'react-resize-detector';
 import * as R from 'ramda';
@@ -40,6 +40,18 @@ const ChartWithConfigNonFixedChartHeight = ({
     return chartContainerAutoSizerHeight;
   }, [chartContainerAutoSizerHeight, controlsAutoSizerHeight]);
 
+  const [codeLabelMapping, setCodeLabelMapping] = useState(null);
+
+  const onDataReady = useMemo(
+    () =>
+      !isNilOrEmpty(controls) && !hideControls
+        ? (data) => {
+            setCodeLabelMapping(R.prop('codeLabelMapping', data));
+          }
+        : null,
+    [controls, hideControls],
+  );
+
   return (
     <div
       ref={chartContainerRef}
@@ -69,6 +81,7 @@ const ChartWithConfigNonFixedChartHeight = ({
               width={chartContainerAutoSizerWidth}
               height={finalChartHeight}
               vars={vars}
+              onDataReady={onDataReady}
               {...R.omit(['height'], otherProps)}
             />
           </div>
@@ -95,6 +108,7 @@ const ChartWithConfigNonFixedChartHeight = ({
             controls={controls}
             vars={vars}
             changeVar={changeVar}
+            codeLabelMapping={codeLabelMapping}
           />
         )}
       </div>
