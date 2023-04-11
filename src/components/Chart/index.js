@@ -45,6 +45,7 @@ Chart.propTypes = {
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   lazyLoad: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+  language: PropTypes.string,
 };
 
 Chart.defaultProps = {
@@ -52,6 +53,7 @@ Chart.defaultProps = {
   width: null,
   height: null,
   lazyLoad: true,
+  language: null,
 };
 
 export default Chart;

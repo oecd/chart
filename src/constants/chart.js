@@ -46,10 +46,8 @@ export const chartControlTypes = {
 };
 
 export const apiUrl =
-  typeof process === 'undefined'
-    ? 'https://oecdch.art'
-    : process.env.NEXT_PUBLIC_CHART_LIB_API_URL ||
-      process.env.API_URL ||
-      'https://oecdch.art';
+  process.env.NEXT_PUBLIC_CHART_LIB_API_URL ||
+  process.env.API_URL ||
+  'https://oecdch.art';
 
 export const fakeMemberLatest = { code: '_LATEST_', label: 'Latest' };

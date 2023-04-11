@@ -17,8 +17,9 @@ import { fetchJson } from '../../utils/fetchUtil';
 import CenteredContainer from '../CenteredContainer';
 import { apiUrl } from '../../constants/chart';
 
-const Chart = ({ chartId, ...otherProps }) => {
+const Chart = ({ chartId, language, ...otherProps }) => {
   const [prevChartId, setPrevChartId] = useState(null);
+  const [prevLanguage, setPrevLanguage] = useState(null);
   const [chartConfigData, setChartConfigData] = useState({
     chartConfig: null,
     isLoading: true,
@@ -29,6 +30,10 @@ const Chart = ({ chartId, ...otherProps }) => {
   useEffect(() => {
     setPrevChartId(chartId);
   }, [chartId]);
+
+  useEffect(() => {
+    setPrevLanguage(language);
+  }, [language]);
 
   const propsVars = useMemo(
     () =>
@@ -44,16 +49,17 @@ const Chart = ({ chartId, ...otherProps }) => {
     [...R.map(R.prop(R.__, otherProps), possibleVariables)],
   );
 
-  const getChartConfig = useCallback(async (id, vars) => {
+  const getChartConfig = useCallback(async (id, lang, vars) => {
     try {
       setChartConfigData(
         R.compose(R.assoc('chartConfig', null), R.assoc('isLoading', true)),
       );
 
       const varsParam = R.join('/', R.values(vars));
+      const langParam = lang ? `?lang=${R.toLower(lang)}` : '';
       const configParams = `${id}${
-        R.isEmpty(varsParam) ? '' : `/${varsParam}`
-      }`;
+        R.isEmpty(varsParam) ? '' : `/${varsParam}$`
+      }${langParam}`;
 
       lastRequestedConfig.current = configParams;
       const config = await fetchJson(
@@ -81,12 +87,14 @@ const Chart = ({ chartId, ...otherProps }) => {
     if (!chartId) {
       return;
     }
-    if (prevChartId !== chartId) {
-      getChartConfig(chartId, propsVars);
+    if (prevChartId !== chartId || prevLanguage !== language) {
+      getChartConfig(chartId, language, propsVars);
     }
   }, [
     prevChartId,
     chartId,
+    prevLanguage,
+    language,
     propsVars,
     getChartConfig,
     chartConfigData.chartConfig,

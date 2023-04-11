@@ -76,6 +76,13 @@ edge is 100px from viewport).
 
 It can be disabled using `lazyLoad={false}`.
 
+## Language
+
+When a chart exists in multiple languages, the `language` prop can be used,
+e.g.: `language="fr"`.
+
+If omitted (or the requested language has not been configured) the default one will be used.
+
 ## Web components
 
 Even though this is a React library, the charts can be used in pages / apps that are not React based. For this purpose "web components" are also exported. Note that React (18) and ReactDOM still have to be in scope.
