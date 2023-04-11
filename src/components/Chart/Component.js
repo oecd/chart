@@ -124,7 +124,11 @@ const Chart = ({ chartId, language, ...otherProps }) => {
   if (chartConfigData.isLoading || chartConfigData.hasFetchFailed) {
     return (
       <CenteredContainer>
-        {chartConfigData.isLoading ? <Spinner /> : 'Something went wrong :('}
+        {chartConfigData.isLoading ? (
+          <Spinner />
+        ) : (
+          <div className="cb-container">Something went wrong :(</div>
+        )}
       </CenteredContainer>
     );
   }
