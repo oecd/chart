@@ -28,12 +28,9 @@ const ChartControls = ({ controls, vars, changeVar, codeLabelMapping }) => {
       {R.map((c) => {
         const ControlComponent = getControlForType(c.type);
         return (
-          <Suspense
-            key={`${c.type}-${c.label}`}
-            fallback={<ChartControlFallback {...c} />}
-          >
+          <Suspense key={c.id} fallback={<ChartControlFallback {...c} />}>
             <ControlComponent
-              key={`${c.type}-${c.label}`}
+              key={c.id}
               vars={vars}
               changeVar={changeVar}
               codeLabelMapping={codeLabelMapping}
