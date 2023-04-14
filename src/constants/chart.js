@@ -45,6 +45,21 @@ export const chartControlTypes = {
   select: { value: 'select', label: 'Select' },
 };
 
+export const frequencyTypes = {
+  yearly: {
+    value: 'yearly',
+    label: 'Yearly',
+  },
+  quaterly: {
+    value: 'quaterly',
+    label: 'Quaterly',
+  },
+  monthly: {
+    value: 'monthly',
+    label: 'Monthly',
+  },
+};
+
 export const apiUrl =
   process.env.NEXT_PUBLIC_CHART_LIB_API_URL ||
   process.env.API_URL ||

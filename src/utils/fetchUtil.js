@@ -17,7 +17,6 @@ const handleResponse = async (response) => {
   }
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export const fetchJson = async (url, config = {}) => {
   const response = await fetch(url, config);
   return handleResponse(response);

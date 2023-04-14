@@ -10,24 +10,20 @@ import {
 } from 'date-fns';
 import * as R from 'ramda';
 
-export const frequencies = {
-  monthly: {
-    value: 'monthly',
-    label: 'Monthly',
+import { frequencyTypes } from '../constants/chart';
+
+const frequencies = {
+  [frequencyTypes.monthly.value]: {
     stringFormat: 'yyyy-MM',
     differenceFunc: differenceInMonths,
     addFunc: addMonths,
   },
-  quaterly: {
-    value: 'quaterly',
-    label: 'Quaterly',
+  [frequencyTypes.quaterly.value]: {
     stringFormat: 'yyyy-QQQ',
     differenceFunc: differenceInQuarters,
     addFunc: addQuarters,
   },
-  yearly: {
-    value: 'yearly',
-    label: 'Yearly',
+  [frequencyTypes.yearly.value]: {
     stringFormat: 'yyyy',
     differenceFunc: differenceInYears,
     addFunc: addYears,
