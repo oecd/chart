@@ -1,14 +1,50 @@
 import * as R from 'ramda';
 import { chartTypes, fakeMemberLatest } from '../constants/chart';
-import { parseCSV } from './csvUtil';
+import {
+  parseCSV,
+  pivotCSV,
+  sortCSV,
+  parseData,
+  sortParsedDataOnYAxis,
+  addAreCategoriesNumbersOrDates,
+  addCodeLabelMapping,
+} from './csvUtil';
 import { createCodeLabelMap } from './generalUtil';
 import { isNilOrEmpty } from './ramdaUtil';
+import { possibleVariables } from './configUtil';
+import { fetchJson } from './fetchUtil';
 
-export const fixDotStatUrl = (url) => {
+const fixDotStatUrl = (url) => {
   const parsedUrl = new URL(url);
   parsedUrl.searchParams.set('dimensionAtObservation', 'AllDimensions');
+
   return parsedUrl.href;
 };
+
+const createDotStatHeaders = (lang) => ({
+  Accept: 'application/vnd.sdmx.data+json',
+  'Accept-Language': isNilOrEmpty(lang) ? 'en' : R.toLower(lang),
+});
+
+export const createDotStatUrl = (dotStatUrl, vars) =>
+  R.reduce(
+    (acc, varName) => {
+      const varValue = R.prop(varName, vars);
+
+      return R.replace(
+        new RegExp(`{${varName}}`, 'gi'),
+        R.toUpper(R.replace(/\|/g, '+', varValue)),
+        acc,
+      );
+    },
+    dotStatUrl,
+    possibleVariables,
+  );
+
+export const fetchDotStatData = async (url, lang) =>
+  fetchJson(fixDotStatUrl(url), {
+    headers: createDotStatHeaders(lang),
+  });
 
 const createDimensionMemberLabelByCode = (members, codeLabelMapping) =>
   R.compose(
@@ -225,4 +261,41 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
     parsingHelperData,
     ...latestAvailableDataMapping,
   };
+};
+
+export const isSdmxJsonEmpty = (sdmxJson) =>
+  R.isEmpty(R.path(['structure', 'dimensions', 'observation'], sdmxJson));
+
+export const createDataFromSdmxJson = ({
+  sdmxJson,
+  dotStatCodeLabelMapping,
+  latestAvailableData,
+  mapCountryDimension,
+  pivotData,
+  chartType,
+  dataSourceType,
+  sortBy,
+  sortOrder,
+  sortSeries,
+  yAxisOrderOverride,
+}) => {
+  if (!sdmxJson) {
+    return null;
+  }
+
+  return R.compose(
+    addCodeLabelMapping,
+    addAreCategoriesNumbersOrDates,
+    sortParsedDataOnYAxis(yAxisOrderOverride),
+    parseData,
+    sortCSV(sortBy, sortOrder, sortSeries),
+    pivotCSV(chartType, dataSourceType, pivotData),
+    parseSdmxJson({
+      chartType,
+      pivotData,
+      mapCountryDimension,
+      latestAvailableData,
+      dotStatCodeLabelMapping,
+    }),
+  )(sdmxJson);
 };

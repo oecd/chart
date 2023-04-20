@@ -31,19 +31,14 @@ import Scatter from './Scatter';
 import Pie from './Pie';
 import NullComponent from '../NullComponent';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
-import { fixDotStatUrl, parseSdmxJson } from '../../utils/sdmxJsonUtil';
 import {
-  parseData,
-  sortCSV,
-  sortParsedDataOnYAxis,
-  emptyData,
-  addAreCategoriesNumbersOrDates,
-  addCodeLabelMapping,
-  createDataFromCSV,
-  pivotCSV,
-} from '../../utils/csvUtil';
+  createDataFromSdmxJson,
+  createDotStatUrl,
+  fetchDotStatData,
+  isSdmxJsonEmpty,
+} from '../../utils/sdmxJsonUtil';
+import { emptyData, createDataFromCSV } from '../../utils/csvUtil';
 import Spinner from '../Spinner';
-import { possibleVariables } from '../../utils/configUtil';
 import {
   replaceVarsNameByVarsValueUsingCodeLabelMapping,
   replaceVarsNameByVarsValue,
@@ -78,11 +73,6 @@ const getChartForType = R.propOr(
   R.__,
   chartByType,
 );
-
-const createDotStatHeaders = (lang) => ({
-  Accept: 'application/vnd.sdmx.data+json',
-  'Accept-Language': isNilOrEmpty(lang) ? 'en' : R.toLower(lang),
-});
 
 const HighchartsChart = ({
   id,
@@ -137,21 +127,11 @@ const HighchartsChart = ({
   const [errorMessage, setErrorMessage] = useState(null);
   const [noDataMessage, setNoDataMessage] = useState(null);
 
-  const finalDotStatUrl = useMemo(
-    () =>
-      R.reduce(
-        (acc, varName) => {
-          const varValue = R.prop(varName, vars);
+  const [preParsedDataInternal, setPreParsedDataInternal] =
+    useState(preParsedData);
 
-          return R.replace(
-            new RegExp(`{${varName}}`, 'gi'),
-            R.toUpper(R.replace(/\|/g, '+', varValue)),
-            acc,
-          );
-        },
-        dotStatUrl,
-        possibleVariables,
-      ),
+  const finalDotStatUrl = useMemo(
+    () => createDotStatUrl(dotStatUrl, vars),
     [dotStatUrl, vars],
   );
 
@@ -160,10 +140,12 @@ const HighchartsChart = ({
       isNilOrEmpty(finalDotStatUrl) ||
       dataSourceType === dataSourceTypes.csv.value
     ) {
-      setIsFetching(false);
-      setErrorMessage(null);
-      setNoDataMessage(null);
-      setSdmxJson(null);
+      if (!preParsedDataInternal) {
+        setIsFetching(false);
+        setErrorMessage(null);
+        setNoDataMessage(null);
+        setSdmxJson(null);
+      }
     } else {
       setIsFetching(true);
       setErrorMessage(null);
@@ -173,9 +155,10 @@ const HighchartsChart = ({
         try {
           lastRequestedDataKey.current = `${finalDotStatUrl}|${dotStatLang}`;
 
-          const newSdmxJson = await fetchJson(fixDotStatUrl(finalDotStatUrl), {
-            headers: createDotStatHeaders(dotStatLang),
-          });
+          const newSdmxJson = await fetchDotStatData(
+            finalDotStatUrl,
+            dotStatLang,
+          );
 
           // discard result from outdated request(s)
           if (
@@ -191,41 +174,50 @@ const HighchartsChart = ({
       };
       getDotStatData();
     }
-  }, [dataSourceType, finalDotStatUrl, dotStatLang]);
+  }, [dataSourceType, finalDotStatUrl, dotStatLang, preParsedDataInternal]);
 
   const parsedSDMXData = useMemo(() => {
     if (dataSourceType === dataSourceTypes.csv.value) {
       return null;
     }
 
-    try {
-      const isEmpty = R.isEmpty(
-        R.path(['structure', 'dimensions', 'observation'], sdmxJson),
-      );
-      if (sdmxJson && isEmpty) {
-        setNoDataMessage('No data available');
-        return emptyData;
-      }
+    if (preParsedDataInternal?.dotStatServerFetchFailed === true) {
+      setErrorMessage('An error occured :-(');
+      return null;
+    }
 
+    if (preParsedDataInternal?.dotStatResponseWasEmpty === true) {
+      setNoDataMessage('No data available');
+      return emptyData;
+    }
+
+    if (!R.isNil(preParsedDataInternal)) {
+      return preParsedDataInternal;
+    }
+
+    try {
       if (!sdmxJson) {
         return null;
       }
 
-      return R.compose(
-        addCodeLabelMapping,
-        addAreCategoriesNumbersOrDates,
-        sortParsedDataOnYAxis(yAxisOrderOverride),
-        parseData,
-        sortCSV(sortBy, sortOrder, sortSeries),
-        pivotCSV(chartType, dataSourceType, pivotData),
-        parseSdmxJson({
-          chartType,
-          pivotData,
-          mapCountryDimension,
-          latestAvailableData,
-          dotStatCodeLabelMapping,
-        }),
-      )(sdmxJson);
+      if (isSdmxJsonEmpty(sdmxJson)) {
+        setNoDataMessage('No data available');
+        return emptyData;
+      }
+
+      return createDataFromSdmxJson({
+        sdmxJson,
+        dotStatCodeLabelMapping,
+        latestAvailableData,
+        mapCountryDimension,
+        pivotData,
+        chartType,
+        dataSourceType,
+        sortBy,
+        sortOrder,
+        sortSeries,
+        yAxisOrderOverride,
+      });
     } catch (e) {
       setErrorMessage('An error occured :-(');
       return emptyData;
@@ -242,10 +234,8 @@ const HighchartsChart = ({
     sortSeries,
     yAxisOrderOverride,
     dotStatCodeLabelMapping,
+    preParsedDataInternal,
   ]);
-
-  const [preParsedDataInternal, setPreParsedDataInternal] =
-    useState(preParsedData);
 
   const parsedCSVData = useMemo(() => {
     if (dataSourceType === dataSourceTypes.dotStat.value) {
@@ -311,14 +301,30 @@ const HighchartsChart = ({
   }, [parsedData, onDataReady]);
 
   useEffect(() => {
-    if (dataSourceType === dataSourceTypes.csv.value && preParsedDataInternal) {
-      const { varUsedForCSVFiltering, varValueUsedForCSVFiltering } =
-        preParsedDataInternal;
-      if (
-        R.toUpper(varValueUsedForCSVFiltering ?? '') !==
-        R.toUpper(vars[varUsedForCSVFiltering] ?? '')
-      ) {
-        const varsParam = R.join('/', R.reject(R.isEmpty, R.values(vars)));
+    if (preParsedDataInternal) {
+      const { varsThatCauseNewPreParsedDataFetch } = preParsedDataInternal;
+
+      if (isNilOrEmpty(varsThatCauseNewPreParsedDataFetch)) {
+        return;
+      }
+
+      const anyVarHasChanged = R.compose(
+        R.any(R.equals(true)),
+        R.map(
+          (varName) =>
+            R.toUpper(varsThatCauseNewPreParsedDataFetch[varName] ?? '') !==
+            R.toUpper(vars[varName] ?? ''),
+        ),
+      )(R.keys(varsThatCauseNewPreParsedDataFetch));
+
+      if (anyVarHasChanged) {
+        const varsParam = R.join(
+          '/',
+          R.compose(
+            R.map((v) => (R.isEmpty(v) ? '-' : v)),
+            R.values,
+          )(vars),
+        );
         const configParams = `${id}${
           R.isEmpty(varsParam) ? '' : `/${varsParam}`
         }`;
@@ -327,7 +333,7 @@ const HighchartsChart = ({
         setErrorMessage(null);
         setNoDataMessage(null);
 
-        const getCsvData = async () => {
+        const getNewPreParsedData = async () => {
           try {
             lastRequestedDataKey.current = configParams;
 
@@ -347,10 +353,10 @@ const HighchartsChart = ({
             setIsFetching(false);
           }
         };
-        getCsvData();
+        getNewPreParsedData();
       }
     }
-  }, [id, dataSourceType, vars, preParsedDataInternal]);
+  }, [id, vars, preParsedDataInternal]);
 
   const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);

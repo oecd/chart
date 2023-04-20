@@ -384,12 +384,10 @@ const filterCSV = (vars) => (data) => {
         ),
       ),
     )(R.tail(data)),
-    varUsedForCSVFiltering: R.replace(
-      /{|}/g,
-      '',
-      R.nth(varColumnIndex, headerRow),
-    ),
-    varValueUsedForCSVFiltering: R.toUpper(varValue),
+    varsThatCauseNewPreParsedDataFetch: {
+      [R.replace(/{|}/g, '', R.nth(varColumnIndex, headerRow))]:
+        R.toUpper(varValue),
+    },
   };
 };
 

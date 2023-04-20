@@ -9,7 +9,6 @@ import React, {
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
-import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import ChartWithConfig from '../ChartWithConfig';
 import Spinner from '../Spinner';
 import { possibleVariables } from '../../utils/configUtil';
@@ -39,7 +38,7 @@ const Chart = ({ chartId, language, ...otherProps }) => {
     () =>
       R.reduce(
         (acc, varName) =>
-          isNilOrEmpty(R.prop(varName, otherProps))
+          R.isNil(R.prop(varName, otherProps))
             ? acc
             : R.assoc(varName, R.prop(varName, otherProps), acc),
         {},
@@ -58,7 +57,7 @@ const Chart = ({ chartId, language, ...otherProps }) => {
       const varsParam = R.join('/', R.values(vars));
       const langParam = lang ? `?lang=${R.toLower(lang)}` : '';
       const configParams = `${id}${
-        R.isEmpty(varsParam) ? '' : `/${varsParam}$`
+        R.isEmpty(varsParam) ? '' : `/${varsParam}`
       }${langParam}`;
 
       lastRequestedConfig.current = configParams;
@@ -106,7 +105,7 @@ const Chart = ({ chartId, language, ...otherProps }) => {
         (acc, varName) =>
           R.assoc(
             varName,
-            isNilOrEmpty(R.prop(varName, propsVars))
+            R.isNil(R.prop(varName, propsVars))
               ? R.propOr(null, varName, chartConfigData.chartConfig)
               : R.replace(/\+/g, '|', R.prop(varName, propsVars)),
             acc,
