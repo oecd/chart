@@ -80,6 +80,7 @@ const ChartControlTimeSlider = ({
             : currentRange.minIndex
         }
         draggableTrack
+        pushable={1}
         allowCross={false}
         disabled={R.isEmpty(steps)}
         trackStyle={{ backgroundColor: '#b3b3b3' }}
