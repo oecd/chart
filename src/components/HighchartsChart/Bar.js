@@ -14,6 +14,7 @@ import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 import {
   deepMergeUserOptionsWithDefaultOptions,
   getBaselineOrHighlightColor,
+  getListItemAtTurningIndex,
 } from '../../utils/chartUtil';
 import { fakeMemberLatest } from '../../constants/chart';
 
@@ -61,19 +62,19 @@ const Bar = forwardRef(
 
     const series = useMemo(
       () =>
-        R.map((s) => {
+        mapWithIndex((s, xIdx) => {
           const seriesColor =
             getBaselineOrHighlightColor(
               s,
               parsedHighlight,
               baseline,
               highlightColors,
-            ) || R.head(colorPalette);
+            ) || getListItemAtTurningIndex(xIdx, colorPalette);
 
           return {
             name: s.label,
-            data: mapWithIndex((d, xIdx) => {
-              const category = R.nth(xIdx, data.categories);
+            data: mapWithIndex((d, dIdx) => {
+              const category = R.nth(dIdx, data.categories);
 
               const baselineOrHighlightColor = getBaselineOrHighlightColor(
                 category,
@@ -220,7 +221,7 @@ const Bar = forwardRef(
           series: {
             animation: false,
             pointPadding: 0.2,
-            groupPadding: 0,
+            groupPadding: 0.1,
             borderWidth: 0,
             threshold: parseFloat(pivotValue) || 0,
             dataLabels: {

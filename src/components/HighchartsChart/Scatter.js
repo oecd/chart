@@ -103,9 +103,7 @@ const Scatter = forwardRef(
 
           const seriesColor =
             seriesBaselineOrHighlightColor ||
-            (symbolLayout
-              ? firstPaletteColor
-              : getListItemAtTurningIndex(yIdx, colorPalette));
+            getListItemAtTurningIndex(yIdx, colorPalette);
 
           return {
             name: s.label,
@@ -157,7 +155,6 @@ const Scatter = forwardRef(
       [
         symbolLayout,
         data,
-        firstPaletteColor,
         colorPalette,
         highlightColors,
         parsedHighlight,

@@ -13,10 +13,11 @@ import * as R from 'ramda';
 import {
   deepMergeUserOptionsWithDefaultOptions,
   getBaselineOrHighlightColor,
+  getListItemAtTurningIndex,
   makeColorReadableOnBackgroundColor,
 } from '../../utils/chartUtil';
 import { fakeMemberLatest } from '../../constants/chart';
-import { isNilOrEmpty } from '../../utils/ramdaUtil';
+import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 
 if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);
@@ -53,14 +54,16 @@ const Line = forwardRef(
 
     const series = useMemo(
       () =>
-        R.map((s) => {
+        mapWithIndex((s, xIdx) => {
           const highlightOrBaselineColor = getBaselineOrHighlightColor(
             s,
             parsedHighlight,
             baseline,
             highlightColors,
           );
-          const color = highlightOrBaselineColor || R.head(colorPalette);
+          const color =
+            highlightOrBaselineColor ||
+            getListItemAtTurningIndex(xIdx, colorPalette);
 
           const dataLabelColor = makeColorReadableOnBackgroundColor(
             color,
