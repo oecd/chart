@@ -15,6 +15,7 @@ const ChartWithConfigFixedChartHeight = ({
   changeVar,
   controls,
   hideControls,
+  lang,
   ...otherProps
 }) => {
   const {
@@ -84,6 +85,7 @@ const ChartWithConfigFixedChartHeight = ({
           vars={vars}
           changeVar={changeVar}
           codeLabelMapping={codeLabelMapping}
+          lang={lang}
         />
       )}
     </div>
@@ -97,6 +99,7 @@ ChartWithConfigFixedChartHeight.propTypes = {
   changeVar: PropTypes.func.isRequired,
   controls: PropTypes.array,
   hideControls: PropTypes.bool,
+  lang: PropTypes.string,
 };
 
 ChartWithConfigFixedChartHeight.defaultProps = {
@@ -104,6 +107,7 @@ ChartWithConfigFixedChartHeight.defaultProps = {
   height: null,
   controls: [],
   hideControls: false,
+  lang: 'default',
 };
 
 export default ChartWithConfigFixedChartHeight;

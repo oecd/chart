@@ -17,7 +17,13 @@ const controlByType = {
 
 const getControlForType = R.prop(R.__, controlByType);
 
-const ChartControls = ({ controls, vars, changeVar, codeLabelMapping }) => {
+const ChartControls = ({
+  controls,
+  vars,
+  changeVar,
+  codeLabelMapping,
+  lang,
+}) => {
   const validControls = useMemo(
     () => R.filter((c) => R.has(c.type, chartControlTypes), controls),
     [controls],
@@ -34,6 +40,7 @@ const ChartControls = ({ controls, vars, changeVar, codeLabelMapping }) => {
               vars={vars}
               changeVar={changeVar}
               codeLabelMapping={codeLabelMapping}
+              lang={lang}
               {...c}
             />
           </Suspense>
@@ -48,6 +55,7 @@ ChartControls.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
+  lang: PropTypes.string.isRequired,
 };
 
 ChartControls.defaultProps = {

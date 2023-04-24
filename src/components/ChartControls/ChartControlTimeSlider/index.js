@@ -16,6 +16,7 @@ const ChartControlTimeSlider = ({
   vars,
   changeVar,
   codeLabelMapping,
+  lang,
 }) => {
   const finalLabel = useMemo(() => {
     if (isNilOrEmpty(label) || R.isNil(codeLabelMapping)) {
@@ -64,6 +65,8 @@ const ChartControlTimeSlider = ({
       maxVarName={maxVarName}
       vars={vars}
       changeVar={changeVar}
+      lang={lang}
+      codeLabelMapping={codeLabelMapping}
     />
   );
 };
@@ -77,6 +80,7 @@ ChartControlTimeSlider.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
+  lang: PropTypes.string.isRequired,
 };
 
 ChartControlTimeSlider.defaultProps = {

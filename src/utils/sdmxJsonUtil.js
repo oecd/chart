@@ -132,6 +132,32 @@ const getXAndYDimension = (
   ])(dimensionsWithMoreThanOneMember);
 };
 
+const matchMonth = R.match(/(\d{4})-(\d{2})/);
+
+const tweakDimensionLabels = R.map((dimension) => {
+  if (isTimeDimension(dimension)) {
+    const membersAreMonths = !R.isEmpty(
+      matchMonth(R.head(dimension.values).id),
+    );
+
+    if (membersAreMonths) {
+      return R.evolve(
+        {
+          values: R.map((month) => {
+            // eslint-disable-next-line no-unused-vars
+            const [_, y, m] = matchMonth(month.id);
+            return { id: month.id, name: `${m}-${y}` };
+          }),
+        },
+        dimension,
+      );
+    }
+
+    return dimension;
+  }
+  return dimension;
+});
+
 const detectV8 = R.hasPath(['meta', 'schema']);
 
 export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
@@ -145,7 +171,9 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
     ? R.path(['data', 'structures', 0, 'dimensions', 'observation'], sdmxJson)
     : R.path(['structure', 'dimensions', 'observation'], sdmxJson);
 
-  const [xDimension, yDimension] = getXAndYDimension(dimensions, chartConfig);
+  const [xDimension, yDimension] = tweakDimensionLabels(
+    getXAndYDimension(dimensions, chartConfig),
+  );
 
   const otherDimensions = R.reject(
     R.propSatisfies(

@@ -14,38 +14,57 @@ import { frequencyTypes } from '../constants/chart';
 
 const frequencies = {
   [frequencyTypes.monthly.value]: {
-    stringFormat: 'yyyy-MM',
+    codeStringFormat: 'yyyy-MM',
+    labelStringFormat: 'MM-yyyy',
     differenceFunc: differenceInMonths,
     addFunc: addMonths,
+    transformLabel: R.identity,
   },
   [frequencyTypes.quaterly.value]: {
-    stringFormat: 'yyyy-QQQ',
+    codeStringFormat: 'yyyy-QQQ',
+    labelStringFormat: 'Q-yyyy',
     differenceFunc: differenceInQuarters,
     addFunc: addQuarters,
+    transformLabel: (label, lang) =>
+      lang === 'fr' ? `T${label}` : `Q${label}`,
   },
   [frequencyTypes.yearly.value]: {
-    stringFormat: 'yyyy',
+    codeStringFormat: 'yyyy',
+    labelStringFormat: 'yyyy',
     differenceFunc: differenceInYears,
     addFunc: addYears,
+    transformLabel: R.identity,
   },
 };
 
-export const getSteps = ({ frequencyTypeCode, minCode, maxCode }) => {
+export const getSteps = (frequency, lang) => {
+  const { frequencyTypeCode, minCode, maxCode } = frequency;
   try {
     const frequencyType = R.prop(frequencyTypeCode, frequencies);
 
-    const { stringFormat, differenceFunc, addFunc } = frequencyType;
+    const {
+      codeStringFormat,
+      labelStringFormat,
+      differenceFunc,
+      addFunc,
+      transformLabel,
+    } = frequencyType;
 
-    const minDate = parse(minCode, stringFormat, new Date());
-    const maxDate = parse(maxCode, stringFormat, new Date());
+    const minDate = parse(minCode, codeStringFormat, new Date());
+    const maxDate = parse(maxCode, codeStringFormat, new Date());
 
     const stepNumber = differenceFunc(maxDate, minDate);
 
-    const steps = R.map((stepIndex) => {
-      return format(addFunc(minDate, stepIndex), stringFormat);
-    }, R.times(R.identity, stepNumber + 1));
+    const labelByCode = R.fromPairs(
+      R.map((stepIndex) => {
+        const date = addFunc(minDate, stepIndex);
+        const code = format(date, codeStringFormat);
+        const label = transformLabel(format(date, labelStringFormat), lang);
+        return [code, label];
+      }, R.times(R.identity, stepNumber + 1)),
+    );
 
-    return steps;
+    return { codes: R.keys(labelByCode), labelByCode };
   } catch {
     return [];
   }

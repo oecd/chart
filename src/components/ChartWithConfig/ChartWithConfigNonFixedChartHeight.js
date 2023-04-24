@@ -16,6 +16,7 @@ const ChartWithConfigNonFixedChartHeight = ({
   changeVar,
   controls,
   hideControls,
+  lang,
   ...otherProps
 }) => {
   const {
@@ -109,6 +110,7 @@ const ChartWithConfigNonFixedChartHeight = ({
             vars={vars}
             changeVar={changeVar}
             codeLabelMapping={codeLabelMapping}
+            lang={lang}
           />
         )}
       </div>
@@ -122,12 +124,14 @@ ChartWithConfigNonFixedChartHeight.propTypes = {
   changeVar: PropTypes.func.isRequired,
   controls: PropTypes.array,
   hideControls: PropTypes.bool,
+  lang: PropTypes.string,
 };
 
 ChartWithConfigNonFixedChartHeight.defaultProps = {
   width: null,
   controls: [],
   hideControls: false,
+  lang: 'default',
 };
 
 export default ChartWithConfigNonFixedChartHeight;

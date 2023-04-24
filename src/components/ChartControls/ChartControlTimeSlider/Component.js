@@ -14,17 +14,23 @@ const ChartControlTimeSlider = ({
   maxVarName,
   vars,
   changeVar,
+  lang,
+  codeLabelMapping,
 }) => {
-  const steps = useMemo(() => getSteps(frequency || {}), [frequency]);
+  const steps = useMemo(
+    () => getSteps(frequency || {}, lang),
+    [frequency, lang],
+  );
 
   const [currentRange, setCurrentRange] = useState({
     minCode: vars[minVarName],
-    minIndex: R.findIndex(R.equals(vars[minVarName]), steps) || 0,
+    minIndex: R.findIndex(R.equals(vars[minVarName]), steps.codes) || 0,
     ...(isRange
       ? {
           maxCode: vars[maxVarName],
           maxIndex:
-            R.findIndex(R.equals(vars[maxVarName]), steps) || R.length(steps),
+            R.findIndex(R.equals(vars[maxVarName]), steps.codes) ||
+            R.length(steps.codes),
         }
       : {}),
   });
@@ -34,33 +40,40 @@ const ChartControlTimeSlider = ({
       if (isRange) {
         const [min, max] = value;
         setCurrentRange({
-          minCode: R.nth(min, steps),
+          minCode: R.nth(min, steps.codes),
           minIndex: min,
-          maxCode: R.nth(max, steps),
+          maxCode: R.nth(max, steps.codes),
           maxIndex: max,
         });
       } else {
         setCurrentRange({
-          minCode: R.nth(value, steps),
+          minCode: R.nth(value, steps.codes),
           minIndex: value,
         });
       }
     },
-    [isRange, steps],
+    [isRange, steps.codes],
   );
 
   const onAfterRangeChange = useCallback(
     (value) => {
       if (isRange) {
         const [min, max] = value;
-        changeVar(minVarName, R.nth(min, steps));
-        changeVar(maxVarName, R.nth(max, steps));
+        changeVar(minVarName, R.nth(min, steps.codes));
+        changeVar(maxVarName, R.nth(max, steps.codes));
       } else {
-        changeVar(minVarName, R.nth(value, steps));
+        changeVar(minVarName, R.nth(value, steps.codes));
       }
     },
-    [isRange, steps, minVarName, maxVarName, changeVar],
+    [isRange, steps.codes, minVarName, maxVarName, changeVar],
   );
+
+  const getLabel = (code) =>
+    R.propOr(
+      R.propOr('', currentRange.minCode, steps.labelByCode),
+      code,
+      codeLabelMapping,
+    );
 
   return (
     <div
@@ -73,7 +86,7 @@ const ChartControlTimeSlider = ({
         onAfterChange={onAfterRangeChange}
         range={isRange}
         min={0}
-        max={R.isEmpty(steps) ? 0 : R.length(steps) - 1}
+        max={R.isEmpty(steps.codes) ? 0 : R.length(steps.codes) - 1}
         value={
           isRange
             ? [currentRange.minIndex, currentRange.maxIndex]
@@ -82,7 +95,7 @@ const ChartControlTimeSlider = ({
         draggableTrack
         pushable={1}
         allowCross={false}
-        disabled={R.isEmpty(steps)}
+        disabled={R.isEmpty(steps.codes)}
         trackStyle={{ backgroundColor: '#b3b3b3' }}
         railStyle={{ backgroundColor: '#d5d5d5' }}
         handleStyle={{
@@ -98,10 +111,10 @@ const ChartControlTimeSlider = ({
           marginBottom: '0px',
         }}
       >
-        {R.isEmpty(steps)
+        {R.isEmpty(steps.codes)
           ? '-'
-          : `${currentRange.minCode || ''}${
-              isRange ? ` - ${currentRange.maxCode || ''}` : ''
+          : `${getLabel(currentRange.minCode)}${
+              isRange ? ` - ${getLabel(currentRange.maxCode)}` : ''
             }`}
       </div>
     </div>
@@ -116,6 +129,8 @@ ChartControlTimeSlider.propTypes = {
   maxVarName: PropTypes.string.isRequired,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
+  lang: PropTypes.string.isRequired,
+  codeLabelMapping: PropTypes.object.isRequired,
 };
 
 ChartControlTimeSlider.defaultProps = {
