@@ -60,6 +60,11 @@ export const frequencyTypes = {
   },
 };
 
+export const decimalPointTypes = {
+  point: { value: '.', label: 'Point' },
+  comma: { value: ',', label: 'Comma' },
+};
+
 export const apiUrl =
   process.env.NEXT_PUBLIC_CHART_LIB_API_URL ||
   process.env.API_URL ||

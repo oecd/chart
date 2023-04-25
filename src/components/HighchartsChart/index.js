@@ -20,6 +20,7 @@ import {
   apiUrl,
   chartTypes,
   dataSourceTypes,
+  decimalPointTypes,
   sortByOptions,
   sortOrderOptions,
 } from '../../constants/chart';
@@ -84,6 +85,7 @@ const HighchartsChart = ({
   csvCodeLabelMappingProjectLevel,
   csvCodeLabelMapping,
   dotStatCodeLabelMapping,
+  decimalPoint,
   preParsedData,
   pivotData,
   chartType,
@@ -472,6 +474,7 @@ const HighchartsChart = ({
         maxNumberOfDecimals,
         latestYByXCode: parsedData?.latestYByXCode,
         latestYByXLabel: parsedData?.latestYByXLabel,
+        decimalPoint,
       }),
     [
       chartType,
@@ -479,6 +482,7 @@ const HighchartsChart = ({
       maxNumberOfDecimals,
       parsedData?.latestYByXCode,
       parsedData?.latestYByXLabel,
+      decimalPoint,
     ],
   );
 
@@ -706,6 +710,7 @@ HighchartsChart.propTypes = {
   csvCodeLabelMappingProjectLevel: PropTypes.string,
   csvCodeLabelMapping: PropTypes.string,
   dotStatCodeLabelMapping: PropTypes.string,
+  decimalPoint: PropTypes.string,
   preParsedData: PropTypes.object,
   pivotData: PropTypes.bool,
   chartType: PropTypes.oneOf(R.values(chartTypes)).isRequired,
@@ -747,6 +752,7 @@ HighchartsChart.defaultProps = {
   csvCodeLabelMappingProjectLevel: null,
   csvCodeLabelMapping: null,
   dotStatCodeLabelMapping: null,
+  decimalPoint: decimalPointTypes.point.value,
   preParsedData: null,
   pivotData: false,
   title: null,

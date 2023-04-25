@@ -5,7 +5,11 @@ import * as R from 'ramda';
 
 import { codeOrLabelEquals, possibleVariables } from './configUtil';
 import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
-import { chartTypes, fakeMemberLatest } from '../constants/chart';
+import {
+  chartTypes,
+  decimalPointTypes,
+  fakeMemberLatest,
+} from '../constants/chart';
 
 const baselineColor = '#262639';
 
@@ -339,25 +343,27 @@ export const createFormatters = ({
   maxNumberOfDecimals,
   latestYByXCode,
   latestYByXLabel,
+  decimalPoint,
 }) => {
   const isMaxNumberOrDecimalCastableToNumber =
     isCastableToNumber(maxNumberOfDecimals);
+
+  const finalDecimalPoint = decimalPoint || decimalPointTypes.point.value;
 
   const stepsHaveLabels =
     chartType === chartTypes.map &&
     !isNilOrEmpty(mapColorValueSteps) &&
     R.all(R.compose(R.equals(2), R.length), mapColorValueSteps);
 
-  const dataLabels = isMaxNumberOrDecimalCastableToNumber
-    ? {
-        formatter: function formatPoint() {
-          return numberFormat(
-            this.point.value || this.point.z || this.point.y,
-            maxNumberOfDecimals,
-          );
-        },
-      }
-    : {};
+  const dataLabels = {
+    formatter: function formatPoint() {
+      return numberFormat(
+        this.point.value || this.point.z || this.point.y,
+        isMaxNumberOrDecimalCastableToNumber ? maxNumberOfDecimals : -1,
+        finalDecimalPoint,
+      );
+    },
+  };
 
   const tooltip = {
     formatter: function format(tooltipInfo) {
@@ -372,7 +378,7 @@ export const createFormatters = ({
               mapColorValueSteps,
             ) || [],
           ) || value
-        : numberFormat(value, maxNumberOfDecimals);
+        : numberFormat(value, maxNumberOfDecimals, finalDecimalPoint);
 
       return R.compose(
         R.ifElse(
