@@ -69,11 +69,7 @@ const ChartControlTimeSlider = ({
   );
 
   const getLabel = (code) =>
-    R.propOr(
-      R.propOr('', currentRange.minCode, steps.labelByCode),
-      code,
-      codeLabelMapping,
-    );
+    R.propOr(R.propOr('', code, steps.labelByCode), code, codeLabelMapping);
 
   return (
     <div
