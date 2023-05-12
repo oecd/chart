@@ -21,32 +21,28 @@ export const emptyData = {
 };
 
 const parseRawCSV = (csvString) =>
-  Papa.parse(csvString, { dynamicTyping: true });
+  Papa.parse(csvString, { dynamicTyping: true, skipEmptyLines: true });
 
-const cleanupCSV = R.compose(
-  (data) => {
-    if (isNilOrEmpty(data)) {
-      return [];
+const cleanupCSV = R.compose((data) => {
+  if (isNilOrEmpty(data)) {
+    return [];
+  }
+
+  const numberOfColumn = R.length(R.reject(R.isNil, R.head(data)));
+
+  return R.map((row) => {
+    if (R.length(row) === numberOfColumn) {
+      return row;
     }
-
-    const numberOfColumn = R.length(R.reject(R.isNil, R.head(data)));
-
-    return R.map((row) => {
-      if (R.length(row) === numberOfColumn) {
-        return row;
-      }
-      if (R.length(row) > numberOfColumn) {
-        return R.take(numberOfColumn, row);
-      }
-      return R.concat(
-        row,
-        R.times(R.always(null), numberOfColumn - R.length(row)),
-      );
-    }, data);
-  },
-  R.reject(R.compose(isNilOrEmpty, R.head)),
-  R.prop('data'),
-);
+    if (R.length(row) > numberOfColumn) {
+      return R.take(numberOfColumn, row);
+    }
+    return R.concat(
+      row,
+      R.times(R.always(null), numberOfColumn - R.length(row)),
+    );
+  }, data);
+}, R.prop('data'));
 
 export const parseCSV = (csvString) =>
   R.compose(cleanupCSV, R.pick(['data']), parseRawCSV)(csvString ?? '');
