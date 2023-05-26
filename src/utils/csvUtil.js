@@ -365,15 +365,26 @@ const filterCSV = (vars) => (data) => {
   }
 
   const varName = R.nth(varColumnIndex, headerRow);
-  const varValue = R.prop(R.replace(/{|}/g, '', varName), vars);
+  const varValue = R.compose(
+    R.when(() => varColumnIndex === 0, R.split('|')),
+    R.toUpper,
+    R.prop(R.replace(/{|}/g, '', varName)),
+  )(vars);
 
   return {
     data: R.compose(
-      R.prepend(R.compose(R.remove(varColumnIndex, 1), R.head)(data)),
-      R.map(R.remove(varColumnIndex, 1)),
+      R.prepend(
+        varColumnIndex === 0
+          ? R.head(data)
+          : R.compose(R.remove(varColumnIndex, 1), R.head)(data),
+      ),
       R.filter(
         R.compose(
-          R.equals(R.toUpper(varValue)),
+          R.ifElse(
+            () => varColumnIndex === 0,
+            R.includes(R.__, varValue),
+            R.equals(varValue),
+          ),
           R.toUpper,
           (v) => `${v}`,
           R.nth(varColumnIndex),
@@ -382,7 +393,7 @@ const filterCSV = (vars) => (data) => {
     )(R.tail(data)),
     varsThatCauseNewPreParsedDataFetch: {
       [R.replace(/{|}/g, '', R.nth(varColumnIndex, headerRow))]:
-        R.toUpper(varValue),
+        varColumnIndex === 0 ? R.join('|', varValue) : varValue,
     },
   };
 };
