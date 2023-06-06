@@ -6,7 +6,7 @@ import * as R from 'ramda';
 import { getSteps } from '../../../utils/dateUtil';
 import { isNilOrEmpty } from '../../../utils/ramdaUtil';
 
-const ChartControlTimeSlider = ({
+const ControlTimeSlider = ({
   label,
   frequency,
   isRange,
@@ -117,7 +117,7 @@ const ChartControlTimeSlider = ({
   );
 };
 
-ChartControlTimeSlider.propTypes = {
+ControlTimeSlider.propTypes = {
   label: PropTypes.string,
   frequency: PropTypes.object.isRequired,
   isRange: PropTypes.bool.isRequired,
@@ -129,8 +129,8 @@ ChartControlTimeSlider.propTypes = {
   codeLabelMapping: PropTypes.object.isRequired,
 };
 
-ChartControlTimeSlider.defaultProps = {
+ControlTimeSlider.defaultProps = {
   label: null,
 };
 
-export default ChartControlTimeSlider;
+export default ControlTimeSlider;

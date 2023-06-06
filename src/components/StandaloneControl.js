@@ -1,200 +1,95 @@
-import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react';
+/* eslint-disable react/jsx-props-no-spreading */
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
-import ChartControlFallback from './ChartControls/ChartControlFallback';
+import { fetchJson } from '../utils/fetchUtil';
+import { apiUrl } from '../constants/chart';
+import ControlFallback from './ControlFallback';
+import StandaloneControlWithConfig from './StandaloneControlWithConfig';
 
-// dynamic import for code splitting
-const ChartControlTimeSlider = lazy(() =>
-  import('./ChartControls/ChartControlTimeSlider'),
-);
-const ChartControlSelect = lazy(() =>
-  import('./ChartControls/ChartControlSelect'),
-);
+const StandaloneControl = ({ controlId, language, ...otherProps }) => {
+  const [prevControlId, setPrevControlId] = useState(null);
+  const [prevLanguage, setPrevLanguage] = useState(null);
+  const [controlConfigData, setControlConfigData] = useState({
+    controlConfig: null,
+    isLoading: true,
+    hasFetchFailed: false,
+  });
+  const lastRequestedConfig = useRef(null);
 
-const StandaloneControl = ({ controlId }) => {
-  // -------------------------------------------
-  // would come from config (based on controlId)
-  // -------------------------------------------
+  useEffect(() => {
+    setPrevControlId(controlId);
+  }, [controlId]);
 
-  // CONTRY
-  const countryVarName = 'var1';
-  const countryInitialVarValue = 'BRA|USA';
+  useEffect(() => {
+    setPrevLanguage(language);
+  }, [language]);
 
-  // VARIABLE
-  const variableVarName = 'var2';
-  const variableInitialVarValue = 'INDEX_2000';
+  const getControlConfig = useCallback(async (id, lang) => {
+    try {
+      setControlConfigData(
+        R.compose(R.assoc('controlConfig', null), R.assoc('isLoading', true)),
+      );
 
-  // TIME
-  const timeMinVarName = 'var3';
-  const timeInitialMinVarValue = '2000';
-  const timeMaxVarName = 'var4';
-  const timeInitialMaxVarValue = '2010';
+      const langParam = lang ? `?lang=${R.toLower(lang)}` : '';
+      const configParams = `${id}${langParam}`;
 
-  // CHART
-  const chartVarName = 'chartId';
-  const chartInitialVarValue = '91525bc3bb';
-  // -------------------------------------------
+      lastRequestedConfig.current = configParams;
+      const config = await fetchJson(
+        `${apiUrl}/api/public/control/${configParams}`,
+      );
 
-  // TODO: while doing "real" implem, codeLabelMapping keys must be transformed to upper case
-
-  const [vars, setVars] = useState(
-    R.cond([
-      [
-        R.equals('country'),
-        R.always({ [countryVarName]: countryInitialVarValue }),
-      ],
-      [
-        R.equals('variable'),
-        R.always({ [variableVarName]: variableInitialVarValue }),
-      ],
-      [
-        R.equals('time'),
-        R.always({
-          [timeMinVarName]: timeInitialMinVarValue,
-          [timeMaxVarName]: timeInitialMaxVarValue,
-        }),
-      ],
-      [
-        R.T,
-        R.always({
-          [chartVarName]: chartInitialVarValue,
-        }),
-      ],
-    ])(controlId),
-  );
-
-  const changeVar = useCallback((varName, varValue) => {
-    setVars(R.assoc(varName, varValue));
+      // discard result from outdated request(s)
+      if (configParams === lastRequestedConfig.current) {
+        setControlConfigData(
+          R.compose(
+            R.assoc('hasFetchFailed', false),
+            R.assoc('controlConfig', config),
+            R.assoc('isLoading', false),
+          ),
+        );
+      }
+    } catch {
+      setControlConfigData(
+        R.compose(R.assoc('hasFetchFailed', true), R.assoc('isLoading', false)),
+      );
+    }
   }, []);
 
   useEffect(() => {
-    R.forEach(([varName, varValue]) => {
-      document.dispatchEvent(
-        new CustomEvent('cbControlValueChange', {
-          detail: { controlId, varName, varValue },
-        }),
-      );
-    }, R.toPairs(vars));
-  }, [controlId, vars]);
+    if (!controlId) {
+      return;
+    }
+    if (prevControlId !== controlId || prevLanguage !== language) {
+      getControlConfig(controlId, language);
+    }
+  }, [prevControlId, controlId, prevLanguage, language, getControlConfig]);
 
-  if (controlId === 'country') {
-    return (
-      <Suspense fallback={<ChartControlFallback />}>
-        <ChartControlSelect
-          label="COU"
-          placeholder="COU_PLACEHOLDER"
-          multiple
-          varName={countryVarName}
-          vars={vars}
-          options={[
-            { value: 'FRA' },
-            { value: 'BRA' },
-            { value: 'MEX' },
-            { value: 'USA' },
-          ]}
-          changeVar={changeVar}
-          codeLabelMapping={{
-            FRA: 'France',
-            BRA: 'Brazil',
-            MEX: 'Mexico',
-            USA: 'United States',
-            COU: 'Countries',
-            COU_PLACEHOLDER: 'Highlight countries...',
-          }}
-        />
-      </Suspense>
-    );
+  if (!controlId) {
+    return null;
   }
 
-  if (controlId === 'variable') {
-    return (
-      <Suspense fallback={<ChartControlFallback />}>
-        <ChartControlSelect
-          label="VAR"
-          placeholder="VAR_PLACEHOLDER"
-          multiple={false}
-          varName={variableVarName}
-          vars={vars}
-          options={[
-            {
-              value: 'INDEX_1990',
-            },
-            {
-              value: 'INDEX_2000',
-            },
-          ]}
-          changeVar={changeVar}
-          codeLabelMapping={{
-            INDEX_1990: 'Total GHG excl. LULUCF, Index 1990=100',
-            INDEX_2000: 'Total GHG excl. LULUCF, Index 2000=100',
-            VAR: 'Variable',
-            VAR_PLACEHOLDER: 'Select a variable...',
-          }}
-        />
-      </Suspense>
-    );
+  if (controlConfigData.isLoading || controlConfigData.hasFetchFailed) {
+    return <ControlFallback />;
   }
 
-  if (controlId === 'time') {
-    return (
-      <Suspense fallback={<ChartControlFallback />}>
-        <ChartControlTimeSlider
-          label="TIME"
-          frequencies={[
-            { frequencyTypeCode: 'yearly', minCode: '1990', maxCode: '2015' },
-          ]}
-          isRange
-          minVarName={timeMinVarName}
-          maxVarName={timeMaxVarName}
-          vars={vars}
-          changeVar={changeVar}
-          codeLabelMapping={{ TIME: 'Time' }}
-        />
-      </Suspense>
-    );
-  }
-
-  if (controlId === 'chart') {
-    return (
-      <Suspense fallback={<ChartControlFallback />}>
-        <ChartControlSelect
-          label="Chart"
-          placeholder="Select a chart..."
-          multiple={false}
-          varName={chartVarName}
-          vars={vars}
-          options={[
-            {
-              value: '92df95bdc5',
-            },
-            {
-              value: '91525bc3bb',
-            },
-            {
-              value: '003a169f86',
-            },
-            {
-              value: '8bcaba6045',
-            },
-          ]}
-          changeVar={changeVar}
-          codeLabelMapping={{
-            '92DF95BDC5': 'Mix politique',
-            '91525BC3BB': 'Climate mitigation technologies',
-            '003A169F86': 'Climate related tax revenue',
-            '8BCABA6045': 'Energy mix in total energy supply',
-          }}
-        />
-      </Suspense>
-    );
-  }
-
-  return null;
+  return (
+    <StandaloneControlWithConfig
+      id={controlId}
+      {...controlConfigData.controlConfig}
+      {...otherProps}
+    />
+  );
 };
 
 StandaloneControl.propTypes = {
   controlId: PropTypes.string.isRequired,
+  language: PropTypes.string,
+};
+
+StandaloneControl.defaultProps = {
+  language: null,
 };
 
 export default StandaloneControl;

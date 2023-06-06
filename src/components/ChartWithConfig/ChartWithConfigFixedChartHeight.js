@@ -6,7 +6,7 @@ import * as R from 'ramda';
 
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
-import ChartControls from '../ChartControls';
+import Controls from '../Controls';
 
 const ChartWithConfigFixedChartHeight = ({
   width,
@@ -80,7 +80,7 @@ const ChartWithConfigFixedChartHeight = ({
       </div>
 
       {!isNilOrEmpty(controls) && !hideControls && (
-        <ChartControls
+        <Controls
           controls={controls}
           vars={vars}
           changeVar={changeVar}

@@ -5,9 +5,9 @@ import * as R from 'ramda';
 import Component from './Component';
 import { generatePseudoRandomString } from '../../../utils/generalUtil';
 import { isNilOrEmpty } from '../../../utils/ramdaUtil';
-import ChartControlFallback from '../ChartControlFallback';
+import ControlFallback from '../../ControlFallback';
 
-const ChartControlTimeSlider = ({
+const ControlTimeSlider = ({
   label,
   frequencies,
   isRange,
@@ -54,7 +54,7 @@ const ChartControlTimeSlider = ({
   ]);
 
   return R.isNil(codeLabelMapping) ? (
-    <ChartControlFallback label={label} />
+    <ControlFallback label={label} />
   ) : (
     <Component
       key={componentKey}
@@ -71,7 +71,7 @@ const ChartControlTimeSlider = ({
   );
 };
 
-ChartControlTimeSlider.propTypes = {
+ControlTimeSlider.propTypes = {
   label: PropTypes.string,
   frequencies: PropTypes.array.isRequired,
   isRange: PropTypes.bool.isRequired,
@@ -83,10 +83,10 @@ ChartControlTimeSlider.propTypes = {
   lang: PropTypes.string.isRequired,
 };
 
-ChartControlTimeSlider.defaultProps = {
+ControlTimeSlider.defaultProps = {
   label: null,
   maxVarName: '',
   codeLabelMapping: null,
 };
 
-export default ChartControlTimeSlider;
+export default ControlTimeSlider;

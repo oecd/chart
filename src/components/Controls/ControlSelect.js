@@ -4,12 +4,12 @@ import * as R from 'ramda';
 import Select from 'react-select';
 import getBasicStylingConfigs from '../../utils/reactSelectUtil';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
-import ChartControlFallback from './ChartControlFallback';
+import ControlFallback from '../ControlFallback';
 
 const { customSelectTheme, customSelectStyles } = getBasicStylingConfigs();
 const noOptionsMessage = () => '';
 
-const ChartControlSelect = ({
+const ControlSelect = ({
   label,
   options,
   placeholder,
@@ -107,7 +107,7 @@ const ChartControlSelect = ({
   }, [vars, varName, finalOptions, multiple, noOptionMeansAllOptions]);
 
   return R.isNil(codeLabelMapping) ? (
-    <ChartControlFallback label={label} />
+    <ControlFallback label={label} />
   ) : (
     <div
       className="cb-control cb-control-select"
@@ -137,7 +137,7 @@ const ChartControlSelect = ({
   );
 };
 
-ChartControlSelect.propTypes = {
+ControlSelect.propTypes = {
   label: PropTypes.string,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.string.isRequired,
@@ -149,10 +149,10 @@ ChartControlSelect.propTypes = {
   codeLabelMapping: PropTypes.object,
 };
 
-ChartControlSelect.defaultProps = {
+ControlSelect.defaultProps = {
   label: null,
   noOptionMeansAllOptions: false,
   codeLabelMapping: null,
 };
 
-export default ChartControlSelect;
+export default ControlSelect;

@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { isNilOrEmpty } from '../../utils/ramdaUtil';
+import { isNilOrEmpty } from '../utils/ramdaUtil';
 
-const ChartControlFallback = ({ label }) => (
+const ControlFallback = ({ label }) => (
   <div
     style={{
       flex: '1',
@@ -14,12 +14,12 @@ const ChartControlFallback = ({ label }) => (
   />
 );
 
-ChartControlFallback.propTypes = {
+ControlFallback.propTypes = {
   label: PropTypes.string,
 };
 
-ChartControlFallback.defaultProps = {
+ControlFallback.defaultProps = {
   label: null,
 };
 
-export default ChartControlFallback;
+export default ControlFallback;

@@ -3,29 +3,23 @@ import React, { useMemo, lazy, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
-import { chartControlTypes } from '../../constants/chart';
-import ChartControlFallback from './ChartControlFallback';
+import { controlTypes } from '../../constants/chart';
+import ControlFallback from '../ControlFallback';
 
 // dynamic import for code splitting
-const ChartControlTimeSlider = lazy(() => import('./ChartControlTimeSlider'));
-const ChartControlSelect = lazy(() => import('./ChartControlSelect'));
+const ControlTimeSlider = lazy(() => import('./ControlTimeSlider'));
+const ControlSelect = lazy(() => import('./ControlSelect'));
 
 const controlByType = {
-  [chartControlTypes.timeSlider.value]: ChartControlTimeSlider,
-  [chartControlTypes.select.value]: ChartControlSelect,
+  [controlTypes.timeSlider.value]: ControlTimeSlider,
+  [controlTypes.select.value]: ControlSelect,
 };
 
 const getControlForType = R.prop(R.__, controlByType);
 
-const ChartControls = ({
-  controls,
-  vars,
-  changeVar,
-  codeLabelMapping,
-  lang,
-}) => {
+const Controls = ({ controls, vars, changeVar, codeLabelMapping, lang }) => {
   const validControls = useMemo(
-    () => R.filter((c) => R.has(c.type, chartControlTypes), controls),
+    () => R.filter((c) => R.has(c.type, controlTypes), controls),
     [controls],
   );
 
@@ -34,7 +28,7 @@ const ChartControls = ({
       {R.map((c) => {
         const ControlComponent = getControlForType(c.type);
         return (
-          <Suspense key={c.id} fallback={<ChartControlFallback {...c} />}>
+          <Suspense key={c.id} fallback={<ControlFallback {...c} />}>
             <ControlComponent
               key={c.id}
               vars={vars}
@@ -50,7 +44,7 @@ const ChartControls = ({
   );
 };
 
-ChartControls.propTypes = {
+Controls.propTypes = {
   controls: PropTypes.array,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
@@ -58,9 +52,9 @@ ChartControls.propTypes = {
   lang: PropTypes.string.isRequired,
 };
 
-ChartControls.defaultProps = {
+Controls.defaultProps = {
   controls: [],
   codeLabelMapping: null,
 };
 
-export default ChartControls;
+export default Controls;

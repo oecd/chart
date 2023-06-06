@@ -40,9 +40,10 @@ export const mapTypes = {
   point: { value: 'point', label: 'Point' },
 };
 
-export const chartControlTypes = {
+export const controlTypes = {
   timeSlider: { value: 'timeSlider', label: 'Time slider' },
-  select: { value: 'select', label: 'Select' },
+  select: { value: 'select', label: 'Variable select' },
+  selectChart: { value: 'selectChart', label: 'Chart select' },
 };
 
 export const frequencyTypes = {
