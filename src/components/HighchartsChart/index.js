@@ -568,24 +568,17 @@ const HighchartsChart = ({
                 <div
                   className="cb-toolbar"
                   style={{ marginLeft: '4px' }}
-                  ref={tooltipState.reference}
+                  ref={tooltipState.refs.setReference}
                   {...tooltipState.getReferenceProps()}
                 >
                   <FontAwesomeIcon icon={faInfoCircle} />
                 </div>
-                <FloatingPortal>
-                  {tooltipState.open && (
+                {tooltipState.open && (
+                  <FloatingPortal>
                     <div
-                      ref={tooltipState.floating}
+                      ref={tooltipState.refs.setFloating}
+                      style={tooltipState.floatingStyles}
                       {...tooltipState.getFloatingProps()}
-                      style={{
-                        position: tooltipState.strategy,
-                        top: tooltipState.y ?? 0,
-                        left: tooltipState.x ?? 0,
-                        visibility: R.isNil(tooltipState.x)
-                          ? 'hidden'
-                          : 'visible',
-                      }}
                       className="cb-floating cb-tooltip"
                       dangerouslySetInnerHTML={{
                         __html: noteAndSourceShouldBeDisplayedInTooltip
@@ -593,8 +586,8 @@ const HighchartsChart = ({
                           : parsedDefinition,
                       }}
                     />
-                  )}
-                </FloatingPortal>
+                  </FloatingPortal>
+                )}
               </>
             ) : (
               fakeTooltipButton

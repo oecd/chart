@@ -57,7 +57,7 @@ const createDimensionMemberLabelByCode = (members, codeLabelMapping) =>
   )(members);
 
 const isTimeDimension = R.either(
-  R.propEq('role', 'TIME_PERIOD'),
+  R.propEq('TIME_PERIOD', 'role'),
   R.compose(R.includes('TIME_PERIOD'), R.propOr([], 'roles')),
 );
 
@@ -91,10 +91,10 @@ const getXAndYDimension = (
       const yDimension =
         R.head(
           R.reject(
-            R.propEq('id', countryDimension.id),
+            R.propEq(countryDimension.id, 'id'),
             dimensionsWithMoreThanOneMember,
           ),
-        ) || R.head(R.reject(R.propEq('id', countryDimension.id), dimensions));
+        ) || R.head(R.reject(R.propEq(countryDimension.id, 'id'), dimensions));
 
       return [countryDimension, timeDimension ?? yDimension];
     }
@@ -104,10 +104,10 @@ const getXAndYDimension = (
     const xDimension =
       R.head(
         R.reject(
-          R.propEq('id', timeDimension.id),
+          R.propEq(timeDimension.id, 'id'),
           dimensionsWithMoreThanOneMember,
         ),
-      ) || R.head(R.reject(R.propEq('id', timeDimension.id), dimensions));
+      ) || R.head(R.reject(R.propEq(timeDimension.id, 'id'), dimensions));
 
     return [xDimension, timeDimension];
   }
@@ -124,7 +124,7 @@ const getXAndYDimension = (
       R.compose(R.equals(R.__, 1), R.length),
       () => {
         const x = R.head(dimensionsWithMoreThanOneMember);
-        const y = R.head(R.reject(R.propEq('id', x.id), dimensions));
+        const y = R.head(R.reject(R.propEq(x.id, 'id'), dimensions));
         return [x, y];
       },
     ],

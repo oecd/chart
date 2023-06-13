@@ -132,7 +132,7 @@ const MapChart = forwardRef(
       R.pathOr(
         code,
         ['properties', 'name'],
-        R.find(R.pathEq(['properties', 'iso-a3'], code), map.features || []),
+        R.find(R.pathEq(code, ['properties', 'iso-a3']), map.features || []),
       );
 
     const series = useMemo(

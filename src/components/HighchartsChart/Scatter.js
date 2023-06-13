@@ -222,7 +222,7 @@ const Scatter = forwardRef(
                     )(R.times(R.identity, R.length(data.categories))),
 
                   R.map(R.compose(R.map(R.prop('y')), R.prop('data'))),
-                )(R.filter(R.propEq('visible', true), chart.series));
+                )(R.filter(R.propEq(true, 'visible'), chart.series));
 
                 minMaxLines = mapWithIndex((category, idx) => {
                   if (R.isEmpty(categoriesMinMax[idx])) {
