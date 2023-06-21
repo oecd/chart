@@ -60,8 +60,6 @@ const symbols = [
   'triangle-down',
 ];
 
-let minMaxLines = [];
-
 const Scatter = forwardRef(
   (
     {
@@ -85,6 +83,8 @@ const Scatter = forwardRef(
     },
     ref,
   ) => {
+    const minMaxLines = useRef([]);
+
     const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
 
     const firstPaletteColor = R.head(colorPalette);
@@ -207,7 +207,7 @@ const Scatter = forwardRef(
               if (symbolLayout) {
                 // remove previous lines (user can make series visible or not which requires to
                 // redraw the lines)
-                forEachWithIndex((l) => l?.destroy(), minMaxLines);
+                forEachWithIndex((l) => l?.destroy(), minMaxLines.current);
 
                 const categoriesMinMax = R.compose(
                   (seriesData) =>
@@ -224,7 +224,7 @@ const Scatter = forwardRef(
                   R.map(R.compose(R.map(R.prop('y')), R.prop('data'))),
                 )(R.filter(R.propEq(true, 'visible'), chart.series));
 
-                minMaxLines = mapWithIndex((category, idx) => {
+                minMaxLines.current = mapWithIndex((category, idx) => {
                   if (R.isEmpty(categoriesMinMax[idx])) {
                     return null;
                   }
