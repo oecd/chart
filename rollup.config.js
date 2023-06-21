@@ -1,21 +1,21 @@
-const replace = require('@rollup/plugin-replace');
-const resolve = require('@rollup/plugin-node-resolve');
-const babel = require('@rollup/plugin-babel');
-const commonjs = require('@rollup/plugin-commonjs');
-const external = require('rollup-plugin-peer-deps-external');
-const json = require('@rollup/plugin-json');
-const postcss = require('rollup-plugin-postcss');
-const terser = require('@rollup/plugin-terser');
-const nodePolyfills = require('rollup-plugin-polyfill-node');
-const externalGlobals = require('rollup-plugin-external-globals');
-const dotenv = require('dotenv');
+import replace from '@rollup/plugin-replace';
+import resolve from '@rollup/plugin-node-resolve';
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
+import external from 'rollup-plugin-peer-deps-external';
+import json from '@rollup/plugin-json';
+import postcss from 'rollup-plugin-postcss';
+import terser from '@rollup/plugin-terser';
+import nodePolyfills from 'rollup-plugin-polyfill-node';
+import externalGlobals from 'rollup-plugin-external-globals';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
 const apiUrl = process.env.API_URL;
 const env = process.env.NODE_ENV || 'production';
 
-module.exports = [
+export default [
   {
     input: './src/index.js',
     output: [
