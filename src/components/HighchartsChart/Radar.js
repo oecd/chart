@@ -33,21 +33,21 @@ if (typeof Highcharts === 'object') {
 const Radar = forwardRef(
   (
     {
-      title,
-      subtitle,
+      title = '',
+      subtitle = '',
       data,
-      highlight,
-      baseline,
-      hideLegend,
-      hideXAxisLabels,
-      hideYAxisLabels,
+      highlight = '',
+      baseline = null,
+      hideLegend = false,
+      hideXAxisLabels = false,
+      hideYAxisLabels = false,
       colorPalette,
       highlightColors,
       height,
-      formatters,
-      fullscreenClose,
-      isFullScreen,
-      optionsOverride,
+      formatters = {},
+      fullscreenClose = null,
+      isFullScreen = false,
+      optionsOverride = {},
     },
     ref,
   ) => {
@@ -281,20 +281,6 @@ Radar.propTypes = {
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
-};
-
-Radar.defaultProps = {
-  title: '',
-  subtitle: '',
-  highlight: '',
-  baseline: null,
-  hideLegend: false,
-  hideXAxisLabels: false,
-  hideYAxisLabels: false,
-  formatters: {},
-  fullscreenClose: null,
-  isFullScreen: false,
-  optionsOverride: {},
 };
 
 export default memo(Radar);

@@ -26,9 +26,9 @@ const ExportButton = ({
   chartRef,
   parsedTitle,
   parsedSubtitle,
-  onDownloadData,
-  disabled,
-  style,
+  onDownloadData = null,
+  disabled = false,
+  style = {},
 }) => {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null);
@@ -179,12 +179,6 @@ ExportButton.propTypes = {
   onDownloadData: PropTypes.func,
   disabled: PropTypes.bool,
   style: PropTypes.object,
-};
-
-ExportButton.defaultProps = {
-  onDownloadData: null,
-  disabled: false,
-  style: {},
 };
 
 export default ExportButton;

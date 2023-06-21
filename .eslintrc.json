@@ -7,7 +7,8 @@
     "react/forbid-prop-types": "off",
     "no-underscore-dangle": "off",
     "react/no-danger": "off",
-    "import/prefer-default-export": "off"
+    "import/prefer-default-export": "off",
+    "react/require-default-props": "off"
   },
   "env": {
     "browser": true

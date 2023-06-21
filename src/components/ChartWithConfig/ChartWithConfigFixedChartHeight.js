@@ -9,13 +9,13 @@ import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
 
 const ChartWithConfigFixedChartHeight = ({
-  width,
-  height,
+  width = null,
+  height = null,
   vars,
   changeVar,
-  controls,
-  hideControls,
-  lang,
+  controls = [],
+  hideControls = false,
+  lang = 'default',
   ...otherProps
 }) => {
   const {
@@ -100,14 +100,6 @@ ChartWithConfigFixedChartHeight.propTypes = {
   controls: PropTypes.array,
   hideControls: PropTypes.bool,
   lang: PropTypes.string,
-};
-
-ChartWithConfigFixedChartHeight.defaultProps = {
-  width: null,
-  height: null,
-  controls: [],
-  hideControls: false,
-  lang: 'default',
 };
 
 export default ChartWithConfigFixedChartHeight;

@@ -7,7 +7,7 @@ import { getSteps } from '../../../utils/dateUtil';
 import { isNilOrEmpty } from '../../../utils/ramdaUtil';
 
 const ControlTimeSlider = ({
-  label,
+  label = null,
   frequency,
   isRange,
   minVarName,
@@ -127,10 +127,6 @@ ControlTimeSlider.propTypes = {
   changeVar: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
   codeLabelMapping: PropTypes.object.isRequired,
-};
-
-ControlTimeSlider.defaultProps = {
-  label: null,
 };
 
 export default ControlTimeSlider;

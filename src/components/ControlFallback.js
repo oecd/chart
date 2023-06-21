@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { isNilOrEmpty } from '../utils/ramdaUtil';
 
-const ControlFallback = ({ label }) => (
+const ControlFallback = ({ label = null }) => (
   <div
     style={{
       flex: '1',
@@ -16,10 +16,6 @@ const ControlFallback = ({ label }) => (
 
 ControlFallback.propTypes = {
   label: PropTypes.string,
-};
-
-ControlFallback.defaultProps = {
-  label: null,
 };
 
 export default ControlFallback;

@@ -148,8 +148,4 @@ Chart.propTypes = {
   ),
 };
 
-Chart.defaultProps = {
-  ...R.fromPairs(R.map((varName) => [varName, null], possibleVariables)),
-};
-
 export default Chart;

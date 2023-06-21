@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const CenteredContainer = ({ height, children }) => (
+const CenteredContainer = ({ height = '100%', children = null }) => (
   <div
     style={{
       minHeight: 'inherit',
@@ -21,11 +21,6 @@ CenteredContainer.propTypes = {
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
   ]),
-};
-
-CenteredContainer.defaultProps = {
-  height: '100%',
-  children: null,
 };
 
 export default CenteredContainer;

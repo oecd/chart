@@ -7,7 +7,7 @@ const sizeMapping = {
   large: { size: '50px', borderSize: '5px' },
 };
 
-const Spinner = ({ size }) => (
+const Spinner = ({ size = 'medium' }) => (
   <div
     style={{
       borderRadius: '50%',
@@ -25,10 +25,6 @@ const Spinner = ({ size }) => (
 
 Spinner.propTypes = {
   size: PropTypes.oneOf(['small', 'medium', 'large']),
-};
-
-Spinner.defaultProps = {
-  size: 'medium',
 };
 
 export default Spinner;

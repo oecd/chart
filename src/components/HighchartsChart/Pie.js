@@ -28,21 +28,21 @@ if (typeof Highcharts === 'object') {
 const Pie = forwardRef(
   (
     {
-      title,
-      subtitle,
+      title = '',
+      subtitle = '',
       data,
-      highlight,
-      baseline,
-      hideLegend,
-      hideXAxisLabels,
+      highlight = '',
+      baseline = null,
+      hideLegend = false,
+      hideXAxisLabels = false,
       colorPalette,
       highlightColors,
       width,
       height,
-      formatters,
-      fullscreenClose,
-      isFullScreen,
-      optionsOverride,
+      formatters = {},
+      fullscreenClose = null,
+      isFullScreen = false,
+      optionsOverride = {},
     },
     ref,
   ) => {
@@ -205,19 +205,6 @@ Pie.propTypes = {
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
-};
-
-Pie.defaultProps = {
-  title: '',
-  subtitle: '',
-  highlight: '',
-  baseline: null,
-  hideLegend: false,
-  hideXAxisLabels: false,
-  formatters: {},
-  fullscreenClose: null,
-  isFullScreen: false,
-  optionsOverride: {},
 };
 
 export default memo(Pie);

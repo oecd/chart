@@ -8,7 +8,7 @@ import { apiUrl } from '../constants/chart';
 import ControlFallback from './ControlFallback';
 import StandaloneControlWithConfig from './StandaloneControlWithConfig';
 
-const StandaloneControl = ({ controlId, language, ...otherProps }) => {
+const StandaloneControl = ({ controlId, language = null, ...otherProps }) => {
   const [prevControlId, setPrevControlId] = useState(null);
   const [prevLanguage, setPrevLanguage] = useState(null);
   const [controlConfigData, setControlConfigData] = useState({
@@ -86,10 +86,6 @@ const StandaloneControl = ({ controlId, language, ...otherProps }) => {
 StandaloneControl.propTypes = {
   controlId: PropTypes.string.isRequired,
   language: PropTypes.string,
-};
-
-StandaloneControl.defaultProps = {
-  language: null,
 };
 
 export default StandaloneControl;

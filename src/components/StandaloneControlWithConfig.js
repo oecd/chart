@@ -29,7 +29,7 @@ const controlByType = {
 const getControlForType = R.prop(R.__, controlByType);
 
 const StandaloneControlWithConfig = ({
-  id,
+  id = '',
   type,
   codeLabelMapping,
   ...otherProps
@@ -94,10 +94,6 @@ StandaloneControlWithConfig.propTypes = {
   id: PropTypes.string,
   type: PropTypes.string.isRequired,
   codeLabelMapping: PropTypes.string.isRequired,
-};
-
-StandaloneControlWithConfig.defaultProps = {
-  id: '',
 };
 
 export default StandaloneControlWithConfig;

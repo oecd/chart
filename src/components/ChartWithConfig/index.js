@@ -8,17 +8,17 @@ import ChartWithConfigNonFixedChartHeight from './ChartWithConfigNonFixedChartHe
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 
 const ChartWithConfig = ({
-  height,
-  var1,
-  var2,
-  var3,
-  var4,
-  var5,
-  var1DefaultValue,
-  var2DefaultValue,
-  var3DefaultValue,
-  var4DefaultValue,
-  var5DefaultValue,
+  height = null,
+  var1 = null,
+  var2 = null,
+  var3 = null,
+  var4 = null,
+  var5 = null,
+  var1DefaultValue = null,
+  var2DefaultValue = null,
+  var3DefaultValue = null,
+  var4DefaultValue = null,
+  var5DefaultValue = null,
   ...otherProps
 }) => {
   const ChartWithConfigComponent = height
@@ -80,20 +80,6 @@ ChartWithConfig.propTypes = {
   var3DefaultValue: PropTypes.string,
   var4DefaultValue: PropTypes.string,
   var5DefaultValue: PropTypes.string,
-};
-
-ChartWithConfig.defaultProps = {
-  height: null,
-  var1: null,
-  var2: null,
-  var3: null,
-  var4: null,
-  var5: null,
-  var1DefaultValue: null,
-  var2DefaultValue: null,
-  var3DefaultValue: null,
-  var4DefaultValue: null,
-  var5DefaultValue: null,
 };
 
 export default ChartWithConfig;

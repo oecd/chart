@@ -32,21 +32,21 @@ const Line = forwardRef(
   (
     {
       data,
-      title,
-      subtitle,
-      highlight,
-      baseline,
-      hideLegend,
-      hideXAxisLabels,
-      hideYAxisLabels,
+      title = '',
+      subtitle = '',
+      highlight = '',
+      baseline = null,
+      hideLegend = false,
+      hideXAxisLabels = false,
+      hideYAxisLabels = false,
       colorPalette,
       highlightColors,
       width,
       height,
-      formatters,
-      fullscreenClose,
-      isFullScreen,
-      optionsOverride,
+      formatters = {},
+      fullscreenClose = null,
+      isFullScreen = false,
+      optionsOverride = {},
     },
     ref,
   ) => {
@@ -317,20 +317,6 @@ Line.propTypes = {
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
-};
-
-Line.defaultProps = {
-  title: '',
-  subtitle: '',
-  highlight: '',
-  baseline: null,
-  hideLegend: false,
-  hideXAxisLabels: false,
-  hideYAxisLabels: false,
-  formatters: {},
-  fullscreenClose: null,
-  isFullScreen: false,
-  optionsOverride: {},
 };
 
 export default memo(Line);

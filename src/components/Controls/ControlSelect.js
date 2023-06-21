@@ -10,15 +10,15 @@ const { customSelectTheme, customSelectStyles } = getBasicStylingConfigs();
 const noOptionsMessage = () => '';
 
 const ControlSelect = ({
-  label,
+  label = null,
   options,
   placeholder,
   multiple,
-  noOptionMeansAllOptions,
+  noOptionMeansAllOptions = false,
   varName,
   vars,
   changeVar,
-  codeLabelMapping,
+  codeLabelMapping = null,
 }) => {
   const selectInstanceId = useId();
 
@@ -147,12 +147,6 @@ ControlSelect.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
-};
-
-ControlSelect.defaultProps = {
-  label: null,
-  noOptionMeansAllOptions: false,
-  codeLabelMapping: null,
 };
 
 export default ControlSelect;

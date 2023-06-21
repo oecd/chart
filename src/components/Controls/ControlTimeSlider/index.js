@@ -8,14 +8,14 @@ import { isNilOrEmpty } from '../../../utils/ramdaUtil';
 import ControlFallback from '../../ControlFallback';
 
 const ControlTimeSlider = ({
-  label,
+  label = null,
   frequencies,
   isRange,
   minVarName,
-  maxVarName,
+  maxVarName = '',
   vars,
   changeVar,
-  codeLabelMapping,
+  codeLabelMapping = null,
   lang,
 }) => {
   const finalLabel = useMemo(() => {
@@ -81,12 +81,6 @@ ControlTimeSlider.propTypes = {
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
   lang: PropTypes.string.isRequired,
-};
-
-ControlTimeSlider.defaultProps = {
-  label: null,
-  maxVarName: '',
-  codeLabelMapping: null,
 };
 
 export default ControlTimeSlider;

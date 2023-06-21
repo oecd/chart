@@ -37,25 +37,25 @@ const calcMarginTop = (title, subtitle, horizontal) => {
 const Stacked = forwardRef(
   (
     {
-      horizontal,
-      area,
-      title,
-      subtitle,
+      horizontal = false,
+      area = false,
+      title = '',
+      subtitle = '',
       data,
-      highlight,
-      baseline,
-      hideLegend,
-      hideXAxisLabels,
-      hideYAxisLabels,
+      highlight = '',
+      baseline = null,
+      hideLegend = false,
+      hideXAxisLabels = false,
+      hideYAxisLabels = false,
       colorPalette,
       highlightColors,
       width,
       height,
-      stacking,
-      formatters,
-      fullscreenClose,
-      isFullScreen,
-      optionsOverride,
+      stacking = stackingOptions.percent.value,
+      formatters = {},
+      fullscreenClose = null,
+      isFullScreen = false,
+      optionsOverride = {},
     },
     ref,
   ) => {
@@ -307,23 +307,6 @@ Stacked.propTypes = {
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
-};
-
-Stacked.defaultProps = {
-  horizontal: false,
-  area: false,
-  title: '',
-  subtitle: '',
-  highlight: '',
-  baseline: null,
-  hideLegend: false,
-  hideXAxisLabels: false,
-  hideYAxisLabels: false,
-  stacking: stackingOptions.percent.value,
-  formatters: {},
-  fullscreenClose: null,
-  isFullScreen: false,
-  optionsOverride: {},
 };
 
 export default memo(Stacked);

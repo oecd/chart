@@ -8,7 +8,12 @@ import Component from './Component';
 import { possibleVariables } from '../../utils/configUtil';
 import { isCastableToNumber } from '../../utils/chartUtil';
 
-const Chart = ({ width, height, lazyLoad, ...otherProps }) => {
+const Chart = ({
+  width = null,
+  height = null,
+  lazyLoad = true,
+  ...otherProps
+}) => {
   const finalWidth = useMemo(
     () => (isCastableToNumber(width) ? Number(width) : width),
     [width],
@@ -46,14 +51,6 @@ Chart.propTypes = {
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   lazyLoad: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
   language: PropTypes.string,
-};
-
-Chart.defaultProps = {
-  ...R.fromPairs(R.map((varName) => [varName, null], possibleVariables)),
-  width: null,
-  height: null,
-  lazyLoad: true,
-  language: null,
 };
 
 export default Chart;

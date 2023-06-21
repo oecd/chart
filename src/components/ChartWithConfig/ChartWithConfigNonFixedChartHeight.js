@@ -11,12 +11,12 @@ import Controls from '../Controls';
 const minChartHeightForControlsDisplay = 280;
 
 const ChartWithConfigNonFixedChartHeight = ({
-  width,
+  width = null,
   vars,
   changeVar,
-  controls,
-  hideControls,
-  lang,
+  controls = [],
+  hideControls = false,
+  lang = 'default',
   ...otherProps
 }) => {
   const {
@@ -125,13 +125,6 @@ ChartWithConfigNonFixedChartHeight.propTypes = {
   controls: PropTypes.array,
   hideControls: PropTypes.bool,
   lang: PropTypes.string,
-};
-
-ChartWithConfigNonFixedChartHeight.defaultProps = {
-  width: null,
-  controls: [],
-  hideControls: false,
-  lang: 'default',
 };
 
 export default ChartWithConfigNonFixedChartHeight;

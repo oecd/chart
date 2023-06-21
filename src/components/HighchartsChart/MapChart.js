@@ -78,24 +78,24 @@ if (typeof Highcharts === 'object') {
 const MapChart = forwardRef(
   (
     {
-      title,
-      subtitle,
+      title = '',
+      subtitle = '',
       data,
-      mapType,
-      mapDisplayCountriesName,
-      mapAutoShade,
-      mapColorValueSteps,
-      highlight,
-      baseline,
-      hideLegend,
+      mapType = mapTypes.normal.value,
+      mapDisplayCountriesName = false,
+      mapAutoShade = true,
+      mapColorValueSteps = [],
+      highlight = '',
+      baseline = null,
+      hideLegend = false,
       colorPalette,
       highlightColors,
       width,
       height,
-      formatters,
-      fullscreenClose,
-      isFullScreen,
-      optionsOverride,
+      formatters = {},
+      fullscreenClose = null,
+      isFullScreen = false,
+      optionsOverride = {},
     },
     ref,
   ) => {
@@ -388,22 +388,6 @@ MapChart.propTypes = {
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
-};
-
-MapChart.defaultProps = {
-  title: '',
-  subtitle: '',
-  mapType: mapTypes.normal.value,
-  mapDisplayCountriesName: false,
-  mapAutoShade: true,
-  mapColorValueSteps: [],
-  highlight: '',
-  baseline: null,
-  hideLegend: false,
-  formatters: {},
-  fullscreenClose: null,
-  isFullScreen: false,
-  optionsOverride: {},
 };
 
 export default memo(MapChart);

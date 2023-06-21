@@ -17,7 +17,13 @@ const controlByType = {
 
 const getControlForType = R.prop(R.__, controlByType);
 
-const Controls = ({ controls, vars, changeVar, codeLabelMapping, lang }) => {
+const Controls = ({
+  controls = [],
+  vars,
+  changeVar,
+  codeLabelMapping = null,
+  lang,
+}) => {
   const validControls = useMemo(
     () => R.filter((c) => R.has(c.type, controlTypes), controls),
     [controls],
@@ -50,11 +56,6 @@ Controls.propTypes = {
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
   lang: PropTypes.string.isRequired,
-};
-
-Controls.defaultProps = {
-  controls: [],
-  codeLabelMapping: null,
 };
 
 export default Controls;

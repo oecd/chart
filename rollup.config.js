@@ -48,6 +48,37 @@ module.exports = [
     ],
   },
   {
+    input: './src/index-util.js',
+    output: [
+      {
+        dir: 'dist/esm',
+        format: 'esm',
+        sourcemap: true,
+        entryFileNames: () => 'util.js',
+      },
+    ],
+    external: [/@babel\/runtime/],
+    plugins: [
+      replace({
+        'process.env.NODE_ENV': JSON.stringify(env),
+        'process.env.API_URL': JSON.stringify(apiUrl),
+        preventAssignment: true,
+      }),
+      external(),
+      resolve(),
+      babel({
+        presets: ['@babel/preset-env', '@babel/preset-react'],
+        plugins: [['@babel/plugin-transform-runtime', { corejs: 3 }]],
+        exclude: [/node_modules/],
+        babelHelpers: 'runtime',
+      }),
+      commonjs(),
+      json(),
+      postcss(),
+      terser(),
+    ],
+  },
+  {
     input: './src/index-browser.js',
     output: [
       {

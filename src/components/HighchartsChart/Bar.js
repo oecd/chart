@@ -37,24 +37,24 @@ const calcMarginTop = (title, subtitle, horizontal) => {
 const Bar = forwardRef(
   (
     {
-      horizontal,
-      title,
-      subtitle,
+      horizontal = false,
+      title = '',
+      subtitle = '',
       data,
-      highlight,
-      baseline,
-      hideLegend,
-      hideXAxisLabels,
-      hideYAxisLabels,
+      highlight = '',
+      baseline = null,
+      hideLegend = false,
+      hideXAxisLabels = false,
+      hideYAxisLabels = false,
       colorPalette,
       highlightColors,
       width,
       height,
-      pivotValue,
-      formatters,
-      fullscreenClose,
-      isFullScreen,
-      optionsOverride,
+      pivotValue = 0,
+      formatters = {},
+      fullscreenClose = null,
+      isFullScreen = false,
+      optionsOverride = {},
     },
     ref,
   ) => {
@@ -303,22 +303,6 @@ Bar.propTypes = {
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
-};
-
-Bar.defaultProps = {
-  horizontal: false,
-  title: '',
-  subtitle: '',
-  highlight: '',
-  baseline: null,
-  hideLegend: false,
-  hideXAxisLabels: false,
-  hideYAxisLabels: false,
-  pivotValue: 0,
-  formatters: {},
-  fullscreenClose: null,
-  isFullScreen: false,
-  optionsOverride: {},
 };
 
 export default memo(Bar);
