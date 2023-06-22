@@ -63,23 +63,23 @@ const symbols = [
 const Scatter = forwardRef(
   (
     {
-      symbolLayout,
-      title,
-      subtitle,
+      symbolLayout = false,
+      title = '',
+      subtitle = '',
       data,
-      highlight,
-      baseline,
-      hideLegend,
-      hideXAxisLabels,
-      hideYAxisLabels,
+      highlight = '',
+      baseline = null,
+      hideLegend = false,
+      hideXAxisLabels = false,
+      hideYAxisLabels = false,
       colorPalette,
       highlightColors,
       width,
       height,
-      formatters,
-      fullscreenClose,
-      isFullScreen,
-      optionsOverride,
+      formatters = {},
+      fullscreenClose = null,
+      isFullScreen = false,
+      optionsOverride = {},
     },
     ref,
   ) => {
@@ -401,21 +401,6 @@ Scatter.propTypes = {
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
   optionsOverride: PropTypes.object,
-};
-
-Scatter.defaultProps = {
-  symbolLayout: false,
-  title: '',
-  subtitle: '',
-  highlight: '',
-  baseline: null,
-  hideLegend: false,
-  hideXAxisLabels: false,
-  hideYAxisLabels: false,
-  formatters: {},
-  fullscreenClose: null,
-  isFullScreen: false,
-  optionsOverride: {},
 };
 
 export default memo(Scatter);
