@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, forwardRef, memo } from 'react';
+import React, { useMemo, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
@@ -98,12 +98,6 @@ const Bar = forwardRef(
       [data, colorPalette, highlightColors, parsedHighlight, baseline],
     );
 
-    const updateNeededAfterChartHasBeenRenderedOnceDone = useRef(false);
-
-    useEffect(() => {
-      updateNeededAfterChartHasBeenRenderedOnceDone.current = false;
-    }, [width, height]);
-
     const defaultOptions = useMemo(
       () => ({
         chart: {
@@ -115,37 +109,9 @@ const Bar = forwardRef(
           height,
           animation: false,
           spacingBottom: 5,
-          events: data.areCategoriesNumbersOrDates
-            ? {
-                fullscreenClose,
-              }
-            : {
-                fullscreenClose,
-                render: ({ target: chart }) => {
-                  if (!updateNeededAfterChartHasBeenRenderedOnceDone.current) {
-                    // TODO:
-                    // show/hide depending on height as well (chart is more important than legend)
-                    updateNeededAfterChartHasBeenRenderedOnceDone.current = true;
-                    if (
-                      (!horizontal && !hideXAxisLabels) ||
-                      (horizontal && !hideYAxisLabels)
-                    ) {
-                      // WARNING: calling update in render can easily cause an infinite loop
-                      // without a stopping condition
-                      chart.xAxis[0].update(
-                        {
-                          labels: {
-                            enabled: chart.xAxis[0]?.tickInterval === 1,
-                          },
-                        },
-                        true,
-                        false,
-                        false,
-                      );
-                    }
-                  }
-                },
-              },
+          events: {
+            fullscreenClose,
+          },
         },
 
         colors: colorPalette,
@@ -175,6 +141,8 @@ const Bar = forwardRef(
         xAxis: {
           categories: R.map(R.prop('label'), data.categories),
           labels: {
+            step: 1,
+            rotation: -45,
             style: { color: '#0c0c0c', fontSize: '12px' },
             ...((hideXAxisLabels && !horizontal) ||
             (hideYAxisLabels && horizontal)

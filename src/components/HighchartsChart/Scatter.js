@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, forwardRef, memo } from 'react';
+import React, { useMemo, useRef, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
@@ -162,12 +162,6 @@ const Scatter = forwardRef(
       ],
     );
 
-    const updateNeededAfterChartHasBeenRenderedOnceDone = useRef(false);
-
-    useEffect(() => {
-      updateNeededAfterChartHasBeenRenderedOnceDone.current = false;
-    }, [width]);
-
     const defaultOptions = useMemo(
       () => ({
         chart: {
@@ -183,27 +177,6 @@ const Scatter = forwardRef(
           events: {
             fullscreenClose,
             render: ({ target: chart }) => {
-              if (
-                !hideXAxisLabels &&
-                !updateNeededAfterChartHasBeenRenderedOnceDone.current &&
-                !data.areCategoriesNumbersOrDates
-              ) {
-                // TODO:
-                // show/hide depending on height as well (chart is more important than legend)
-                updateNeededAfterChartHasBeenRenderedOnceDone.current = true;
-                // WARNING: calling update in render can easily cause an infinite loop
-                // without a stopping condition
-                chart.xAxis[0].update(
-                  {
-                    labels: { enabled: chart.xAxis[0]?.tickInterval === 1 },
-                  },
-                  true,
-                  false,
-                  false,
-                );
-                return;
-              }
-
               if (symbolLayout) {
                 // remove previous lines (user can make series visible or not which requires to
                 // redraw the lines)
@@ -282,6 +255,8 @@ const Scatter = forwardRef(
         xAxis: {
           categories: R.map(R.prop('label'), data.categories),
           labels: {
+            step: 1,
+            rotation: -45,
             style: { color: '#0c0c0c', fontSize: '12px' },
             ...(hideXAxisLabels ? { enabled: false } : {}),
           },
