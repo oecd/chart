@@ -7,6 +7,8 @@ import * as R from 'ramda';
 import Component from './Component';
 import { possibleVariables } from '../../utils/configUtil';
 import { isCastableToNumber } from '../../utils/chartUtil';
+import CenteredContainer from '../CenteredContainer';
+import ChartErrorBoundary from '../ChartErrorBoundary';
 
 const Chart = ({
   width = null,
@@ -26,19 +28,29 @@ const Chart = ({
 
   if (lazyLoad === false || lazyLoad === 'false') {
     return (
-      <Component width={finalWidth} height={finalHeight} {...otherProps} />
+      <ChartErrorBoundary
+        fallback={
+          <CenteredContainer>Something went wrong :(</CenteredContainer>
+        }
+      >
+        <Component width={finalWidth} height={finalHeight} {...otherProps} />
+      </ChartErrorBoundary>
     );
   }
 
   return (
-    <LazyLoad
-      style={finalHeight ? { minHeight: finalHeight } : { height: '100%' }}
-      once
-      offset={100}
-      resize
+    <ChartErrorBoundary
+      fallback={<CenteredContainer>Something went wrong :(</CenteredContainer>}
     >
-      <Component width={finalWidth} height={finalHeight} {...otherProps} />
-    </LazyLoad>
+      <LazyLoad
+        style={finalHeight ? { minHeight: finalHeight } : { height: '100%' }}
+        once
+        offset={100}
+        resize
+      >
+        <Component width={finalWidth} height={finalHeight} {...otherProps} />
+      </LazyLoad>
+    </ChartErrorBoundary>
   );
 };
 
