@@ -255,8 +255,6 @@ const Scatter = forwardRef(
         xAxis: {
           categories: R.map(R.prop('label'), data.categories),
           labels: {
-            step: 1,
-            rotation: -45,
             style: { color: '#0c0c0c', fontSize: '12px' },
             ...(hideXAxisLabels ? { enabled: false } : {}),
           },
