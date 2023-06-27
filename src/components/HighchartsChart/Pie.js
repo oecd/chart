@@ -141,7 +141,7 @@ const Pie = forwardRef(
 
         tooltip: {
           ...R.propOr({}, 'tooltip', formatters),
-          outside: true,
+          outside: !isFullScreen,
         },
 
         series,
@@ -166,6 +166,7 @@ const Pie = forwardRef(
         hideXAxisLabels,
         formatters,
         fullscreenClose,
+        isFullScreen,
       ],
     );
 

@@ -202,7 +202,7 @@ const Stacked = forwardRef(
 
         tooltip: {
           ...R.propOr({}, 'tooltip', formatters),
-          outside: true,
+          outside: !isFullScreen,
         },
 
         series,
@@ -230,6 +230,7 @@ const Stacked = forwardRef(
         stacking,
         formatters,
         fullscreenClose,
+        isFullScreen,
       ],
     );
 

@@ -310,7 +310,10 @@ const MapChart = forwardRef(
           },
         },
 
-        tooltip: { ...R.propOr({}, 'tooltip', formatters), outside: true },
+        tooltip: {
+          ...R.propOr({}, 'tooltip', formatters),
+          outside: !isFullScreen,
+        },
 
         mapNavigation: {
           enabled: true,
@@ -344,6 +347,7 @@ const MapChart = forwardRef(
         hideLegend,
         formatters,
         fullscreenClose,
+        isFullScreen,
       ],
     );
 

@@ -200,7 +200,7 @@ const Bar = forwardRef(
 
         tooltip: {
           ...R.propOr({}, 'tooltip', formatters),
-          outside: true,
+          outside: !isFullScreen,
         },
 
         series,
@@ -228,6 +228,7 @@ const Bar = forwardRef(
         pivotValue,
         formatters,
         fullscreenClose,
+        isFullScreen,
       ],
     );
 

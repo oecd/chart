@@ -218,7 +218,7 @@ const Radar = forwardRef(
 
         tooltip: {
           ...R.propOr({}, 'tooltip', formatters),
-          outside: true,
+          outside: !isFullScreen,
         },
 
         series,
@@ -242,6 +242,7 @@ const Radar = forwardRef(
         hideYAxisLabels,
         formatters,
         fullscreenClose,
+        isFullScreen,
       ],
     );
 

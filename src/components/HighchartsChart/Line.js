@@ -224,7 +224,7 @@ const Line = forwardRef(
 
         tooltip: {
           ...R.propOr({}, 'tooltip', formatters),
-          outside: true,
+          outside: !isFullScreen,
         },
 
         series,
@@ -250,6 +250,7 @@ const Line = forwardRef(
         hideYAxisLabels,
         formatters,
         fullscreenClose,
+        isFullScreen,
       ],
     );
 

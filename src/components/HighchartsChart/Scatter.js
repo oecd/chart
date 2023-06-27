@@ -308,7 +308,7 @@ const Scatter = forwardRef(
 
         tooltip: {
           ...R.propOr({}, 'tooltip', formatters),
-          outside: true,
+          outside: !isFullScreen,
         },
 
         series,
@@ -334,6 +334,7 @@ const Scatter = forwardRef(
         hideYAxisLabels,
         formatters,
         fullscreenClose,
+        isFullScreen,
       ],
     );
 
