@@ -15,6 +15,8 @@ const ControlSelect = ({
   placeholder,
   multiple,
   noOptionMeansAllOptions = false,
+  displayClearAllOptions = true,
+  displayOptionsWhenAllOptions = false,
   varName,
   vars,
   changeVar,
@@ -75,7 +77,10 @@ const ControlSelect = ({
     if (multiple) {
       const optionsFromVar = R.split('|', vars[varName] ?? '');
       if (noOptionMeansAllOptions) {
-        if (R.length(optionsFromVar) === R.length(finalOptions)) {
+        if (
+          !displayOptionsWhenAllOptions &&
+          R.length(optionsFromVar) === R.length(finalOptions)
+        ) {
           return [];
         }
       }
@@ -104,7 +109,14 @@ const ControlSelect = ({
           finalOptions,
         )
       : null;
-  }, [vars, varName, finalOptions, multiple, noOptionMeansAllOptions]);
+  }, [
+    vars,
+    varName,
+    finalOptions,
+    multiple,
+    noOptionMeansAllOptions,
+    displayOptionsWhenAllOptions,
+  ]);
 
   return R.isNil(codeLabelMapping) ? (
     <ControlFallback label={label} />
@@ -125,6 +137,7 @@ const ControlSelect = ({
         formatOptionLabel={(o) => (
           <span dangerouslySetInnerHTML={{ __html: o.label }} />
         )}
+        components={displayClearAllOptions ? {} : { ClearIndicator: null }}
         menuPlacement="auto"
         isMulti={multiple}
         closeMenuOnSelect={!multiple}
@@ -143,6 +156,8 @@ ControlSelect.propTypes = {
   placeholder: PropTypes.string.isRequired,
   multiple: PropTypes.bool.isRequired,
   noOptionMeansAllOptions: PropTypes.bool,
+  displayClearAllOptions: PropTypes.bool,
+  displayOptionsWhenAllOptions: PropTypes.bool,
   varName: PropTypes.string.isRequired,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
