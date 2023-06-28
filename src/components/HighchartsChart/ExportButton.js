@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons/faDownload';
 import { faFileImage } from '@fortawesome/free-solid-svg-icons/faFileImage';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons/faFileCsv';
+import { faCode } from '@fortawesome/free-solid-svg-icons/faCode';
+
 import {
   useFloating,
   autoUpdate,
@@ -66,6 +68,7 @@ const ExportButton = ({
     {
       label: 'CSV',
       icon: faFileCsv,
+      iconStyle: { marginRight: '8px' },
       onSelect: () => {
         if (chartRef.current?.chart.downloadCSV) {
           chartRef.current?.chart.downloadCSV();
@@ -75,6 +78,7 @@ const ExportButton = ({
     {
       label: 'PNG',
       icon: faFileImage,
+      iconStyle: { marginRight: '12px' },
       onSelect: () => {
         chartRef.current?.chart.exportChartLocal(undefined, {
           title: {
@@ -87,6 +91,27 @@ const ExportButton = ({
             ? { chart: { marginTop: undefined } }
             : {}),
         });
+      },
+    },
+    {
+      label: 'SVG',
+      icon: faCode,
+      iconStyle: {},
+      onSelect: () => {
+        chartRef.current?.chart.exportChartLocal(
+          { type: 'image/svg+xml' },
+          {
+            title: {
+              text: parsedTitle,
+            },
+            subtitle: {
+              text: parsedSubtitle,
+            },
+            ...(!isNilOrEmpty(parsedTitle) || !isNilOrEmpty(parsedSubtitle)
+              ? { chart: { marginTop: undefined } }
+              : {}),
+          },
+        );
       },
     },
   ];
@@ -157,6 +182,7 @@ const ExportButton = ({
                       <FontAwesomeIcon
                         icon={o.icon}
                         className="cb-toolbar-menu-item-icon"
+                        style={o.iconStyle}
                       />
                       {o.label}
                     </div>
