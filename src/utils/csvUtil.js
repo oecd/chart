@@ -47,6 +47,13 @@ const cleanupCSV = R.compose((data) => {
 export const parseCSV = (csvString) =>
   R.compose(cleanupCSV, R.pick(['data']), parseRawCSV)(csvString ?? '');
 
+export const parseCSVWithoutCleanUp = (csvString) =>
+  R.compose(
+    R.when(isNilOrEmpty, R.always([])),
+    R.prop('data'),
+    parseRawCSV,
+  )(csvString ?? '');
+
 export const parseData = ({ data, parsingHelperData, ...rest }) => {
   if (isNilOrEmpty(data)) {
     return { categories: [], series: [], otherDimensions: [], ...rest };

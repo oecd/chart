@@ -5,6 +5,9 @@ import Select from 'react-select';
 import getBasicStylingConfigs from '../../utils/reactSelectUtil';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import ControlFallback from '../ControlFallback';
+import { controlTypes } from '../../constants/chart';
+import { parseCSVWithoutCleanUp } from '../../utils/csvUtil';
+import { possibleVariables } from '../../utils/configUtil';
 
 const { customSelectTheme, customSelectStyles } = getBasicStylingConfigs();
 const noOptionsMessage = () => '';
@@ -21,25 +24,31 @@ const ControlSelect = ({
   vars,
   changeVar,
   codeLabelMapping = null,
+  type,
 }) => {
   const selectInstanceId = useId();
 
   const finalOptions = useMemo(
     () =>
-      R.map(
-        (o) =>
+      R.map((o) => {
+        const codeThatCanContainVars =
+          type === controlTypes.selectChart.value
+            ? R.join('|', R.head(parseCSVWithoutCleanUp(R.prop('value', o))))
+            : R.prop('value', o);
+
+        return R.compose(
+          R.assoc('value', codeThatCanContainVars),
           R.assoc(
             'label',
             R.propOr(
-              R.prop('value', o),
-              R.toUpper(R.prop('value', o)),
+              codeThatCanContainVars,
+              R.toUpper(codeThatCanContainVars),
               codeLabelMapping,
             ),
-            o,
           ),
-        R.reject(R.compose(isNilOrEmpty, R.prop('value')), options || []),
-      ),
-    [options, codeLabelMapping],
+        )(o);
+      }, R.reject(R.compose(isNilOrEmpty, R.prop('value')), options || [])),
+    [options, codeLabelMapping, type],
   );
 
   const finalLabel = useMemo(() => {
@@ -99,16 +108,25 @@ const ControlSelect = ({
       );
     }
 
-    return R.has(varName, vars)
-      ? R.find(
-          R.compose(
-            R.equals(R.toUpper(vars[varName])),
+    if (!R.has(varName, vars)) {
+      return null;
+    }
+
+    const optionValue =
+      type === controlTypes.selectChart.value
+        ? R.compose(
             R.toUpper,
-            R.prop('value'),
-          ),
-          finalOptions,
-        )
-      : null;
+            R.join('|'),
+            R.prepend(vars[varName]),
+            R.values,
+            R.pick(possibleVariables),
+          )(vars)
+        : R.toUpper(vars[varName]);
+
+    return R.find(
+      R.compose(R.equals(optionValue), R.toUpper, R.prop('value')),
+      finalOptions,
+    );
   }, [
     vars,
     varName,
@@ -116,6 +134,7 @@ const ControlSelect = ({
     multiple,
     noOptionMeansAllOptions,
     displayOptionsWhenAllOptions,
+    type,
   ]);
 
   return R.isNil(codeLabelMapping) ? (
@@ -162,6 +181,7 @@ ControlSelect.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
+  type: PropTypes.string.isRequired,
 };
 
 export default ControlSelect;
