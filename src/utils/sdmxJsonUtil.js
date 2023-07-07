@@ -304,7 +304,7 @@ export const createDataFromSdmxJson = ({
   dataSourceType,
   sortBy,
   sortOrder,
-  sortSeries,
+  sortSeries = '',
   yAxisOrderOverride,
 }) => {
   if (!sdmxJson) {
