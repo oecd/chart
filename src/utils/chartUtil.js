@@ -300,14 +300,26 @@ export const replaceVarsNameByVarsValueUsingCodeLabelMapping = (
   string,
   vars,
   mapping,
+  replaceMissingVarByBlank = false,
 ) =>
   R.reduce(
     (acc, varName) =>
       R.replace(
         new RegExp(`{${varName}}`, 'gi'),
-        R.propOr('', R.toUpper(R.prop(varName, vars)), mapping),
+        R.propOr(
+          replaceMissingVarByBlank ? '&nbsp;' : '',
+          R.toUpper(R.prop(varName, vars)),
+          mapping,
+        ),
         acc,
       ),
     string ?? '',
     possibleVariables,
   );
+
+const anyVarRegExp = R.join(
+  '|',
+  R.map((v) => `{${v}}`, possibleVariables),
+);
+
+export const doesStringContainVar = R.test(new RegExp(anyVarRegExp, 'i'));

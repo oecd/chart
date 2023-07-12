@@ -43,6 +43,7 @@ import Spinner from '../Spinner';
 import {
   replaceVarsNameByVarsValueUsingCodeLabelMapping,
   replaceVarsNameByVarsValue,
+  doesStringContainVar,
 } from '../../utils/chartUtil';
 import { createFormatters } from '../../utils/highchartsUtil';
 import useTooltipState from '../../hooks/useTooltipState';
@@ -406,6 +407,7 @@ const HighchartsChart = ({
         title,
         vars,
         parsedData?.codeLabelMapping,
+        true,
       ),
     [title, vars, parsedData?.codeLabelMapping],
   );
@@ -416,8 +418,18 @@ const HighchartsChart = ({
         subtitle,
         vars,
         parsedData?.codeLabelMapping,
+        true,
       ),
     [subtitle, vars, parsedData?.codeLabelMapping],
+  );
+
+  const doesTitleOrSubtitleContainVar = useMemo(
+    () => doesStringContainVar(title) || doesStringContainVar(subtitle),
+    [title, subtitle],
+  );
+
+  const canTitleAndSubtitleBeDisplayed = !(
+    doesTitleOrSubtitleContainVar && isFetching
   );
 
   useEffect(() => {
@@ -537,7 +549,7 @@ const HighchartsChart = ({
       >
         <div style={{ display: 'flex', padding: '7px 10px 5px 10px' }}>
           <div style={{ flex: '1 1 auto' }}>
-            {!R.isEmpty(parsedTitle) && (
+            {!R.isEmpty(parsedTitle) && canTitleAndSubtitleBeDisplayed && (
               <div
                 className="cb-title"
                 dangerouslySetInnerHTML={{
@@ -545,7 +557,7 @@ const HighchartsChart = ({
                 }}
               />
             )}
-            {!R.isEmpty(parsedSubtitle) && (
+            {!R.isEmpty(parsedSubtitle) && canTitleAndSubtitleBeDisplayed && (
               <div
                 className="cb-subtitle"
                 dangerouslySetInnerHTML={{
