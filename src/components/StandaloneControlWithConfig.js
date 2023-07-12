@@ -107,17 +107,19 @@ const StandaloneControlWithConfig = ({
 
   useEffect(() => {
     R.forEach(([varName, varValue]) => {
-      document.dispatchEvent(
-        new CustomEvent('cbControlValueChange', {
-          detail: {
-            controlId: id || '',
-            varName,
-            varValue: varValue === '-' ? '' : varValue,
-          },
-        }),
-      );
+      if (varValue || type !== controlTypes.selectChart.value) {
+        document.dispatchEvent(
+          new CustomEvent('cbControlValueChange', {
+            detail: {
+              controlId: id || '',
+              varName,
+              varValue: varValue === '-' ? '' : varValue,
+            },
+          }),
+        );
+      }
     }, R.toPairs(vars));
-  }, [id, vars]);
+  }, [id, vars, type]);
 
   return (
     <Suspense fallback={<ControlFallback {...otherProps} />}>

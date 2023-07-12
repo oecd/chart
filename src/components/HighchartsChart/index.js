@@ -320,13 +320,13 @@ const HighchartsChart = ({
       )(R.keys(varsThatCauseNewPreParsedDataFetch));
 
       if (anyVarHasChanged) {
-        const varsParam = R.join(
-          '/',
-          R.compose(
-            R.map((v) => (R.isEmpty(v) ? '-' : v)),
-            R.values,
-          )(vars),
-        );
+        const varsParam = R.compose(
+          R.join('/'),
+          R.dropLastWhile((v) => v === '-'),
+          R.map((v) => (R.isEmpty(v) ? '-' : v)),
+          R.values,
+        )(vars);
+
         const configParams = `${id}${
           R.isEmpty(varsParam) ? '' : `/${varsParam}`
         }`;

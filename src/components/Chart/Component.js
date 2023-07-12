@@ -15,6 +15,7 @@ import { possibleVariables } from '../../utils/configUtil';
 import { fetchJson } from '../../utils/fetchUtil';
 import CenteredContainer from '../CenteredContainer';
 import { apiUrl } from '../../constants/chart';
+import { isNilOrEmpty } from '../../utils/ramdaUtil';
 
 const Chart = ({ chartId, language, ...otherProps }) => {
   const [prevChartId, setPrevChartId] = useState(null);
@@ -54,7 +55,14 @@ const Chart = ({ chartId, language, ...otherProps }) => {
         R.compose(R.assoc('chartConfig', null), R.assoc('isLoading', true)),
       );
 
-      const varsParam = R.join('/', R.values(vars));
+      const varsParam = R.compose(
+        R.join('/'),
+        R.dropLastWhile((value) => value === '-'),
+        R.map((varName) =>
+          isNilOrEmpty(R.prop(varName, vars)) ? '-' : R.prop(varName, vars),
+        ),
+      )(possibleVariables);
+
       const langParam = lang ? `?lang=${R.toLower(lang)}` : '';
       const configParams = `${id}${
         R.isEmpty(varsParam) ? '' : `/${varsParam}`
