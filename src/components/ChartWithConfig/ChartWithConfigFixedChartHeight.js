@@ -71,6 +71,7 @@ const ChartWithConfigFixedChartHeight = ({
                 width={autoSizerWidth}
                 height={autoSizerHeight}
                 vars={vars}
+                lang={lang}
                 onDataReady={onDataReady}
                 {...otherProps}
               />

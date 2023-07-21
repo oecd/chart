@@ -116,6 +116,7 @@ const HighchartsChart = ({
   onDownloadData = null,
   onDataReady = null,
   vars,
+  lang,
   ...otherProps
 }) => {
   const chartForType = getChartForType(chartType);
@@ -341,7 +342,9 @@ const HighchartsChart = ({
             lastRequestedDataKey.current = configParams;
 
             const newPreParsedData = await fetchJson(
-              `${apiUrl}/api/public/chartConfig/${configParams}?preParsedDataOnly`,
+              `${apiUrl}/api/public/chartConfig/${configParams}?preParsedDataOnly&lang=${R.toLower(
+                lang,
+              )}`,
             );
 
             // discard result from outdated request(s)
@@ -359,7 +362,7 @@ const HighchartsChart = ({
         getNewPreParsedData();
       }
     }
-  }, [id, vars, preParsedDataInternal]);
+  }, [id, vars, lang, preParsedDataInternal]);
 
   const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);
@@ -745,6 +748,7 @@ HighchartsChart.propTypes = {
   onDownloadData: PropTypes.func,
   onDataReady: PropTypes.func,
   vars: PropTypes.object.isRequired,
+  lang: PropTypes.string.isRequired,
 };
 
 export default memo(HighchartsChart);

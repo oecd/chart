@@ -82,6 +82,7 @@ const ChartWithConfigNonFixedChartHeight = ({
               width={chartContainerAutoSizerWidth}
               height={finalChartHeight}
               vars={vars}
+              lang={lang}
               onDataReady={onDataReady}
               {...R.omit(['height'], otherProps)}
             />

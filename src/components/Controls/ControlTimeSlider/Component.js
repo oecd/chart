@@ -92,12 +92,12 @@ const ControlTimeSlider = ({
         pushable={1}
         allowCross={false}
         disabled={R.isEmpty(steps.codes)}
-        trackStyle={{ backgroundColor: '#b3b3b3' }}
-        railStyle={{ backgroundColor: '#d5d5d5' }}
+        trackStyle={{ backgroundColor: '#156DF9' }}
+        railStyle={{ backgroundColor: '#DEE5ED' }}
         handleStyle={{
           opacity: 1,
-          border: '1px solid #959595',
-          backgroundColor: '#bbbbbb',
+          border: '1px solid #156DF9',
+          backgroundColor: '#156DF9',
         }}
       />
       <div
@@ -105,13 +105,15 @@ const ControlTimeSlider = ({
         style={{
           marginTop: '5px',
           marginBottom: '0px',
+          justifyContent: 'space-between',
         }}
       >
-        {R.isEmpty(steps.codes)
-          ? '-'
-          : `${getLabel(currentRange.minCode)}${
-              isRange ? ` - ${getLabel(currentRange.maxCode)}` : ''
-            }`}
+        {!R.isEmpty(steps.codes) && (
+          <>
+            <div>{getLabel(currentRange.minCode)}</div>
+            {isRange && <div>{getLabel(currentRange.maxCode)}</div>}
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,13 +1,21 @@
 import React, { useCallback, useMemo, useId } from 'react';
 import PropTypes from 'prop-types';
-import * as R from 'ramda';
 import Select from 'react-select';
-import getBasicStylingConfigs from '../../utils/reactSelectUtil';
-import { isNilOrEmpty } from '../../utils/ramdaUtil';
-import ControlFallback from '../ControlFallback';
-import { controlTypes } from '../../constants/chart';
-import { parseCSVWithoutCleanUp } from '../../utils/csvUtil';
-import { possibleVariables } from '../../utils/configUtil';
+import * as R from 'ramda';
+
+import getBasicStylingConfigs from '../../../utils/reactSelectUtil';
+import { isNilOrEmpty, toggleArrayItem } from '../../../utils/ramdaUtil';
+import ControlFallback from '../../ControlFallback';
+import { controlTypes } from '../../../constants/chart';
+import { parseCSVWithoutCleanUp } from '../../../utils/csvUtil';
+import { possibleVariables } from '../../../utils/configUtil';
+import {
+  MultiValueContainer,
+  DropdownIndicator,
+  OptionLabelSingle,
+  createOptionLabelMultiple,
+  createOptionLabelMultipleWithStar,
+} from './SubComponents';
 
 const { customSelectTheme, customSelectStyles } = getBasicStylingConfigs();
 const noOptionsMessage = () => '';
@@ -19,14 +27,20 @@ const ControlSelect = ({
   multiple,
   noOptionMeansAllOptions = false,
   displayClearAllOptions = true,
-  displayOptionsWhenAllOptions = false,
   varName,
+  displayStars = false,
+  starsVarName = 'n/a',
   vars,
   changeVar,
   codeLabelMapping = null,
   type,
 }) => {
   const selectInstanceId = useId();
+
+  const finalMultiple = useMemo(
+    () => multiple || displayStars,
+    [multiple, displayStars],
+  );
 
   const finalOptions = useMemo(
     () =>
@@ -67,33 +81,51 @@ const ControlSelect = ({
     return R.propOr(placeholder, R.toUpper(placeholder), codeLabelMapping);
   }, [placeholder, codeLabelMapping]);
 
+  const starValues = useMemo(
+    () =>
+      !displayStars || isNilOrEmpty(vars[starsVarName])
+        ? []
+        : R.split('|', vars[starsVarName]),
+    [vars, starsVarName, displayStars],
+  );
+
   const selectedOptionChanged = useCallback(
     (value) => {
-      if (multiple) {
+      if (finalMultiple) {
         if (noOptionMeansAllOptions && R.isEmpty(value)) {
           changeVar(varName, R.join('|', R.map(R.prop('value'), finalOptions)));
         } else {
-          changeVar(varName, R.join('|', R.map(R.prop('value'), value)));
+          const newValues = R.map(R.prop('value'), value);
+          changeVar(varName, R.join('|', newValues));
+
+          if (displayStars) {
+            const newStarValues = R.compose(
+              (starsToBeDeleted) => R.without(starsToBeDeleted, starValues),
+              R.difference(starValues),
+            )(newValues);
+
+            changeVar(starsVarName, R.join('|', newStarValues));
+          }
         }
       } else {
         changeVar(varName, value.value);
       }
     },
-    [changeVar, varName, multiple, noOptionMeansAllOptions, finalOptions],
+    [
+      changeVar,
+      varName,
+      finalMultiple,
+      noOptionMeansAllOptions,
+      finalOptions,
+      starValues,
+      displayStars,
+      starsVarName,
+    ],
   );
 
   const selectedOption = useMemo(() => {
-    if (multiple) {
+    if (finalMultiple) {
       const optionsFromVar = R.split('|', vars[varName] ?? '');
-      if (noOptionMeansAllOptions) {
-        if (
-          !displayOptionsWhenAllOptions &&
-          R.length(optionsFromVar) === R.length(finalOptions)
-        ) {
-          return [];
-        }
-      }
-
       return R.reduce(
         (acc, item) => {
           const option = R.find(
@@ -127,15 +159,68 @@ const ControlSelect = ({
       R.compose(R.equals(optionValue), R.toUpper, R.prop('value')),
       finalOptions,
     );
+  }, [vars, varName, finalOptions, finalMultiple, type]);
+
+  const starSelectedOptionChanged = useCallback(
+    (value) => {
+      if (displayStars) {
+        const selectedValues = isNilOrEmpty(vars[varName])
+          ? []
+          : R.split('|', vars[varName]);
+        if (
+          !R.includes(value, starValues) &&
+          !R.includes(value, selectedValues)
+        ) {
+          changeVar(varName, R.join('|', R.append(value, selectedValues)));
+        }
+
+        changeVar(
+          starsVarName,
+          R.compose(R.join('|'), toggleArrayItem(value))(starValues),
+        );
+      }
+    },
+    [displayStars, starValues, varName, starsVarName, vars, changeVar],
+  );
+
+  const formatOptionLabel = useMemo(() => {
+    if (!multiple) {
+      return OptionLabelSingle;
+    }
+
+    const selectedOptionValues = R.map(R.prop('value'), selectedOption);
+    if (displayStars) {
+      return createOptionLabelMultipleWithStar(
+        selectedOptionValues,
+        starSelectedOptionChanged,
+        starValues,
+      );
+    }
+    return createOptionLabelMultiple(selectedOptionValues);
   }, [
-    vars,
-    varName,
-    finalOptions,
     multiple,
-    noOptionMeansAllOptions,
-    displayOptionsWhenAllOptions,
-    type,
+    displayStars,
+    starSelectedOptionChanged,
+    starValues,
+    selectedOption,
   ]);
+
+  const selectComponents = useMemo(
+    () => ({
+      MultiValueContainer,
+      ...(displayClearAllOptions && !noOptionMeansAllOptions
+        ? {}
+        : { ClearIndicator: null }),
+      ...(!multiple ||
+      !displayClearAllOptions ||
+      R.isEmpty(selectedOption) ||
+      noOptionMeansAllOptions
+        ? { IndicatorSeparator: null }
+        : {}),
+      ...(multiple ? { DropdownIndicator } : {}),
+    }),
+    [displayClearAllOptions, noOptionMeansAllOptions, multiple, selectedOption],
+  );
 
   return R.isNil(codeLabelMapping) ? (
     <ControlFallback label={label} />
@@ -152,14 +237,12 @@ const ControlSelect = ({
         value={selectedOption}
         options={finalOptions}
         onChange={selectedOptionChanged}
-        // eslint-disable-next-line react/no-unstable-nested-components
-        formatOptionLabel={(o) => (
-          <span dangerouslySetInnerHTML={{ __html: o.label }} />
-        )}
-        components={displayClearAllOptions ? {} : { ClearIndicator: null }}
+        formatOptionLabel={formatOptionLabel}
+        hideSelectedOptions={false}
+        components={selectComponents}
         menuPlacement="auto"
-        isMulti={multiple}
-        closeMenuOnSelect={!multiple}
+        isMulti={finalMultiple}
+        closeMenuOnSelect={!finalMultiple}
         placeholder={finalPlaceholder || ''}
         noOptionsMessage={noOptionsMessage}
         theme={customSelectTheme}
@@ -176,8 +259,9 @@ ControlSelect.propTypes = {
   multiple: PropTypes.bool.isRequired,
   noOptionMeansAllOptions: PropTypes.bool,
   displayClearAllOptions: PropTypes.bool,
-  displayOptionsWhenAllOptions: PropTypes.bool,
   varName: PropTypes.string.isRequired,
+  displayStars: PropTypes.bool,
+  starsVarName: PropTypes.string,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,

@@ -3,26 +3,47 @@ const getBasicStylingConfigs = () => {
     ...theme,
     colors: {
       ...theme.colors,
-      primary: '#b3b3b3',
-      primary25: '#d5d5d5',
-      primary50: '#d5d5d5',
+      neutral80: '#101D40',
+      primary: '#E0F2FF',
+      primary50: '#E0F2FF',
     },
   });
 
+  const getOptionBackgroundColor = (state) => {
+    if (!state.isMulti && state.isSelected) {
+      return '#156DF9';
+    }
+    if (state.isFocused) {
+      return '#E0F2FF';
+    }
+    return '#E8EDF2';
+  };
+
   const customSelectStyles = {
-    control: (provided) => ({
+    control: (provided, state) => ({
       ...provided,
+      backgroundColor: '#E8EDF2',
       boxShadow: 'none',
       fontSize: '14px',
       minHeight: '33px',
+      borderColor: state.isFocused ? '#156DF9' : '#E8EDF2',
+      '&:hover': {
+        borderColor: '#156DF9',
+      },
     }),
     menu: (provided) => ({
       ...provided,
+      backgroundColor: '#E8EDF2',
       marginBottom: 2,
-      marginTop: 2,
+      marginTop: 0,
+      boxShadow: 'none',
+      borderRadius: '0px 0px 4px 4px',
+      zIndex: 2,
     }),
-    option: (provided) => ({
+    option: (provided, state) => ({
       ...provided,
+      backgroundColor: getOptionBackgroundColor(state),
+      color: !state.isMulti && state.isSelected ? '#ffffff' : '#101D40',
       fontSize: '14px',
       padding: '4px 7px',
     }),
@@ -32,12 +53,30 @@ const getBasicStylingConfigs = () => {
     }),
     dropdownIndicator: (provided) => ({
       ...provided,
-      padding: '4px',
+      padding: '4px 8px 4px 8px',
     }),
-    valueContainer: (provided) => ({
+    valueContainer: (provided, state) => ({
       ...provided,
-      padding: '1px 4px',
+      position: 'relative',
+      padding: state.isMulti && state.hasValue ? '1px 6px' : '1px 4px',
+      textOverflow: 'ellipsis',
+      maxWidth: '90%',
+      minHeight: '23px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      display: `${state.hasValue && state.isMulti ? 'initial' : 'grid'}`,
     }),
+    input: (provided, state) =>
+      state.isMulti
+        ? {
+            ...provided,
+            position: 'absolute',
+            paddingTop: '0px',
+            paddingLeft: state.hasValue ? '4px' : '1px',
+            left: '0px',
+            top: '0px',
+          }
+        : provided,
   };
 
   return { customSelectTheme, customSelectStyles };
