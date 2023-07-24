@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons/faExpandArrowsAlt';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
 import { FloatingPortal } from '@floating-ui/react';
+import striptags from 'striptags';
 import * as R from 'ramda';
 
 import {
@@ -536,6 +537,27 @@ const HighchartsChart = ({
     !R.isNil(parsedNoteAndSource) &&
     (footerHeight === 0 || displayFooterAsTooltip);
 
+  const csvExportcolumnHeaderFormatter = useMemo(() => {
+    if (isNilOrEmpty(parsedTitle) && isNilOrEmpty(parsedSubtitle)) {
+      return () => false;
+    }
+
+    return (item) => {
+      if (item?.coll === 'xAxis' || (chartType === chartTypes.pie && !item)) {
+        if (isNilOrEmpty(parsedSubtitle)) {
+          return `${striptags(parsedTitle)}"\n"Category`;
+        }
+        if (isNilOrEmpty(parsedTitle)) {
+          return `${striptags(parsedSubtitle)}"\n"Category`;
+        }
+        return `${striptags(parsedTitle)}"\n"${striptags(
+          parsedSubtitle,
+        )}"\n"Category`;
+      }
+      return false;
+    };
+  }, [parsedTitle, parsedSubtitle, chartType]);
+
   return (
     <div className="cb-container" style={{ backgroundColor: '#fff' }}>
       <div
@@ -680,6 +702,7 @@ const HighchartsChart = ({
             formatters={formatters}
             fullscreenClose={fullscreenClose}
             isFullScreen={isFullScreen}
+            csvExportcolumnHeaderFormatter={csvExportcolumnHeaderFormatter}
             {...otherProps}
           />
         </Suspense>

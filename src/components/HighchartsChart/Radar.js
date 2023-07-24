@@ -47,6 +47,7 @@ const Radar = forwardRef(
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
+      csvExportcolumnHeaderFormatter,
       optionsOverride = {},
     },
     ref,
@@ -228,6 +229,9 @@ const Radar = forwardRef(
           sourceWidth: 600,
           sourceHeight: 400,
           filename: `export-${new Date(Date.now()).toISOString()}`,
+          csv: {
+            columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+          },
         },
       }),
       [
@@ -243,6 +247,7 @@ const Radar = forwardRef(
         formatters,
         fullscreenClose,
         isFullScreen,
+        csvExportcolumnHeaderFormatter,
       ],
     );
 
@@ -281,6 +286,7 @@ Radar.propTypes = {
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
+  csvExportcolumnHeaderFormatter: PropTypes.func.isRequired,
   optionsOverride: PropTypes.object,
 };
 
