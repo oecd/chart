@@ -45,7 +45,7 @@ const getBasicStylingConfigs = () => {
       backgroundColor: getOptionBackgroundColor(state),
       color: !state.isMulti && state.isSelected ? '#ffffff' : '#101D40',
       fontSize: '14px',
-      padding: '4px 7px',
+      padding: state.isMulti ? '0px' : '4px 7px',
     }),
     clearIndicator: (provided) => ({
       ...provided,

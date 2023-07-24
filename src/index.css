@@ -112,6 +112,10 @@
   color: #586179;
 }
 
+.cb-control-select-option {
+  padding: 4px 7px;
+}
+
 .cb-control-select-option .cb-control-select-option-icon {
   border-radius: 4px;
   border-color: #c2cbd6;
