@@ -41,9 +41,10 @@ export const createDotStatUrl = (dotStatUrl, vars) =>
     possibleVariables,
   );
 
-export const fetchDotStatData = async (url, lang) =>
+export const fetchDotStatData = async (url, lang, fetchConfig = {}) =>
   fetchJson(fixDotStatUrl(url), {
     headers: createDotStatHeaders(lang),
+    ...fetchConfig,
   });
 
 const createDimensionMemberLabelByCode = (members, codeLabelMapping) =>
