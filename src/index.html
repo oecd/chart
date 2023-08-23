@@ -12,51 +12,60 @@
   <body>
     <div style="display: flex; justify-content: center">
       <div>
-        <h2 style="padding: 10px; margin-bottom: 0px; text-align: center">
+        <h1 style="padding: 10px; margin-bottom: 0px; text-align: center">
           Charts as Web Components
-        </h2>
+        </h1>
 
-        <div style="margin-top: 50px; padding: 20px; border: 1px solid black">
+        <div style="margin-top: 50px; padding: 15px; border: 1px solid black">
+          <h2 style="text-align: center">Dashboard</h2>
           <div style="min-height: 61px">
-            <oecd-control control-id="country" />
+            <oecd-control control-id="9cdf4b8b46" />
           </div>
           <div style="min-height: 61px">
-            <oecd-control control-id="variable" />
+            <oecd-control control-id="1f7e54141e" />
           </div>
-          <div style="min-height: 61px"><oecd-control control-id="time" /></div>
+          <div style="min-height: 61px">
+            <oecd-control control-id="2689355508" />
+          </div>
 
           <div style="display: flex; margin-top: 50px">
             <div style="width: 400px; height: 300px">
-              <oecd-chart chart-id="d20d1f23c6" />
+              <oecd-chart chart-id="02adb6aab1" />
             </div>
             <div style="width: 400px; height: 300px">
-              <oecd-chart chart-id="d20d1f23c6" />
+              <oecd-chart chart-id="02adb6aab1" />
             </div>
           </div>
         </div>
 
-        <div style="margin-top: 200px; padding: 20px; border: 1px solid black">
-          <div><oecd-control control-id="chart" /></div>
+        <div style="margin-top: 200px; padding: 15px; border: 1px solid black">
+          <h2 style="text-align: center">Chart selector</h2>
+          <div><oecd-control control-id="fecf86b496" /></div>
           <div style="margin-top: 50px; width: 800px; height: 400px">
             <oecd-chart />
           </div>
         </div>
 
-        <div style="margin-top: 200px; padding: 20px; border: 1px solid black">
+        <div style="margin-top: 200px; padding: 15px; border: 1px solid black">
+          <h2 style="text-align: center">Ensure lazy loading</h2>
           <div style="display: flex">
             <div style="width: 400px; height: 250px">
-              <oecd-chart chart-id="92df95bdc5" />
+              <oecd-chart chart-id="08f26fdcaa" />
             </div>
             <div style="width: 400px; height: 250px">
-              <oecd-chart chart-id="91525bc3bb" />
+              <oecd-chart chart-id="adb56ee4ad" />
             </div>
           </div>
-          <div style="display: flex; margin-top: 50px">
+        </div>
+
+        <div style="margin-top: 100px; padding: 15px; border: 1px solid black">
+          <h2 style="text-align: center">Same charts in FR</h2>
+          <div style="display: flex">
             <div style="width: 400px; height: 250px">
-              <oecd-chart chart-id="003a169f86" />
+              <oecd-chart chart-id="08f26fdcaa" language="fr" />
             </div>
             <div style="width: 400px; height: 250px">
-              <oecd-chart chart-id="8bcaba6045" />
+              <oecd-chart chart-id="adb56ee4ad" language="fr" />
             </div>
           </div>
         </div>
@@ -72,19 +81,36 @@
       crossorigin
     ></script>
 
+    <script>
+      // use int env as a temp workaround
+      const __CHART_BUILDER_API_URL_OVERRIDE = 'https://int.oecdch.art';
+    </script>
     <script type="module" src="../dist/browser/oecd-chart-latest.js"></script>
 
     <script>
       document.addEventListener('cbControlValueChange', ({ detail }) => {
         const chartElements = document.querySelectorAll('oecd-chart');
 
-        if (detail.controlId === 'chart') {
-          // 'chart-id' is hardcoded because what is passed is camel cased (chartId)
-          chartElements[2].setAttribute('chart-id', detail.varValue);
-        } else {
-          chartElements[0].setAttribute(detail.varName, detail.varValue);
-          chartElements[1].setAttribute(detail.varName, detail.varValue);
+        // handle chart selector control
+        if (detail.controlId === 'fecf86b496') {
+          const chartSelectorChart = chartElements[2];
+          if (detail.varValue) {
+            chartSelectorChart.setAttribute(
+              detail.varName === 'chartId' ? 'chart-id' : detail.varName,
+              detail.varValue,
+            );
+          } else {
+            chartSelectorChart.removeAttribute(detail.varName);
+          }
+
+          return;
         }
+
+        // handle dashboard controls
+        const dashboardCharts = [chartElements[0], chartElements[1]];
+        dashboardCharts.map((chart) =>
+          chart.setAttribute(detail.varName, detail.varValue),
+        );
       });
     </script>
   </body>

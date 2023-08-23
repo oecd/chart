@@ -66,7 +66,14 @@ export const decimalPointTypes = {
   comma: { value: ',', label: 'Comma' },
 };
 
+const chartBuilderApiUrlOverride =
+  typeof __CHART_BUILDER_API_URL_OVERRIDE !== 'undefined'
+    ? // eslint-disable-next-line no-undef
+      __CHART_BUILDER_API_URL_OVERRIDE
+    : null;
+
 export const apiUrl =
+  chartBuilderApiUrlOverride ||
   process.env.NEXT_PUBLIC_CHART_LIB_API_URL ||
   process.env.API_URL ||
   'https://oecdch.art';
