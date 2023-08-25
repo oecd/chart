@@ -3,20 +3,26 @@ import * as R from 'ramda';
 import {
   chartTypes,
   dataSourceTypes,
+  frequencyTypes,
   sortByOptions,
   sortOrderOptions,
 } from '../constants/chart';
-import { isNumberOrDate } from './chartUtil';
+import {
+  tryCastAllToDatesAndDetectFormat,
+  isCastableToNumber,
+} from './chartUtil';
 import { codeOrLabelEquals, possibleVariables } from './configUtil';
 import { createCodeLabelMap } from './generalUtil';
 
 import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
+import { frequencies } from './dateUtil';
 
 export const emptyData = {
   categories: [],
   series: [],
   otherDimensions: [],
-  areCategoriesNumbersOrDates: false,
+  areCategoriesDates: false,
+  areCategoriesNumbers: false,
   codeLabelMapping: {},
 };
 
@@ -233,6 +239,7 @@ const addParsingHelperData =
 
     return {
       data,
+      rawCodeLabelMapping: codeLabelMapping,
       parsingHelperData: {
         xDimensionLabelByCode,
         yDimensionLabelByCode,
@@ -334,12 +341,61 @@ export const sortCSV =
     return { data, parsingHelperData, ...rest };
   };
 
-export const addAreCategoriesNumbersOrDates = (data) =>
-  R.assoc(
-    'areCategoriesNumbersOrDates',
-    R.all(isNumberOrDate, R.map(R.prop('code'), data.categories)),
-    data,
-  );
+export const handleAreCategoriesNumbersOrDates = (data) => {
+  const categoriesCodes = R.map(R.prop('code'), data.categories);
+
+  const {
+    isSuccessful,
+    dates: categoriesCodesAsDates,
+    dateFormat,
+  } = tryCastAllToDatesAndDetectFormat(categoriesCodes);
+  if (isSuccessful) {
+    const newSeries = R.map(
+      (s) =>
+        R.evolve(
+          {
+            data: mapWithIndex((y, i) => [R.nth(i, categoriesCodesAsDates), y]),
+          },
+          s,
+        ),
+      data.series,
+    );
+
+    return {
+      ...data,
+      series: newSeries,
+      areCategoriesDates: true,
+      areCategoriesNumbers: false,
+      categoriesDateFomat: dateFormat,
+    };
+  }
+
+  if (R.all(isCastableToNumber, categoriesCodes)) {
+    const categoriesCodesAsNumbers = R.map(Number, categoriesCodes);
+    const newSeries = R.map(
+      (s) =>
+        R.evolve(
+          {
+            data: mapWithIndex((y, i) => [
+              R.nth(i, categoriesCodesAsNumbers),
+              y,
+            ]),
+          },
+          s,
+        ),
+      data.series,
+    );
+
+    return {
+      ...data,
+      series: newSeries,
+      areCategoriesDates: false,
+      areCategoriesNumbers: true,
+    };
+  }
+
+  return { ...data, areCategoriesDates: false, areCategoriesNumbers: false };
+};
 
 export const addCodeLabelMapping = (data) =>
   R.assoc(
@@ -405,6 +461,33 @@ const filterCSV = (vars) => (data) => {
   };
 };
 
+const transformCategoriesLabel = (data) => {
+  if (
+    data.areCategoriesDates &&
+    R.includes(data.categoriesDateFomat, [
+      frequencyTypes.monthly.value,
+      frequencyTypes.quaterly.value,
+    ])
+  ) {
+    const frequency = R.prop(data.categoriesDateFomat, frequencies);
+
+    return R.evolve(
+      {
+        categories: R.map((c) => {
+          if (R.has(c.code, data.rawCodeLabelMapping)) {
+            return c;
+          }
+          const codeAsDate = frequency.tryParse(c.code);
+          return R.assoc('label', frequency.formatToLabel(codeAsDate), c);
+        }),
+      },
+      data,
+    );
+  }
+
+  return data;
+};
+
 export const createDataFromCSV = ({
   staticCsvData,
   chartType,
@@ -424,7 +507,9 @@ export const createDataFromCSV = ({
 
   return R.compose(
     addCodeLabelMapping,
-    addAreCategoriesNumbersOrDates,
+    R.dissoc('rawCodeLabelMapping'),
+    transformCategoriesLabel,
+    handleAreCategoriesNumbersOrDates,
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
     sortCSV(sortBy, sortOrder, sortSeries),

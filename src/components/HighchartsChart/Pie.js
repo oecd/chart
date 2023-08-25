@@ -73,7 +73,12 @@ const Pie = forwardRef(
                   highlightColors,
                 ) || getListItemAtTurningIndex(xIdx, finalColorPalette);
 
-              return { name: category.label, y: d, color };
+              const dataPoint =
+                data.areCategoriesDates || data.areCategoriesNumbers
+                  ? { y: R.nth(1, d) }
+                  : { y: d };
+
+              return { name: category.label, ...dataPoint, color };
             }, s.data),
           }),
           R.isEmpty(data.series) ? [] : [R.head(data.series)],
@@ -141,7 +146,7 @@ const Pie = forwardRef(
         },
 
         tooltip: {
-          ...R.propOr({}, 'tooltip', formatters),
+          ...R.prop('tooltip', formatters),
           outside: !isFullScreen,
         },
 
@@ -198,6 +203,8 @@ Pie.propTypes = {
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
+    areCategoriesDates: PropTypes.bool.isRequired,
+    areCategoriesNumbers: PropTypes.bool.isRequired,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

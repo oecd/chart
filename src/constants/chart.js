@@ -12,6 +12,14 @@ export const chartTypes = {
   pie: 'Pie',
 };
 
+export const chartTypesForWhichXAxisIsAlwaysTreatedAsCategories = [
+  chartTypes.map,
+  chartTypes.pie,
+  chartTypes.stackedBar,
+  chartTypes.stackedRow,
+  chartTypes.radar,
+];
+
 export const stackingOptions = {
   percent: { value: 'percent', label: 'Percent' },
   normal: { value: 'normal', label: 'Normal' },

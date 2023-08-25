@@ -118,10 +118,15 @@ const Scatter = forwardRef(
                 highlightColors,
               );
 
+              const dataPoint =
+                data.areCategoriesDates || data.areCategoriesNumbers
+                  ? { x: R.head(d), y: R.nth(1, d) }
+                  : { y: d };
+
               return baselineOrHighlightColor
                 ? {
                     name: category.label,
-                    y: d,
+                    ...dataPoint,
                     color: baselineOrHighlightColor,
                     marker: {
                       fillColor: !symbolLayout
@@ -131,7 +136,7 @@ const Scatter = forwardRef(
                   }
                 : {
                     name: category.label,
-                    y: d,
+                    ...dataPoint,
                   };
             }, s.data),
             color: seriesColor,
@@ -202,9 +207,12 @@ const Scatter = forwardRef(
                   if (R.isEmpty(categoriesMinMax[idx])) {
                     return null;
                   }
-                  const ax = chart.xAxis[0]?.toPixels(idx);
+                  const x = data.areCategoriesNumbers
+                    ? Number(R.nth(idx, data.categories).code)
+                    : idx;
+                  const ax = chart.xAxis[0]?.toPixels(x);
                   const ay = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][0]);
-                  const bx = chart.xAxis[0]?.toPixels(idx);
+                  const bx = ax;
                   const by = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][1]);
 
                   const lineColor =
@@ -254,15 +262,21 @@ const Scatter = forwardRef(
         },
 
         xAxis: {
-          categories: R.map(R.prop('label'), data.categories),
+          categories:
+            data.areCategoriesDates || data.areCategoriesNumbers
+              ? null
+              : R.map(R.prop('label'), data.categories),
+          ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
           labels: {
             style: { color: '#0c0c0c', fontSize: '12px' },
+            ...R.prop('xAxisLabels', formatters),
             ...(hideXAxisLabels ? { enabled: false } : {}),
           },
           gridLineColor: '#cbcbcb',
           lineColor: '#cbcbcb',
           width: '90%',
           left: '7%',
+          tickWidth: 0,
         },
 
         yAxis: {
@@ -297,7 +311,7 @@ const Scatter = forwardRef(
           series: {
             animation: false,
             dataLabels: {
-              ...R.propOr({}, 'dataLabels', formatters),
+              ...R.prop('dataLabels', formatters),
             },
           },
           scatter: {
@@ -306,7 +320,7 @@ const Scatter = forwardRef(
         },
 
         tooltip: {
-          ...R.propOr({}, 'tooltip', formatters),
+          ...R.prop('tooltip', formatters),
           outside: !isFullScreen,
         },
 
@@ -365,7 +379,8 @@ Scatter.propTypes = {
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
-    areCategoriesNumbersOrDates: PropTypes.bool.isRequired,
+    areCategoriesDates: PropTypes.bool.isRequired,
+    areCategoriesNumbers: PropTypes.bool.isRequired,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

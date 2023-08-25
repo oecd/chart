@@ -491,6 +491,10 @@ const HighchartsChart = ({
         latestYByXCode: parsedData?.latestYByXCode,
         latestYByXLabel: parsedData?.latestYByXLabel,
         decimalPoint,
+        areCategoriesNumbers: parsedData?.areCategoriesNumbers,
+        areCategoriesDates: parsedData?.areCategoriesDates,
+        categoriesDateFomat: parsedData?.categoriesDateFomat,
+        lang,
       }),
     [
       chartType,
@@ -499,6 +503,10 @@ const HighchartsChart = ({
       parsedData?.latestYByXCode,
       parsedData?.latestYByXLabel,
       decimalPoint,
+      parsedData?.areCategoriesNumbers,
+      parsedData?.areCategoriesDates,
+      parsedData?.categoriesDateFomat,
+      lang,
     ],
   );
 

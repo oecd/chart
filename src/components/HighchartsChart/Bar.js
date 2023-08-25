@@ -84,13 +84,18 @@ const Bar = forwardRef(
                 highlightColors,
               );
 
+              const dataPoint =
+                data.areCategoriesDates || data.areCategoriesNumbers
+                  ? { x: R.head(d), y: R.nth(1, d) }
+                  : { y: d };
+
               return baselineOrHighlightColor
                 ? {
                     name: category.label,
-                    y: d,
                     color: baselineOrHighlightColor,
+                    ...dataPoint,
                   }
-                : { name: category.label, y: d };
+                : { name: category.label, ...dataPoint };
             }, s.data),
             color: seriesColor,
             showInLegend: s.code !== fakeMemberLatest.code,
@@ -140,9 +145,14 @@ const Bar = forwardRef(
         },
 
         xAxis: {
-          categories: R.map(R.prop('label'), data.categories),
+          categories:
+            data.areCategoriesDates || data.areCategoriesNumbers
+              ? null
+              : R.map(R.prop('label'), data.categories),
+          ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
           labels: {
             style: { color: '#0c0c0c', fontSize: '12px' },
+            ...R.prop('xAxisLabels', formatters),
             ...((hideXAxisLabels && !horizontal) ||
             (hideYAxisLabels && horizontal)
               ? { enabled: false }
@@ -153,6 +163,7 @@ const Bar = forwardRef(
           ...(horizontal
             ? { height: '90%', top: '5%' }
             : { width: '90%', left: '7%' }),
+          tickWidth: 0,
         },
 
         yAxis: {
@@ -192,13 +203,13 @@ const Bar = forwardRef(
             borderWidth: 0,
             threshold: parseFloat(pivotValue) || 0,
             dataLabels: {
-              ...R.propOr({}, 'dataLabels', formatters),
+              ...R.prop('dataLabels', formatters),
             },
           },
         },
 
         tooltip: {
-          ...R.propOr({}, 'tooltip', formatters),
+          ...R.prop('tooltip', formatters),
           outside: !isFullScreen,
         },
 
@@ -259,7 +270,8 @@ Bar.propTypes = {
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
-    areCategoriesNumbersOrDates: PropTypes.bool.isRequired,
+    areCategoriesDates: PropTypes.bool.isRequired,
+    areCategoriesNumbers: PropTypes.bool.isRequired,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

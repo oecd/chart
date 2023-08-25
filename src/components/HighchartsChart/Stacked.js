@@ -80,8 +80,16 @@ const Stacked = forwardRef(
           highlightColors,
           parsedHighlight,
           baseline,
+          area,
         ),
-      [data, finalColorPalette, highlightColors, parsedHighlight, baseline],
+      [
+        data,
+        finalColorPalette,
+        highlightColors,
+        parsedHighlight,
+        baseline,
+        area,
+      ],
     );
 
     const chartType = R.cond([
@@ -138,9 +146,18 @@ const Stacked = forwardRef(
         },
 
         xAxis: {
-          categories: R.map(R.prop('label'), data.categories),
+          categories:
+            area && (data.areCategoriesDates || data.areCategoriesNumbers)
+              ? null
+              : R.map(R.prop('label'), data.categories),
+          ...(area && data.areCategoriesDates
+            ? {
+                type: 'datetime',
+              }
+            : {}),
           labels: {
             style: { color: '#0c0c0c', fontSize: '12px' },
+            ...R.prop('xAxisLabels', formatters),
             ...((hideXAxisLabels && !horizontal) ||
             (hideYAxisLabels && horizontal) ||
             hideFakeMemberLatest
@@ -152,6 +169,7 @@ const Stacked = forwardRef(
           ...(horizontal
             ? { height: '85%', top: '7%' }
             : { width: '90%', left: '7%' }),
+          tickWidth: 0,
         },
 
         yAxis: {
@@ -194,13 +212,13 @@ const Stacked = forwardRef(
             groupPadding: 0,
             borderWidth: 1.5,
             dataLabels: {
-              ...R.propOr({}, 'dataLabels', formatters),
+              ...R.prop('dataLabels', formatters),
             },
           },
         },
 
         tooltip: {
-          ...R.propOr({}, 'tooltip', formatters),
+          ...R.prop('tooltip', formatters),
           outside: !isFullScreen,
         },
 
@@ -262,7 +280,8 @@ Stacked.propTypes = {
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
-    areCategoriesNumbersOrDates: PropTypes.bool.isRequired,
+    areCategoriesDates: PropTypes.bool.isRequired,
+    areCategoriesNumbers: PropTypes.bool.isRequired,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

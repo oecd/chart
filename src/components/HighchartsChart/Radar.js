@@ -74,7 +74,10 @@ const Radar = forwardRef(
 
           return {
             name: s.label,
-            data: s.data,
+            data:
+              data.areCategoriesDates || data.areCategoriesNumbers
+                ? R.map(R.nth(1), s.data)
+                : s.data,
             type: 'line',
             marker: {
               symbol: 'circle',
@@ -188,7 +191,7 @@ const Radar = forwardRef(
                     {
                       dataLabels: {
                         enabled: true,
-                        ...R.propOr({}, 'dataLabels', formatters),
+                        ...R.prop('dataLabels', formatters),
                       },
                     },
                     false,
@@ -218,7 +221,7 @@ const Radar = forwardRef(
         },
 
         tooltip: {
-          ...R.propOr({}, 'tooltip', formatters),
+          ...R.prop('tooltip', formatters),
           outside: !isFullScreen,
         },
 
@@ -274,6 +277,8 @@ Radar.propTypes = {
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
+    areCategoriesDates: PropTypes.bool.isRequired,
+    areCategoriesNumbers: PropTypes.bool.isRequired,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

@@ -55,7 +55,7 @@ const Line = forwardRef(
 
     const series = useMemo(
       () =>
-        mapWithIndex((s, xIdx) => {
+        mapWithIndex((s, yIdx) => {
           const highlightOrBaselineColor = getBaselineOrHighlightColor(
             s,
             parsedHighlight,
@@ -64,7 +64,7 @@ const Line = forwardRef(
           );
           const color =
             highlightOrBaselineColor ||
-            getListItemAtTurningIndex(xIdx, colorPalette);
+            getListItemAtTurningIndex(yIdx, colorPalette);
 
           const dataLabelColor = makeColorReadableOnBackgroundColor(
             color,
@@ -73,7 +73,14 @@ const Line = forwardRef(
 
           return {
             name: s.label,
-            data: s.data,
+            data: R.map((d) => {
+              const dataPoint =
+                data.areCategoriesDates || data.areCategoriesNumbers
+                  ? d
+                  : { y: d };
+
+              return dataPoint;
+            }, s.data),
             type: 'line',
             marker: {
               symbol: 'circle',
@@ -142,15 +149,21 @@ const Line = forwardRef(
         },
 
         xAxis: {
-          categories: R.map(R.prop('label'), data.categories),
+          categories:
+            data.areCategoriesDates || data.areCategoriesNumbers
+              ? null
+              : R.map(R.prop('label'), data.categories),
+          ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
           labels: {
             style: { color: '#0c0c0c', fontSize: '12px' },
+            ...R.prop('xAxisLabels', formatters),
             ...(hideXAxisLabels ? { enabled: false } : {}),
           },
           gridLineColor: '#cbcbcb',
           lineColor: 'transparent',
           left: '5%',
           width: '90%',
+          tickWidth: 0,
         },
 
         yAxis: {
@@ -192,7 +205,7 @@ const Line = forwardRef(
                     {
                       dataLabels: {
                         enabled: true,
-                        ...R.propOr({}, 'dataLabels', formatters),
+                        ...R.prop('dataLabels', formatters),
                       },
                     },
                     false,
@@ -222,7 +235,7 @@ const Line = forwardRef(
         },
 
         tooltip: {
-          ...R.propOr({}, 'tooltip', formatters),
+          ...R.prop('tooltip', formatters),
           outside: !isFullScreen,
         },
 
@@ -280,7 +293,8 @@ Line.propTypes = {
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
-    areCategoriesNumbersOrDates: PropTypes.bool.isRequired,
+    areCategoriesDates: PropTypes.bool.isRequired,
+    areCategoriesNumbers: PropTypes.bool.isRequired,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

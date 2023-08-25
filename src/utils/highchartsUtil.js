@@ -1,9 +1,14 @@
 import Highcharts from 'highcharts';
 import * as R from 'ramda';
 
-import { chartTypes, decimalPointTypes } from '../constants/chart';
+import {
+  chartTypes,
+  chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
+  decimalPointTypes,
+} from '../constants/chart';
 import { isCastableToNumber, roundNumber } from './chartUtil';
 import { isNilOrEmpty } from './ramdaUtil';
+import { frequencies } from './dateUtil';
 
 const numberFormat = (number, decimals, decimalPoint, thousandsSep) => {
   if (!isCastableToNumber(number)) {
@@ -32,6 +37,10 @@ export const createFormatters = ({
   latestYByXCode,
   latestYByXLabel,
   decimalPoint,
+  areCategoriesNumbers,
+  areCategoriesDates,
+  categoriesDateFomat,
+  lang,
 }) => {
   const isMaxNumberOrDecimalCastableToNumber =
     isCastableToNumber(maxNumberOfDecimals);
@@ -53,11 +62,26 @@ export const createFormatters = ({
     },
   };
 
+  const frequency = areCategoriesDates
+    ? R.prop(categoriesDateFomat, frequencies)
+    : null;
+
+  const xAxisLabels =
+    frequency &&
+    !R.includes(chartType, chartTypesForWhichXAxisIsAlwaysTreatedAsCategories)
+      ? {
+          formatter: function formatXAxis() {
+            return frequency.formatToLabel(this.value, lang);
+          },
+        }
+      : {};
+
   const tooltip = {
     formatter: function format(tooltipInfo) {
       const fullFormat = `${tooltipInfo.options.headerFormat}${tooltipInfo.options.pointFormat}`;
 
       const value = this.point.y ?? this.point.value ?? this.point.z;
+
       const newValue = stepsHaveLabels
         ? R.nth(
             1,
@@ -76,12 +100,39 @@ export const createFormatters = ({
               '{series.name}',
               chartType === chartTypes.map ? this.point.name : this.series.name,
             ),
-            R.replace(
-              '{point.key}',
-              chartType === chartTypes.pie
-                ? this.point.name
-                : this.point.category ?? this.series.name,
-            ),
+            (content) => {
+              const key =
+                chartType === chartTypes.pie
+                  ? this.point.name
+                  : this.point.category ?? this.series.name;
+
+              if (
+                R.includes(
+                  chartType,
+                  chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
+                )
+              ) {
+                return R.replace('{point.key}', key, content);
+              }
+
+              if (!R.isNil(frequency)) {
+                return R.replace(
+                  '{point.key}',
+                  frequency.formatToLabel(key, lang),
+                  content,
+                );
+              }
+
+              if (areCategoriesNumbers) {
+                return R.replace(
+                  '{point.key}',
+                  numberFormat(key, maxNumberOfDecimals, finalDecimalPoint),
+                  content,
+                );
+              }
+
+              return R.replace('{point.key}', key, content);
+            },
           ),
           R.compose(
             R.replace(
@@ -97,6 +148,24 @@ export const createFormatters = ({
                     chartTypes.stackedRow,
                   ]),
                   R.always(this.series.name),
+                ],
+                [
+                  () =>
+                    !R.isNil(frequency) &&
+                    !R.includes(
+                      chartType,
+                      chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
+                    ),
+                  () => frequency.formatToLabel(this.point.category, lang),
+                ],
+                [
+                  () => areCategoriesNumbers,
+                  () =>
+                    numberFormat(
+                      this.point.category,
+                      maxNumberOfDecimals,
+                      finalDecimalPoint,
+                    ),
                 ],
                 [R.T, R.always(this.point.category)],
               ])(chartType),
@@ -150,5 +219,5 @@ export const createFormatters = ({
     },
   };
 
-  return { dataLabels, tooltip };
+  return { dataLabels, tooltip, xAxisLabels };
 };

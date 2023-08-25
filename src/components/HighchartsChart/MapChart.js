@@ -304,7 +304,7 @@ const MapChart = forwardRef(
           series: {
             animation: false,
             dataLabels: {
-              ...R.propOr({}, 'dataLabels', formatters),
+              ...R.prop('dataLabels', formatters),
               color: '#333333',
             },
             borderColor: '#bbbbbb',
@@ -312,7 +312,7 @@ const MapChart = forwardRef(
         },
 
         tooltip: {
-          ...R.propOr({}, 'tooltip', formatters),
+          ...R.prop('tooltip', formatters),
           outside: !isFullScreen,
         },
 
@@ -380,7 +380,6 @@ MapChart.propTypes = {
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
-    areCategoriesNumbersOrDates: PropTypes.bool.isRequired,
   }).isRequired,
   mapType: PropTypes.string,
   mapDisplayCountriesName: PropTypes.bool,

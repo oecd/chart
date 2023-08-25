@@ -7,33 +7,48 @@ import {
   addMonths,
   addQuarters,
   addYears,
+  isValid,
 } from 'date-fns';
 import * as R from 'ramda';
 
 import { frequencyTypes } from '../constants/chart';
 
-const frequencies = {
+const tryParseWithFormat = (string, dateFormat) => {
+  const date = parse(string, dateFormat, new Date());
+  if (isValid(date)) {
+    return date;
+  }
+  return false;
+};
+
+export const frequencies = {
   [frequencyTypes.monthly.value]: {
     codeStringFormat: 'yyyy-MM',
-    labelStringFormat: 'MM-yyyy',
+    tryParse: (string) =>
+      R.length(string) === 7 && tryParseWithFormat(string, 'yyyy-MM'),
+    formatToLabel: (date) => format(date, 'MM-yyyy'),
     differenceFunc: differenceInMonths,
     addFunc: addMonths,
-    transformLabel: R.identity,
   },
   [frequencyTypes.quaterly.value]: {
     codeStringFormat: 'yyyy-QQQ',
-    labelStringFormat: 'Q-yyyy',
+    tryParse: (string) =>
+      R.length(string) === 7 && tryParseWithFormat(string, 'yyyy-QQQ'),
+
+    formatToLabel: (date, lang) => {
+      const label = format(date, 'Q-yyyy');
+      return lang === 'fr' ? `T${label}` : `Q${label}`;
+    },
     differenceFunc: differenceInQuarters,
     addFunc: addQuarters,
-    transformLabel: (label, lang) =>
-      lang === 'fr' ? `T${label}` : `Q${label}`,
   },
   [frequencyTypes.yearly.value]: {
     codeStringFormat: 'yyyy',
-    labelStringFormat: 'yyyy',
+    tryParse: (string) =>
+      R.length(string) === 4 && tryParseWithFormat(string, 'yyyy'),
+    formatToLabel: (date) => format(date, 'yyyy'),
     differenceFunc: differenceInYears,
     addFunc: addYears,
-    transformLabel: R.identity,
   },
 };
 
@@ -43,15 +58,15 @@ export const getSteps = (frequency, lang) => {
     const frequencyType = R.prop(frequencyTypeCode, frequencies);
 
     const {
+      tryParse,
+      formatToLabel,
       codeStringFormat,
-      labelStringFormat,
       differenceFunc,
       addFunc,
-      transformLabel,
     } = frequencyType;
 
-    const minDate = parse(minCode, codeStringFormat, new Date());
-    const maxDate = parse(maxCode, codeStringFormat, new Date());
+    const minDate = tryParse(minCode);
+    const maxDate = tryParse(maxCode);
 
     const stepNumber = differenceFunc(maxDate, minDate);
 
@@ -59,13 +74,13 @@ export const getSteps = (frequency, lang) => {
       R.map((stepIndex) => {
         const date = addFunc(minDate, stepIndex);
         const code = format(date, codeStringFormat);
-        const label = transformLabel(format(date, labelStringFormat), lang);
+        const label = formatToLabel(date, lang);
         return [code, label];
       }, R.times(R.identity, stepNumber + 1)),
     );
 
     return { codes: R.keys(labelByCode), labelByCode };
   } catch {
-    return [];
+    return { codes: [], labelByCode: [] };
   }
 };

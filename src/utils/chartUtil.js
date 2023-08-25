@@ -4,7 +4,8 @@ import * as R from 'ramda';
 
 import { codeOrLabelEquals, possibleVariables } from './configUtil';
 import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
-import { fakeMemberLatest } from '../constants/chart';
+import { fakeMemberLatest, frequencyTypes } from '../constants/chart';
+import { frequencies } from './dateUtil';
 
 const baselineColor = '#262639';
 
@@ -78,6 +79,7 @@ export const createStackedDatapoints = (
   highlightColors,
   highlight,
   baseline,
+  area,
 ) =>
   mapWithIndex((s, yIdx) => {
     const seriesColor = getListItemAtTurningIndex(yIdx, colorPalette);
@@ -126,9 +128,24 @@ export const createStackedDatapoints = (
           [R.T, R.always(null)],
         ])();
 
+        const dataPoint = R.cond([
+          [
+            () =>
+              area && (data.areCategoriesDates || data.areCategoriesNumbers),
+            () => ({ x: R.head(d), y: R.nth(1, d) }),
+          ],
+          [
+            () => data.areCategoriesDates || data.areCategoriesNumbers,
+            () => ({
+              y: R.nth(1, d),
+            }),
+          ],
+          [R.T, R.always({ y: d })],
+        ])();
+
         return color
-          ? { name: category.label, y: d, color }
-          : { name: category.label, y: d };
+          ? { name: category.label, ...dataPoint, color }
+          : { name: category.label, ...dataPoint };
       }, s.data),
     };
   }, data.series);
@@ -244,8 +261,47 @@ export const addColorAlpha = (color, alphaToAdd) => {
   return colorObject.setAlpha(newAlpha).toHex8String();
 };
 
-export const isNumberOrDate = (x) =>
-  isCastableToNumber(x) || isCastableToNumber(new Date(x));
+export const tryCastAllToDatesAndDetectFormat = (values) => {
+  const firstValue = R.head(values);
+
+  const yearlyFrequency = R.prop(frequencyTypes.yearly.value, frequencies);
+  if (yearlyFrequency.tryParse(firstValue)) {
+    const dates = R.map(yearlyFrequency.tryParse, values);
+    if (!R.any(R.equals(false), dates)) {
+      return {
+        isSuccessful: true,
+        dates: R.map((d) => d.getTime(), dates),
+        dateFormat: frequencyTypes.yearly.value,
+      };
+    }
+  }
+
+  const monthyFrequency = R.prop(frequencyTypes.monthly.value, frequencies);
+  if (monthyFrequency.tryParse(firstValue)) {
+    const dates = R.map(monthyFrequency.tryParse, values);
+    if (!R.any(R.equals(false), dates)) {
+      return {
+        isSuccessful: true,
+        dates: R.map((d) => d.getTime(), dates),
+        dateFormat: frequencyTypes.monthly.value,
+      };
+    }
+  }
+
+  const quaterlyFrequency = R.prop(frequencyTypes.quaterly.value, frequencies);
+  if (quaterlyFrequency.tryParse(firstValue)) {
+    const dates = R.map(quaterlyFrequency.tryParse, values);
+    if (!R.any(R.equals(false), dates)) {
+      return {
+        isSuccessful: true,
+        dates: R.map((d) => d.getTime(), dates),
+        dateFormat: frequencyTypes.quaterly.value,
+      };
+    }
+  }
+
+  return { isSuccessful: false, dates: null, dateFormat: null };
+};
 
 export const createMapDataClasses = (steps, stepsHaveLabels) => {
   const stepsLength = R.length(steps);

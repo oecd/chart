@@ -6,7 +6,7 @@ import {
   sortCSV,
   parseData,
   sortParsedDataOnYAxis,
-  addAreCategoriesNumbersOrDates,
+  handleAreCategoriesNumbersOrDates,
   addCodeLabelMapping,
 } from './csvUtil';
 import { createCodeLabelMap } from './generalUtil';
@@ -314,7 +314,7 @@ export const createDataFromSdmxJson = ({
 
   return R.compose(
     addCodeLabelMapping,
-    addAreCategoriesNumbersOrDates,
+    handleAreCategoriesNumbersOrDates,
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
     sortCSV(sortBy, sortOrder, sortSeries),
