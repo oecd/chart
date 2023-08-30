@@ -80,16 +80,8 @@ const Stacked = forwardRef(
           highlightColors,
           parsedHighlight,
           baseline,
-          area,
         ),
-      [
-        data,
-        finalColorPalette,
-        highlightColors,
-        parsedHighlight,
-        baseline,
-        area,
-      ],
+      [data, finalColorPalette, highlightColors, parsedHighlight, baseline],
     );
 
     const chartType = R.cond([
@@ -150,7 +142,7 @@ const Stacked = forwardRef(
             area && (data.areCategoriesDates || data.areCategoriesNumbers)
               ? null
               : R.map(R.prop('label'), data.categories),
-          ...(area && data.areCategoriesDates
+          ...(data.areCategoriesDates
             ? {
                 type: 'datetime',
               }
@@ -164,8 +156,8 @@ const Stacked = forwardRef(
               ? { enabled: false }
               : {}),
           },
-          gridLineColor: '#cbcbcb',
-          lineColor: '#cbcbcb',
+          gridLineColor: '#e6e6e6',
+          lineColor: 'transparent',
           ...(horizontal
             ? { height: '85%', top: '7%' }
             : { width: '90%', left: '7%' }),
@@ -177,6 +169,8 @@ const Stacked = forwardRef(
             enabled: false,
           },
           startOnTick: false,
+          gridLineColor: '#e6e6e6',
+          lineColor: '#e6e6e6',
           labels: {
             style: { fontSize: '12px', color: '#0c0c0c' },
             enabled:

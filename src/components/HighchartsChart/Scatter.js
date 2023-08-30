@@ -207,9 +207,8 @@ const Scatter = forwardRef(
                   if (R.isEmpty(categoriesMinMax[idx])) {
                     return null;
                   }
-                  const x = data.areCategoriesNumbers
-                    ? Number(R.nth(idx, data.categories).code)
-                    : idx;
+
+                  const x = R.path([0, 'data', idx, 'x'], chart.series);
                   const ax = chart.xAxis[0]?.toPixels(x);
                   const ay = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][0]);
                   const bx = ax;
@@ -272,8 +271,8 @@ const Scatter = forwardRef(
             ...R.prop('xAxisLabels', formatters),
             ...(hideXAxisLabels ? { enabled: false } : {}),
           },
-          gridLineColor: '#cbcbcb',
-          lineColor: '#cbcbcb',
+          gridLineColor: '#e6e6e6',
+          lineColor: 'transparent',
           width: '90%',
           left: '7%',
           tickWidth: 0,
@@ -283,6 +282,8 @@ const Scatter = forwardRef(
           title: {
             enabled: false,
           },
+          gridLineColor: '#e6e6e6',
+          lineColor: '#e6e6e6',
           labels: {
             style: { fontSize: '12px', color: '#0c0c0c' },
             enabled: !hideYAxisLabels,

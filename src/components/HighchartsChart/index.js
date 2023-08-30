@@ -84,6 +84,7 @@ const HighchartsChart = ({
   dotStatLang = 'en',
   latestAvailableData = false,
   staticCsvData = '',
+  forceXAxisToBeTreatedAsCategories = false,
   csvCodeLabelMappingProjectLevel = null,
   csvCodeLabelMapping = null,
   dotStatCodeLabelMapping = null,
@@ -222,6 +223,7 @@ const HighchartsChart = ({
         sortOrder,
         sortSeries,
         yAxisOrderOverride,
+        forceXAxisToBeTreatedAsCategories,
       });
     } catch (e) {
       setErrorMessage('An error occured :-(');
@@ -240,6 +242,7 @@ const HighchartsChart = ({
     yAxisOrderOverride,
     dotStatCodeLabelMapping,
     preParsedDataInternal,
+    forceXAxisToBeTreatedAsCategories,
   ]);
 
   const parsedCSVData = useMemo(() => {
@@ -265,6 +268,7 @@ const HighchartsChart = ({
         sortOrder,
         sortSeries,
         yAxisOrderOverride,
+        forceXAxisToBeTreatedAsCategories,
         vars,
       });
 
@@ -289,6 +293,7 @@ const HighchartsChart = ({
     staticCsvData,
     vars,
     yAxisOrderOverride,
+    forceXAxisToBeTreatedAsCategories,
   ]);
 
   const parsedData = useMemo(() => {
@@ -746,6 +751,7 @@ HighchartsChart.propTypes = {
   dotStatLang: PropTypes.string,
   latestAvailableData: PropTypes.bool,
   staticCsvData: PropTypes.string,
+  forceXAxisToBeTreatedAsCategories: PropTypes.bool,
   csvCodeLabelMappingProjectLevel: PropTypes.string,
   csvCodeLabelMapping: PropTypes.string,
   dotStatCodeLabelMapping: PropTypes.string,

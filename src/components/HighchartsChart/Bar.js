@@ -158,8 +158,8 @@ const Bar = forwardRef(
               ? { enabled: false }
               : {}),
           },
-          gridLineColor: '#cbcbcb',
-          lineColor: '#cbcbcb',
+          gridLineColor: '#e6e6e6',
+          lineColor: 'transparent',
           ...(horizontal
             ? { height: '90%', top: '5%' }
             : { width: '90%', left: '7%' }),
@@ -170,6 +170,8 @@ const Bar = forwardRef(
           title: {
             enabled: false,
           },
+          gridLineColor: '#e6e6e6',
+          lineColor: '#e6e6e6',
           labels: {
             style: { fontSize: '12px', color: '#0c0c0c' },
             enabled:

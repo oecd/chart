@@ -79,7 +79,6 @@ export const createStackedDatapoints = (
   highlightColors,
   highlight,
   baseline,
-  area,
 ) =>
   mapWithIndex((s, yIdx) => {
     const seriesColor = getListItemAtTurningIndex(yIdx, colorPalette);
@@ -130,13 +129,9 @@ export const createStackedDatapoints = (
 
         const dataPoint = R.cond([
           [
-            () =>
-              area && (data.areCategoriesDates || data.areCategoriesNumbers),
-            () => ({ x: R.head(d), y: R.nth(1, d) }),
-          ],
-          [
             () => data.areCategoriesDates || data.areCategoriesNumbers,
             () => ({
+              x: R.head(d),
               y: R.nth(1, d),
             }),
           ],

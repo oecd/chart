@@ -155,14 +155,16 @@ const Radar = forwardRef(
             },
             enabled: !hideXAxisLabels,
           },
-          gridLineColor: '#cbcbcb',
-          lineColor: '#cbcbcb',
+          gridLineColor: '#e6e6e6',
+          lineColor: 'transparent',
         },
 
         yAxis: {
           title: {
             enabled: false,
           },
+          gridLineColor: '#e6e6e6',
+          lineColor: '#e6e6e6',
           labels: {
             enabled: !hideYAxisLabels,
           },

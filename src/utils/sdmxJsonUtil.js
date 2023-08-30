@@ -6,8 +6,9 @@ import {
   sortCSV,
   parseData,
   sortParsedDataOnYAxis,
-  handleAreCategoriesNumbersOrDates,
   addCodeLabelMapping,
+  handleAreCategoriesDates,
+  handleAreCategoriesNumbers,
 } from './csvUtil';
 import { createCodeLabelMap } from './generalUtil';
 import { isNilOrEmpty } from './ramdaUtil';
@@ -307,6 +308,7 @@ export const createDataFromSdmxJson = ({
   sortOrder,
   sortSeries = '',
   yAxisOrderOverride,
+  forceXAxisToBeTreatedAsCategories,
 }) => {
   if (!sdmxJson) {
     return null;
@@ -314,7 +316,12 @@ export const createDataFromSdmxJson = ({
 
   return R.compose(
     addCodeLabelMapping,
-    handleAreCategoriesNumbersOrDates,
+    handleAreCategoriesNumbers(chartType, forceXAxisToBeTreatedAsCategories),
+    handleAreCategoriesDates(
+      dataSourceType,
+      chartType,
+      forceXAxisToBeTreatedAsCategories,
+    ),
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
     sortCSV(sortBy, sortOrder, sortSeries),
