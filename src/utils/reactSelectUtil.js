@@ -1,4 +1,12 @@
-const getBasicStylingConfigs = () => {
+const getOptionPadding = (isMulti, isStandalone) => {
+  if (isMulti) {
+    return '0px';
+  }
+
+  return isStandalone ? '8px 17px' : '4px 7px';
+};
+
+const getBasicStylingConfigs = (isStandalone) => {
   const customSelectTheme = (theme) => ({
     ...theme,
     colors: {
@@ -22,6 +30,7 @@ const getBasicStylingConfigs = () => {
   const customSelectStyles = {
     control: (provided, state) => ({
       ...provided,
+      padding: isStandalone ? '10px' : '0px',
       backgroundColor: '#E8EDF2',
       boxShadow: 'none',
       fontSize: '14px',
@@ -34,10 +43,10 @@ const getBasicStylingConfigs = () => {
     menu: (provided) => ({
       ...provided,
       backgroundColor: '#E8EDF2',
-      marginBottom: 2,
-      marginTop: 0,
+      marginBottom: 1,
+      marginTop: 1,
       boxShadow: 'none',
-      borderRadius: '0px 0px 4px 4px',
+      borderRadius: '4px',
       zIndex: 2,
     }),
     option: (provided, state) => ({
@@ -45,15 +54,15 @@ const getBasicStylingConfigs = () => {
       backgroundColor: getOptionBackgroundColor(state),
       color: !state.isMulti && state.isSelected ? '#ffffff' : '#101D40',
       fontSize: '14px',
-      padding: state.isMulti ? '0px' : '4px 7px',
+      padding: getOptionPadding(state.isMulti, isStandalone),
     }),
     clearIndicator: (provided) => ({
       ...provided,
       padding: '4px',
     }),
-    dropdownIndicator: (provided) => ({
+    dropdownIndicator: (provided, state) => ({
       ...provided,
-      padding: '4px 8px 4px 8px',
+      padding: state.isMulti ? '7px 8px 8px 8px' : '4px 8px 4px 8px',
     }),
     valueContainer: (provided, state) => ({
       ...provided,
@@ -72,11 +81,11 @@ const getBasicStylingConfigs = () => {
             ...provided,
             position: 'absolute',
             paddingTop: '0px',
-            paddingLeft: state.hasValue ? '4px' : '1px',
+            paddingLeft: state.hasValue ? '4px' : '0px',
             left: '0px',
             top: '0px',
           }
-        : provided,
+        : { ...provided, paddingTop: '0px' },
   };
 
   return { customSelectTheme, customSelectStyles };

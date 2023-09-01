@@ -17,6 +17,7 @@ const ControlTimeSlider = ({
   changeVar,
   codeLabelMapping = null,
   lang,
+  isStandalone = false,
 }) => {
   const finalLabel = useMemo(() => {
     if (isNilOrEmpty(label) || R.isNil(codeLabelMapping)) {
@@ -54,7 +55,7 @@ const ControlTimeSlider = ({
   ]);
 
   return R.isNil(codeLabelMapping) ? (
-    <ControlFallback label={label} />
+    <ControlFallback label={label} isStandalone={isStandalone} />
   ) : (
     <Component
       key={componentKey}
@@ -67,6 +68,7 @@ const ControlTimeSlider = ({
       changeVar={changeVar}
       lang={lang}
       codeLabelMapping={codeLabelMapping}
+      isStandalone={isStandalone}
     />
   );
 };
@@ -81,6 +83,7 @@ ControlTimeSlider.propTypes = {
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
   lang: PropTypes.string.isRequired,
+  isStandalone: PropTypes.bool,
 };
 
 export default ControlTimeSlider;

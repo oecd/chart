@@ -17,7 +17,6 @@ import {
   createOptionLabelMultipleWithStar,
 } from './SubComponents';
 
-const { customSelectTheme, customSelectStyles } = getBasicStylingConfigs();
 const noOptionsMessage = () => '';
 
 const ControlSelect = ({
@@ -34,6 +33,7 @@ const ControlSelect = ({
   changeVar,
   codeLabelMapping = null,
   type,
+  isStandalone = false,
 }) => {
   const selectInstanceId = useId();
 
@@ -194,15 +194,17 @@ const ControlSelect = ({
         selectedOptionValues,
         starSelectedOptionChanged,
         starValues,
+        isStandalone,
       );
     }
-    return createOptionLabelMultiple(selectedOptionValues);
+    return createOptionLabelMultiple(selectedOptionValues, isStandalone);
   }, [
     multiple,
     displayStars,
     starSelectedOptionChanged,
     starValues,
     selectedOption,
+    isStandalone,
   ]);
 
   const selectComponents = useMemo(
@@ -222,8 +224,13 @@ const ControlSelect = ({
     [displayClearAllOptions, noOptionMeansAllOptions, multiple, selectedOption],
   );
 
+  const { customSelectTheme, customSelectStyles } = useMemo(
+    () => getBasicStylingConfigs(isStandalone),
+    [isStandalone],
+  );
+
   return R.isNil(codeLabelMapping) ? (
-    <ControlFallback label={label} />
+    <ControlFallback label={label} isStandalone={isStandalone} />
   ) : (
     <div
       className="cb-control cb-control-select"
@@ -266,6 +273,7 @@ ControlSelect.propTypes = {
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
   type: PropTypes.string.isRequired,
+  isStandalone: PropTypes.bool,
 };
 
 export default ControlSelect;

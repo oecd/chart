@@ -32,14 +32,22 @@ const OptionLabelMultiple = ({
   value,
   label,
   selectedOptionValues,
+  isStandalone,
   children,
 }) => (
-  <div style={{ display: 'flex' }} className="cb-control-select-option">
+  <div
+    style={{ display: 'flex' }}
+    className={
+      isStandalone
+        ? 'cb-control-select-option-multi-standalone'
+        : 'cb-control-select-option-multi'
+    }
+  >
     <div>
       <FontAwesomeIcon
         icon={faCheck}
         border
-        className="cb-control-select-option-icon"
+        className="cb-control-select-option-multi-icon"
         style={{
           color: R.includes(value, selectedOptionValues)
             ? '#156DF9'
@@ -55,24 +63,26 @@ const OptionLabelMultiple = ({
 );
 
 export const createOptionLabelMultiple =
-  (selectedOptionValues) =>
+  (selectedOptionValues, isStandalone) =>
   ({ value, label }) =>
     (
       <OptionLabelMultiple
         value={value}
         label={label}
         selectedOptionValues={selectedOptionValues}
+        isStandalone={isStandalone}
       />
     );
 
 export const createOptionLabelMultipleWithStar =
-  (selectedOptionValues, starSelectedOptionChanged, starValues) =>
+  (selectedOptionValues, starSelectedOptionChanged, starValues, isStandalone) =>
   ({ value, label }) =>
     (
       <OptionLabelMultiple
         value={value}
         label={label}
         selectedOptionValues={selectedOptionValues}
+        isStandalone={isStandalone}
       >
         <div
           role="button"

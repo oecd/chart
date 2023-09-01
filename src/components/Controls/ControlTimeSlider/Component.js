@@ -16,6 +16,7 @@ const ControlTimeSlider = ({
   changeVar,
   lang,
   codeLabelMapping,
+  isStandalone,
 }) => {
   const steps = useMemo(
     () => getSteps(frequency || {}, lang),
@@ -73,7 +74,11 @@ const ControlTimeSlider = ({
 
   return (
     <div
-      className="cb-control cb-control-time-slider"
+      className={`cb-control ${
+        isStandalone
+          ? 'cb-control-time-slider-standalone'
+          : 'cb-control-time-slider'
+      }`}
       style={{ flex: '1', padding: '5px 10px', minWidth: '200px' }}
     >
       {!isNilOrEmpty(label) && <div className="cb-control-label">{label}</div>}
@@ -129,6 +134,7 @@ ControlTimeSlider.propTypes = {
   changeVar: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
   codeLabelMapping: PropTypes.object.isRequired,
+  isStandalone: PropTypes.bool.isRequired,
 };
 
 export default ControlTimeSlider;

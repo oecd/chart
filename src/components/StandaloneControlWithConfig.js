@@ -122,13 +122,14 @@ const StandaloneControlWithConfig = ({
   }, [id, vars, type]);
 
   return (
-    <Suspense fallback={<ControlFallback {...otherProps} />}>
+    <Suspense fallback={<ControlFallback {...otherProps} isStandalone />}>
       <ControlComponent
         vars={vars}
         changeVar={changeVar}
         codeLabelMapping={parsedCodeLabelMapping}
         type={type}
         {...R.omit(['codeLabelMapping'], otherProps)}
+        isStandalone
       />
     </Suspense>
   );

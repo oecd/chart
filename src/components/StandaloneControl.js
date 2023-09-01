@@ -71,7 +71,7 @@ const StandaloneControl = ({ controlId, language = null, ...otherProps }) => {
   }
 
   if (controlConfigData.isLoading || controlConfigData.hasFetchFailed) {
-    return <ControlFallback />;
+    return <ControlFallback isStandalone />;
   }
 
   return (
