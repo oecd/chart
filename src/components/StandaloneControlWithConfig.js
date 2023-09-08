@@ -121,6 +121,12 @@ const StandaloneControlWithConfig = ({
     }, R.toPairs(vars));
   }, [id, vars, type]);
 
+  useEffect(() => {
+    if (!otherProps.displayStars && R.has(otherProps.starsVarName, vars)) {
+      setVars(R.dissoc(otherProps.starsVarName));
+    }
+  }, [vars, otherProps.displayStars, otherProps.starsVarName]);
+
   return (
     <Suspense fallback={<ControlFallback {...otherProps} isStandalone />}>
       <ControlComponent

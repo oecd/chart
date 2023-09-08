@@ -37,11 +37,6 @@ const ControlSelect = ({
 }) => {
   const selectInstanceId = useId();
 
-  const finalMultiple = useMemo(
-    () => multiple || displayStars,
-    [multiple, displayStars],
-  );
-
   const finalOptions = useMemo(
     () =>
       R.map((o) => {
@@ -91,7 +86,7 @@ const ControlSelect = ({
 
   const selectedOptionChanged = useCallback(
     (value) => {
-      if (finalMultiple) {
+      if (multiple) {
         if (noOptionMeansAllOptions && R.isEmpty(value)) {
           changeVar(varName, R.join('|', R.map(R.prop('value'), finalOptions)));
         } else {
@@ -114,7 +109,7 @@ const ControlSelect = ({
     [
       changeVar,
       varName,
-      finalMultiple,
+      multiple,
       noOptionMeansAllOptions,
       finalOptions,
       starValues,
@@ -124,7 +119,7 @@ const ControlSelect = ({
   );
 
   const selectedOption = useMemo(() => {
-    if (finalMultiple) {
+    if (multiple) {
       const optionsFromVar = R.split('|', vars[varName] ?? '');
       return R.reduce(
         (acc, item) => {
@@ -159,7 +154,7 @@ const ControlSelect = ({
       R.compose(R.equals(optionValue), R.toUpper, R.prop('value')),
       finalOptions,
     );
-  }, [vars, varName, finalOptions, finalMultiple, type]);
+  }, [vars, varName, finalOptions, multiple, type]);
 
   const starSelectedOptionChanged = useCallback(
     (value) => {
@@ -248,8 +243,8 @@ const ControlSelect = ({
         hideSelectedOptions={false}
         components={selectComponents}
         menuPlacement="auto"
-        isMulti={finalMultiple}
-        closeMenuOnSelect={!finalMultiple}
+        isMulti={multiple}
+        closeMenuOnSelect={!multiple}
         placeholder={finalPlaceholder || ''}
         noOptionsMessage={noOptionsMessage}
         theme={customSelectTheme}
