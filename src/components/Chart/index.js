@@ -14,6 +14,7 @@ const Chart = ({
   width = null,
   height = null,
   lazyLoad = true,
+  displayActionButton = false,
   ...otherProps
 }) => {
   const finalWidth = useMemo(
@@ -26,6 +27,14 @@ const Chart = ({
     [height],
   );
 
+  const finalDisplayActionButton = useMemo(
+    () =>
+      displayActionButton === true ||
+      displayActionButton === 'true' ||
+      displayActionButton === '',
+    [displayActionButton],
+  );
+
   if (lazyLoad === false || lazyLoad === 'false') {
     return (
       <ChartErrorBoundary
@@ -33,7 +42,12 @@ const Chart = ({
           <CenteredContainer>Something went wrong :(</CenteredContainer>
         }
       >
-        <Component width={finalWidth} height={finalHeight} {...otherProps} />
+        <Component
+          width={finalWidth}
+          height={finalHeight}
+          displayActionButton={finalDisplayActionButton}
+          {...R.omit([displayActionButton], otherProps)}
+        />
       </ChartErrorBoundary>
     );
   }
@@ -48,7 +62,12 @@ const Chart = ({
         offset={100}
         resize
       >
-        <Component width={finalWidth} height={finalHeight} {...otherProps} />
+        <Component
+          width={finalWidth}
+          height={finalHeight}
+          displayActionButton={finalDisplayActionButton}
+          {...R.omit([displayActionButton], otherProps)}
+        />
       </LazyLoad>
     </ChartErrorBoundary>
   );
@@ -63,6 +82,8 @@ Chart.propTypes = {
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   lazyLoad: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
   language: PropTypes.string,
+  displayActionButton: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+  actionButtonLabel: PropTypes.string,
 };
 
 export default Chart;

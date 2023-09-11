@@ -77,6 +77,16 @@ const getChartForType = R.propOr(
   chartByType,
 );
 
+const actionButtonClick = (id) => {
+  document.dispatchEvent(
+    new CustomEvent('cbChartActionButtonClicked', {
+      detail: {
+        chartId: id || '',
+      },
+    }),
+  );
+};
+
 const HighchartsChart = ({
   id = 'temp-id',
   dataSourceType = dataSourceTypes.csv.value,
@@ -113,6 +123,8 @@ const HighchartsChart = ({
   mapCountryDimension = '',
   onTitleParsed = null,
   displayFooterAsTooltip = false,
+  displayActionButton = false,
+  actionButtonLabel,
   onExpandChart = null,
   hideExpand = false,
   onDownloadData = null,
@@ -585,7 +597,38 @@ const HighchartsChart = ({
             : {}
         }
       >
-        <div style={{ display: 'flex', padding: '7px 10px 5px 10px' }}>
+        <div
+          style={{
+            display: 'flex',
+            padding: '7px 10px 5px 10px',
+            position: 'relative',
+          }}
+        >
+          {displayActionButton && !isNilOrEmpty(actionButtonLabel) && (
+            <div
+              style={{
+                position: 'absolute',
+                display: 'flex',
+                width: '100%',
+                justifyContent: 'center',
+              }}
+            >
+              <div
+                className="cb-action-btn"
+                role="button"
+                tabIndex={0}
+                onClick={() => actionButtonClick(id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    actionButtonClick(id);
+                    e.stopPropagation();
+                  }
+                }}
+              >
+                {actionButtonLabel}
+              </div>
+            </div>
+          )}
           <div style={{ flex: '1 1 auto' }}>
             {!R.isEmpty(parsedTitle) && canTitleAndSubtitleBeDisplayed && (
               <div
@@ -780,6 +823,8 @@ HighchartsChart.propTypes = {
   mapCountryDimension: PropTypes.string,
   onTitleParsed: PropTypes.func,
   displayFooterAsTooltip: PropTypes.bool,
+  displayActionButton: PropTypes.bool,
+  actionButtonLabel: PropTypes.string,
   onExpandChart: PropTypes.func,
   hideExpand: PropTypes.bool,
   onDownloadData: PropTypes.func,
