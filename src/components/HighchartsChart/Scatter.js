@@ -72,6 +72,14 @@ const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
     : { y: d.value, __metadata: d.metadata };
 };
 
+const calcMarginTop = (title, subtitle, isSmall) => {
+  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
+    return isSmall ? 20 : 32;
+  }
+
+  return undefined;
+};
+
 const Scatter = forwardRef(
   (
     {
@@ -88,6 +96,7 @@ const Scatter = forwardRef(
       highlightColors,
       width,
       height,
+      isSmall,
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
@@ -191,10 +200,9 @@ const Scatter = forwardRef(
         chart: {
           type: 'scatter',
           style: {
-            fontFamily: 'Segoe UI',
+            fontFamily: "'Noto Sans', sans-serif",
           },
-          marginTop:
-            isNilOrEmpty(title) && isNilOrEmpty(subtitle) ? 22 : undefined,
+          marginTop: calcMarginTop(title, subtitle, isSmall),
           height,
           animation: false,
           spacingBottom: 5,
@@ -261,16 +269,17 @@ const Scatter = forwardRef(
           align: 'left',
           margin: 20,
           style: {
-            color: '#333333',
+            color: '#101d40',
             fontWeight: 'bold',
+            fontSize: '22px',
           },
         },
         subtitle: {
           text: subtitle,
           align: 'left',
           style: {
-            color: '#737373',
-            fontWeight: 'bold',
+            color: '#101d40',
+            fontSize: '20px',
           },
         },
 
@@ -285,11 +294,11 @@ const Scatter = forwardRef(
               : R.map(R.prop('label'), data.categories),
           ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
           labels: {
-            style: { color: '#0c0c0c', fontSize: '12px' },
+            style: { color: '#586179', fontSize: isSmall ? '13px' : '17px' },
             ...R.prop('xAxisLabels', formatters),
             ...(hideXAxisLabels ? { enabled: false } : {}),
           },
-          gridLineColor: '#e6e6e6',
+          gridLineColor: '#c2cbd6',
           lineColor: 'transparent',
           width: '90%',
           left: '7%',
@@ -300,10 +309,10 @@ const Scatter = forwardRef(
           title: {
             enabled: false,
           },
-          gridLineColor: '#e6e6e6',
-          lineColor: '#e6e6e6',
+          gridLineColor: '#c2cbd6',
+          lineColor: '#c2cbd6',
           labels: {
-            style: { fontSize: '12px', color: '#0c0c0c' },
+            style: { fontSize: isSmall ? '13px' : '17px', color: '#586179' },
             enabled: !hideYAxisLabels,
             align: 'left',
             x: 0,
@@ -317,7 +326,8 @@ const Scatter = forwardRef(
           margin: 10,
           itemStyle: {
             fontWeight: 'normal',
-            color: '#0c0c0c',
+            color: '#101d40',
+            fontSize: isSmall ? '13px' : '17px',
           },
           align: 'left',
           squareSymbol: false,
@@ -364,6 +374,7 @@ const Scatter = forwardRef(
         colorPalette,
         width,
         height,
+        isSmall,
         hideLegend,
         hideXAxisLabels,
         hideYAxisLabels,
@@ -371,6 +382,12 @@ const Scatter = forwardRef(
         fullscreenClose,
         tooltipOutside,
         csvExportcolumnHeaderFormatter,
+        baseline,
+        firstPaletteColor,
+        highlightColors,
+        isSmall,
+        parsedHighlight,
+        symbolLayout,
       ],
     );
 
@@ -411,6 +428,7 @@ Scatter.propTypes = {
   highlightColors: PropTypes.array.isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  isSmall: PropTypes.bool.isRequired,
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
