@@ -51,7 +51,9 @@ const Radar = forwardRef(
       hideYAxisLabels = false,
       colorPalette,
       highlightColors,
+      width,
       height,
+      isSmall,
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
@@ -127,7 +129,7 @@ const Radar = forwardRef(
         chart: {
           polar: true,
           style: {
-            fontFamily: 'Segoe UI',
+            fontFamily: "'Noto Sans', sans-serif",
           },
           height,
           animation: false,
@@ -142,16 +144,17 @@ const Radar = forwardRef(
           align: 'left',
           margin: 20,
           style: {
-            color: '#333333',
+            color: '#101d40',
             fontWeight: 'bold',
+            fontSize: '22px',
           },
         },
         subtitle: {
           text: subtitle,
           align: 'left',
           style: {
-            color: '#737373',
-            fontWeight: 'bold',
+            color: '#101d40',
+            fontSize: '20px',
           },
         },
 
@@ -168,13 +171,10 @@ const Radar = forwardRef(
         xAxis: {
           categories: R.map(R.prop('label'), data.categories),
           labels: {
-            style: {
-              color: '#0c0c0c',
-              fontSize: '12px',
-            },
+            style: { color: '#586179', fontSize: isSmall ? '13px' : '17px' },
             enabled: !hideXAxisLabels,
           },
-          gridLineColor: '#e6e6e6',
+          gridLineColor: '#c2cbd6',
           lineColor: 'transparent',
         },
 
@@ -182,9 +182,10 @@ const Radar = forwardRef(
           title: {
             enabled: false,
           },
-          gridLineColor: '#e6e6e6',
-          lineColor: '#e6e6e6',
+          gridLineColor: '#c2cbd6',
+          lineColor: '#c2cbd6',
           labels: {
+            style: { fontSize: isSmall ? '13px' : '17px', color: '#586179' },
             enabled: !hideYAxisLabels,
           },
         },
@@ -195,7 +196,8 @@ const Radar = forwardRef(
           margin: 10,
           itemStyle: {
             fontWeight: 'normal',
-            color: '#0c0c0c',
+            color: '#101d40',
+            fontSize: isSmall ? '13px' : '17px',
           },
           symbolWidth: 18,
         },
@@ -258,13 +260,16 @@ const Radar = forwardRef(
           },
         },
       }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [
         title,
         subtitle,
         data,
         series,
         colorPalette,
+        width,
         height,
+        isSmall,
         hideLegend,
         hideXAxisLabels,
         hideYAxisLabels,
@@ -309,7 +314,9 @@ Radar.propTypes = {
   hideYAxisLabels: PropTypes.bool,
   colorPalette: PropTypes.array.isRequired,
   highlightColors: PropTypes.array.isRequired,
+  width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  isSmall: PropTypes.bool.isRequired,
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,

@@ -47,6 +47,7 @@ const Pie = forwardRef(
       highlightColors,
       width,
       height,
+      isSmall,
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
@@ -110,7 +111,7 @@ const Pie = forwardRef(
         chart: {
           type: 'pie',
           style: {
-            fontFamily: 'Segoe UI',
+            fontFamily: "'Noto Sans', sans-serif",
           },
           height,
           animation: false,
@@ -122,16 +123,17 @@ const Pie = forwardRef(
           align: 'left',
           margin: 20,
           style: {
-            color: '#333333',
+            color: '#101d40',
             fontWeight: 'bold',
+            fontSize: '22px',
           },
         },
         subtitle: {
           text: subtitle,
           align: 'left',
           style: {
-            color: '#737373',
-            fontWeight: 'bold',
+            color: '#101d40',
+            fontSize: '20px',
           },
         },
 
@@ -144,7 +146,8 @@ const Pie = forwardRef(
           margin: 10,
           itemStyle: {
             fontWeight: 'normal',
-            color: '#0c0c0c',
+            color: '#101d40',
+            fontSize: isSmall ? '13px' : '17px',
           },
           align: 'left',
           symbolWidth: 18,
@@ -158,7 +161,11 @@ const Pie = forwardRef(
           pie: {
             dataLabels: {
               enabled: !hideXAxisLabels,
-              style: { color: '#0c0c0c', fontSize: '12px' },
+              style: {
+                fontSize: isSmall ? '13px' : '17px',
+                color: '#586179',
+                fontWeight: 'normal',
+              },
             },
             showInLegend: !hideLegend,
           },
@@ -185,11 +192,10 @@ const Pie = forwardRef(
       [
         title,
         subtitle,
-        data,
         series,
-        colorPalette,
         width,
         height,
+        isSmall,
         hideLegend,
         hideXAxisLabels,
         formatters,
@@ -234,6 +240,7 @@ Pie.propTypes = {
   highlightColors: PropTypes.array.isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  isSmall: PropTypes.bool.isRequired,
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,

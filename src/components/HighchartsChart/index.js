@@ -633,6 +633,8 @@ const HighchartsChart = ({
     };
   }, [parsedTitle, parsedSubtitle, chartType]);
 
+  const isSmall = useMemo(() => width < 400, [width]);
+
   const finalColorPalette = useMemo(
     () =>
       getFinalPalette(
@@ -651,7 +653,7 @@ const HighchartsChart = ({
 
   return (
     <div
-      className="cb-container"
+      className={`cb-container ${isSmall ? 'cb-small' : ''}`}
       style={{ backgroundColor: '#fff', position: 'relative' }}
     >
       {displayActionButton && !isNilOrEmpty(actionButtonLabel) && (
@@ -752,6 +754,7 @@ const HighchartsChart = ({
             fullscreenClose={fullscreenClose}
             isFullScreen={isFullScreen}
             csvExportcolumnHeaderFormatter={csvExportcolumnHeaderFormatter}
+            isSmall={isSmall}
             {...otherProps}
           />
         </Suspense>

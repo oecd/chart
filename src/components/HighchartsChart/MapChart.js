@@ -102,6 +102,7 @@ const MapChart = forwardRef(
       highlightColors,
       width,
       height,
+      isSmall,
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
@@ -227,7 +228,7 @@ const MapChart = forwardRef(
           proj4,
 
           style: {
-            fontFamily: 'Segoe UI',
+            fontFamily: "'Noto Sans', sans-serif",
           },
           height,
           animation: !isFullScreen,
@@ -246,6 +247,12 @@ const MapChart = forwardRef(
                 allowNegativeLog: true,
                 minColor: createLighterColor(R.head(finalColorPalette), 90),
                 maxColor: convertColorToHex(R.head(finalColorPalette)),
+                labels: {
+                  style: {
+                    color: '#101d40',
+                    fontSize: isSmall ? '13px' : '17px',
+                  },
+                },
               },
             ]),
           ],
@@ -269,16 +276,17 @@ const MapChart = forwardRef(
           align: 'left',
           margin: 20,
           style: {
-            color: '#333333',
+            color: '#101d40',
             fontWeight: 'bold',
+            fontSize: '22px',
           },
         },
         subtitle: {
           text: subtitle,
           align: 'left',
           style: {
-            color: '#737373',
-            fontWeight: 'bold',
+            color: '#101d40',
+            fontSize: '20px',
           },
         },
 
@@ -292,7 +300,8 @@ const MapChart = forwardRef(
           margin: 10,
           itemStyle: {
             fontWeight: 'normal',
-            color: '#0c0c0c',
+            color: '#101d40',
+            fontSize: isSmall ? '13px' : '17px',
           },
           squareSymbol: false,
           symbolRadius: mapType === mapTypes.normal.value ? 0 : undefined,
@@ -313,7 +322,7 @@ const MapChart = forwardRef(
             animation: false,
             dataLabels: {
               ...R.prop('dataLabels', formatters),
-              color: '#333333',
+              color: '#101d40',
             },
             borderColor: '#bbbbbb',
           },
@@ -347,7 +356,6 @@ const MapChart = forwardRef(
       [
         title,
         subtitle,
-        data,
         series,
         mapType,
         mapAutoShade,
@@ -356,6 +364,7 @@ const MapChart = forwardRef(
         finalColorPalette,
         width,
         height,
+        isSmall,
         hideLegend,
         formatters,
         fullscreenClose,
@@ -401,6 +410,7 @@ MapChart.propTypes = {
   highlightColors: PropTypes.array.isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  isSmall: PropTypes.bool.isRequired,
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
