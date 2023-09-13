@@ -51,6 +51,7 @@ import useTooltipState from '../../hooks/useTooltipState';
 import CenteredContainer from '../CenteredContainer';
 import { fetchJson } from '../../utils/fetchUtil';
 import ExportButton from './ExportButton';
+import { getFinalPalette } from '../../utils/configUtil';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -112,6 +113,8 @@ const HighchartsChart = ({
   highlight = '',
   baseline = '',
   colorPalette,
+  paletteStartingColor = null,
+  paletteStartingColorOverride = null,
   paletteColorsOverride,
   highlightColors,
   highlightColorsOverride,
@@ -583,6 +586,22 @@ const HighchartsChart = ({
     };
   }, [parsedTitle, parsedSubtitle, chartType]);
 
+  const finalColorPalette = useMemo(
+    () =>
+      getFinalPalette(
+        colorPalette,
+        paletteColorsOverride,
+        paletteStartingColor,
+        paletteStartingColorOverride,
+      ),
+    [
+      colorPalette,
+      paletteColorsOverride,
+      paletteStartingColor,
+      paletteStartingColorOverride,
+    ],
+  );
+
   return (
     <div className="cb-container" style={{ backgroundColor: '#fff' }}>
       <div
@@ -745,11 +764,7 @@ const HighchartsChart = ({
             data={parsedData}
             highlight={parsedHighlight}
             baseline={parsedBaseline}
-            colorPalette={
-              R.isEmpty(paletteColorsOverride)
-                ? colorPalette
-                : paletteColorsOverride
-            }
+            colorPalette={finalColorPalette}
             highlightColors={
               R.isEmpty(highlightColorsOverride)
                 ? highlightColors
@@ -812,6 +827,8 @@ HighchartsChart.propTypes = {
   highlight: PropTypes.string,
   baseline: PropTypes.string,
   colorPalette: PropTypes.array.isRequired,
+  paletteStartingColor: PropTypes.string,
+  paletteStartingColorOverride: PropTypes.string,
   paletteColorsOverride: PropTypes.array.isRequired,
   highlightColors: PropTypes.array.isRequired,
   highlightColorsOverride: PropTypes.array.isRequired,

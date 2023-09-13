@@ -7,3 +7,32 @@ export const codeOrLabelEquals = (obj) =>
     R.either(R.equals(R.toUpper(obj.code)), R.equals(R.toUpper(obj.label))),
     R.toUpper,
   );
+
+export const getFinalPalette = (
+  colorPalette,
+  paletteColorsOverride,
+  paletteStartingColor,
+  paletteStartingColorOverride,
+) => {
+  if (!R.isEmpty(paletteColorsOverride)) {
+    return paletteColorsOverride;
+  }
+
+  const startingColor = paletteStartingColorOverride || paletteStartingColor;
+
+  if (startingColor) {
+    const startingColorIndex = R.findIndex(
+      R.equals(startingColor),
+      colorPalette,
+    );
+    if (startingColorIndex !== -1) {
+      return R.compose(
+        R.unnest,
+        R.reverse,
+        R.splitAt(startingColorIndex),
+      )(colorPalette);
+    }
+  }
+
+  return colorPalette;
+};
