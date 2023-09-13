@@ -713,7 +713,7 @@ const HighchartsChart = ({
     };
   }, [parsedTitle, parsedSubtitle, chartType]);
 
-  const isSmall = useMemo(() => width < 400, [width]);
+  const isSmall = useMemo(() => width < 400 || height < 300, [width, height]);
 
   const finalColorPalette = useMemo(
     () =>
