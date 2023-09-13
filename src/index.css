@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;800&display=swap');
+
 .cb-container {
-  font-family: 'Segoe UI';
-  color: #333333;
+  font-family: 'Noto Sans', sans-serif;
+  color: #101d40;
 }
 
 .cb-container p,
@@ -9,15 +11,25 @@
 }
 
 .cb-title {
-  color: #333333;
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 28px;
+}
+
+.cb-container.cb-small .cb-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 18px;
 }
 
 .cb-subtitle {
-  color: #737373;
-  font-size: 12px;
-  font-weight: bold;
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.cb-container.cb-small .cb-subtitle {
+  font-size: 15px;
+  line-height: 18px;
 }
 
 .cb-action-btn {
@@ -38,7 +50,11 @@
 
 .cb-toolbar {
   cursor: pointer;
-  color: #737373;
+  color: #101d40;
+  font-size: 18px;
+}
+.cb-container.cb-small .cb-toolbar {
+  font-size: 16px;
 }
 .cb-toolbar-disabled {
   cursor: default;
@@ -53,10 +69,10 @@
 }
 
 .cb-floating {
-  font-family: 'Segoe UI';
-  font-size: 13px;
-  border: 1px solid #e6e6e6;
-  color: #0c0c0c;
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 14px;
+  border: 1px solid #c2cbd6;
+  color: #586179;
   background-color: #ffffffe6;
   z-index: 12;
 }
@@ -70,16 +86,24 @@
   margin: 0px;
 }
 
+.cb-footer {
+  font-size: 16px;
+  line-height: 20px;
+  color: #586179;
+}
+
+.cb-container.cb-small .cb-footer {
+  font-size: 13px;
+  line-height: 16px;
+}
+
 .cb-footer div:not(:empty) {
   padding: 5px 10px;
-  font-family: sans-serif;
-  font-size: 13px;
-  line-height: normal;
 }
+
 .cb-footer p {
   margin-top: 0px;
   margin-bottom: 5px;
-  color: #586179;
 }
 .cb-footer p:last-of-type {
   margin-bottom: 0px;
@@ -90,7 +114,7 @@
 }
 
 .cb-control {
-  font-family: 'Segoe UI';
+  font-family: 'Noto Sans', sans-serif;
   font-size: 14px;
   flex: 1;
   padding: 5px 10px;

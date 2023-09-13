@@ -27,10 +27,14 @@ if (typeof Highcharts === 'object') {
   ExportDataModule(Highcharts);
 }
 
-const calcMarginTop = (title, subtitle, horizontal) => {
+const calcMarginTop = (title, subtitle, horizontal, isSmall) => {
   if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
-    return horizontal ? 32 : 22;
+    if (isSmall) {
+      return 22;
+    }
+    return horizontal ? 42 : 32;
   }
+
   return undefined;
 };
 
@@ -62,6 +66,7 @@ const Bar = forwardRef(
       highlightColors,
       width,
       height,
+      isSmall,
       pivotValue = 0,
       formatters = {},
       fullscreenClose = null,
@@ -133,9 +138,9 @@ const Bar = forwardRef(
         chart: {
           type: horizontal ? 'bar' : 'column',
           style: {
-            fontFamily: 'Segoe UI',
+            fontFamily: "'Noto Sans', sans-serif",
           },
-          marginTop: calcMarginTop(title, subtitle, horizontal),
+          marginTop: calcMarginTop(title, subtitle, horizontal, isSmall),
           height,
           animation: false,
           spacingBottom: 5,
@@ -151,7 +156,8 @@ const Bar = forwardRef(
           align: 'left',
           margin: 20,
           style: {
-            color: '#333333',
+            color: '#101d40',
+            fontSize: '22px',
             fontWeight: 'bold',
           },
         },
@@ -159,8 +165,8 @@ const Bar = forwardRef(
           text: subtitle,
           align: 'left',
           style: {
-            color: '#737373',
-            fontWeight: 'bold',
+            color: '#101d40',
+            fontSize: '20px',
           },
         },
 
@@ -175,14 +181,14 @@ const Bar = forwardRef(
               : R.map(R.prop('label'), data.categories),
           ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
           labels: {
-            style: { color: '#0c0c0c', fontSize: '12px' },
+            style: { color: '#586179', fontSize: isSmall ? '13px' : '17px' },
             ...R.prop('xAxisLabels', formatters),
             ...((hideXAxisLabels && !horizontal) ||
             (hideYAxisLabels && horizontal)
               ? { enabled: false }
               : {}),
           },
-          gridLineColor: '#e6e6e6',
+          gridLineColor: '#c2cbd6',
           lineColor: 'transparent',
           ...(horizontal
             ? { height: '90%', top: '5%' }
@@ -194,14 +200,15 @@ const Bar = forwardRef(
           title: {
             enabled: false,
           },
-          gridLineColor: '#e6e6e6',
-          lineColor: '#e6e6e6',
+          gridLineColor: '#c2cbd6',
+          lineColor: '#c2cbd6',
+          ...(horizontal ? { width: '97%' } : {}),
           labels: {
-            style: { fontSize: '12px', color: '#0c0c0c' },
+            style: { fontSize: isSmall ? '13px' : '17px', color: '#586179' },
             enabled:
               (!horizontal && !hideYAxisLabels) ||
               (horizontal && !hideXAxisLabels),
-            ...(horizontal ? {} : { align: 'left', x: 0, y: -4 }),
+            ...(horizontal ? { y: 10 } : { align: 'left', x: 0, y: -4 }),
           },
           opposite: horizontal,
         },
@@ -212,7 +219,8 @@ const Bar = forwardRef(
           margin: 10,
           itemStyle: {
             fontWeight: 'normal',
-            color: '#0c0c0c',
+            color: '#101d40',
+            fontSize: isSmall ? '13px' : '17px',
           },
           align: 'left',
           squareSymbol: false,
@@ -261,6 +269,7 @@ const Bar = forwardRef(
         colorPalette,
         width,
         height,
+        isSmall,
         hideLegend,
         hideXAxisLabels,
         hideYAxisLabels,
@@ -309,6 +318,7 @@ Bar.propTypes = {
   highlightColors: PropTypes.array.isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  isSmall: PropTypes.bool.isRequired,
   pivotValue: PropTypes.number,
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
