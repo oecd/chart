@@ -44,6 +44,7 @@ const calcVarsForSelectChartOptionValue = (value) => {
 
 const StandaloneControlWithConfig = ({
   id = '',
+  initialValue = null,
   type,
   codeLabelMapping,
   ...otherProps
@@ -74,7 +75,10 @@ const StandaloneControlWithConfig = ({
     R.cond([
       [
         R.equals(controlTypes.select.value),
-        R.always({ [otherProps.varName]: otherProps.varDefaultValue || '' }),
+        R.always({
+          [otherProps.varName]:
+            initialValue || otherProps.varDefaultValue || '',
+        }),
       ],
       [
         R.equals(controlTypes.selectChart.value),
@@ -137,6 +141,7 @@ const StandaloneControlWithConfig = ({
 
 StandaloneControlWithConfig.propTypes = {
   id: PropTypes.string,
+  initialValue: PropTypes.string,
   type: PropTypes.string.isRequired,
   codeLabelMapping: PropTypes.string.isRequired,
 };
