@@ -39,24 +39,27 @@ const ControlSelect = ({
 
   const finalOptions = useMemo(
     () =>
-      R.map((o) => {
-        const codeThatCanContainVars =
-          type === controlTypes.selectChart.value
-            ? R.join('|', R.head(parseCSVWithoutCleanUp(R.prop('value', o))))
-            : R.prop('value', o);
+      R.map(
+        (o) => {
+          const codeThatCanContainVars =
+            type === controlTypes.selectChart.value
+              ? R.join('|', R.head(parseCSVWithoutCleanUp(R.prop('value', o))))
+              : R.prop('value', o);
 
-        return R.compose(
-          R.assoc('value', codeThatCanContainVars),
-          R.assoc(
-            'label',
-            R.propOr(
-              codeThatCanContainVars,
-              R.toUpper(codeThatCanContainVars),
-              codeLabelMapping,
+          return R.compose(
+            R.assoc('value', codeThatCanContainVars),
+            R.assoc(
+              'label',
+              R.propOr(
+                codeThatCanContainVars,
+                R.toUpper(codeThatCanContainVars),
+                codeLabelMapping,
+              ),
             ),
-          ),
-        )(o);
-      }, R.reject(R.compose(isNilOrEmpty, R.prop('value')), options || [])),
+          )(o);
+        },
+        R.reject(R.compose(isNilOrEmpty, R.prop('value')), options || []),
+      ),
     [options, codeLabelMapping, type],
   );
 

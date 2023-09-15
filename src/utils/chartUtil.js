@@ -36,10 +36,13 @@ export const createLighterColor = (color, percent) => {
 
 export const createShadesFromColor = (color) => {
   const hex = convertColorToHex(color);
-  return R.map((n) => {
-    const percent = n * 10;
-    return lightenColor(hex, percent);
-  }, R.times(R.identity, 9));
+  return R.map(
+    (n) => {
+      const percent = n * 10;
+      return lightenColor(hex, percent);
+    },
+    R.times(R.identity, 9),
+  );
 };
 
 export const makeColorReadableOnBackgroundColor = (color, backgroundColor) =>

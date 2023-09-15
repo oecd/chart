@@ -74,17 +74,20 @@ export const parseData = ({ data, parsingHelperData, ...rest }) => {
     R.map(R.head, R.tail(data)),
   );
 
-  const series = mapWithIndex((seriesCode, idx) => {
-    const serieData = R.map(R.nth(idx + 1), R.tail(data));
-    return {
-      code: `${seriesCode}`,
-      label: R.path(
-        ['yDimensionLabelByCode', `${seriesCode}`],
-        parsingHelperData,
-      ),
-      data: serieData,
-    };
-  }, R.tail(R.head(data)));
+  const series = mapWithIndex(
+    (seriesCode, idx) => {
+      const serieData = R.map(R.nth(idx + 1), R.tail(data));
+      return {
+        code: `${seriesCode}`,
+        label: R.path(
+          ['yDimensionLabelByCode', `${seriesCode}`],
+          parsingHelperData,
+        ),
+        data: serieData,
+      };
+    },
+    R.tail(R.head(data)),
+  );
 
   const otherDimensions = R.map(
     ([c, l]) => ({

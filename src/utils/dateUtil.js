@@ -71,12 +71,15 @@ export const getSteps = (frequency, lang) => {
     const stepNumber = differenceFunc(maxDate, minDate);
 
     const labelByCode = R.fromPairs(
-      R.map((stepIndex) => {
-        const date = addFunc(minDate, stepIndex);
-        const code = format(date, codeStringFormat);
-        const label = formatToLabel(date, lang);
-        return [code, label];
-      }, R.times(R.identity, stepNumber + 1)),
+      R.map(
+        (stepIndex) => {
+          const date = addFunc(minDate, stepIndex);
+          const code = format(date, codeStringFormat);
+          const label = formatToLabel(date, lang);
+          return [code, label];
+        },
+        R.times(R.identity, stepNumber + 1),
+      ),
     );
 
     return { codes: R.keys(labelByCode), labelByCode };

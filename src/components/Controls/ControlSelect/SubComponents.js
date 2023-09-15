@@ -64,51 +64,49 @@ const OptionLabelMultiple = ({
 
 export const createOptionLabelMultiple =
   (selectedOptionValues, isStandalone) =>
-  ({ value, label }) =>
-    (
-      <OptionLabelMultiple
-        value={value}
-        label={label}
-        selectedOptionValues={selectedOptionValues}
-        isStandalone={isStandalone}
-      />
-    );
+  ({ value, label }) => (
+    <OptionLabelMultiple
+      value={value}
+      label={label}
+      selectedOptionValues={selectedOptionValues}
+      isStandalone={isStandalone}
+    />
+  );
 
 export const createOptionLabelMultipleWithStar =
   (selectedOptionValues, starSelectedOptionChanged, starValues, isStandalone) =>
-  ({ value, label }) =>
-    (
-      <OptionLabelMultiple
-        value={value}
-        label={label}
-        selectedOptionValues={selectedOptionValues}
-        isStandalone={isStandalone}
-      >
-        <div
-          role="button"
-          tabIndex={0}
-          className="cb-star-container"
-          onClick={(e) => {
+  ({ value, label }) => (
+    <OptionLabelMultiple
+      value={value}
+      label={label}
+      selectedOptionValues={selectedOptionValues}
+      isStandalone={isStandalone}
+    >
+      <div
+        role="button"
+        tabIndex={0}
+        className="cb-star-container"
+        onClick={(e) => {
+          starSelectedOptionChanged(value);
+          e.stopPropagation();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
             starSelectedOptionChanged(value);
             e.stopPropagation();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              starSelectedOptionChanged(value);
-              e.stopPropagation();
-            }
-          }}
-        >
-          <span className="fa-layers">
-            <FontAwesomeIcon icon={faStar} className="cb-star-border" />
-            <FontAwesomeIcon
-              icon={faStar}
-              transform="shrink-4"
-              className={`cb-star${
-                R.includes(value, starValues) ? '-selected' : ''
-              }`}
-            />
-          </span>
-        </div>
-      </OptionLabelMultiple>
-    );
+          }
+        }}
+      >
+        <span className="fa-layers">
+          <FontAwesomeIcon icon={faStar} className="cb-star-border" />
+          <FontAwesomeIcon
+            icon={faStar}
+            transform="shrink-4"
+            className={`cb-star${
+              R.includes(value, starValues) ? '-selected' : ''
+            }`}
+          />
+        </span>
+      </div>
+    </OptionLabelMultiple>
+  );
