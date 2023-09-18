@@ -104,7 +104,7 @@ const Line = forwardRef(
 
               return dataPoint;
             }, s.data),
-            type: 'line',
+            type: 'spline',
             marker: {
               symbol: 'circle',
               radius: 3,
