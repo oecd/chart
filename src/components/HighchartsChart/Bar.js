@@ -232,7 +232,7 @@ const Bar = forwardRef(
         plotOptions: {
           series: {
             animation: false,
-            pointPadding: 0.2,
+            pointPadding: 0.1,
             groupPadding: 0.1,
             borderWidth: 0,
             threshold: parseFloat(pivotValue) || 0,
