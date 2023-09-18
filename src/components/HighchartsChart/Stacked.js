@@ -91,7 +91,7 @@ const Stacked = forwardRef(
     );
 
     const chartType = R.cond([
-      [R.always(area), R.always('area')],
+      [R.always(area), R.always('areaspline')],
       [R.always(horizontal), R.always('bar')],
       [R.T, R.always('column')],
     ])();
@@ -211,9 +211,9 @@ const Stacked = forwardRef(
           series: {
             animation: false,
             stacking: stacking || stackingOptions.percent.value,
-            pointPadding: 0,
-            groupPadding: 0,
-            borderWidth: 1.5,
+            pointPadding: 0.1,
+            groupPadding: 0.1,
+            borderWidth: 0,
             dataLabels: {
               ...R.prop('dataLabels', formatters),
             },
