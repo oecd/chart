@@ -129,6 +129,7 @@ const Radar = forwardRef(
       () => ({
         chart: {
           polar: true,
+          type: 'line',
           style: {
             fontFamily: "'Noto Sans', sans-serif",
           },

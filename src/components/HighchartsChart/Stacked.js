@@ -38,6 +38,18 @@ const calcMarginTop = (title, subtitle, horizontal, isSmall) => {
   return undefined;
 };
 
+const calcXAxisLayout = (horizontal, area, areCategoriesDatesOrNumbers) => {
+  if (area) {
+    return areCategoriesDatesOrNumbers
+      ? { left: '10%', width: '85%' }
+      : { left: '5%', width: '95%' };
+  }
+
+  return horizontal
+    ? { top: '7%', height: '85%' }
+    : { left: '9%', width: '87%' };
+};
+
 const Stacked = forwardRef(
   (
     {
@@ -165,9 +177,11 @@ const Stacked = forwardRef(
           },
           gridLineColor: '#c2cbd6',
           lineColor: 'transparent',
-          ...(horizontal
-            ? { height: '85%', top: '7%' }
-            : { width: '90%', left: '7%' }),
+          ...calcXAxisLayout(
+            horizontal,
+            area,
+            data.areCategoriesDates || data.areCategoriesNumbers,
+          ),
           tickWidth: 0,
         },
 
@@ -178,7 +192,7 @@ const Stacked = forwardRef(
           startOnTick: false,
           gridLineColor: '#c2cbd6',
           lineColor: '#c2cbd6',
-          ...(horizontal ? { width: '97%' } : {}),
+          ...(horizontal ? { width: '96%' } : {}),
           labels: {
             style: { fontSize: isSmall ? '13px' : '17px', color: '#586179' },
             enabled:
