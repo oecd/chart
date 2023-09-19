@@ -50,6 +50,18 @@ const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
     : { y: d.value, __metadata: d.metadata };
 };
 
+const calcXAxisLayout = (horizontal, areCategoriesDatesOrNumbers) => {
+  if (horizontal) {
+    return areCategoriesDatesOrNumbers
+      ? { top: '6%', height: '87%' }
+      : { top: '7%', height: '85%' };
+  }
+
+  return areCategoriesDatesOrNumbers
+    ? { left: '8%', width: '89%' }
+    : { left: '9%', width: '87%' };
+};
+
 const Bar = forwardRef(
   (
     {
@@ -190,9 +202,10 @@ const Bar = forwardRef(
           },
           gridLineColor: '#c2cbd6',
           lineColor: 'transparent',
-          ...(horizontal
-            ? { height: '90%', top: '5%' }
-            : { width: '90%', left: '7%' }),
+          ...calcXAxisLayout(
+            horizontal,
+            data.areCategoriesDates || data.areCategoriesNumbers,
+          ),
           tickWidth: 0,
         },
 
@@ -202,7 +215,7 @@ const Bar = forwardRef(
           },
           gridLineColor: '#c2cbd6',
           lineColor: '#c2cbd6',
-          ...(horizontal ? { width: '97%' } : {}),
+          ...(horizontal ? { width: '96%' } : {}),
           labels: {
             style: { fontSize: isSmall ? '13px' : '17px', color: '#586179' },
             enabled:

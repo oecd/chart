@@ -300,8 +300,12 @@ const Scatter = forwardRef(
           },
           gridLineColor: '#c2cbd6',
           lineColor: 'transparent',
-          width: '90%',
-          left: '7%',
+          left:
+            data.areCategoriesDates || data.areCategoriesNumbers ? '10%' : '5%',
+          width:
+            data.areCategoriesDates || data.areCategoriesNumbers
+              ? '85%'
+              : '95%',
           tickWidth: 0,
         },
 

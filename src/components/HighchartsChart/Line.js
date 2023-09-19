@@ -192,8 +192,12 @@ const Line = forwardRef(
           },
           gridLineColor: '#c2cbd6',
           lineColor: 'transparent',
-          left: '5%',
-          width: '90%',
+          left:
+            data.areCategoriesDates || data.areCategoriesNumbers ? '10%' : '5%',
+          width:
+            data.areCategoriesDates || data.areCategoriesNumbers
+              ? '85%'
+              : '95%',
           tickWidth: 0,
         },
 
