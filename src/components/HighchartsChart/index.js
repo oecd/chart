@@ -10,10 +10,6 @@ import React, {
   useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons/faExpandArrowsAlt';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
-import { FloatingPortal } from '@floating-ui/react';
 import striptags from 'striptags';
 import * as R from 'ramda';
 
@@ -47,11 +43,10 @@ import {
   doesStringContainVar,
 } from '../../utils/chartUtil';
 import { createFormatters } from '../../utils/highchartsUtil';
-import useTooltipState from '../../hooks/useTooltipState';
 import CenteredContainer from '../CenteredContainer';
 import { fetchJson } from '../../utils/fetchUtil';
-import ExportButton from './ExportButton';
 import { getFinalPalette } from '../../utils/configUtil';
+import Header from './Header';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -124,7 +119,6 @@ const HighchartsChart = ({
   yAxisOrderOverride = '',
   maxNumberOfDecimals = '',
   mapCountryDimension = '',
-  onTitleParsed = null,
   displayFooterAsTooltip = false,
   displayActionButton = false,
   actionButtonLabel,
@@ -134,6 +128,9 @@ const HighchartsChart = ({
   onDataReady = null,
   vars,
   lang,
+  hideTitle = false,
+  hideSubtitle = false,
+  hideToolbox = false,
   ...otherProps
 }) => {
   const chartForType = getChartForType(chartType);
@@ -417,34 +414,33 @@ const HighchartsChart = ({
       : definitionWithVars;
   }, [definition, vars, parsedData?.codeLabelMapping]);
 
-  const fakeTooltipButton =
-    R.isNil(parsedNoteAndSource) && R.isNil(parsedDefinition) ? null : (
-      <div style={{ width: '20px' }} />
-    );
-
   const headerRef = useRef(null);
   const footerRef = useRef(null);
 
   const parsedTitle = useMemo(
     () =>
-      replaceVarsNameByVarsValueUsingCodeLabelMapping(
-        title,
-        vars,
-        parsedData?.codeLabelMapping,
-        true,
-      ),
-    [title, vars, parsedData?.codeLabelMapping],
+      hideTitle
+        ? ''
+        : replaceVarsNameByVarsValueUsingCodeLabelMapping(
+            title,
+            vars,
+            parsedData?.codeLabelMapping,
+            true,
+          ),
+    [title, vars, parsedData?.codeLabelMapping, hideTitle],
   );
 
   const parsedSubtitle = useMemo(
     () =>
-      replaceVarsNameByVarsValueUsingCodeLabelMapping(
-        subtitle,
-        vars,
-        parsedData?.codeLabelMapping,
-        true,
-      ),
-    [subtitle, vars, parsedData?.codeLabelMapping],
+      hideSubtitle
+        ? ''
+        : replaceVarsNameByVarsValueUsingCodeLabelMapping(
+            subtitle,
+            vars,
+            parsedData?.codeLabelMapping,
+            true,
+          ),
+    [subtitle, vars, parsedData?.codeLabelMapping, hideSubtitle],
   );
 
   const doesTitleOrSubtitleContainVar = useMemo(
@@ -530,12 +526,6 @@ const HighchartsChart = ({
     ],
   );
 
-  useEffect(() => {
-    if (onTitleParsed) {
-      onTitleParsed(parsedTitle);
-    }
-  }, [onTitleParsed, parsedTitle]);
-
   const chartRef = useRef(null);
 
   const chartCanBedisplayed =
@@ -544,13 +534,9 @@ const HighchartsChart = ({
     R.isNil(errorMessage) &&
     !R.isNil(parsedData);
 
-  const tooltipState = useTooltipState();
-
-  const [isInIframe, setIsInIframe] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [screenHeight, setScreenHeight] = useState(0);
   useEffect(() => {
-    setIsInIframe(window.location !== window.parent.location);
     setScreenHeight(window.screen.height);
   }, []);
   const openChartFullScreen = () => {
@@ -603,7 +589,35 @@ const HighchartsChart = ({
   );
 
   return (
-    <div className="cb-container" style={{ backgroundColor: '#fff' }}>
+    <div
+      className="cb-container"
+      style={{ backgroundColor: '#fff', position: 'relative' }}
+    >
+      {displayActionButton && !isNilOrEmpty(actionButtonLabel) && (
+        <div
+          style={{
+            position: 'absolute',
+            display: 'flex',
+            width: '100%',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            className="cb-action-btn"
+            role="button"
+            tabIndex={0}
+            onClick={() => actionButtonClick(id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                actionButtonClick(id);
+                e.stopPropagation();
+              }
+            }}
+          >
+            {actionButtonLabel}
+          </div>
+        </div>
+      )}
       <div
         ref={headerRef}
         style={
@@ -616,126 +630,29 @@ const HighchartsChart = ({
             : {}
         }
       >
-        <div
-          style={{
-            display: 'flex',
-            padding: '7px 10px 5px 10px',
-            position: 'relative',
-          }}
-        >
-          {displayActionButton && !isNilOrEmpty(actionButtonLabel) && (
-            <div
-              style={{
-                position: 'absolute',
-                display: 'flex',
-                width: '100%',
-                justifyContent: 'center',
-              }}
-            >
-              <div
-                className="cb-action-btn"
-                role="button"
-                tabIndex={0}
-                onClick={() => actionButtonClick(id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    actionButtonClick(id);
-                    e.stopPropagation();
-                  }
-                }}
-              >
-                {actionButtonLabel}
-              </div>
-            </div>
-          )}
-          <div style={{ flex: '1 1 auto' }}>
-            {!R.isEmpty(parsedTitle) && canTitleAndSubtitleBeDisplayed && (
-              <div
-                className="cb-title"
-                dangerouslySetInnerHTML={{
-                  __html: parsedTitle,
-                }}
-              />
-            )}
-            {!R.isEmpty(parsedSubtitle) && canTitleAndSubtitleBeDisplayed && (
-              <div
-                className="cb-subtitle"
-                dangerouslySetInnerHTML={{
-                  __html: parsedSubtitle,
-                }}
-              />
-            )}
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              flexWrap: 'nowrap',
-              minHeight: '21px',
-            }}
-          >
-            {noteAndSourceShouldBeDisplayedInTooltip ||
-            !R.isNil(parsedDefinition) ? (
-              <>
-                <div
-                  className="cb-toolbar"
-                  style={{ marginLeft: '4px' }}
-                  ref={tooltipState.refs.setReference}
-                  {...tooltipState.getReferenceProps()}
-                >
-                  <FontAwesomeIcon icon={faInfoCircle} />
-                </div>
-                {tooltipState.open && (
-                  <FloatingPortal>
-                    <div
-                      ref={tooltipState.refs.setFloating}
-                      style={tooltipState.floatingStyles}
-                      {...tooltipState.getFloatingProps()}
-                      className="cb-floating cb-tooltip"
-                      dangerouslySetInnerHTML={{
-                        __html: noteAndSourceShouldBeDisplayedInTooltip
-                          ? R.join('', [parsedDefinition, parsedNoteAndSource])
-                          : parsedDefinition,
-                      }}
-                    />
-                  </FloatingPortal>
-                )}
-              </>
-            ) : (
-              fakeTooltipButton
-            )}
-            <ExportButton
-              chartRef={chartRef}
-              parsedTitle={parsedTitle}
-              parsedSubtitle={parsedSubtitle}
-              onDownloadData={onDownloadData}
-              disabled={!chartCanBedisplayed}
-              style={{ marginLeft: '8px' }}
-            />
-            {(onExpandChart || !isInIframe) && !hideExpand && (
-              <div
-                style={{ marginLeft: '8px' }}
-                className={
-                  chartCanBedisplayed ? 'cb-toolbar' : 'cb-toolbar-disabled'
-                }
-                role="button"
-                tabIndex={0}
-                onClick={onExpandChart || openChartFullScreen}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    if (onExpandChart) {
-                      onExpandChart();
-                    } else {
-                      openChartFullScreen();
-                    }
-                  }
-                }}
-              >
-                <FontAwesomeIcon icon={faExpandArrowsAlt} />
-              </div>
-            )}
-          </div>
-        </div>
+        {!(
+          isNilOrEmpty(parsedTitle) &&
+          isNilOrEmpty(parsedSubtitle) &&
+          hideToolbox
+        ) && (
+          <Header
+            title={parsedTitle}
+            subtitle={parsedSubtitle}
+            definition={parsedDefinition}
+            noteAndSource={parsedNoteAndSource}
+            canTitleAndSubtitleBeDisplayed={canTitleAndSubtitleBeDisplayed}
+            noteAndSourceShouldBeDisplayedInTooltip={
+              noteAndSourceShouldBeDisplayedInTooltip
+            }
+            hideToolbox={hideToolbox}
+            exportDisabled={!chartCanBedisplayed}
+            onDownloadData={onDownloadData}
+            onExpandChart={onExpandChart}
+            hideExpand={hideExpand}
+            openChartFullScreen={openChartFullScreen}
+            chartRef={chartRef}
+          />
+        )}
       </div>
 
       {!chartCanBedisplayed && (
@@ -838,7 +755,6 @@ HighchartsChart.propTypes = {
   yAxisOrderOverride: PropTypes.string,
   maxNumberOfDecimals: PropTypes.string,
   mapCountryDimension: PropTypes.string,
-  onTitleParsed: PropTypes.func,
   displayFooterAsTooltip: PropTypes.bool,
   displayActionButton: PropTypes.bool,
   actionButtonLabel: PropTypes.string,
@@ -848,6 +764,9 @@ HighchartsChart.propTypes = {
   onDataReady: PropTypes.func,
   vars: PropTypes.object.isRequired,
   lang: PropTypes.string.isRequired,
+  hideTitle: PropTypes.bool,
+  hideSubtitle: PropTypes.bool,
+  hideToolbox: PropTypes.bool,
 };
 
 export default memo(HighchartsChart);

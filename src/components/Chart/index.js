@@ -15,6 +15,9 @@ const Chart = ({
   height = null,
   lazyLoad = true,
   displayActionButton = false,
+  hideTitle = false,
+  hideSubtitle = false,
+  hideToolbox = false,
   ...otherProps
 }) => {
   const finalWidth = useMemo(
@@ -35,6 +38,22 @@ const Chart = ({
     [displayActionButton],
   );
 
+  const finalHideTitle = useMemo(
+    () => hideTitle === true || hideTitle === 'true' || hideTitle === '',
+    [hideTitle],
+  );
+
+  const finalHideSubtitle = useMemo(
+    () =>
+      hideSubtitle === true || hideSubtitle === 'true' || hideSubtitle === '',
+    [hideSubtitle],
+  );
+
+  const finalHideToolbox = useMemo(
+    () => hideToolbox === true || hideToolbox === 'true' || hideToolbox === '',
+    [hideToolbox],
+  );
+
   if (lazyLoad === false || lazyLoad === 'false') {
     return (
       <ChartErrorBoundary
@@ -46,7 +65,10 @@ const Chart = ({
           width={finalWidth}
           height={finalHeight}
           displayActionButton={finalDisplayActionButton}
-          {...R.omit([displayActionButton], otherProps)}
+          hideTitle={finalHideTitle}
+          hideSubtitle={finalHideSubtitle}
+          hideToolbox={finalHideToolbox}
+          {...otherProps}
         />
       </ChartErrorBoundary>
     );
@@ -66,7 +88,10 @@ const Chart = ({
           width={finalWidth}
           height={finalHeight}
           displayActionButton={finalDisplayActionButton}
-          {...R.omit([displayActionButton], otherProps)}
+          hideTitle={finalHideTitle}
+          hideSubtitle={finalHideSubtitle}
+          hideToolbox={finalHideToolbox}
+          {...otherProps}
         />
       </LazyLoad>
     </ChartErrorBoundary>
@@ -84,6 +109,9 @@ Chart.propTypes = {
   language: PropTypes.string,
   displayActionButton: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
   actionButtonLabel: PropTypes.string,
+  hideTitle: PropTypes.bool,
+  hideSubtitle: PropTypes.bool,
+  hideToolbox: PropTypes.bool,
 };
 
 export default Chart;

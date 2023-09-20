@@ -83,6 +83,14 @@ e.g.: `language="fr"`.
 
 If omitted (or the requested language has not been configured) the default one will be used.
 
+## Hiding header elements
+
+The following props are supported:
+
+- `hideTitle`: hides the title
+- `hideSubtitle`: hides the subtitle
+- `hideToolbox`: hides the toolbox
+
 ## Web components
 
 Even though this is a React library, the charts can be used in pages / apps that are not React based. For this purpose "web components" are also exported. Note that React (18) and ReactDOM still have to be in scope.
