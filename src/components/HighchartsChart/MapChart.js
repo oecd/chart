@@ -249,8 +249,8 @@ const MapChart = forwardRef(
                 maxColor: convertColorToHex(R.head(finalColorPalette)),
                 labels: {
                   style: {
-                    color: '#101d40',
-                    fontSize: isSmall ? '13px' : '17px',
+                    color: '#586179',
+                    fontSize: isSmall ? '13px' : '16px',
                   },
                 },
               },
@@ -278,15 +278,15 @@ const MapChart = forwardRef(
           style: {
             color: '#101d40',
             fontWeight: 'bold',
-            fontSize: '22px',
+            fontSize: '18px',
           },
         },
         subtitle: {
           text: subtitle,
           align: 'left',
           style: {
-            color: '#101d40',
-            fontSize: '20px',
+            color: '#586179',
+            fontSize: '17px',
           },
         },
 
@@ -300,8 +300,8 @@ const MapChart = forwardRef(
           margin: 10,
           itemStyle: {
             fontWeight: 'normal',
-            color: '#101d40',
-            fontSize: isSmall ? '13px' : '17px',
+            color: '#586179',
+            fontSize: isSmall ? '13px' : '16px',
           },
           squareSymbol: false,
           symbolRadius: mapType === mapTypes.normal.value ? 0 : undefined,
@@ -322,7 +322,7 @@ const MapChart = forwardRef(
             animation: false,
             dataLabels: {
               ...R.prop('dataLabels', formatters),
-              color: '#101d40',
+              color: '#586179',
             },
             borderColor: '#bbbbbb',
           },
