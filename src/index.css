@@ -11,9 +11,9 @@
 }
 
 .cb-title {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
-  line-height: 28px;
+  line-height: 22px;
 }
 
 .cb-container.cb-small .cb-title {
@@ -23,8 +23,9 @@
 }
 
 .cb-subtitle {
-  font-size: 20px;
-  line-height: 24px;
+  font-size: 17px;
+  line-height: 22px;
+  color: #586179;
 }
 
 .cb-container.cb-small .cb-subtitle {
@@ -71,6 +72,7 @@
 .cb-floating {
   font-family: 'Noto Sans', sans-serif;
   font-size: 14px;
+  line-height: 18px;
   border: 1px solid #c2cbd6;
   color: #586179;
   background-color: #ffffffe6;
@@ -87,8 +89,8 @@
 }
 
 .cb-footer {
-  font-size: 16px;
-  line-height: 20px;
+  font-size: 14px;
+  line-height: 18px;
   color: #586179;
 }
 
