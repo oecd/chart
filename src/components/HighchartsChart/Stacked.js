@@ -140,15 +140,15 @@ const Stacked = forwardRef(
           style: {
             color: '#101d40',
             fontWeight: 'bold',
-            fontSize: '22px',
+            fontSize: '18px',
           },
         },
         subtitle: {
           text: subtitle,
           align: 'left',
           style: {
-            color: '#101d40',
-            fontSize: '20px',
+            color: '#586179',
+            fontSize: '17px',
           },
         },
 
@@ -167,7 +167,7 @@ const Stacked = forwardRef(
               }
             : {}),
           labels: {
-            style: { color: '#586179', fontSize: isSmall ? '13px' : '17px' },
+            style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
             ...R.prop('xAxisLabels', formatters),
             ...((hideXAxisLabels && !horizontal) ||
             (hideYAxisLabels && horizontal) ||
@@ -194,7 +194,7 @@ const Stacked = forwardRef(
           lineColor: '#c2cbd6',
           ...(horizontal ? { width: '96%' } : {}),
           labels: {
-            style: { fontSize: isSmall ? '13px' : '17px', color: '#586179' },
+            style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
             enabled:
               (!horizontal && !hideYAxisLabels) ||
               (horizontal && !hideXAxisLabels),
@@ -211,8 +211,8 @@ const Stacked = forwardRef(
           margin: 10,
           itemStyle: {
             fontWeight: 'normal',
-            color: '#101d40',
-            fontSize: isSmall ? '13px' : '17px',
+            color: '#586179',
+            fontSize: isSmall ? '13px' : '16px',
           },
           align: 'left',
           squareSymbol: false,
