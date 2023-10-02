@@ -144,7 +144,9 @@ const Line = forwardRef(
           style: {
             fontFamily: "'Noto Sans', sans-serif",
           },
-          marginTop: calcMarginTop(title, subtitle, isSmall),
+          marginTop: hideLegend
+            ? calcMarginTop(title, subtitle, isSmall)
+            : undefined,
           height,
           animation: false,
           spacingBottom: 5,
@@ -219,7 +221,6 @@ const Line = forwardRef(
         legend: {
           enabled: !hideLegend,
           itemDistance: 10,
-          margin: 10,
           itemStyle: {
             fontWeight: 'normal',
             color: '#586179',
@@ -228,6 +229,9 @@ const Line = forwardRef(
           align: 'left',
           symbolWidth: 18,
           x: -7,
+          y: isSmall ? -16 : -12,
+          verticalAlign: 'top',
+          margin: isSmall ? 16 : 24,
         },
 
         plotOptions: {
