@@ -261,7 +261,6 @@ const MapChart = forwardRef(
         chart: {
           map: finalMap,
           proj4,
-
           style: {
             fontFamily: "'Noto Sans', sans-serif",
           },
@@ -332,7 +331,10 @@ const MapChart = forwardRef(
         legend: {
           enabled: !hideLegend,
           itemDistance: 10,
-          margin: 10,
+          verticalAlign: 'top',
+          x: -7,
+          y: isSmall ? -16 : -12,
+          margin: isSmall ? 16 : 24,
           itemStyle: {
             fontWeight: 'normal',
             color: '#586179',

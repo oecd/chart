@@ -38,6 +38,14 @@ const calcMarginTop = (title, subtitle, horizontal, isSmall) => {
   return undefined;
 };
 
+const calcLegendMargin = (horizontal, isSmall) => {
+  if (isSmall) {
+    return horizontal ? 0 : 16;
+  }
+
+  return horizontal ? 4 : 24;
+};
+
 const calcXAxisLayout = (horizontal, area, areCategoriesDatesOrNumbers) => {
   if (area) {
     return areCategoriesDatesOrNumbers
@@ -122,7 +130,9 @@ const Stacked = forwardRef(
           style: {
             fontFamily: "'Noto Sans', sans-serif",
           },
-          marginTop: calcMarginTop(title, subtitle, horizontal, isSmall),
+          marginTop: hideLegend
+            ? calcMarginTop(title, subtitle, horizontal, isSmall)
+            : undefined,
           height,
           animation: false,
           spacingBottom: 5,
@@ -208,7 +218,6 @@ const Stacked = forwardRef(
           enabled: !hideLegend,
           reversed: false,
           itemDistance: 10,
-          margin: 10,
           itemStyle: {
             fontWeight: 'normal',
             color: '#586179',
@@ -219,6 +228,9 @@ const Stacked = forwardRef(
           symbolRadius: 0,
           symbolWidth: 18,
           x: -7,
+          y: isSmall ? -16 : -12,
+          verticalAlign: 'top',
+          margin: calcLegendMargin(horizontal, isSmall),
         },
 
         plotOptions: {

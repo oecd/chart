@@ -50,6 +50,14 @@ const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
     : { y: d.value, __metadata: d.metadata };
 };
 
+const calcLegendMargin = (horizontal, isSmall) => {
+  if (isSmall) {
+    return horizontal ? 0 : 16;
+  }
+
+  return horizontal ? 4 : 24;
+};
+
 const calcXAxisLayout = (horizontal, areCategoriesDatesOrNumbers) => {
   if (horizontal) {
     return areCategoriesDatesOrNumbers
@@ -152,7 +160,9 @@ const Bar = forwardRef(
           style: {
             fontFamily: "'Noto Sans', sans-serif",
           },
-          marginTop: calcMarginTop(title, subtitle, horizontal, isSmall),
+          marginTop: hideLegend
+            ? calcMarginTop(title, subtitle, horizontal, isSmall)
+            : undefined,
           height,
           animation: false,
           spacingBottom: 5,
@@ -229,7 +239,6 @@ const Bar = forwardRef(
         legend: {
           enabled: !hideLegend,
           itemDistance: 10,
-          margin: 10,
           itemStyle: {
             fontWeight: 'normal',
             color: '#586179',
@@ -240,6 +249,9 @@ const Bar = forwardRef(
           symbolRadius: 0,
           symbolWidth: 18,
           x: -7,
+          y: isSmall ? -16 : -12,
+          verticalAlign: 'top',
+          margin: calcLegendMargin(horizontal, isSmall),
         },
 
         plotOptions: {
