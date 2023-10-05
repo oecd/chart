@@ -1,8 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;800&display=swap');
 
 .cb-container {
+  padding: 22px 26px;
   font-family: 'Noto Sans', sans-serif;
   color: #101d40;
+  background-color: #fff;
+}
+.cb-container.cb-small {
+  padding: 16px 20px;
 }
 
 .cb-container p,
@@ -99,20 +104,26 @@
   line-height: 16px;
 }
 
-.cb-footer div:not(:empty) {
-  padding: 5px 10px;
-}
-
 .cb-footer p {
-  margin-top: 0px;
-  margin-bottom: 5px;
+  padding-top: 5px;
 }
-.cb-footer p:last-of-type {
-  margin-bottom: 0px;
+.cb-footer p:first-of-type {
+  padding-top: 10px;
 }
 
 .cb-controls {
-  border-top: 1px solid #cbcbcb;
+  padding: 10px 16px 16px 16px;
+}
+.cb-controls.cb-small {
+  padding: 10px;
+}
+.cb-controls-separator {
+  height: 1px;
+  background-color: #dee3e9;
+  margin: 0px 26px;
+}
+.cb-controls-separator.cb-small {
+  margin: 0px 20px;
 }
 
 .cb-control {

@@ -38,12 +38,7 @@ const Header = ({
     );
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        padding: '7px 10px 5px 10px',
-      }}
-    >
+    <div style={{ display: 'flex' }}>
       <div style={{ flex: '1 1 auto' }}>
         {!R.isEmpty(title) && canTitleAndSubtitleBeDisplayed && (
           <div

@@ -12,6 +12,7 @@ import * as R from 'ramda';
 
 import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 import {
+  calcChartSpacing,
   deepMergeUserOptionsWithDefaultOptions,
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -165,7 +166,7 @@ const Bar = forwardRef(
             : undefined,
           height,
           animation: false,
-          spacingBottom: 5,
+          spacing: calcChartSpacing(isFullScreen),
           events: {
             fullscreenClose,
           },
@@ -249,7 +250,6 @@ const Bar = forwardRef(
           symbolRadius: 0,
           symbolWidth: 18,
           x: -7,
-          y: isSmall ? -16 : -12,
           verticalAlign: 'top',
           margin: calcLegendMargin(horizontal, isSmall),
         },

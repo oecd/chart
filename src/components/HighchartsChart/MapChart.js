@@ -21,6 +21,7 @@ import {
   createMapDataClasses,
   getBaselineOrHighlightColor,
   createShadesFromColor,
+  calcChartSpacing,
 } from '../../utils/chartUtil';
 import { mapTypes, fakeMemberLatest } from '../../constants/chart';
 import {
@@ -266,7 +267,7 @@ const MapChart = forwardRef(
           },
           height,
           animation: !isFullScreen,
-          spacingBottom: 5,
+          spacing: calcChartSpacing(isFullScreen),
           events: { fullscreenClose },
         },
 
@@ -333,13 +334,13 @@ const MapChart = forwardRef(
           itemDistance: 10,
           verticalAlign: 'top',
           x: -7,
-          y: isSmall ? -16 : -12,
           margin: isSmall ? 16 : 24,
           itemStyle: {
             fontWeight: 'normal',
             color: '#586179',
             fontSize: isSmall ? '13px' : '16px',
           },
+          align: 'left',
           squareSymbol: false,
           symbolRadius: mapType === mapTypes.normal.value ? 0 : undefined,
           symbolWidth:
@@ -373,7 +374,16 @@ const MapChart = forwardRef(
         mapNavigation: {
           enabled: true,
           buttonOptions: {
-            verticalAlign: 'top',
+            verticalAlign: 'bottom',
+          },
+
+          buttons: {
+            zoomIn: {
+              y: -29,
+            },
+            zoomOut: {
+              y: -1,
+            },
           },
         },
 

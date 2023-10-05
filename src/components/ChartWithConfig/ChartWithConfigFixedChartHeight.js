@@ -8,6 +8,7 @@ import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
 import { trackChartView } from '../../utils/trackingUtil';
+import { calcIsSmall } from '../../utils/chartUtil';
 
 const ChartWithConfigFixedChartHeight = ({
   width = null,
@@ -20,10 +21,20 @@ const ChartWithConfigFixedChartHeight = ({
   ...otherProps
 }) => {
   const {
-    width: autoSizerWidth,
-    height: autoSizerHeight,
-    ref: chartContainerRef,
+    width: fullContainerWidth,
+    height: fullContainerHeight,
+    ref: fullContainerRef,
   } = useResizeDetector();
+  const {
+    width: innerContainerWidth,
+    height: innerContainerHeight,
+    ref: innerContainerRef,
+  } = useResizeDetector();
+
+  const isSmall = useMemo(
+    () => calcIsSmall(fullContainerWidth, fullContainerHeight),
+    [fullContainerWidth, fullContainerHeight],
+  );
 
   const [codeLabelMapping, setCodeLabelMapping] = useState(null);
 
@@ -50,7 +61,7 @@ const ChartWithConfigFixedChartHeight = ({
       }}
     >
       <div
-        ref={chartContainerRef}
+        ref={fullContainerRef}
         style={{
           position: 'relative',
           width: '100%',
@@ -65,21 +76,31 @@ const ChartWithConfigFixedChartHeight = ({
             overflow: 'visible',
           }}
         >
-          {autoSizerHeight && (
+          {fullContainerHeight && (
             <div
+              className={`cb-container ${isSmall ? 'cb-small' : ''}`}
               style={{
-                width: autoSizerWidth,
-                height: autoSizerHeight,
+                width: fullContainerWidth,
+                height: fullContainerHeight,
+                boxSizing: 'border-box',
               }}
             >
-              <HighchartsChart
-                width={autoSizerWidth}
-                height={autoSizerHeight}
-                vars={vars}
-                lang={lang}
-                onDataReady={onDataReady}
-                {...otherProps}
-              />
+              <div
+                ref={innerContainerRef}
+                style={{ wdth: '100%', height: '100%' }}
+              >
+                {innerContainerHeight && (
+                  <HighchartsChart
+                    width={innerContainerWidth}
+                    height={innerContainerHeight}
+                    vars={vars}
+                    lang={lang}
+                    onDataReady={onDataReady}
+                    isSmall={isSmall}
+                    {...otherProps}
+                  />
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -92,6 +113,7 @@ const ChartWithConfigFixedChartHeight = ({
           changeVar={changeVar}
           codeLabelMapping={codeLabelMapping}
           lang={lang}
+          isSmall={isSmall}
         />
       )}
     </div>
