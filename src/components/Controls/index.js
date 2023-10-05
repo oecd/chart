@@ -23,6 +23,7 @@ const Controls = ({
   changeVar,
   codeLabelMapping = null,
   lang,
+  isSmall,
 }) => {
   const validControls = useMemo(
     () => R.filter((c) => R.has(c.type, controlTypes), controls),
@@ -30,23 +31,29 @@ const Controls = ({
   );
 
   return R.isEmpty(validControls) ? null : (
-    <div className="cb-controls" style={{ display: 'flex', flexWrap: 'wrap' }}>
-      {R.map((c) => {
-        const ControlComponent = getControlForType(c.type);
-        return (
-          <Suspense key={c.id} fallback={<ControlFallback {...c} />}>
-            <ControlComponent
-              key={c.id}
-              vars={vars}
-              changeVar={changeVar}
-              codeLabelMapping={codeLabelMapping}
-              lang={lang}
-              {...R.omit(['codeLabelMapping'], c)}
-            />
-          </Suspense>
-        );
-      }, controls)}
-    </div>
+    <>
+      <div className={`cb-controls-separator ${isSmall ? 'cb-small' : ''}`} />
+      <div
+        className={`cb-controls ${isSmall ? 'cb-small' : ''}`}
+        style={{ display: 'flex', flexWrap: 'wrap' }}
+      >
+        {R.map((c) => {
+          const ControlComponent = getControlForType(c.type);
+          return (
+            <Suspense key={c.id} fallback={<ControlFallback {...c} />}>
+              <ControlComponent
+                key={c.id}
+                vars={vars}
+                changeVar={changeVar}
+                codeLabelMapping={codeLabelMapping}
+                lang={lang}
+                {...R.omit(['codeLabelMapping'], c)}
+              />
+            </Suspense>
+          );
+        }, controls)}
+      </div>
+    </>
   );
 };
 
@@ -56,6 +63,7 @@ Controls.propTypes = {
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
   lang: PropTypes.string.isRequired,
+  isSmall: PropTypes.bool.isRequired,
 };
 
 export default Controls;

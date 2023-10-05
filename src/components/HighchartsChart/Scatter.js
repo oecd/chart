@@ -17,6 +17,7 @@ import {
 } from '../../utils/ramdaUtil';
 import {
   addColorAlpha,
+  calcChartSpacing,
   deepMergeUserOptionsWithDefaultOptions,
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -206,7 +207,7 @@ const Scatter = forwardRef(
             : undefined,
           height,
           animation: false,
-          spacingBottom: 5,
+          spacing: calcChartSpacing(isFullScreen),
           events: {
             fullscreenClose,
             render: ({ target: chart }) => {
@@ -338,7 +339,6 @@ const Scatter = forwardRef(
           symbolRadius: 0,
           symbolWidth: 18,
           x: -7,
-          y: isSmall ? -16 : -12,
           verticalAlign: 'top',
           margin: isSmall ? 16 : 24,
         },

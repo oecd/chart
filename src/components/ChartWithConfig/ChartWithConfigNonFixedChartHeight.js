@@ -8,6 +8,7 @@ import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
 import { trackChartView } from '../../utils/trackingUtil';
+import { calcIsSmall } from '../../utils/chartUtil';
 
 const minChartHeightForControlsDisplay = 280;
 
@@ -21,26 +22,36 @@ const ChartWithConfigNonFixedChartHeight = ({
   ...otherProps
 }) => {
   const {
-    width: chartContainerAutoSizerWidth,
-    height: chartContainerAutoSizerHeight,
-    ref: chartContainerRef,
+    width: fullContainerWidth,
+    height: fullContainerHeight,
+    ref: fullContainerRef,
+  } = useResizeDetector();
+  const {
+    width: innerContainerWidth,
+    height: innerContainerHeight,
+    ref: innerContainerRef,
   } = useResizeDetector();
 
   const { height: controlsAutoSizerHeight, ref: controlsRef } =
     useResizeDetector();
 
   const finalChartHeight = useMemo(() => {
-    if (!chartContainerAutoSizerHeight) {
+    if (!fullContainerHeight) {
       return null;
     }
     if (
-      chartContainerAutoSizerHeight - controlsAutoSizerHeight >
+      fullContainerHeight - controlsAutoSizerHeight >
       minChartHeightForControlsDisplay
     ) {
-      return chartContainerAutoSizerHeight - controlsAutoSizerHeight;
+      return fullContainerHeight - controlsAutoSizerHeight;
     }
-    return chartContainerAutoSizerHeight;
-  }, [chartContainerAutoSizerHeight, controlsAutoSizerHeight]);
+    return fullContainerHeight;
+  }, [fullContainerHeight, controlsAutoSizerHeight]);
+
+  const isSmall = useMemo(
+    () => calcIsSmall(fullContainerWidth, finalChartHeight),
+    [fullContainerWidth, finalChartHeight],
+  );
 
   const [codeLabelMapping, setCodeLabelMapping] = useState(null);
 
@@ -60,7 +71,7 @@ const ChartWithConfigNonFixedChartHeight = ({
 
   return (
     <div
-      ref={chartContainerRef}
+      ref={fullContainerRef}
       style={{
         position: 'relative',
         width: '100%',
@@ -78,19 +89,29 @@ const ChartWithConfigNonFixedChartHeight = ({
       >
         {finalChartHeight && (
           <div
+            className={`cb-container ${isSmall ? 'cb-small' : ''}`}
             style={{
-              width: chartContainerAutoSizerWidth,
+              width: fullContainerWidth,
               height: finalChartHeight,
+              boxSizing: 'border-box',
             }}
           >
-            <HighchartsChart
-              width={chartContainerAutoSizerWidth}
-              height={finalChartHeight}
-              vars={vars}
-              lang={lang}
-              onDataReady={onDataReady}
-              {...R.omit(['height'], otherProps)}
-            />
+            <div
+              ref={innerContainerRef}
+              style={{ wdth: '100%', height: '100%' }}
+            >
+              {innerContainerHeight && (
+                <HighchartsChart
+                  width={innerContainerWidth}
+                  height={innerContainerHeight}
+                  vars={vars}
+                  lang={lang}
+                  onDataReady={onDataReady}
+                  isSmall={isSmall}
+                  {...R.omit(['height'], otherProps)}
+                />
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -99,13 +120,11 @@ const ChartWithConfigNonFixedChartHeight = ({
         style={{
           position: 'relative',
           top:
-            finalChartHeight &&
-            chartContainerAutoSizerHeight !== finalChartHeight
+            finalChartHeight && fullContainerHeight !== finalChartHeight
               ? finalChartHeight
               : '-1000px',
           visibility:
-            finalChartHeight &&
-            chartContainerAutoSizerHeight !== finalChartHeight
+            finalChartHeight && fullContainerHeight !== finalChartHeight
               ? 'visible'
               : 'hidden',
         }}
@@ -117,6 +136,7 @@ const ChartWithConfigNonFixedChartHeight = ({
             changeVar={changeVar}
             codeLabelMapping={codeLabelMapping}
             lang={lang}
+            isSmall={isSmall}
           />
         )}
       </div>

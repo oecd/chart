@@ -11,6 +11,7 @@ import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
 
 import {
+  calcChartSpacing,
   createShadesFromColor,
   createStackedDatapoints,
   deepMergeUserOptionsWithDefaultOptions,
@@ -134,7 +135,7 @@ const Stacked = forwardRef(
             : undefined,
           height,
           animation: false,
-          spacingBottom: 5,
+          spacing: calcChartSpacing(isFullScreen),
           events: {
             fullscreenClose,
           },
@@ -227,7 +228,6 @@ const Stacked = forwardRef(
           symbolRadius: 0,
           symbolWidth: 18,
           x: -7,
-          y: isSmall ? -16 : -12,
           verticalAlign: 'top',
           margin: calcLegendMargin(horizontal, isSmall),
         },

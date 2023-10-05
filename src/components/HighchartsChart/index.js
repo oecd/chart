@@ -132,6 +132,7 @@ const HighchartsChart = ({
   hideTitle = false,
   hideSubtitle = false,
   hideToolbox = false,
+  isSmall,
   ...otherProps
 }) => {
   const chartForType = getChartForType(chartType);
@@ -633,8 +634,6 @@ const HighchartsChart = ({
     };
   }, [parsedTitle, parsedSubtitle, chartType]);
 
-  const isSmall = useMemo(() => width < 400 || height < 300, [width, height]);
-
   const finalColorPalette = useMemo(
     () =>
       getFinalPalette(
@@ -652,10 +651,7 @@ const HighchartsChart = ({
   );
 
   return (
-    <div
-      className={`cb-container ${isSmall ? 'cb-small' : ''}`}
-      style={{ backgroundColor: '#fff', position: 'relative' }}
-    >
+    <div style={{ position: 'relative' }}>
       {displayActionButton && !isNilOrEmpty(actionButtonLabel) && (
         <div
           style={{
@@ -713,6 +709,7 @@ const HighchartsChart = ({
             onExpandChart={onExpandChart}
             hideExpand={hideExpand}
             openChartFullScreen={openChartFullScreen}
+            isSmall={isSmall}
             chartRef={chartRef}
           />
         )}
@@ -832,6 +829,7 @@ HighchartsChart.propTypes = {
   hideTitle: PropTypes.bool,
   hideSubtitle: PropTypes.bool,
   hideToolbox: PropTypes.bool,
+  isSmall: PropTypes.bool.isRequired,
 };
 
 export default memo(HighchartsChart);

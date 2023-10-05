@@ -12,6 +12,7 @@ import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
 
 import {
+  calcChartSpacing,
   deepMergeUserOptionsWithDefaultOptions,
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -134,7 +135,8 @@ const Radar = forwardRef(
           },
           height,
           animation: false,
-          spacingBottom: 12,
+          margin: hideLegend ? 55 : undefined,
+          spacing: calcChartSpacing(isFullScreen),
           events: { fullscreenClose },
         },
 
@@ -202,7 +204,6 @@ const Radar = forwardRef(
           align: 'left',
           symbolWidth: 18,
           x: -7,
-          y: isSmall ? -16 : -12,
           verticalAlign: 'top',
           margin: isSmall ? 16 : 24,
         },
