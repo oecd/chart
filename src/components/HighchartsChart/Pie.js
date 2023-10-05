@@ -11,6 +11,7 @@ import * as R from 'ramda';
 
 import { mapWithIndex } from '../../utils/ramdaUtil';
 import {
+  calcChartSpacing,
   createShadesFromColor,
   deepMergeUserOptionsWithDefaultOptions,
   getBaselineOrHighlightColor,
@@ -116,6 +117,9 @@ const Pie = forwardRef(
           },
           height,
           animation: false,
+          spacing: calcChartSpacing(isFullScreen),
+          marginLeft: 10,
+          marginRight: 10,
           events: { fullscreenClose },
         },
 
@@ -152,7 +156,6 @@ const Pie = forwardRef(
           align: 'left',
           symbolWidth: 18,
           x: -7,
-          y: isSmall ? -16 : -12,
           verticalAlign: 'top',
           margin: isSmall ? 16 : 24,
         },

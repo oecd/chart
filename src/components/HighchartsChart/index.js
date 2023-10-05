@@ -145,6 +145,7 @@ const HighchartsChart = ({
   hideSubtitle = false,
   hideToolbox = false,
   tooltipContainerId,
+  isSmall,
   debug = false,
   ...otherProps
 }) => {
@@ -712,8 +713,6 @@ const HighchartsChart = ({
     };
   }, [parsedTitle, parsedSubtitle, chartType]);
 
-  const isSmall = useMemo(() => width < 400 || height < 300, [width, height]);
-
   const finalColorPalette = useMemo(
     () =>
       getFinalPalette(
@@ -733,10 +732,7 @@ const HighchartsChart = ({
   const tooltipOutside = !(isFullScreen || !isNilOrEmpty(tooltipContainerId));
 
   return (
-    <div
-      className={`cb-container ${isSmall ? 'cb-small' : ''}`}
-      style={{ backgroundColor: '#fff', position: 'relative' }}
-    >
+    <div style={{ position: 'relative' }}>
       {displayActionButton && !isNilOrEmpty(actionButtonLabel) && (
         <div
           style={{
@@ -795,6 +791,7 @@ const HighchartsChart = ({
             hideExpand={hideExpand}
             openChartFullScreen={openChartFullScreen}
             tooltipContainerId={tooltipContainerId}
+            isSmall={isSmall}
             chartRef={chartRef}
           />
         )}
@@ -916,6 +913,7 @@ HighchartsChart.propTypes = {
   hideSubtitle: PropTypes.bool,
   hideToolbox: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
+  isSmall: PropTypes.bool.isRequired,
   debug: PropTypes.bool,
 };
 

@@ -11,6 +11,7 @@ import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
 
 import {
+  calcChartSpacing,
   deepMergeUserOptionsWithDefaultOptions,
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -150,7 +151,7 @@ const Line = forwardRef(
             : undefined,
           height,
           animation: false,
-          spacingBottom: 5,
+          spacing: calcChartSpacing(isFullScreen),
           events: {
             fullscreenClose,
           },
@@ -230,7 +231,6 @@ const Line = forwardRef(
           align: 'left',
           symbolWidth: 18,
           x: -7,
-          y: isSmall ? -16 : -12,
           verticalAlign: 'top',
           margin: isSmall ? 16 : 24,
         },

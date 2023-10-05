@@ -410,3 +410,8 @@ const anyVarRegExp = R.join(
 );
 
 export const doesStringContainVar = R.test(new RegExp(anyVarRegExp, 'i'));
+
+export const calcIsSmall = (width, height) =>
+  !width || !height ? false : width < 540 || height < 350;
+
+export const calcChartSpacing = (isFullScreen) => (isFullScreen ? 22 : 0);
