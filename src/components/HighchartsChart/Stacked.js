@@ -33,7 +33,7 @@ const calcMarginTop = (title, subtitle, horizontal, isSmall) => {
     if (isSmall) {
       return 22;
     }
-    return horizontal ? 42 : 32;
+    return horizontal ? 22 : 32;
   }
 
   return undefined;
@@ -55,7 +55,7 @@ const calcXAxisLayout = (horizontal, area, areCategoriesDatesOrNumbers) => {
   }
 
   return horizontal
-    ? { top: '7%', height: '85%' }
+    ? { top: '8%', height: '88%' }
     : { left: '9%', width: '87%' };
 };
 
@@ -203,13 +203,13 @@ const Stacked = forwardRef(
           startOnTick: false,
           gridLineColor: '#c2cbd6',
           lineColor: '#c2cbd6',
-          ...(horizontal ? { width: '96%' } : {}),
           labels: {
             style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
             enabled:
               (!horizontal && !hideYAxisLabels) ||
               (horizontal && !hideXAxisLabels),
-            ...(horizontal ? { y: 10 } : { align: 'left', x: 0, y: -4 }),
+            align: 'left',
+            ...(horizontal ? { x: 4, y: isSmall ? 28 : 35 } : { x: 0, y: -4 }),
           },
           opposite: horizontal,
           reversedStacks: false,
