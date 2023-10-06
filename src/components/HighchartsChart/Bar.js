@@ -33,7 +33,7 @@ const calcMarginTop = (title, subtitle, horizontal, isSmall) => {
     if (isSmall) {
       return 22;
     }
-    return horizontal ? 42 : 32;
+    return horizontal ? 22 : 32;
   }
 
   return undefined;
@@ -62,8 +62,8 @@ const calcLegendMargin = (horizontal, isSmall) => {
 const calcXAxisLayout = (horizontal, areCategoriesDatesOrNumbers) => {
   if (horizontal) {
     return areCategoriesDatesOrNumbers
-      ? { top: '6%', height: '87%' }
-      : { top: '7%', height: '85%' };
+      ? { top: '7.5%', height: '88.9%' }
+      : { top: '8%', height: '88%' };
   }
 
   return areCategoriesDatesOrNumbers
@@ -226,13 +226,14 @@ const Bar = forwardRef(
           },
           gridLineColor: '#c2cbd6',
           lineColor: '#c2cbd6',
-          ...(horizontal ? { width: '96%' } : {}),
           labels: {
             style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
             enabled:
               (!horizontal && !hideYAxisLabels) ||
               (horizontal && !hideXAxisLabels),
-            ...(horizontal ? { y: 10 } : { align: 'left', x: 0, y: -4 }),
+
+            align: 'left',
+            ...(horizontal ? { x: 4, y: isSmall ? 28 : 35 } : { x: 0, y: -4 }),
           },
           opposite: horizontal,
         },
