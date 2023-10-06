@@ -136,7 +136,8 @@ const Radar = forwardRef(
           },
           height,
           animation: false,
-          margin: hideLegend ? 55 : undefined,
+          margin: hideLegend ? 40 : undefined,
+          marginBottom: !hideLegend && isSmall ? 5 : undefined,
           spacing: calcChartSpacing(isFullScreen),
           events: { fullscreenClose },
         },
@@ -169,7 +170,7 @@ const Radar = forwardRef(
         pane: {
           startAngle: 0,
           endAngle: 360,
-          size: '90%',
+          size: isSmall ? '70%' : '90%',
         },
 
         xAxis: {
