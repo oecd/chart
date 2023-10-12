@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;800&display=swap');
 
 .cb-container {
-  padding: 22px 26px;
+  padding: 22px 24px;
   font-family: 'Noto Sans', sans-serif;
   color: #101d40;
   background-color: #fff;
 }
 .cb-container.cb-small {
-  padding: 16px 20px;
+  padding: 16px 18px;
 }
 
 .cb-container p,
@@ -38,47 +38,56 @@
   line-height: 18px;
 }
 
-.cb-action-btn {
-  position: absolute;
-  padding: 2px 10px;
-  border-radius: 13px;
-  top: 50px;
-  z-index: 1;
-  font-size: 14px;
-  color: #fff;
-  background-color: rgba(51, 51, 51, 0.4);
+.cb-tool {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #dee3e9;
+  border-radius: 4px;
   cursor: pointer;
-  user-select: none;
 }
-.cb-action-btn:hover {
-  background-color: rgba(51, 51, 51, 0.7);
+.cb-tool svg {
+  fill: #156df9;
 }
-
-.cb-toolbar {
-  cursor: pointer;
-  color: #101d40;
-  font-size: 18px;
+.cb-tool:hover,
+.cb-tool:focus {
+  border: 1px solid #156df9;
 }
-.cb-container.cb-small .cb-toolbar {
-  font-size: 16px;
+.cb-tool {
+  margin-left: 8px;
 }
-.cb-toolbar-disabled {
+.cb-tool.cb-small {
+  margin-left: 4px;
+}
+.cb-container.cb-small .cb-tool,
+.cb-toolbox.cb-small .cb-tool {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 4px;
+}
+.cb-toolbox .cb-tool {
+  margin-bottom: 8px;
+}
+.cb-tool.cb-disabled {
   cursor: default;
-  color: #ddd;
 }
-.cb-toolbar-menu-item {
-  padding: 3px 12px;
-  cursor: pointer;
+.cb-tool.cb-disabled:hover,
+.cb-tool.cb-disabled:focus {
+  border: 1px solid #dee3e9;
 }
-.cb-toolbar-menu-item-active {
-  background-color: #f5f5f5;
+.cb-tool.cb-disabled svg {
+  fill: #dee3e9;
 }
 
 .cb-floating {
   font-family: 'Noto Sans', sans-serif;
   font-size: 14px;
   line-height: 18px;
-  border: 1px solid #c2cbd6;
+  border: 1px solid #dee3e9;
+  border-radius: 4px;
   color: #586179;
   background-color: #ffffffe6;
   z-index: 12;
@@ -151,20 +160,25 @@
 .cb-control .cb-star-container,
 .cb-control-standalone .cb-star-container {
   max-height: 21px;
+  max-height: 21px;
   cursor: pointer;
   padding: 0px 0px 0px 10px;
+  padding: 0px 0px 0px 10px;
+}
+.cb-control .cb-star-container svg,
+.cb-control-standalone .cb-star-container svg {
+  fill: #586179;
 }
 .cb-control .cb-star-container:hover svg,
 .cb-control-standalone .cb-star-container:hover svg {
   fill: #156df9;
 }
-
 .cb-control-select-magnifying-glass {
   width: 16px;
   max-height: 16px;
 }
 .cb-control-select-magnifying-glass:hover svg {
-  fill: #586179b3 !important;
+  fill: hsl(0, 0%, 40%) !important;
 }
 
 .cb-control-select-option-multi {
@@ -184,9 +198,9 @@
   box-sizing: border-box;
 }
 .cb-control-select-option-multi:hover .cb-control-select-option-multi-check,
+.cb-control-select-option-multi:hover .cb-control-select-option-multi-check,
 .cb-control-select-option-multi-standalone:hover
   .cb-control-select-option-multi-check {
-  transition: border-color 150ms;
   border-color: #156df9;
 }
 

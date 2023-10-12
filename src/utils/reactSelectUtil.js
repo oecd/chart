@@ -66,7 +66,7 @@ const getBasicStylingConfigs = (isStandalone) => {
     }),
     dropdownIndicator: (provided, state) => ({
       ...provided,
-      padding: state.isMulti ? '7px 8px 8px 8px' : '4px 8px 4px 8px',
+      padding: state.isMulti ? '6px 6px 7px 6px' : '4px 8px 4px 8px',
     }),
     valueContainer: (provided, state) => ({
       ...provided,
