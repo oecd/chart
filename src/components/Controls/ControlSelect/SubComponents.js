@@ -2,6 +2,9 @@
 import React from 'react';
 import { components } from 'react-select';
 import * as R from 'ramda';
+import StarIcon from '../../Icons/StarIcon';
+import CheckIcon from '../../Icons/CheckIcon';
+import MagnifyingGlassIcon from '../../Icons/MagnifyingGlassIcon';
 
 import StarIcon from '../../Icons/StarIcon';
 import CheckIcon from '../../Icons/CheckIcon';

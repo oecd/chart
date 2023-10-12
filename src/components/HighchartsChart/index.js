@@ -73,16 +73,6 @@ const getChartForType = R.propOr(
   chartByType,
 );
 
-const actionButtonClick = (id) => {
-  document.dispatchEvent(
-    new CustomEvent('cbChartActionButtonClicked', {
-      detail: {
-        chartId: id || '',
-      },
-    }),
-  );
-};
-
 const HighchartsChart = ({
   id = 'temp-id',
   dataSourceType = dataSourceTypes.csv.value,
@@ -122,7 +112,7 @@ const HighchartsChart = ({
   mapCountryDimension = '',
   displayFooterAsTooltip = false,
   displayActionButton = false,
-  actionButtonLabel,
+  actionButtonLabel = '',
   onExpandChart = null,
   hideExpand = false,
   onDownloadData = null,
@@ -650,33 +640,18 @@ const HighchartsChart = ({
     ],
   );
 
+  const actionButtonClick = useCallback(() => {
+    document.dispatchEvent(
+      new CustomEvent('cbChartActionButtonClicked', {
+        detail: {
+          chartId: id || '',
+        },
+      }),
+    );
+  }, [id]);
+
   return (
-    <div style={{ position: 'relative' }}>
-      {displayActionButton && !isNilOrEmpty(actionButtonLabel) && (
-        <div
-          style={{
-            position: 'absolute',
-            display: 'flex',
-            width: '100%',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            className="cb-action-btn"
-            role="button"
-            tabIndex={0}
-            onClick={() => actionButtonClick(id)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                actionButtonClick(id);
-                e.stopPropagation();
-              }
-            }}
-          >
-            {actionButtonLabel}
-          </div>
-        </div>
-      )}
+    <div>
       <div
         ref={headerRef}
         style={
@@ -709,6 +684,9 @@ const HighchartsChart = ({
             onExpandChart={onExpandChart}
             hideExpand={hideExpand}
             openChartFullScreen={openChartFullScreen}
+            displayActionButton={displayActionButton}
+            actionButtonLabel={actionButtonLabel}
+            onActionButtonClick={actionButtonClick}
             isSmall={isSmall}
             chartRef={chartRef}
           />
