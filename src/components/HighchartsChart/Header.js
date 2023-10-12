@@ -1,13 +1,12 @@
 /* eslint-disable react/jsx-props-no-spreading, , jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FloatingPortal } from '@floating-ui/react';
 import * as R from 'ramda';
 
+import Toolbox from './Toolbox';
 import InfoIcon from '../Icons/InfoIcon';
-import ExpandIcon from '../Icons/ExpandIcon';
-import ExportButton from './ExportButton';
-import useTooltipState from '../../hooks/useTooltipState';
+import ActionIcon from '../Icons/ActionIcon';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../floating/Tooltip';
 
 const Header = ({
   title,
@@ -23,19 +22,16 @@ const Header = ({
   hideExpand,
   openChartFullScreen,
   tooltipContainerId,
+  displayActionButton,
+  actionButtonLabel,
+  onActionButtonClick,
+  isSmall,
   chartRef,
 }) => {
-  const tooltipState = useTooltipState();
-
   const [isInIframe, setIsInIframe] = useState(false);
   useEffect(() => {
     setIsInIframe(window.location !== window.parent.location);
   }, []);
-
-  const fakeTooltipButton =
-    R.isNil(noteAndSource) && R.isNil(definition) ? null : (
-      <div style={{ width: '20px' }} />
-    );
 
   return (
     <div style={{ display: 'flex' }}>
@@ -63,67 +59,69 @@ const Header = ({
             display: 'flex',
             alignItems: 'flex-start',
             flexWrap: 'nowrap',
-            minHeight: '21px',
           }}
         >
-          {noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition) ? (
-            <>
-              <div
-                className="cb-toolbar"
-                style={{ margin: '2px 0px 0px 4px' }}
-                ref={tooltipState.refs.setReference}
-                {...tooltipState.getReferenceProps()}
-              >
-                <InfoIcon />
-              </div>
-              {tooltipState.open && (
-                <FloatingPortal id={tooltipContainerId}>
-                  <div
-                    ref={tooltipState.refs.setFloating}
-                    style={tooltipState.floatingStyles}
-                    {...tooltipState.getFloatingProps()}
-                    className="cb-floating cb-tooltip"
-                    dangerouslySetInnerHTML={{
-                      __html: noteAndSourceShouldBeDisplayedInTooltip
-                        ? R.join('', [definition, noteAndSource])
-                        : definition,
-                    }}
-                  />
-                </FloatingPortal>
-              )}
-            </>
-          ) : (
-            fakeTooltipButton
+          {displayActionButton && (
+            <div
+              role="button"
+              aria-label={actionButtonLabel}
+              className="cb-tool"
+              tabIndex={0}
+              onClick={onActionButtonClick}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  onActionButtonClick();
+                  e.stopPropagation();
+                }
+              }}
+              style={{ marginLeft: '4px' }}
+            >
+              <ActionIcon />
+            </div>
           )}
-          <ExportButton
+          {(noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition)) &&
+            !isSmall && (
+              <Tooltip placement="bottom-end">
+                <TooltipTrigger>
+                  <div
+                    aria-label="Info"
+                    className="cb-tool"
+                    style={{ marginLeft: '8px' }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <InfoIcon />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent
+                  tooltipContainerId={tooltipContainerId}
+                  className="cb-floating cb-tooltip"
+                  dangerouslySetInnerHTML={{
+                    __html: noteAndSourceShouldBeDisplayedInTooltip
+                      ? R.join('', [definition, noteAndSource])
+                      : definition,
+                  }}
+                />
+              </Tooltip>
+            )}
+          <Toolbox
             chartRef={chartRef}
             parsedTitle={title}
             parsedSubtitle={subtitle}
             onDownloadData={onDownloadData}
-            disabled={exportDisabled}
-            style={{ margin: '2px 0px 0px 4px' }}
+            onExpandChart={onExpandChart}
+            isInIframe={isInIframe}
+            hideExpand={hideExpand}
+            openChartFullScreen={openChartFullScreen}
+            definition={definition}
+            noteAndSource={noteAndSource}
+            noteAndSourceShouldBeDisplayedInTooltip={
+              noteAndSourceShouldBeDisplayedInTooltip
+            }
             tooltipContainerId={tooltipContainerId}
+            isSmall={isSmall}
+            exportDisabled={exportDisabled}
           />
-          {(onExpandChart || !isInIframe) && !hideExpand && (
-            <div
-              style={{ margin: '2px 0px 0px 4px' }}
-              className={exportDisabled ? 'cb-toolbar-disabled' : 'cb-toolbar'}
-              role="button"
-              tabIndex={0}
-              onClick={onExpandChart || openChartFullScreen}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  if (onExpandChart) {
-                    onExpandChart();
-                  } else {
-                    openChartFullScreen();
-                  }
-                }
-              }}
-            >
-              <ExpandIcon />
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -144,6 +142,10 @@ Header.propTypes = {
   hideExpand: PropTypes.bool.isRequired,
   openChartFullScreen: PropTypes.func.isRequired,
   tooltipContainerId: PropTypes.string,
+  displayActionButton: PropTypes.bool.isRequired,
+  actionButtonLabel: PropTypes.string.isRequired,
+  onActionButtonClick: PropTypes.func.isRequired,
+  isSmall: PropTypes.bool.isRequired,
   chartRef: PropTypes.object.isRequired,
 };
 
