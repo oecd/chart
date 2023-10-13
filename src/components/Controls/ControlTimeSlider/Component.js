@@ -16,6 +16,7 @@ const ControlTimeSlider = ({
   changeVar,
   lang,
   codeLabelMapping,
+  hideTitle,
   isStandalone,
 }) => {
   const steps = useMemo(
@@ -73,15 +74,10 @@ const ControlTimeSlider = ({
     R.propOr(R.propOr('', code, steps.labelByCode), code, codeLabelMapping);
 
   return (
-    <div
-      className={`cb-control ${
-        isStandalone
-          ? 'cb-control-time-slider-standalone'
-          : 'cb-control-time-slider'
-      }`}
-      style={{ flex: '1', padding: '5px 10px', minWidth: '200px' }}
-    >
-      {!isNilOrEmpty(label) && <div className="cb-control-label">{label}</div>}
+    <div className={isStandalone ? 'cb-control-standalone' : 'cb-control'}>
+      {!isNilOrEmpty(label) && !hideTitle && (
+        <div className="cb-control-label">{label}</div>
+      )}
       <Slider
         onChange={onRangeChange}
         onAfterChange={onAfterRangeChange}
@@ -104,6 +100,14 @@ const ControlTimeSlider = ({
           border: '1px solid #156DF9',
           backgroundColor: '#156DF9',
         }}
+        ariaLabelForHandle={
+          isRange
+            ? [
+                `${label ? `${label} - ` : ''}min`,
+                `${label ? `${label} - ` : ''}max`,
+              ]
+            : label || ''
+        }
       />
       <div
         className="cb-control-label"
@@ -134,6 +138,7 @@ ControlTimeSlider.propTypes = {
   changeVar: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
   codeLabelMapping: PropTypes.object.isRequired,
+  hideTitle: PropTypes.bool.isRequired,
   isStandalone: PropTypes.bool.isRequired,
 };
 

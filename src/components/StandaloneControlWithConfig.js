@@ -47,6 +47,7 @@ const StandaloneControlWithConfig = ({
   initialValue = null,
   type,
   codeLabelMapping,
+  hideTitle = false,
   ...otherProps
 }) => {
   const ControlComponent = getControlForType(type);
@@ -126,13 +127,18 @@ const StandaloneControlWithConfig = ({
   }, [id, vars, type]);
 
   return (
-    <Suspense fallback={<ControlFallback {...otherProps} isStandalone />}>
+    <Suspense
+      fallback={
+        <ControlFallback {...otherProps} hideTitle={hideTitle} isStandalone />
+      }
+    >
       <ControlComponent
         vars={vars}
         changeVar={changeVar}
         codeLabelMapping={parsedCodeLabelMapping}
         type={type}
         {...R.omit(['codeLabelMapping'], otherProps)}
+        hideTitle={hideTitle}
         isStandalone
       />
     </Suspense>
@@ -141,6 +147,7 @@ const StandaloneControlWithConfig = ({
 
 StandaloneControlWithConfig.propTypes = {
   id: PropTypes.string,
+  hideTitle: PropTypes.bool,
   initialValue: PropTypes.string,
   type: PropTypes.string.isRequired,
   codeLabelMapping: PropTypes.string.isRequired,

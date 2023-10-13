@@ -1,5 +1,11 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+} from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
@@ -10,6 +16,7 @@ import StandaloneControlWithConfig from './StandaloneControlWithConfig';
 
 const StandaloneControl = ({
   controlId,
+  hideTitle = false,
   initialValue = null,
   language = null,
   ...otherProps
@@ -71,17 +78,23 @@ const StandaloneControl = ({
     }
   }, [prevControlId, controlId, prevLanguage, language, getControlConfig]);
 
+  const finalHideTitle = useMemo(
+    () => hideTitle === true || hideTitle === 'true' || hideTitle === '',
+    [hideTitle],
+  );
+
   if (!controlId) {
     return null;
   }
 
   if (controlConfigData.isLoading || controlConfigData.hasFetchFailed) {
-    return <ControlFallback isStandalone />;
+    return <ControlFallback hideTitle={finalHideTitle} isStandalone />;
   }
 
   return (
     <StandaloneControlWithConfig
       id={controlId}
+      hideTitle={finalHideTitle}
       initialValue={initialValue}
       {...controlConfigData.controlConfig}
       {...otherProps}
@@ -91,6 +104,7 @@ const StandaloneControl = ({
 
 StandaloneControl.propTypes = {
   controlId: PropTypes.string.isRequired,
+  hideTitle: PropTypes.bool,
   initialValue: PropTypes.string,
   language: PropTypes.string,
 };

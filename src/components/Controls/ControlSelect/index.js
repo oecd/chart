@@ -33,6 +33,7 @@ const ControlSelect = ({
   changeVar,
   codeLabelMapping = null,
   type,
+  hideTitle = false,
   isStandalone = false,
 }) => {
   const selectInstanceId = useId();
@@ -228,13 +229,14 @@ const ControlSelect = ({
   );
 
   return R.isNil(codeLabelMapping) ? (
-    <ControlFallback label={label} isStandalone={isStandalone} />
+    <ControlFallback
+      label={label}
+      hideTitle={hideTitle}
+      isStandalone={isStandalone}
+    />
   ) : (
-    <div
-      className="cb-control cb-control-select"
-      style={{ flex: '1', padding: '5px 10px', minWidth: '200px' }}
-    >
-      {!isNilOrEmpty(finalLabel) && (
+    <div className={isStandalone ? 'cb-control-standalone' : 'cb-control'}>
+      {!isNilOrEmpty(finalLabel) && !hideTitle && (
         <div className="cb-control-label">{finalLabel}</div>
       )}
       <Select
@@ -252,6 +254,7 @@ const ControlSelect = ({
         noOptionsMessage={noOptionsMessage}
         theme={customSelectTheme}
         styles={customSelectStyles}
+        aria-label={finalLabel || ''}
       />
     </div>
   );
@@ -271,6 +274,7 @@ ControlSelect.propTypes = {
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
   type: PropTypes.string.isRequired,
+  hideTitle: PropTypes.bool,
   isStandalone: PropTypes.bool,
 };
 
