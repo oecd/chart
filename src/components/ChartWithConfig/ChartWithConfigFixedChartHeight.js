@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading  */
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
@@ -7,6 +7,7 @@ import * as R from 'ramda';
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
+import { trackChartView } from '../../utils/trackingUtil';
 
 const ChartWithConfigFixedChartHeight = ({
   width = null,
@@ -35,6 +36,10 @@ const ChartWithConfigFixedChartHeight = ({
         : null,
     [controls, hideControls],
   );
+
+  useEffect(() => {
+    trackChartView(otherProps.id);
+  }, [otherProps.id]);
 
   return (
     <div
