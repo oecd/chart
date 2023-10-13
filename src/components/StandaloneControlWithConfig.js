@@ -6,6 +6,7 @@ import React, {
   useState,
   lazy,
   Suspense,
+  useRef,
 } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
@@ -110,6 +111,8 @@ const StandaloneControlWithConfig = ({
     [type],
   );
 
+  const isInitialChange = useRef(true);
+
   useEffect(() => {
     R.forEach(([varName, varValue]) => {
       if (varValue || type !== controlTypes.selectChart.value) {
@@ -119,11 +122,13 @@ const StandaloneControlWithConfig = ({
               controlId: id || '',
               varName,
               varValue: varValue === '-' ? '' : varValue,
+              isInitialChange: isInitialChange.current,
             },
           }),
         );
       }
     }, R.toPairs(vars));
+    isInitialChange.current = false;
   }, [id, vars, type]);
 
   return (
