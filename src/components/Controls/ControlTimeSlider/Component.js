@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
+/* eslint-disable react/jsx-props-no-spreading  */
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Slider from 'rc-slider';
 import * as R from 'ramda';
@@ -24,7 +25,7 @@ const ControlTimeSlider = ({
     [frequency, lang],
   );
 
-  const [currentRange, setCurrentRange] = useState({
+  const [currentRange, setCurrentRange] = useState(() => ({
     minCode: vars[minVarName],
     minIndex: R.findIndex(R.equals(vars[minVarName]), steps.codes) || 0,
     ...(isRange
@@ -35,7 +36,7 @@ const ControlTimeSlider = ({
             R.length(steps.codes),
         }
       : {}),
-  });
+  }));
 
   const onRangeChange = useCallback(
     (value) => {
@@ -56,6 +57,28 @@ const ControlTimeSlider = ({
     },
     [isRange, steps.codes],
   );
+
+  useEffect(() => {
+    if (isRange) {
+      const min = R.findIndex(R.equals(vars[minVarName]), steps.codes) || 0;
+      const max =
+        R.findIndex(R.equals(vars[maxVarName]), steps.codes) ||
+        R.length(steps.codes);
+
+      setCurrentRange({
+        minCode: R.nth(min, steps.codes),
+        minIndex: min,
+        maxCode: R.nth(max, steps.codes),
+        maxIndex: max,
+      });
+    } else {
+      const min = R.findIndex(R.equals(vars[minVarName]), steps.codes) || 0;
+      setCurrentRange({
+        minCode: R.nth(min, steps.codes),
+        minIndex: min,
+      });
+    }
+  }, [vars, isRange, steps.codes, minVarName, maxVarName]);
 
   const onAfterRangeChange = useCallback(
     (value) => {
@@ -89,6 +112,7 @@ const ControlTimeSlider = ({
             ? [currentRange.minIndex, currentRange.maxIndex]
             : currentRange.minIndex
         }
+        {...(isRange ? {} : { startPoint: currentRange.minIndex })}
         draggableTrack
         pushable={1}
         allowCross={false}

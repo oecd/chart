@@ -45,13 +45,35 @@ const calcVarsForSelectChartOptionValue = (value) => {
 
 const StandaloneControlWithConfig = ({
   id = '',
-  initialValue = null,
   type,
   codeLabelMapping,
   hideTitle = false,
   ...otherProps
 }) => {
   const ControlComponent = getControlForType(type);
+
+  const propsVars = useMemo(
+    () => ({
+      var1: otherProps.var1,
+      var2: otherProps.var2,
+      var3: otherProps.var3,
+      var4: otherProps.var4,
+      var5: otherProps.var5,
+    }),
+    [
+      otherProps.var1,
+      otherProps.var2,
+      otherProps.var3,
+      otherProps.var4,
+      otherProps.var5,
+    ],
+  );
+
+  const [prevPropsVars, setPrevPropsVars] = useState(propsVars);
+
+  useEffect(() => {
+    setPrevPropsVars(propsVars);
+  }, [propsVars]);
 
   const parsedCodeLabelMapping = useMemo(() => {
     if (isNilOrEmpty(codeLabelMapping)) {
@@ -73,13 +95,19 @@ const StandaloneControlWithConfig = ({
     return createCodeLabelMap(parseCSV(codeLabelMapping));
   }, [codeLabelMapping, type]);
 
-  const [vars, setVars] = useState(
+  const [vars, setVars] = useState(() =>
     R.cond([
       [
         R.equals(controlTypes.select.value),
         R.always({
           [otherProps.varName]:
-            initialValue || otherProps.varDefaultValue || '',
+            propsVars[otherProps.varName] || otherProps.varDefaultValue || '',
+          ...(otherProps.displayStars
+            ? {
+                [otherProps.starsVarName]:
+                  propsVars[otherProps.starsVarName] || '',
+              }
+            : {}),
         }),
       ],
       [
@@ -91,8 +119,18 @@ const StandaloneControlWithConfig = ({
       [
         R.equals(controlTypes.timeSlider.value),
         R.always({
-          [otherProps.minVarName]: otherProps.minVarDefaultValue || '',
-          [otherProps.maxVarName]: otherProps.maxVarDefaultValue || '',
+          [otherProps.minVarName]:
+            propsVars[otherProps.minVarName] ||
+            otherProps.minVarDefaultValue ||
+            '',
+          ...(otherProps.isRange
+            ? {
+                [otherProps.maxVarName]:
+                  propsVars[otherProps.maxVarName] ||
+                  otherProps.maxVarDefaultValue ||
+                  '',
+              }
+            : {}),
         }),
       ],
       [R.T, R.always({})],
@@ -131,6 +169,51 @@ const StandaloneControlWithConfig = ({
     isInitialChange.current = false;
   }, [id, vars, type]);
 
+  useEffect(() => {
+    if (type === controlTypes.select.value) {
+      if (
+        propsVars[otherProps.varName] &&
+        propsVars[otherProps.varName] !== prevPropsVars[otherProps.varName]
+      ) {
+        changeVar(otherProps.varName, propsVars[otherProps.varName]);
+      }
+      if (
+        otherProps.displayStars &&
+        propsVars[otherProps.starsVarName] &&
+        propsVars[otherProps.starsVarName] !==
+          prevPropsVars[otherProps.starsVarName]
+      ) {
+        changeVar(otherProps.starsVarName, propsVars[otherProps.starsVarName]);
+      }
+    }
+    if (type === controlTypes.timeSlider.value) {
+      if (
+        propsVars[otherProps.minVarName] &&
+        propsVars[otherProps.minVarName] !==
+          prevPropsVars[otherProps.minVarName]
+      ) {
+        changeVar(otherProps.minVarName, propsVars[otherProps.minVarName]);
+      }
+      if (
+        propsVars[otherProps.maxVarName] &&
+        propsVars[otherProps.maxVarName] !==
+          prevPropsVars[otherProps.maxVarName]
+      ) {
+        changeVar(otherProps.maxVarName, propsVars[otherProps.maxVarName]);
+      }
+    }
+  }, [
+    type,
+    propsVars,
+    prevPropsVars,
+    changeVar,
+    otherProps.varName,
+    otherProps.minVarName,
+    otherProps.maxVarName,
+    otherProps.displayStars,
+    otherProps.starsVarName,
+  ]);
+
   return (
     <Suspense
       fallback={
@@ -153,7 +236,6 @@ const StandaloneControlWithConfig = ({
 StandaloneControlWithConfig.propTypes = {
   id: PropTypes.string,
   hideTitle: PropTypes.bool,
-  initialValue: PropTypes.string,
   type: PropTypes.string.isRequired,
   codeLabelMapping: PropTypes.string.isRequired,
 };
