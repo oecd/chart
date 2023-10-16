@@ -8,6 +8,34 @@
     />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Charts as Web Components</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: 'Noto Sans', sans-serif;
+      }
+      .block-container {
+        margin-top: 50px;
+        padding: 15px;
+        border: 1px solid #a5aab1;
+        border-radius: 8px;
+      }
+      .chart-container {
+        width: 400px;
+        height: 300px;
+        border: 1px solid #dee3e9;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .block-title {
+        margin: 10px 0px 25px 0px;
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
     <div style="display: flex; justify-content: center">
@@ -16,20 +44,20 @@
           Charts as Web Components
         </h1>
 
-        <div style="margin-top: 50px; padding: 15px; border: 1px solid black">
-          <h2 style="text-align: center">Dashboard</h2>
+        <div class="block-container">
+          <h2 class="block-title">Dashboard</h2>
           <div style="min-height: 79px">
-            <oecd-control control-id="9cdf4b8b46" initial-value="BRA" />
+            <oecd-control control-id="9cdf4b8b46" var1="BRA" />
           </div>
           <div style="min-height: 79px">
-            <oecd-control control-id="1f7e54141e" initial-value="INDEX_1990" />
+            <oecd-control control-id="1f7e54141e" var2="INDEX_1990" />
           </div>
           <div style="min-height: 79px">
             <oecd-control control-id="2689355508" />
           </div>
 
           <div style="display: flex; margin-top: 50px">
-            <div style="width: 400px; height: 300px">
+            <div class="chart-container" style="margin-right: 15px">
               <oecd-chart
                 chart-id="02adb6aab1"
                 hide-title
@@ -37,45 +65,53 @@
                 hide-toolbox
               />
             </div>
-            <div style="width: 400px; height: 300px">
+            <div class="chart-container">
               <oecd-chart chart-id="02adb6aab1" />
             </div>
           </div>
         </div>
 
-        <div style="margin-top: 200px; padding: 15px; border: 1px solid black">
-          <h2 style="text-align: center">Chart selector</h2>
+        <div class="block-container" style="margin-top: 200px">
+          <h2 class="block-title">Chart selector</h2>
           <div style="min-height: 79px">
-            <oecd-control control-id="fecf86b496" />
+            <oecd-control control-id="fecf86b496" hide-title />
           </div>
-          <div style="margin-top: 50px; width: 800px; height: 400px">
+          <div
+            style="
+              width: 816px;
+              height: 400px;
+              border: 1px solid #dee3e9;
+              border-radius: 8px;
+              overflow: hidden;
+            "
+          >
             <oecd-chart />
           </div>
         </div>
 
-        <div style="margin-top: 200px; padding: 15px; border: 1px solid black">
-          <h2 style="text-align: center">Ensure lazy loading</h2>
+        <div class="block-container" style="margin-top: 200px">
+          <h2 class="block-title">Ensure lazy loading</h2>
           <div style="display: flex">
-            <div style="width: 400px; height: 250px">
+            <div class="chart-container" style="margin-right: 15px">
               <oecd-chart
                 chart-id="08f26fdcaa"
                 display-action-button
                 action-button-label="Compare"
               />
             </div>
-            <div style="width: 400px; height: 250px">
+            <div class="chart-container">
               <oecd-chart chart-id="adb56ee4ad" />
             </div>
           </div>
         </div>
 
-        <div style="margin-top: 100px; padding: 15px; border: 1px solid black">
-          <h2 style="text-align: center">Same charts in FR</h2>
+        <div class="block-container" style="margin-top: 100px">
+          <h2 class="block-title">Same charts in FR</h2>
           <div style="display: flex">
-            <div style="width: 400px; height: 250px">
+            <div class="chart-container" style="margin-right: 15px">
               <oecd-chart chart-id="08f26fdcaa" language="fr" />
             </div>
-            <div style="width: 400px; height: 250px">
+            <div class="chart-container">
               <oecd-chart chart-id="adb56ee4ad" language="fr" />
             </div>
           </div>
@@ -118,14 +154,55 @@
         }
 
         // handle dashboard controls
+        if (detail.isInitialChange) {
+          console.log(
+            'isInitialChange for control ' +
+              detail.controlId +
+              ' => ' +
+              detail.varName +
+              '=' +
+              detail.varValue +
+              ' does not need to be set in url.',
+          );
+        } else {
+          console.log(
+            'control ' +
+              detail.controlId +
+              ': ' +
+              detail.varName +
+              '=' +
+              detail.varValue +
+              ' needs to be set in url.',
+          );
+        }
         const dashboardCharts = [chartElements[0], chartElements[1]];
         dashboardCharts.map((chart) =>
           chart.setAttribute(detail.varName, detail.varValue),
         );
       });
 
+      setTimeout(() => {
+        // simulate external control variable manipulation, e.g.: after url has been parsed
+        const countryControl = document.querySelector(
+          'oecd-control[control-id="9cdf4b8b46"]',
+        );
+        countryControl.var1 = 'FRA|BRA|MEX';
+        const variableControl = document.querySelector(
+          'oecd-control[control-id="1f7e54141e"]',
+        );
+        const timeControl = document.querySelector(
+          'oecd-control[control-id="2689355508"]',
+        );
+        timeControl.var3 = '1990';
+        timeControl.var4 = '2005';
+      }, 5000);
+
       document.addEventListener('cbChartActionButtonClicked', ({ detail }) => {
         console.log('action button clicked:', detail);
+      });
+
+      document.addEventListener('cbTrackingEvent', ({ detail }) => {
+        console.log('tracking event:', detail);
       });
     </script>
   </body>
