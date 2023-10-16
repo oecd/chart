@@ -13,6 +13,7 @@ import { fetchJson } from '../utils/fetchUtil';
 import { apiUrl } from '../constants/chart';
 import ControlFallback from './ControlFallback';
 import StandaloneControlWithConfig from './StandaloneControlWithConfig';
+import { possibleVariables } from '../utils/configUtil';
 
 const StandaloneControl = ({
   controlId,
@@ -107,6 +108,9 @@ StandaloneControl.propTypes = {
   hideTitle: PropTypes.bool,
   initialValue: PropTypes.string,
   language: PropTypes.string,
+  ...R.fromPairs(
+    R.map((varName) => [varName, PropTypes.string], possibleVariables),
+  ),
 };
 
 export default StandaloneControl;
