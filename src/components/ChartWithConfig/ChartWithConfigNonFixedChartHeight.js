@@ -49,8 +49,8 @@ const ChartWithConfigNonFixedChartHeight = ({
   }, [fullContainerHeight, controlsAutoSizerHeight]);
 
   const isSmall = useMemo(
-    () => calcIsSmall(fullContainerWidth, finalChartHeight),
-    [fullContainerWidth, finalChartHeight],
+    () => calcIsSmall(fullContainerWidth, fullContainerHeight),
+    [fullContainerWidth, fullContainerHeight],
   );
 
   const [codeLabelMapping, setCodeLabelMapping] = useState(null);
