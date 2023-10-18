@@ -53,6 +53,7 @@ import CenteredContainer from '../CenteredContainer';
 import { fetchJson } from '../../utils/fetchUtil';
 import { getFinalPalette } from '../../utils/configUtil';
 import Header from './Header';
+import useIsFontLoaded from '../../hook/useIsFontLoaded';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -584,6 +585,8 @@ const HighchartsChart = ({
     doesTitleOrSubtitleContainVar && isFetching
   );
 
+  const isFontLoaded = useIsFontLoaded();
+
   useEffect(() => {
     const isThereEnoughSpaceForFooter = displayFooterAsTooltip
       ? false
@@ -611,6 +614,7 @@ const HighchartsChart = ({
     note,
     source,
     displayFooterAsTooltip,
+    isFontLoaded,
   ]);
 
   const parsedHighlight = useMemo(
