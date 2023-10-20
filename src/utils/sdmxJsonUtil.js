@@ -11,7 +11,7 @@ import {
   handleAreCategoriesNumbers,
 } from './csvUtil';
 import { createCodeLabelMap } from './generalUtil';
-import { isNilOrEmpty } from './ramdaUtil';
+import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import { possibleVariables } from './configUtil';
 import { fetchJson } from './fetchUtil';
 
@@ -162,6 +162,25 @@ const tweakDimensionLabels = R.map((dimension) => {
 
 const detectV8 = R.hasPath(['meta', 'schema']);
 
+const fixV7DimensionsBug = (rawDimensions) => {
+  // only time dimension is supposed to NOT have a keyPosition
+  // but most often, it is the last dimension in the dimensions list
+  // which allows to "guess" its position in data coordinates
+  const isBugPresent = R.compose(
+    (i) => i !== R.length(rawDimensions) - 1,
+    R.findIndex((d) => !R.has('keyPosition', d)),
+  )(rawDimensions);
+
+  // when the bug occurs not only we no longer can assume that the time dimension "keyPosition"
+  // is equal to length - 1 but all dimensions that are after the time one have an incorrect
+  // keyPosition!
+  // since the dimensions order and the their position in data coordinate match, the fix
+  // consists to assoc a "keyPosition" to all dimensions (=> equal to index)
+  return isBugPresent
+    ? mapWithIndex((d, i) => R.assoc('keyPosition', i, d), rawDimensions)
+    : rawDimensions;
+};
+
 export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
   const isV8 = detectV8(sdmxJson);
 
@@ -169,9 +188,11 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
     ? R.path(['data', 'dataSets'], sdmxJson)
     : R.prop('dataSets', sdmxJson);
 
-  const dimensions = isV8
+  const rawDimensions = isV8
     ? R.path(['data', 'structures', 0, 'dimensions', 'observation'], sdmxJson)
     : R.path(['structure', 'dimensions', 'observation'], sdmxJson);
+
+  const dimensions = isV8 ? rawDimensions : fixV7DimensionsBug(rawDimensions);
 
   const [xDimension, yDimension] = tweakDimensionLabels(
     getXAndYDimension(dimensions, chartConfig),
@@ -195,7 +216,8 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
 
   const defaultRowValues = R.times(R.always(null), R.length(yDimension.values));
 
-  // time dimension does not have keyPosition prop (and is always the last one)
+  // time dimension does not have keyPosition prop (and is supposed to always be the last one)
+  // unless v7 sent buggy data (see fixV7DimensionsBug)
   const xDimensionIndexInCoordinate = R.propOr(
     R.length(dimensions) - 1,
     'keyPosition',
