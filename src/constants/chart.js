@@ -52,6 +52,11 @@ export const controlTypes = {
   timeSlider: { value: 'timeSlider', label: 'Time slider' },
   select: { value: 'select', label: 'Variable select' },
   selectChart: { value: 'selectChart', label: 'Chart select' },
+  reusableControl: { value: 'reusableControl', label: 'Reusable control' },
+  missingReusableControl: {
+    value: 'missingReusableControl',
+    label: 'Missing reusable control',
+  },
 };
 
 export const frequencyTypes = {

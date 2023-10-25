@@ -41,7 +41,7 @@ const Controls = ({
               changeVar={changeVar}
               codeLabelMapping={codeLabelMapping}
               lang={lang}
-              {...c}
+              {...R.omit(['codeLabelMapping'], c)}
             />
           </Suspense>
         );
