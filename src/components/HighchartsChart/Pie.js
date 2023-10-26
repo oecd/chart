@@ -112,7 +112,7 @@ const Pie = forwardRef(
         chart: {
           type: 'pie',
           style: {
-            fontFamily: "'Noto Sans', sans-serif",
+            fontFamily: "'Noto Sans Display', sans-serif",
           },
           height,
           animation: false,
@@ -162,6 +162,9 @@ const Pie = forwardRef(
         plotOptions: {
           series: {
             animation: false,
+            borderWidth: 0.3,
+            borderColor: '#ffffff',
+            borderRadius: 0,
           },
           pie: {
             dataLabels: {
