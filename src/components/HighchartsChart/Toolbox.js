@@ -126,7 +126,15 @@ const Toolbox = ({
           tabIndex={0}
           aria-label="Toolbox"
         >
-          <DotsIcon />
+          <div
+            style={{
+              display: 'flex',
+              transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'all 250ms',
+            }}
+          >
+            <DotsIcon />
+          </div>
         </div>
       </PopoverTrigger>
       <PopoverContent>

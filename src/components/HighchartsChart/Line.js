@@ -144,7 +144,7 @@ const Line = forwardRef(
       () => ({
         chart: {
           style: {
-            fontFamily: "'Noto Sans', sans-serif",
+            fontFamily: "'Noto Sans Display', sans-serif",
           },
           marginTop: hideLegend
             ? calcMarginTop(title, subtitle, isSmall)
@@ -232,7 +232,7 @@ const Line = forwardRef(
           symbolWidth: 18,
           x: -7,
           verticalAlign: 'top',
-          margin: isSmall ? 16 : 24,
+          margin: isSmall ? 26 : 34,
         },
 
         plotOptions: {
