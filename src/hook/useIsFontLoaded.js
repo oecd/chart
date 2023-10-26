@@ -6,9 +6,12 @@ const useIsFontLoaded = () => {
 
   useEffect(() => {
     const checkIsFontLoaded = async () => {
-      const font = new FontFaceObserver('Noto Sans');
+      const fonts = [
+        new FontFaceObserver('Noto Sans').load(),
+        new FontFaceObserver('Noto Sans Display').load(),
+      ];
       try {
-        await font.load();
+        await Promise.all(fonts);
         setIsLoaded(true);
       } catch {
         // no need to do anything if the font cannot be loaded

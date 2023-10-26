@@ -53,10 +53,10 @@ const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
 
 const calcLegendMargin = (horizontal, isSmall) => {
   if (isSmall) {
-    return horizontal ? 0 : 16;
+    return horizontal ? 10 : 26;
   }
 
-  return horizontal ? 4 : 24;
+  return horizontal ? 14 : 34;
 };
 
 const calcXAxisLayout = (horizontal, areCategoriesDatesOrNumbers) => {
@@ -159,7 +159,7 @@ const Bar = forwardRef(
         chart: {
           type: horizontal ? 'bar' : 'column',
           style: {
-            fontFamily: "'Noto Sans', sans-serif",
+            fontFamily: "'Noto Sans Display', sans-serif",
           },
           marginTop: hideLegend
             ? calcMarginTop(title, subtitle, horizontal, isSmall)
@@ -260,7 +260,9 @@ const Bar = forwardRef(
             animation: false,
             pointPadding: 0.1,
             groupPadding: 0.1,
-            borderWidth: 0,
+            borderWidth: 0.3,
+            borderColor: '#ffffff',
+            borderRadius: 0,
             threshold: parseFloat(pivotValue) || 0,
             dataLabels: {
               ...R.prop('dataLabels', formatters),

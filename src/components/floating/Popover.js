@@ -21,6 +21,7 @@ import {
   useMergeRefs,
   FloatingPortal,
   FloatingFocusManager,
+  useTransitionStyles,
 } from '@floating-ui/react';
 import * as R from 'ramda';
 
@@ -46,8 +47,9 @@ export const usePopover = ({
       shift(),
     ],
   });
-
   const { context } = data;
+
+  const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
 
   const click = useClick(context);
   const dismiss = useDismiss(context);
@@ -62,8 +64,10 @@ export const usePopover = ({
       ...interactions,
       ...data,
       modal,
+      transitionStyles,
+      isMounted,
     }),
-    [open, setOpen, interactions, data, modal],
+    [open, setOpen, interactions, data, modal, transitionStyles, isMounted],
   );
 };
 
@@ -114,7 +118,7 @@ export const PopoverContent = forwardRef(
     const { context: floatingContext, ...context } = useContext(PopoverContext);
     const ref = useMergeRefs([context.refs.setFloating, propRef]);
 
-    return floatingContext.open ? (
+    return context.isMounted ? (
       <FloatingPortal id={tooltipContainerId}>
         <FloatingFocusManager
           context={floatingContext}
@@ -123,10 +127,13 @@ export const PopoverContent = forwardRef(
         >
           <div
             ref={ref}
-            style={{ ...context.floatingStyles, ...style }}
+            style={{
+              ...context.floatingStyles,
+              ...style,
+            }}
             {...context.getFloatingProps(props)}
           >
-            {props.children}
+            <div style={{ ...context.transitionStyles }}>{props.children}</div>
           </div>
         </FloatingFocusManager>
       </FloatingPortal>

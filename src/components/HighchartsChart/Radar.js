@@ -132,7 +132,7 @@ const Radar = forwardRef(
           polar: true,
           type: 'line',
           style: {
-            fontFamily: "'Noto Sans', sans-serif",
+            fontFamily: "'Noto Sans Display', sans-serif",
           },
           height,
           animation: false,
@@ -170,7 +170,7 @@ const Radar = forwardRef(
         pane: {
           startAngle: 0,
           endAngle: 360,
-          size: isSmall ? '70%' : '90%',
+          size: isSmall ? '70%' : '85%',
         },
 
         xAxis: {

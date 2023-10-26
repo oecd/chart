@@ -34,7 +34,7 @@ const Header = ({
   }, []);
 
   return (
-    <div style={{ display: 'flex' }}>
+    <div style={{ display: 'flex', marginBottom: isSmall ? '2px' : '5px' }}>
       <div style={{ flex: '1 1 auto' }}>
         {!R.isEmpty(title) && canTitleAndSubtitleBeDisplayed && (
           <div
