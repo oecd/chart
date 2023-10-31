@@ -10,6 +10,7 @@ export const chartTypes = {
   scatter: 'Scatter',
   radar: 'Radar',
   pie: 'Pie',
+  splitPackedBubble: 'SplitPackedBubble',
 };
 
 export const chartTypesForWhichXAxisIsAlwaysTreatedAsCategories = [

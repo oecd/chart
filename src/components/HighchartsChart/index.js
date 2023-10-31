@@ -50,6 +50,7 @@ import Header from './Header';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
+const SplitPackedBubble = lazy(() => import('./SplitPackedBubble'));
 
 const minChartHeightForFooterDisplay = 280;
 
@@ -65,6 +66,7 @@ const chartByType = {
   [chartTypes.scatter]: { component: Scatter, props: {} },
   [chartTypes.radar]: { component: Radar, props: {} },
   [chartTypes.pie]: { component: Pie, props: {} },
+  [chartTypes.splitPackedBubble]: { component: SplitPackedBubble, props: {} },
 };
 
 const getChartForType = R.propOr(
