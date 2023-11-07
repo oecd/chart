@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
 import Component from './Component';
-import { generatePseudoRandomString } from '../../../utils/generalUtil';
 import { isNilOrEmpty } from '../../../utils/ramdaUtil';
 import ControlFallback from '../../ControlFallback';
 
@@ -34,27 +33,6 @@ const ControlTimeSlider = ({
     [frequencies],
   );
 
-  const [componentKey, setComponentKey] = useState(
-    generatePseudoRandomString(),
-  );
-  const isFirstRenderDone = useRef(false);
-
-  useEffect(() => {
-    if (isFirstRenderDone.current) {
-      // re-init Component (useful when config is changed in chart-builder)
-      setComponentKey(generatePseudoRandomString());
-    } else {
-      isFirstRenderDone.current = true;
-    }
-  }, [
-    isRange,
-    frequency.frequencyTypeCode,
-    frequency.minCode,
-    frequency.maxCode,
-    minVarName,
-    maxVarName,
-  ]);
-
   return R.isNil(codeLabelMapping) ? (
     <ControlFallback
       label={label}
@@ -63,7 +41,6 @@ const ControlTimeSlider = ({
     />
   ) : (
     <Component
-      key={componentKey}
       label={finalLabel}
       frequency={frequency}
       isRange={isRange}
