@@ -25,6 +25,7 @@ const Header = ({
   actionButtonLabel,
   onActionButtonClick,
   isSmall,
+  isFontLoaded,
   chartRef,
 }) => {
   const [isInIframe, setIsInIframe] = useState(false);
@@ -37,7 +38,7 @@ const Header = ({
       <div style={{ flex: '1 1 auto' }}>
         {!R.isEmpty(title) && canTitleAndSubtitleBeDisplayed && (
           <div
-            className="cb-title"
+            className={`cb-title ${isFontLoaded ? 'cb-font-loaded' : ''}`}
             dangerouslySetInnerHTML={{
               __html: title,
             }}
@@ -45,7 +46,7 @@ const Header = ({
         )}
         {!R.isEmpty(subtitle) && canTitleAndSubtitleBeDisplayed && (
           <div
-            className="cb-subtitle"
+            className={`cb-subtitle ${isFontLoaded ? 'cb-font-loaded' : ''}`}
             dangerouslySetInnerHTML={{
               __html: subtitle,
             }}
@@ -142,6 +143,7 @@ Header.propTypes = {
   actionButtonLabel: PropTypes.string.isRequired,
   onActionButtonClick: PropTypes.func.isRequired,
   isSmall: PropTypes.bool.isRequired,
+  isFontLoaded: PropTypes.bool.isRequired,
   chartRef: PropTypes.object.isRequired,
 };
 

@@ -536,7 +536,6 @@ const HighchartsChart = ({
     note,
     source,
     displayFooterAsTooltip,
-    isFontLoaded,
   ]);
 
   const parsedHighlight = useMemo(
@@ -692,6 +691,7 @@ const HighchartsChart = ({
             actionButtonLabel={actionButtonLabel}
             onActionButtonClick={actionButtonClick}
             isSmall={isSmall}
+            isFontLoaded={isFontLoaded}
             chartRef={chartRef}
           />
         )}
@@ -741,7 +741,7 @@ const HighchartsChart = ({
 
       <div
         ref={footerRef}
-        className="cb-footer"
+        className={`cb-footer ${isFontLoaded ? 'cb-font-loaded' : ''}`}
         style={
           R.isNil(footerHeight) || footerHeight === 0
             ? {

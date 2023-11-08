@@ -228,7 +228,7 @@ const MapChart = forwardRef(
           map,
           proj4,
           style: {
-            fontFamily: "'Noto Sans Display', sans-serif",
+            fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
           },
           height,
           animation: !isFullScreen,
