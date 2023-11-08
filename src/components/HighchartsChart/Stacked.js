@@ -129,7 +129,7 @@ const Stacked = forwardRef(
         chart: {
           type: chartType,
           style: {
-            fontFamily: "'Noto Sans Display', sans-serif",
+            fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
           },
           marginTop: hideLegend
             ? calcMarginTop(title, subtitle, horizontal, isSmall)

@@ -7,8 +7,21 @@ const useIsFontLoaded = () => {
   useEffect(() => {
     const checkIsFontLoaded = async () => {
       const fonts = [
-        new FontFaceObserver('Noto Sans').load(),
-        new FontFaceObserver('Noto Sans Display').load(),
+        new FontFaceObserver('Noto Sans', {
+          weight: 400,
+        }).load(),
+        new FontFaceObserver('Noto Sans', {
+          weight: 600,
+        }).load(),
+        new FontFaceObserver('Noto Sans', {
+          weight: 800,
+        }).load(),
+        new FontFaceObserver('Noto Sans Display', {
+          weight: 400,
+        }).load(),
+        new FontFaceObserver('Noto Sans Display', {
+          weight: 500,
+        }).load(),
       ];
       try {
         await Promise.all(fonts);

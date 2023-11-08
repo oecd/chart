@@ -159,7 +159,7 @@ const Bar = forwardRef(
         chart: {
           type: horizontal ? 'bar' : 'column',
           style: {
-            fontFamily: "'Noto Sans Display', sans-serif",
+            fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
           },
           marginTop: hideLegend
             ? calcMarginTop(title, subtitle, horizontal, isSmall)
