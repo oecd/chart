@@ -201,7 +201,7 @@ const Scatter = forwardRef(
         chart: {
           type: 'scatter',
           style: {
-            fontFamily: "'Noto Sans Display', sans-serif",
+            fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
           },
           marginTop: hideLegend
             ? calcMarginTop(title, subtitle, isSmall)

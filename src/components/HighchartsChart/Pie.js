@@ -113,7 +113,7 @@ const Pie = forwardRef(
         chart: {
           type: 'pie',
           style: {
-            fontFamily: "'Noto Sans Display', sans-serif",
+            fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
           },
           height,
           animation: false,
