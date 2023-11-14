@@ -289,19 +289,33 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
   };
 
   const latestAvailableDataMapping = finalLatestAvailableData
-    ? {
-        latestYByXLabel: R.compose(
-          R.fromPairs,
-          R.map((s) => [
-            R.prop(R.head(s), parsingHelperData.xDimensionLabelByCode),
-            R.prop(R.last(s), yDimensionLabelByCode),
-          ]),
-        )(series),
-        latestYByXCode: R.compose(
-          R.fromPairs,
-          R.map((s) => [R.head(s), R.prop(R.last(s), yDimensionLabelByCode)]),
-        )(series),
-      }
+    ? R.compose(
+        (mapping) => {
+          const orderedLatestY = R.sortBy(R.identity, R.map(R.last, series));
+          return {
+            ...mapping,
+            latestYMin: R.prop(R.head(orderedLatestY), yDimensionLabelByCode),
+            latestYMax: R.prop(R.last(orderedLatestY), yDimensionLabelByCode),
+          };
+        },
+        R.assoc(
+          'latestYByXLabel',
+          R.compose(
+            R.fromPairs,
+            R.map((s) => [
+              R.prop(R.head(s), parsingHelperData.xDimensionLabelByCode),
+              R.prop(R.last(s), yDimensionLabelByCode),
+            ]),
+          )(series),
+        ),
+        R.assoc(
+          'latestYByXCode',
+          R.compose(
+            R.fromPairs,
+            R.map((s) => [R.head(s), R.prop(R.last(s), yDimensionLabelByCode)]),
+          )(series),
+        ),
+      )({})
     : {};
 
   const caterories = finalLatestAvailableData

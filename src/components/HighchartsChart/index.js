@@ -38,7 +38,7 @@ import {
 import { emptyData, createDataFromCSV } from '../../utils/csvUtil';
 import Spinner from '../Spinner';
 import {
-  replaceVarsNameByVarsValueUsingCodeLabelMapping,
+  replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax,
   replaceVarsNameByVarsValue,
   doesStringContainVar,
 } from '../../utils/chartUtil';
@@ -388,31 +388,51 @@ const HighchartsChart = ({
 
   const parsedNoteAndSource = useMemo(() => {
     const nonEmpyItems = R.reject(R.either(R.equals('<p></p>'), isNilOrEmpty), [
-      replaceVarsNameByVarsValueUsingCodeLabelMapping(
-        note,
+      replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+        string: note,
         vars,
-        parsedData?.codeLabelMapping,
-      ),
-      replaceVarsNameByVarsValueUsingCodeLabelMapping(
-        source,
+        latestMin: parsedData?.latestYMin,
+        latestMax: parsedData?.latestYMax,
+        mapping: parsedData?.codeLabelMapping,
+      }),
+      replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+        string: source,
         vars,
-        parsedData?.codeLabelMapping,
-      ),
+        latestMin: parsedData?.latestYMin,
+        latestMax: parsedData?.latestYMax,
+        mapping: parsedData?.codeLabelMapping,
+      }),
     ]);
     return R.isEmpty(nonEmpyItems) ? null : R.join('', nonEmpyItems);
-  }, [note, source, vars, parsedData?.codeLabelMapping]);
+  }, [
+    note,
+    source,
+    vars,
+    parsedData?.latestYMin,
+    parsedData?.latestYMax,
+    parsedData?.codeLabelMapping,
+  ]);
 
   const parsedDefinition = useMemo(() => {
-    const definitionWithVars = replaceVarsNameByVarsValueUsingCodeLabelMapping(
-      definition,
-      vars,
-      parsedData?.codeLabelMapping,
-    );
+    const definitionWithVars =
+      replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+        string: definition,
+        vars,
+        latestMin: parsedData?.latestYMin,
+        latestMax: parsedData?.latestYMax,
+        mapping: parsedData?.codeLabelMapping,
+      });
 
     return R.either(R.equals('<p></p>'), isNilOrEmpty)(definitionWithVars)
       ? null
       : definitionWithVars;
-  }, [definition, vars, parsedData?.codeLabelMapping]);
+  }, [
+    definition,
+    vars,
+    parsedData?.latestYMin,
+    parsedData?.latestYMax,
+    parsedData?.codeLabelMapping,
+  ]);
 
   const headerRef = useRef(null);
   const footerRef = useRef(null);
@@ -421,26 +441,44 @@ const HighchartsChart = ({
     () =>
       hideTitle
         ? ''
-        : replaceVarsNameByVarsValueUsingCodeLabelMapping(
-            title,
+        : replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+            string: title,
             vars,
-            parsedData?.codeLabelMapping,
-            true,
-          ),
-    [title, vars, parsedData?.codeLabelMapping, hideTitle],
+            latestMin: parsedData?.latestYMin,
+            latestMax: parsedData?.latestYMax,
+            mapping: parsedData?.codeLabelMapping,
+            replaceMissingVarByBlank: true,
+          }),
+    [
+      title,
+      vars,
+      parsedData?.latestYMin,
+      parsedData?.latestYMax,
+      parsedData?.codeLabelMapping,
+      hideTitle,
+    ],
   );
 
   const parsedSubtitle = useMemo(
     () =>
       hideSubtitle
         ? ''
-        : replaceVarsNameByVarsValueUsingCodeLabelMapping(
-            subtitle,
+        : replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+            string: subtitle,
             vars,
-            parsedData?.codeLabelMapping,
-            true,
-          ),
-    [subtitle, vars, parsedData?.codeLabelMapping, hideSubtitle],
+            latestMin: parsedData?.latestYMin,
+            latestMax: parsedData?.latestYMax,
+            mapping: parsedData?.codeLabelMapping,
+            replaceMissingVarByBlank: true,
+          }),
+    [
+      subtitle,
+      vars,
+      parsedData?.latestYMin,
+      parsedData?.latestYMax,
+      parsedData?.codeLabelMapping,
+      hideSubtitle,
+    ],
   );
 
   const doesTitleOrSubtitleContainVar = useMemo(

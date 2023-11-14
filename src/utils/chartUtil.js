@@ -2,7 +2,12 @@
 import { TinyColor, isReadable } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 
-import { codeOrLabelEquals, possibleVariables } from './configUtil';
+import {
+  codeOrLabelEquals,
+  latestMaxVariable,
+  latestMinVariable,
+  possibleVariables,
+} from './configUtil';
 import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import { fakeMemberLatest, frequencyTypes } from '../constants/chart';
 import { frequencies } from './dateUtil';
@@ -350,30 +355,45 @@ export const replaceVarsNameByVarsValue = (string, vars) =>
     possibleVariables,
   );
 
-export const replaceVarsNameByVarsValueUsingCodeLabelMapping = (
+export const replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax = ({
   string,
   vars,
+  latestMin,
+  latestMax,
   mapping,
   replaceMissingVarByBlank = false,
-) =>
-  R.reduce(
-    (acc, varName) =>
-      R.replace(
-        new RegExp(`{${varName}}`, 'gi'),
-        R.propOr(
-          replaceMissingVarByBlank ? '&nbsp;' : '',
-          R.toUpper(R.prop(varName, vars)),
-          mapping,
+}) =>
+  R.compose(
+    R.replace(
+      new RegExp(`{${latestMaxVariable}}`, 'gi'),
+      latestMax || (replaceMissingVarByBlank ? '&nbsp;' : ''),
+    ),
+    R.replace(
+      new RegExp(`{${latestMinVariable}}`, 'gi'),
+      latestMin || (replaceMissingVarByBlank ? '&nbsp;' : ''),
+    ),
+    R.reduce(
+      (acc, varName) =>
+        R.replace(
+          new RegExp(`{${varName}}`, 'gi'),
+          R.propOr(
+            replaceMissingVarByBlank ? '&nbsp;' : '',
+            R.toUpper(R.prop(varName, vars)),
+            mapping,
+          ),
+          acc,
         ),
-        acc,
-      ),
-    string ?? '',
-    possibleVariables,
-  );
+      R.__,
+      possibleVariables,
+    ),
+  )(string ?? '');
 
 const anyVarRegExp = R.join(
   '|',
-  R.map((v) => `{${v}}`, possibleVariables),
+  R.map(
+    (v) => `{${v}}`,
+    R.concat(possibleVariables, [latestMinVariable, latestMaxVariable]),
+  ),
 );
 
 export const doesStringContainVar = R.test(new RegExp(anyVarRegExp, 'i'));

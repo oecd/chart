@@ -1,6 +1,8 @@
 import * as R from 'ramda';
 
 export const possibleVariables = ['var1', 'var2', 'var3', 'var4', 'var5'];
+export const latestMinVariable = 'latest_min';
+export const latestMaxVariable = 'latest_max';
 
 export const codeOrLabelEquals = (obj) =>
   R.compose(
