@@ -73,8 +73,13 @@
 
         <div class="block-container" style="margin-top: 200px">
           <h2 class="block-title">Chart selector</h2>
-          <div style="min-height: 79px">
-            <oecd-control control-id="fecf86b496" hide-title />
+          <div style="display: flex; min-height: 79px">
+            <div style="width: 50%; margin-right: 7px">
+              <oecd-control control-id="55eda08751" hide-title />
+            </div>
+            <div style="width: 50%; margin-left: 7px">
+              <oecd-control control-id="1617b854de" hide-title />
+            </div>
           </div>
           <div
             style="
@@ -139,16 +144,15 @@
         const chartElements = document.querySelectorAll('oecd-chart');
 
         // handle chart selector control
-        if (detail.controlId === 'fecf86b496') {
+        if (
+          detail.controlId === '55eda08751' ||
+          detail.controlId === '1617b854de'
+        ) {
           const chartSelectorChart = chartElements[2];
-          if (detail.varValue) {
-            chartSelectorChart.setAttribute(
-              detail.varName === 'chartId' ? 'chart-id' : detail.varName,
-              detail.varValue,
-            );
-          } else {
-            chartSelectorChart.removeAttribute(detail.varName);
-          }
+          chartSelectorChart.setAttribute(
+            detail.varName === 'chartId' ? 'chart-id' : detail.varName,
+            detail.varValue,
+          );
 
           return;
         }
