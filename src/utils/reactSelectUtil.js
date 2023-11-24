@@ -37,11 +37,11 @@ const getBasicStylingConfigs = (isStandalone) => {
       minHeight: '33px',
       borderColor: state.isFocused ? '#156DF9' : '#E8EDF2',
       '&:hover': {
-        borderColor: '#156DF9',
+        borderColor: state.isFocused ? '#156DF9' : '#E8EDF2',
       },
+      transition: 'border-color 150ms',
       '.cb-control-select-magnifying-glass svg': {
-        fill: state.isFocused ? 'hsl(0, 0%, 40%)' : 'hsl(0, 0%, 80%)',
-        transition: 'fill 150ms',
+        fill: '#586179b3',
       },
     }),
     menu: (provided) => ({
@@ -62,10 +62,12 @@ const getBasicStylingConfigs = (isStandalone) => {
     }),
     clearIndicator: (provided) => ({
       ...provided,
+      color: '#586179b3',
       padding: '4px',
     }),
     dropdownIndicator: (provided, state) => ({
       ...provided,
+      color: '#586179b3',
       padding: state.isMulti ? '6px 6px 7px 6px' : '5px 8px 4px 8px',
     }),
     valueContainer: (provided, state) => ({
