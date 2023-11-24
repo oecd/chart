@@ -71,6 +71,7 @@
   align-items: center;
   background-color: #ffffff;
   border: 1px solid #dee3e9;
+  transition: border 150ms;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -215,7 +216,7 @@
   max-height: 16px;
 }
 .cb-control-select-magnifying-glass:hover svg {
-  fill: hsl(0, 0%, 40%) !important;
+  fill: #586179b3 !important;
 }
 
 .cb-control-select-option-multi {
@@ -238,6 +239,7 @@
 .cb-control-select-option-multi:hover .cb-control-select-option-multi-check,
 .cb-control-select-option-multi-standalone:hover
   .cb-control-select-option-multi-check {
+  transition: border-color 150ms;
   border-color: #156df9;
 }
 
