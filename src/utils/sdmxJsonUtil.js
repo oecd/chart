@@ -65,12 +65,40 @@ const isTimeDimension = R.either(
 
 const getXAndYDimension = (
   dimensions,
-  { chartType, mapCountryDimension, latestAvailableData },
+  {
+    chartType,
+    mapCountryDimension,
+    latestAvailableData,
+    dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+  },
 ) => {
   const dimensionsWithMoreThanOneMember = R.filter(
     R.compose(R.gt(R.__, 1), R.length, R.prop('values')),
     dimensions,
   );
+
+  const findDimensionWithPredefinedIdOrThatDoesNotHaveId = (id) => {
+    const dimensionWithoutIdToExclude = R.reject(
+      R.propEq(id, 'id'),
+      dimensions,
+    );
+    if (
+      isNilOrEmpty(dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember)
+    ) {
+      return R.head(dimensionWithoutIdToExclude);
+    }
+
+    return R.find(
+      R.compose(
+        R.equals(
+          R.toUpper(dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember),
+        ),
+        R.toUpper,
+        R.prop('id'),
+      ),
+      dimensionWithoutIdToExclude,
+    );
+  };
 
   const timeDimension = latestAvailableData
     ? R.find(isTimeDimension, dimensionsWithMoreThanOneMember)
@@ -96,7 +124,8 @@ const getXAndYDimension = (
             R.propEq(countryDimension.id, 'id'),
             dimensionsWithMoreThanOneMember,
           ),
-        ) || R.head(R.reject(R.propEq(countryDimension.id, 'id'), dimensions));
+        ) ||
+        findDimensionWithPredefinedIdOrThatDoesNotHaveId(countryDimension.id);
 
       return [countryDimension, timeDimension ?? yDimension];
     }
@@ -109,7 +138,7 @@ const getXAndYDimension = (
           R.propEq(timeDimension.id, 'id'),
           dimensionsWithMoreThanOneMember,
         ),
-      ) || R.head(R.reject(R.propEq(timeDimension.id, 'id'), dimensions));
+      ) || findDimensionWithPredefinedIdOrThatDoesNotHaveId(timeDimension.id);
 
     return [xDimension, timeDimension];
   }
@@ -126,7 +155,8 @@ const getXAndYDimension = (
       R.compose(R.equals(R.__, 1), R.length),
       () => {
         const x = R.head(dimensionsWithMoreThanOneMember);
-        const y = R.head(R.reject(R.propEq(x.id, 'id'), dimensions));
+        const y = findDimensionWithPredefinedIdOrThatDoesNotHaveId(x.id);
+
         return [x, y];
       },
     ],
@@ -345,6 +375,7 @@ export const createDataFromSdmxJson = ({
   sortSeries = '',
   yAxisOrderOverride,
   forceXAxisToBeTreatedAsCategories,
+  dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
 }) => {
   if (!sdmxJson) {
     return null;
@@ -368,6 +399,7 @@ export const createDataFromSdmxJson = ({
       mapCountryDimension,
       latestAvailableData,
       dotStatCodeLabelMapping,
+      dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
     }),
   )(sdmxJson);
 };

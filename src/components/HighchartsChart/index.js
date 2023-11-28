@@ -94,6 +94,7 @@ const HighchartsChart = ({
   csvCodeLabelMappingProjectLevel = null,
   csvCodeLabelMapping = null,
   dotStatCodeLabelMapping = null,
+  dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember = null,
   decimalPoint = decimalPointTypes.point.value,
   preParsedData = null,
   pivotData = false,
@@ -223,9 +224,13 @@ const HighchartsChart = ({
         return emptyData;
       }
 
+      setErrorMessage(null);
+      setNoDataMessage(null);
+
       return createDataFromSdmxJson({
         sdmxJson,
         dotStatCodeLabelMapping,
+        dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
         latestAvailableData,
         mapCountryDimension,
         pivotData,
@@ -253,6 +258,7 @@ const HighchartsChart = ({
     sortSeries,
     yAxisOrderOverride,
     dotStatCodeLabelMapping,
+    dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
     preParsedDataInternal,
     forceXAxisToBeTreatedAsCategories,
   ]);
@@ -768,6 +774,7 @@ HighchartsChart.propTypes = {
   csvCodeLabelMappingProjectLevel: PropTypes.string,
   csvCodeLabelMapping: PropTypes.string,
   dotStatCodeLabelMapping: PropTypes.string,
+  dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember: PropTypes.string,
   decimalPoint: PropTypes.string,
   preParsedData: PropTypes.object,
   pivotData: PropTypes.bool,
