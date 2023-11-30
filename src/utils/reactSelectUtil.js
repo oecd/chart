@@ -39,6 +39,10 @@ const getBasicStylingConfigs = (isStandalone) => {
       '&:hover': {
         borderColor: '#156DF9',
       },
+      '.cb-control-select-magnifying-glass svg': {
+        fill: state.isFocused ? 'hsl(0, 0%, 40%)' : 'hsl(0, 0%, 80%)',
+        transition: 'fill 150ms',
+      },
     }),
     menu: (provided) => ({
       ...provided,

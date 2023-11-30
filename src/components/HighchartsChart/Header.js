@@ -1,12 +1,11 @@
-/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable react/jsx-props-no-spreading, , jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons/faExpandArrowsAlt';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
 import { FloatingPortal } from '@floating-ui/react';
 import * as R from 'ramda';
 
+import InfoIcon from '../Icons/InfoIcon';
+import ExpandIcon from '../Icons/ExpandIcon';
 import ExportButton from './ExportButton';
 import useTooltipState from '../../hooks/useTooltipState';
 
@@ -75,11 +74,11 @@ const Header = ({
             <>
               <div
                 className="cb-toolbar"
-                style={{ marginLeft: '4px' }}
+                style={{ margin: '2px 0px 0px 4px' }}
                 ref={tooltipState.refs.setReference}
                 {...tooltipState.getReferenceProps()}
               >
-                <FontAwesomeIcon icon={faInfoCircle} />
+                <InfoIcon />
               </div>
               {tooltipState.open && (
                 <FloatingPortal>
@@ -106,11 +105,11 @@ const Header = ({
             parsedSubtitle={subtitle}
             onDownloadData={onDownloadData}
             disabled={exportDisabled}
-            style={{ marginLeft: '8px' }}
+            style={{ margin: '2px 0px 0px 4px' }}
           />
           {(onExpandChart || !isInIframe) && !hideExpand && (
             <div
-              style={{ marginLeft: '8px' }}
+              style={{ margin: '2px 0px 0px 4px' }}
               className={exportDisabled ? 'cb-toolbar-disabled' : 'cb-toolbar'}
               role="button"
               tabIndex={0}
@@ -125,7 +124,7 @@ const Header = ({
                 }
               }}
             >
-              <FontAwesomeIcon icon={faExpandArrowsAlt} />
+              <ExpandIcon />
             </div>
           )}
         </div>

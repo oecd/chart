@@ -1,12 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload } from '@fortawesome/free-solid-svg-icons/faDownload';
-import { faFileImage } from '@fortawesome/free-solid-svg-icons/faFileImage';
-import { faFileCsv } from '@fortawesome/free-solid-svg-icons/faFileCsv';
-import { faCode } from '@fortawesome/free-solid-svg-icons/faCode';
-
 import {
   useFloating,
   autoUpdate,
@@ -22,6 +16,10 @@ import {
 } from '@floating-ui/react';
 import * as R from 'ramda';
 
+import DownloadIcon from '../Icons/DownloadIcon';
+import CsvIcon from '../Icons/CsvIcon';
+import PngIcon from '../Icons/PngIcon';
+import SvgIcon from '../Icons/SvgIcon';
 import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 
 const ExportButton = ({
@@ -67,8 +65,7 @@ const ExportButton = ({
   const options = [
     {
       label: 'CSV',
-      icon: faFileCsv,
-      iconStyle: { marginRight: '8px' },
+      icon: <CsvIcon />,
       onSelect: () => {
         if (chartRef.current?.chart.downloadCSV) {
           chartRef.current?.chart.downloadCSV();
@@ -77,8 +74,7 @@ const ExportButton = ({
     },
     {
       label: 'PNG',
-      icon: faFileImage,
-      iconStyle: { marginRight: '12px' },
+      icon: <PngIcon />,
       onSelect: () => {
         chartRef.current?.chart.exportChartLocal(undefined, {
           title: {
@@ -95,8 +91,7 @@ const ExportButton = ({
     },
     {
       label: 'SVG',
-      icon: faCode,
-      iconStyle: {},
+      icon: <SvgIcon />,
       onSelect: () => {
         chartRef.current?.chart.exportChartLocal(
           { type: 'image/svg+xml' },
@@ -132,9 +127,10 @@ const ExportButton = ({
         className={disabled ? 'cb-toolbar-disabled' : 'cb-toolbar'}
         style={style}
         role="button"
+        aria-label="open export menu"
         tabIndex={0}
       >
-        <FontAwesomeIcon icon={faDownload} />
+        <DownloadIcon />
       </div>
       {!disabled && (
         <FloatingPortal>
@@ -163,6 +159,7 @@ const ExportButton = ({
                       ref={(el) => {
                         listRef.current[i] = el;
                       }}
+                      aria-label={o.label}
                       tabIndex={i === activeIndex ? 0 : -1}
                       className={`cb-toolbar-menu-item ${
                         i === activeIndex ? 'cb-toolbar-menu-item-active' : ''
@@ -179,12 +176,7 @@ const ExportButton = ({
                         },
                       })}
                     >
-                      <FontAwesomeIcon
-                        icon={o.icon}
-                        className="cb-toolbar-menu-item-icon"
-                        style={o.iconStyle}
-                      />
-                      {o.label}
+                      {o.icon}
                     </div>
                   ),
                   options,

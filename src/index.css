@@ -51,11 +51,6 @@
 .cb-toolbar-menu-item-active {
   background-color: #f5f5f5;
 }
-.cb-toolbar-menu-item-icon {
-  margin-right: 5px;
-  font-size: 14px;
-  color: #737373;
-}
 
 .cb-floating {
   font-family: 'Segoe UI';
@@ -118,28 +113,21 @@
 
 .cb-control .cb-star-container,
 .cb-control-standalone .cb-star-container {
+  max-height: 21px;
   cursor: pointer;
-  padding: 0px 3px 0px 10px;
+  padding: 0px 0px 0px 10px;
+}
+.cb-control .cb-star-container:hover svg,
+.cb-control-standalone .cb-star-container:hover svg {
+  fill: #156df9;
 }
 
-.cb-control .cb-star-container:hover .cb-star-border,
-.cb-control-standalone .cb-star-container:hover .cb-star-border {
-  color: #156df9;
+.cb-control-select-magnifying-glass {
+  width: 16px;
+  max-height: 16px;
 }
-
-.cb-control .cb-star-border,
-.cb-control-standalone .cb-star-border {
-  color: #586179;
-}
-
-.cb-control .cb-star,
-.cb-control-standalone .cb-star {
-  color: #ffffff;
-}
-
-.cb-control .cb-star-selected,
-.cb-control-standalone .cb-star-selected {
-  color: #586179;
+.cb-control-select-magnifying-glass:hover svg {
+  fill: #586179b3 !important;
 }
 
 .cb-control-select-option-multi {
@@ -150,16 +138,18 @@
   padding: 8px 17px;
 }
 
-.cb-control-select-option-multi .cb-control-select-option-multi-icon,
-.cb-control-select-option-multi-standalone
-  .cb-control-select-option-multi-icon {
+.cb-control-select-option-multi-check {
+  width: 21px;
+  height: 21px;
+  padding: 1px 0px 0px 1px;
+  border: 1px solid #c2cbd6;
   border-radius: 4px;
-  border-color: #c2cbd6;
+  box-sizing: border-box;
 }
-
-.cb-control-select-option-multi:hover .cb-control-select-option-multi-icon,
+.cb-control-select-option-multi:hover .cb-control-select-option-multi-check,
 .cb-control-select-option-multi-standalone:hover
-  .cb-control-select-option-multi-icon {
+  .cb-control-select-option-multi-check {
+  transition: border-color 150ms;
   border-color: #156df9;
 }
 

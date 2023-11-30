@@ -1,11 +1,11 @@
-/* eslint-disable react/jsx-props-no-spreading, react/prop-types */
+/* eslint-disable react/jsx-props-no-spreading, react/prop-types, jsx-a11y/control-has-associated-label */
 import React from 'react';
 import { components } from 'react-select';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar } from '@fortawesome/free-solid-svg-icons/faStar';
-import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons/faMagnifyingGlass';
 import * as R from 'ramda';
+
+import StarIcon from '../../Icons/StarIcon';
+import CheckIcon from '../../Icons/CheckIcon';
+import MagnifyingGlassIcon from '../../Icons/MagnifyingGlassIcon';
 
 export const MultiValueContainer = ({ selectProps, data }) => {
   if (selectProps.inputValue !== '') {
@@ -19,7 +19,9 @@ export const MultiValueContainer = ({ selectProps, data }) => {
 export const DropdownIndicator = (props) => {
   return (
     <components.DropdownIndicator {...props}>
-      <FontAwesomeIcon icon={faMagnifyingGlass} />
+      <div className="cb-control-select-magnifying-glass">
+        <MagnifyingGlassIcon />
+      </div>
     </components.DropdownIndicator>
   );
 };
@@ -43,17 +45,8 @@ const OptionLabelMultiple = ({
         : 'cb-control-select-option-multi'
     }
   >
-    <div>
-      <FontAwesomeIcon
-        icon={faCheck}
-        border
-        className="cb-control-select-option-multi-icon"
-        style={{
-          color: R.includes(value, selectedOptionValues)
-            ? '#156DF9'
-            : '#E8EDF2',
-        }}
-      />
+    <div className="cb-control-select-option-multi-check">
+      {R.includes(value, selectedOptionValues) && <CheckIcon />}
     </div>
     <div style={{ flex: 1, marginLeft: '5px' }}>
       <OptionLabelSingle label={label} />
@@ -84,6 +77,7 @@ export const createOptionLabelMultipleWithStar =
     >
       <div
         role="button"
+        aria-label="select star"
         tabIndex={0}
         className="cb-star-container"
         onClick={(e) => {
@@ -97,16 +91,7 @@ export const createOptionLabelMultipleWithStar =
           }
         }}
       >
-        <span className="fa-layers">
-          <FontAwesomeIcon icon={faStar} className="cb-star-border" />
-          <FontAwesomeIcon
-            icon={faStar}
-            transform="shrink-4"
-            className={`cb-star${
-              R.includes(value, starValues) ? '-selected' : ''
-            }`}
-          />
-        </span>
+        <StarIcon selected={R.includes(value, starValues)} />
       </div>
     </OptionLabelMultiple>
   );

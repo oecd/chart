@@ -1,5 +1,4 @@
 import 'rc-slider/assets/index.css';
-import '@fortawesome/fontawesome-svg-core/styles.css';
 
 import './index.css';
 
