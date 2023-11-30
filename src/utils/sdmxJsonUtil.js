@@ -263,6 +263,30 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
     chartConfig.latestAvailableData && isTimeDimension(yDimension);
 
   const series = R.compose(
+    (seriesWithoutEmptyOnes) => {
+      const allXMemberCodes = R.map(R.prop('id'), xDimension.values);
+      const seriesMemberCodes = R.map(R.head, seriesWithoutEmptyOnes);
+      const missingEmptySeriesMemberCodes = R.difference(
+        allXMemberCodes,
+        seriesMemberCodes,
+      );
+
+      if (R.isEmpty(missingEmptySeriesMemberCodes)) {
+        return seriesWithoutEmptyOnes;
+      }
+
+      const emptyData = R.times(
+        R.always(null),
+        R.length(R.head(seriesWithoutEmptyOnes)) - 1,
+      );
+
+      const missingEmptySeries = R.map(
+        (c) => R.prepend(c, emptyData),
+        missingEmptySeriesMemberCodes,
+      );
+
+      return R.concat(seriesWithoutEmptyOnes, missingEmptySeries);
+    },
     R.map(([k, v]) => R.prepend(k, v)),
     R.toPairs,
     R.reduce((acc, [coordinateString, [value]]) => {
@@ -360,7 +384,9 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
 };
 
 export const isSdmxJsonEmpty = (sdmxJson) =>
-  R.isEmpty(R.path(['structure', 'dimensions', 'observation'], sdmxJson));
+  detectV8(sdmxJson)
+    ? !R.has('observations', R.path(['data', 'dataSets', 0], sdmxJson))
+    : R.isEmpty(R.path(['structure', 'dimensions', 'observation'], sdmxJson));
 
 export const createDataFromSdmxJson = ({
   sdmxJson,
