@@ -232,13 +232,7 @@
   height: 21px;
   padding: 1px 0px 0px 1px;
   border: 1px solid #c2cbd6;
-.cb-control-select-option-multi-check {
-  width: 21px;
-  height: 21px;
-  padding: 1px 0px 0px 1px;
-  border: 1px solid #c2cbd6;
   border-radius: 4px;
-  box-sizing: border-box;
   box-sizing: border-box;
 }
 .cb-control-select-option-multi:hover .cb-control-select-option-multi-check,
