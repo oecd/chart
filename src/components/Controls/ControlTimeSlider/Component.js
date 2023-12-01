@@ -80,7 +80,7 @@ const ControlTimeSlider = ({
     }
   }, [vars, isRange, steps.codes, minVarName, maxVarName]);
 
-  const onAfterRangeChange = useCallback(
+  const onChangeComplete = useCallback(
     (value) => {
       if (isRange) {
         const [min, max] = value;
@@ -103,7 +103,7 @@ const ControlTimeSlider = ({
       )}
       <Slider
         onChange={onRangeChange}
-        onAfterChange={onAfterRangeChange}
+        onChangeComplete={onChangeComplete}
         range={isRange}
         min={0}
         max={R.isEmpty(steps.codes) ? 0 : R.length(steps.codes) - 1}
