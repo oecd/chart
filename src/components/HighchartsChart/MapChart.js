@@ -96,7 +96,7 @@ const MapChart = forwardRef(
       mapDisplayCountriesName = false,
       mapAutoShade = true,
       mapColorValueSteps = [],
-      highlight = '',
+      highlight = null,
       baseline = null,
       hideLegend = false,
       colorPalette,
@@ -112,8 +112,6 @@ const MapChart = forwardRef(
     },
     ref,
   ) => {
-    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
-
     const stepsHaveLabels = useMemo(
       () =>
         !isNilOrEmpty(mapColorValueSteps) &&
@@ -188,8 +186,8 @@ const MapChart = forwardRef(
 
                 const baselineOrHighlightColor = getBaselineOrHighlightColor(
                   { code: countryCode, label: getLabelFromMap(countryCode) },
-                  R.map(R.toUpper, parsedHighlight),
-                  R.toUpper(baseline),
+                  R.map(R.toUpper, highlight),
+                  R.map(R.toUpper, baseline),
                   highlightColors,
                 );
 
@@ -217,7 +215,7 @@ const MapChart = forwardRef(
         data,
         finalColorPalette,
         highlightColors,
-        parsedHighlight,
+        highlight,
         baseline,
       ],
     );
@@ -415,8 +413,8 @@ MapChart.propTypes = {
   mapDisplayCountriesName: PropTypes.bool,
   mapAutoShade: PropTypes.bool,
   mapColorValueSteps: PropTypes.array,
-  highlight: PropTypes.string,
-  baseline: PropTypes.string,
+  highlight: PropTypes.array,
+  baseline: PropTypes.array,
   hideLegend: PropTypes.bool,
   colorPalette: PropTypes.array.isRequired,
   highlightColors: PropTypes.array.isRequired,

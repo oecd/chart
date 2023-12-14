@@ -53,7 +53,7 @@ const Line = forwardRef(
       data,
       title = '',
       subtitle = '',
-      highlight = '',
+      highlight = null,
       baseline = null,
       hideLegend = false,
       hideXAxisLabels = false,
@@ -71,8 +71,6 @@ const Line = forwardRef(
     },
     ref,
   ) => {
-    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
-
     const areCategoriesDatesOrNumber =
       data.areCategoriesDates || data.areCategoriesNumbers;
 
@@ -81,7 +79,7 @@ const Line = forwardRef(
         mapWithIndex((s, yIdx) => {
           const highlightOrBaselineColor = getBaselineOrHighlightColor(
             s,
-            parsedHighlight,
+            highlight,
             baseline,
             highlightColors,
           );
@@ -129,14 +127,7 @@ const Line = forwardRef(
             showInLegend: s.code !== fakeMemberLatest.code,
           };
         }, data.series),
-      [
-        data,
-        areCategoriesDatesOrNumber,
-        colorPalette,
-        highlightColors,
-        parsedHighlight,
-        baseline,
-      ],
+      [data, colorPalette, highlightColors, highlight, baseline],
     );
 
     const defaultOptions = useMemo(
@@ -337,8 +328,8 @@ Line.propTypes = {
     areCategoriesNumbers: PropTypes.bool.isRequired,
     version: PropTypes.string,
   }).isRequired,
-  highlight: PropTypes.string,
-  baseline: PropTypes.string,
+  highlight: PropTypes.array,
+  baseline: PropTypes.array,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
   hideYAxisLabels: PropTypes.bool,
