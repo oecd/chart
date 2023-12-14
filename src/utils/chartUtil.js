@@ -12,7 +12,16 @@ import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import { fakeMemberLatest, frequencyTypes } from '../constants/chart';
 import { frequencies } from './dateUtil';
 
-const baselineColor = '#262639';
+const baselineColor = '#48A7FF';
+const baselineColorShades = [
+  ['#0A4095', '#0E51B5', '#1162D4', '#2379E2', '#3690F1', '#48A7FF', '#73BCFF'],
+  ['#0A4095', '#0E51B5', '#1162D4', '#3690F1', '#48A7FF', '#73BCFF'],
+  ['#0A4095', '#0E51B5', '#1162D4', '#48A7FF', '#73BCFF'],
+  ['#0A4095', '#0E51B5', '#1162D4', '#48A7FF'],
+  ['#0A4095', '#1162D4', '#48A7FF'],
+  ['#0E51B5', '#48A7FF'],
+  [baselineColor],
+];
 
 const lightenColor = (color, percent) => {
   const num = parseInt(color.replace('#', ''), 16);
@@ -67,7 +76,11 @@ export const getBaselineOrHighlightColor = (
   baseline,
   highlightColors,
 ) => {
-  if (codeOrLabelEquals(objWithCodeAndLabel)(baseline)) {
+  const baselineIndex = R.findIndex(
+    codeOrLabelEquals(objWithCodeAndLabel),
+    baseline,
+  );
+  if (baselineIndex !== -1) {
     return baselineColor;
   }
 
@@ -99,8 +112,13 @@ export const createStackedDatapoints = (
   highlightColors,
   highlight,
   baseline,
-) =>
-  mapWithIndex((s, yIdx) => {
+) => {
+  const baselineColors = R.find(
+    (shade) => R.length(shade) <= R.length(data.series),
+    baselineColorShades,
+  );
+
+  return mapWithIndex((s, yIdx) => {
     const seriesColor = getListItemAtTurningIndex(yIdx, colorPalette);
 
     return {
@@ -124,6 +142,15 @@ export const createStackedDatapoints = (
           codeOrLabelEquals(category),
           highlight,
         );
+        const baselineColorsIndex = R.findIndex(
+          codeOrLabelEquals(category),
+          baseline,
+        );
+
+        const finalBaselineColor =
+          baselineColorsIndex === -1
+            ? null
+            : getListItemAtTurningIndex(yIdx, baselineColors);
 
         const highlightColor =
           highlightColorsIndex === -1
@@ -139,10 +166,7 @@ export const createStackedDatapoints = (
               );
 
         const color = R.cond([
-          [
-            () => codeOrLabelEquals(category)(baseline),
-            R.always(baselineColor),
-          ],
+          [() => !R.isNil(finalBaselineColor), R.always(finalBaselineColor)],
           [() => !R.isNil(highlightColor), R.always(highlightColor)],
           [R.T, R.always(null)],
         ])();
@@ -159,6 +183,7 @@ export const createStackedDatapoints = (
       }, s.data),
     };
   }, data.series);
+};
 
 const createIndexesFromLongestArrays = (arr1, arr2) =>
   isNilOrEmpty(arr1) || isNilOrEmpty(arr2)

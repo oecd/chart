@@ -618,7 +618,6 @@ const HighchartsChart = ({
   const parsedHighlight = useMemo(
     () =>
       R.compose(
-        R.join('|'),
         R.reject(R.isEmpty),
         R.split('|'),
       )(replaceVarsNameByVarsValue(highlight, vars)),
@@ -626,7 +625,11 @@ const HighchartsChart = ({
   );
 
   const parsedBaseline = useMemo(
-    () => replaceVarsNameByVarsValue(baseline, vars),
+    () =>
+      R.compose(
+        R.reject(R.isEmpty),
+        R.split('|'),
+      )(replaceVarsNameByVarsValue(baseline, vars)),
     [baseline, vars],
   );
 

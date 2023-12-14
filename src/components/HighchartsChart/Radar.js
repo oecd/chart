@@ -45,7 +45,7 @@ const Radar = forwardRef(
       title = '',
       subtitle = '',
       data,
-      highlight = '',
+      highlight = null,
       baseline = null,
       hideLegend = false,
       hideXAxisLabels = false,
@@ -64,8 +64,6 @@ const Radar = forwardRef(
     },
     ref,
   ) => {
-    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
-
     const areCategoriesDatesOrNumber =
       data.areCategoriesDates || data.areCategoriesNumbers;
 
@@ -74,7 +72,7 @@ const Radar = forwardRef(
         mapWithIndex((s, xIdx) => {
           const highlightOrBaselineColor = getBaselineOrHighlightColor(
             s,
-            parsedHighlight,
+            highlight,
             baseline,
             highlightColors,
           );
@@ -116,14 +114,7 @@ const Radar = forwardRef(
             ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
           };
         }, data.series),
-      [
-        data,
-        areCategoriesDatesOrNumber,
-        colorPalette,
-        highlightColors,
-        parsedHighlight,
-        baseline,
-      ],
+      [data, colorPalette, highlightColors, highlight, baseline],
     );
 
     const defaultOptions = useMemo(
@@ -315,8 +306,8 @@ Radar.propTypes = {
     areCategoriesNumbers: PropTypes.bool.isRequired,
     version: PropTypes.string,
   }).isRequired,
-  highlight: PropTypes.string,
-  baseline: PropTypes.string,
+  highlight: PropTypes.array,
+  baseline: PropTypes.array,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
   hideYAxisLabels: PropTypes.bool,

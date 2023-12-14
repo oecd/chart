@@ -78,7 +78,7 @@ const Bar = forwardRef(
       title = '',
       subtitle = '',
       data,
-      highlight = '',
+      highlight = null,
       baseline = null,
       hideLegend = false,
       hideXAxisLabels = false,
@@ -98,8 +98,6 @@ const Bar = forwardRef(
     },
     ref,
   ) => {
-    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
-
     const areCategoriesDatesOrNumber =
       data.areCategoriesDates || data.areCategoriesNumbers;
 
@@ -109,7 +107,7 @@ const Bar = forwardRef(
           const seriesColor =
             getBaselineOrHighlightColor(
               s,
-              parsedHighlight,
+              highlight,
               baseline,
               highlightColors,
             ) || getListItemAtTurningIndex(xIdx, colorPalette);
@@ -121,7 +119,7 @@ const Bar = forwardRef(
 
               const baselineOrHighlightColor = getBaselineOrHighlightColor(
                 category,
-                parsedHighlight,
+                highlight,
                 baseline,
                 highlightColors,
               );
@@ -144,14 +142,7 @@ const Bar = forwardRef(
             showInLegend: s.code !== fakeMemberLatest.code,
           };
         }, data.series),
-      [
-        data,
-        areCategoriesDatesOrNumber,
-        colorPalette,
-        highlightColors,
-        parsedHighlight,
-        baseline,
-      ],
+      [data, colorPalette, highlightColors, highlight, baseline],
     );
 
     const defaultOptions = useMemo(
@@ -337,8 +328,8 @@ Bar.propTypes = {
     areCategoriesNumbers: PropTypes.bool.isRequired,
     version: PropTypes.string,
   }).isRequired,
-  highlight: PropTypes.string,
-  baseline: PropTypes.string,
+  highlight: PropTypes.array,
+  baseline: PropTypes.array,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
   hideYAxisLabels: PropTypes.bool,
