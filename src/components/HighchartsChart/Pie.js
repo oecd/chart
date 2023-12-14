@@ -40,7 +40,7 @@ const Pie = forwardRef(
       title = '',
       subtitle = '',
       data,
-      highlight = '',
+      highlight = null,
       baseline = null,
       hideLegend = false,
       hideXAxisLabels = false,
@@ -58,8 +58,6 @@ const Pie = forwardRef(
     },
     ref,
   ) => {
-    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
-
     const areCategoriesDatesOrNumber =
       data.areCategoriesDates || data.areCategoriesNumbers;
 
@@ -82,7 +80,7 @@ const Pie = forwardRef(
               const color =
                 getBaselineOrHighlightColor(
                   category,
-                  parsedHighlight,
+                  highlight,
                   baseline,
                   highlightColors,
                 ) || getListItemAtTurningIndex(xIdx, finalColorPalette);
@@ -98,14 +96,7 @@ const Pie = forwardRef(
           }),
           R.isEmpty(data.series) ? [] : [R.head(data.series)],
         ),
-      [
-        data,
-        areCategoriesDatesOrNumber,
-        finalColorPalette,
-        highlightColors,
-        parsedHighlight,
-        baseline,
-      ],
+      [data, finalColorPalette, highlightColors, highlight, baseline],
     );
 
     const defaultOptions = useMemo(
@@ -241,8 +232,8 @@ Pie.propTypes = {
     areCategoriesNumbers: PropTypes.bool.isRequired,
     version: PropTypes.string,
   }).isRequired,
-  highlight: PropTypes.string,
-  baseline: PropTypes.string,
+  highlight: PropTypes.array,
+  baseline: PropTypes.array,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
   colorPalette: PropTypes.array.isRequired,

@@ -88,7 +88,7 @@ const Scatter = forwardRef(
       title = '',
       subtitle = '',
       data,
-      highlight = '',
+      highlight = null,
       baseline = null,
       hideLegend = false,
       hideXAxisLabels = false,
@@ -109,8 +109,6 @@ const Scatter = forwardRef(
   ) => {
     const minMaxLines = useRef([]);
 
-    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
-
     const areCategoriesDatesOrNumber =
       data.areCategoriesDates || data.areCategoriesNumbers;
 
@@ -123,7 +121,7 @@ const Scatter = forwardRef(
 
           const seriesBaselineOrHighlightColor = getBaselineOrHighlightColor(
             s,
-            parsedHighlight,
+            highlight,
             baseline,
             highlightColors,
           );
@@ -139,7 +137,7 @@ const Scatter = forwardRef(
 
               const baselineOrHighlightColor = getBaselineOrHighlightColor(
                 category,
-                parsedHighlight,
+                highlight,
                 baseline,
                 highlightColors,
               );
@@ -191,7 +189,7 @@ const Scatter = forwardRef(
         areCategoriesDatesOrNumber,
         colorPalette,
         highlightColors,
-        parsedHighlight,
+        highlight,
         baseline,
       ],
     );
@@ -246,7 +244,7 @@ const Scatter = forwardRef(
                   const lineColor =
                     getBaselineOrHighlightColor(
                       category,
-                      parsedHighlight,
+                      highlight,
                       baseline,
                       highlightColors,
                     ) || firstPaletteColor;
@@ -394,7 +392,7 @@ const Scatter = forwardRef(
         firstPaletteColor,
         highlightColors,
         isSmall,
-        parsedHighlight,
+        highlight,
         symbolLayout,
       ],
     );
@@ -427,8 +425,8 @@ Scatter.propTypes = {
     areCategoriesNumbers: PropTypes.bool.isRequired,
     version: PropTypes.string,
   }).isRequired,
-  highlight: PropTypes.string,
-  baseline: PropTypes.string,
+  highlight: PropTypes.array,
+  baseline: PropTypes.array,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
   hideYAxisLabels: PropTypes.bool,

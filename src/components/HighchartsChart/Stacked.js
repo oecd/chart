@@ -67,7 +67,7 @@ const Stacked = forwardRef(
       title = '',
       subtitle = '',
       data,
-      highlight = '',
+      highlight = null,
       baseline = null,
       hideLegend = false,
       hideXAxisLabels = false,
@@ -87,8 +87,6 @@ const Stacked = forwardRef(
     },
     ref,
   ) => {
-    const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
-
     const finalColorPalette = useMemo(
       () =>
         R.when(
@@ -105,10 +103,10 @@ const Stacked = forwardRef(
           data,
           finalColorPalette,
           highlightColors,
-          parsedHighlight,
+          highlight,
           baseline,
         ),
-      [data, finalColorPalette, highlightColors, parsedHighlight, baseline],
+      [data, finalColorPalette, highlightColors, highlight, baseline],
     );
 
     const chartType = R.cond([
@@ -318,8 +316,8 @@ Stacked.propTypes = {
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
   }).isRequired,
-  highlight: PropTypes.string,
-  baseline: PropTypes.string,
+  highlight: PropTypes.array,
+  baseline: PropTypes.array,
   hideLegend: PropTypes.bool,
   hideXAxisLabels: PropTypes.bool,
   hideYAxisLabels: PropTypes.bool,
