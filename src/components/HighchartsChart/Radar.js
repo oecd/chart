@@ -113,7 +113,14 @@ const Radar = forwardRef(
             ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
           };
         }, data.series),
-      [data, colorPalette, highlightColors, highlight, baseline],
+      [
+        data,
+        areCategoriesDatesOrNumber,
+        colorPalette,
+        highlightColors,
+        highlight,
+        baseline,
+      ],
     );
 
     const defaultOptions = useMemo(

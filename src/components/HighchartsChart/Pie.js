@@ -95,7 +95,14 @@ const Pie = forwardRef(
           }),
           R.isEmpty(data.series) ? [] : [R.head(data.series)],
         ),
-      [data, finalColorPalette, highlightColors, highlight, baseline],
+      [
+        data,
+        areCategoriesDatesOrNumber,
+        finalColorPalette,
+        highlightColors,
+        highlight,
+        baseline,
+      ],
     );
 
     const defaultOptions = useMemo(
