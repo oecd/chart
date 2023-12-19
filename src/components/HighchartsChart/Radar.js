@@ -30,6 +30,14 @@ if (typeof Highcharts === 'object') {
   ExportDataModule(Highcharts);
 }
 
+const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
+  if (version !== '2') {
+    return areCategoriesDatesOrNumber ? R.nth(1, d) : d;
+  }
+
+  return { y: d.value, __metadata: d.metadata };
+};
+
 const Radar = forwardRef(
   (
     {
@@ -54,6 +62,9 @@ const Radar = forwardRef(
   ) => {
     const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
 
+    const areCategoriesDatesOrNumber =
+      data.areCategoriesDates || data.areCategoriesNumbers;
+
     const series = useMemo(
       () =>
         mapWithIndex((s, xIdx) => {
@@ -74,10 +85,11 @@ const Radar = forwardRef(
 
           return {
             name: s.label,
-            data:
-              data.areCategoriesDates || data.areCategoriesNumbers
-                ? R.map(R.nth(1), s.data)
-                : s.data,
+            data: R.map(
+              (d) =>
+                createDatapoint(d, areCategoriesDatesOrNumber, data.version),
+              s.data,
+            ),
             type: 'line',
             marker: {
               symbol: 'circle',
@@ -100,7 +112,14 @@ const Radar = forwardRef(
             ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
           };
         }, data.series),
-      [data, colorPalette, highlightColors, parsedHighlight, baseline],
+      [
+        data,
+        areCategoriesDatesOrNumber,
+        colorPalette,
+        highlightColors,
+        parsedHighlight,
+        baseline,
+      ],
     );
 
     const defaultOptions = useMemo(
@@ -281,6 +300,7 @@ Radar.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
+    version: PropTypes.string,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

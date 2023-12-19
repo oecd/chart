@@ -5,6 +5,7 @@ import {
   chartTypes,
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   decimalPointTypes,
+  fakeMemberLatest,
 } from '../constants/chart';
 import { isCastableToNumber, roundNumber } from './chartUtil';
 import { isNilOrEmpty } from './ramdaUtil';
@@ -34,8 +35,7 @@ export const createFormatters = ({
   chartType,
   mapColorValueSteps,
   maxNumberOfDecimals,
-  latestYByXCode,
-  latestYByXLabel,
+  codeLabelMapping,
   decimalPoint,
   areCategoriesNumbers,
   areCategoriesDates,
@@ -81,6 +81,8 @@ export const createFormatters = ({
       const fullFormat = `${tooltipInfo.options.headerFormat}${tooltipInfo.options.pointFormat}`;
 
       const value = this.point.y ?? this.point.value ?? this.point.z;
+      const timeCode = this.point.__metadata?.timeCode;
+      const timeLabel = timeCode ? R.prop(timeCode, codeLabelMapping) : null;
 
       const newValue = stepsHaveLabels
         ? R.nth(
@@ -92,127 +94,73 @@ export const createFormatters = ({
           ) || value
         : numberFormat(value, maxNumberOfDecimals, finalDecimalPoint);
 
+      const seriesName =
+        chartType === chartTypes.map ? this.point.name : this.series.name;
+
       return R.compose(
-        R.ifElse(
-          () => R.isNil(latestYByXCode),
-          R.compose(
-            R.replace(
-              '{series.name}',
-              chartType === chartTypes.map ? this.point.name : this.series.name,
-            ),
-            (content) => {
-              const key =
-                chartType === chartTypes.pie
-                  ? this.point.name
-                  : this.point.category ?? this.series.name;
+        R.compose(
+          (content) => {
+            if (timeLabel && seriesName === fakeMemberLatest.label) {
+              return R.replace('{series.name}', timeLabel, content);
+            }
 
-              if (
-                R.includes(
-                  chartType,
-                  chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
-                )
-              ) {
-                return R.replace('{point.key}', key, content);
-              }
+            return R.replace('{series.name}', seriesName, content);
+          },
+          (content) => {
+            const key =
+              chartType === chartTypes.pie
+                ? this.point.name
+                : this.point.category ?? this.series.name;
 
-              if (!R.isNil(frequency)) {
-                return R.replace(
-                  '{point.key}',
-                  frequency.formatToLabel(key, lang),
-                  content,
-                );
-              }
+            if (timeLabel && key === fakeMemberLatest.label) {
+              return R.replace('{point.key}', timeLabel, content);
+            }
 
-              if (areCategoriesNumbers) {
-                return R.replace(
-                  '{point.key}',
-                  numberFormat(key, maxNumberOfDecimals, finalDecimalPoint),
-                  content,
-                );
-              }
+            const timeLabelSuffix =
+              timeLabel && seriesName !== fakeMemberLatest.label
+                ? ` - ${timeLabel}`
+                : '';
 
-              return R.replace('{point.key}', key, content);
-            },
-          ),
-          R.compose(
-            R.replace(
+            if (
+              R.includes(
+                chartType,
+                chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
+              )
+            ) {
+              return R.replace(
+                '{point.key}',
+                `${key}${timeLabelSuffix}`,
+                content,
+              );
+            }
+
+            if (!R.isNil(frequency)) {
+              return R.replace(
+                '{point.key}',
+                frequency.formatToLabel(key, lang),
+                content,
+              );
+            }
+
+            if (areCategoriesNumbers) {
+              return R.replace(
+                '{point.key}',
+                `${numberFormat(
+                  key,
+                  maxNumberOfDecimals,
+                  finalDecimalPoint,
+                )}${timeLabelSuffix}`,
+                content,
+              );
+            }
+
+            return R.replace(
               '{point.key}',
-              R.cond([
-                [
-                  R.includes(R.__, [chartTypes.map, chartTypes.pie]),
-                  R.always(this.point.name),
-                ],
-                [
-                  R.includes(R.__, [
-                    chartTypes.stackedBar,
-                    chartTypes.stackedRow,
-                  ]),
-                  R.always(this.series.name),
-                ],
-                [
-                  () =>
-                    !R.isNil(frequency) &&
-                    !R.includes(
-                      chartType,
-                      chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
-                    ),
-                  () => frequency.formatToLabel(this.point.category, lang),
-                ],
-                [
-                  () => areCategoriesNumbers,
-                  () =>
-                    numberFormat(
-                      this.point.category,
-                      maxNumberOfDecimals,
-                      finalDecimalPoint,
-                    ),
-                ],
-                [R.T, R.always(this.point.category)],
-              ])(chartType),
-            ),
-            R.replace(
-              '{series.name}',
-              R.cond([
-                [
-                  R.includes(R.__, [
-                    chartTypes.stackedBar,
-                    chartTypes.stackedRow,
-                  ]),
-                  () =>
-                    R.propOr(
-                      this.point.category,
-                      this.series.name,
-                      latestYByXLabel,
-                    ),
-                ],
-                [
-                  R.equals(chartTypes.map),
-                  () =>
-                    R.propOr(this.series.name, this.point.code, latestYByXCode),
-                ],
-                [
-                  R.equals(chartTypes.pie),
-                  () =>
-                    R.propOr(
-                      this.series.name,
-                      this.point.name,
-                      latestYByXLabel,
-                    ),
-                ],
-                [
-                  R.T,
-                  () =>
-                    R.propOr(
-                      this.series.name,
-                      this.point.category,
-                      latestYByXLabel,
-                    ),
-                ],
-              ])(chartType),
-            ),
-          ),
+              `${key}${timeLabelSuffix}`,
+              content,
+            );
+          },
         ),
-
         R.replace('{point.color}', this.color),
         R.replace('{point.y}', newValue),
       )(fullFormat);

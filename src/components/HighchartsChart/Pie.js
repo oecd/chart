@@ -25,6 +25,14 @@ if (typeof Highcharts === 'object') {
   ExportDataModule(Highcharts);
 }
 
+const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
+  if (version !== '2') {
+    return areCategoriesDatesOrNumber ? { y: R.nth(1, d) } : { y: d };
+  }
+
+  return { y: d.value, __metadata: d.metadata };
+};
+
 const Pie = forwardRef(
   (
     {
@@ -48,6 +56,9 @@ const Pie = forwardRef(
     ref,
   ) => {
     const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
+
+    const areCategoriesDatesOrNumber =
+      data.areCategoriesDates || data.areCategoriesNumbers;
 
     const finalColorPalette = useMemo(
       () =>
@@ -73,17 +84,25 @@ const Pie = forwardRef(
                   highlightColors,
                 ) || getListItemAtTurningIndex(xIdx, finalColorPalette);
 
-              const dataPoint =
-                data.areCategoriesDates || data.areCategoriesNumbers
-                  ? { y: R.nth(1, d) }
-                  : { y: d };
+              const dataPoint = createDatapoint(
+                d,
+                areCategoriesDatesOrNumber,
+                data.version,
+              );
 
               return { name: category.label, ...dataPoint, color };
             }, s.data),
           }),
           R.isEmpty(data.series) ? [] : [R.head(data.series)],
         ),
-      [data, finalColorPalette, highlightColors, parsedHighlight, baseline],
+      [
+        data,
+        areCategoriesDatesOrNumber,
+        finalColorPalette,
+        highlightColors,
+        parsedHighlight,
+        baseline,
+      ],
     );
 
     const defaultOptions = useMemo(
@@ -205,6 +224,7 @@ Pie.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
+    version: PropTypes.string,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

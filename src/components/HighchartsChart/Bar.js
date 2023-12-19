@@ -34,6 +34,18 @@ const calcMarginTop = (title, subtitle, horizontal) => {
   return undefined;
 };
 
+const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
+  if (version !== '2') {
+    return areCategoriesDatesOrNumber
+      ? { x: R.head(d), y: R.nth(1, d) }
+      : { y: d };
+  }
+
+  return areCategoriesDatesOrNumber
+    ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
+    : { y: d.value, __metadata: d.metadata };
+};
+
 const Bar = forwardRef(
   (
     {
@@ -61,6 +73,9 @@ const Bar = forwardRef(
   ) => {
     const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
 
+    const areCategoriesDatesOrNumber =
+      data.areCategoriesDates || data.areCategoriesNumbers;
+
     const series = useMemo(
       () =>
         mapWithIndex((s, xIdx) => {
@@ -84,10 +99,11 @@ const Bar = forwardRef(
                 highlightColors,
               );
 
-              const dataPoint =
-                data.areCategoriesDates || data.areCategoriesNumbers
-                  ? { x: R.head(d), y: R.nth(1, d) }
-                  : { y: d };
+              const dataPoint = createDatapoint(
+                d,
+                areCategoriesDatesOrNumber,
+                data.version,
+              );
 
               return baselineOrHighlightColor
                 ? {
@@ -101,7 +117,14 @@ const Bar = forwardRef(
             showInLegend: s.code !== fakeMemberLatest.code,
           };
         }, data.series),
-      [data, colorPalette, highlightColors, parsedHighlight, baseline],
+      [
+        data,
+        areCategoriesDatesOrNumber,
+        colorPalette,
+        highlightColors,
+        parsedHighlight,
+        baseline,
+      ],
     );
 
     const defaultOptions = useMemo(
@@ -274,6 +297,7 @@ Bar.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
+    version: PropTypes.string,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

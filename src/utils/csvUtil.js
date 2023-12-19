@@ -148,15 +148,13 @@ const shouldPivot = (
 export const pivotCSV =
   (chartType, dataSourceType, pivotData) =>
   ({ data, ...rest }) => {
-    const latestAvailableData = R.has('latestYByXCode', rest);
-
     if (
       shouldPivot(
         data,
         pivotData,
         chartType,
         dataSourceType,
-        latestAvailableData,
+        rest.finalLatestAvailableData,
       )
     ) {
       const header = R.map(R.head, data);
@@ -278,7 +276,7 @@ export const sortParsedDataOnYAxis =
   };
 
 export const sortCSV =
-  (sortBy, sortOrder, sortSeries) =>
+  (sortBy, sortOrder, sortSeries, version) =>
   ({ data, parsingHelperData, ...rest }) => {
     const orderFunc =
       !sortOrder || sortOrder === sortOrderOptions.asc.value
@@ -333,7 +331,14 @@ export const sortCSV =
         data: R.prepend(
           R.head(data),
           R.sort(
-            orderFunc(R.compose(R.sum, R.props(yIndexes), R.tail)),
+            orderFunc(
+              R.compose(
+                R.sum,
+                R.props(yIndexes),
+                R.when(() => version === '2', R.map(R.prop('value'))),
+                R.tail,
+              ),
+            ),
             R.tail(data),
           ),
         ),
@@ -346,7 +351,8 @@ export const sortCSV =
   };
 
 export const handleAreCategoriesDates =
-  (dataSourceType, chartType, forceXAxisToBeTreatedAsCategories) => (data) => {
+  (dataSourceType, chartType, forceXAxisToBeTreatedAsCategories, version) =>
+  (data) => {
     const xAxisToBeTreatedAsCategories =
       forceXAxisToBeTreatedAsCategories ||
       R.includes(chartType, chartTypesForWhichXAxisIsAlwaysTreatedAsCategories);
@@ -372,10 +378,15 @@ export const handleAreCategoriesDates =
             (s) =>
               R.evolve(
                 {
-                  data: mapWithIndex((y, i) => [
-                    R.nth(i, categoriesCodesAsDates),
-                    y,
-                  ]),
+                  data: mapWithIndex((y, i) =>
+                    version === '2'
+                      ? R.assocPath(
+                          ['metadata', 'parsedX'],
+                          R.nth(i, categoriesCodesAsDates),
+                          y,
+                        )
+                      : [R.nth(i, categoriesCodesAsDates), y],
+                  ),
                 },
                 s,
               ),
@@ -394,7 +405,7 @@ export const handleAreCategoriesDates =
   };
 
 export const handleAreCategoriesNumbers =
-  (chartType, forceXAxisToBeTreatedAsCategories) => (data) => {
+  (chartType, forceXAxisToBeTreatedAsCategories, version) => (data) => {
     if (
       data.areCategoriesDates ||
       forceXAxisToBeTreatedAsCategories ||
@@ -411,10 +422,15 @@ export const handleAreCategoriesNumbers =
         (s) =>
           R.evolve(
             {
-              data: mapWithIndex((y, i) => [
-                R.nth(i, categoriesCodesAsNumbers),
-                y,
-              ]),
+              data: mapWithIndex((y, i) =>
+                version === '2'
+                  ? R.assocPath(
+                      ['metadata', 'parsedX'],
+                      R.nth(i, categoriesCodesAsNumbers),
+                      y,
+                    )
+                  : [R.nth(i, categoriesCodesAsNumbers), y],
+              ),
             },
             s,
           ),
@@ -496,7 +512,7 @@ const filterCSV = (vars) => (data) => {
 };
 
 const transformCategoriesLabel =
-  (chartType, forceXAxisToBeTreatedAsCategories) => (data) => {
+  (chartType, forceXAxisToBeTreatedAsCategories, lang) => (data) => {
     if (
       data.areCategoriesDates &&
       data.categoriesDateFomat === frequencyTypes.yearly.value &&
@@ -534,7 +550,11 @@ const transformCategoriesLabel =
               return c;
             }
             const codeAsDate = frequency.tryParse(c.code);
-            return R.assoc('label', frequency.formatToLabel(codeAsDate), c);
+            return R.assoc(
+              'label',
+              frequency.formatToLabel(codeAsDate, lang),
+              c,
+            );
           }),
         }),
       )(data);
@@ -545,6 +565,21 @@ const transformCategoriesLabel =
       R.assoc('areCategoriesDates', false),
     )(data);
   };
+
+const transformValuesForVersion2 = ({ data, ...rest }) => {
+  const headerRow = R.head(data);
+
+  const newData = R.map(
+    (row) =>
+      R.prepend(
+        R.head(row),
+        R.map((v) => ({ value: v }), R.tail(row)),
+      ),
+    R.tail(data),
+  );
+
+  return { data: R.prepend(headerRow, newData), ...rest };
+};
 
 export const createDataFromCSV = ({
   staticCsvData,
@@ -559,24 +594,37 @@ export const createDataFromCSV = ({
   yAxisOrderOverride,
   forceXAxisToBeTreatedAsCategories,
   vars,
+  lang,
+  version,
 }) => {
   if (isNilOrEmpty(staticCsvData)) {
     return emptyData;
   }
 
   return R.compose(
+    R.assoc('version', version),
     addCodeLabelMapping,
     R.dissoc('rawCodeLabelMapping'),
-    transformCategoriesLabel(chartType, forceXAxisToBeTreatedAsCategories),
-    handleAreCategoriesNumbers(chartType, forceXAxisToBeTreatedAsCategories),
+    transformCategoriesLabel(
+      chartType,
+      forceXAxisToBeTreatedAsCategories,
+      lang,
+    ),
+    handleAreCategoriesNumbers(
+      chartType,
+      forceXAxisToBeTreatedAsCategories,
+      version,
+    ),
     handleAreCategoriesDates(
       dataSourceType,
       chartType,
       forceXAxisToBeTreatedAsCategories,
+      version,
     ),
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
-    sortCSV(sortBy, sortOrder, sortSeries),
+    sortCSV(sortBy, sortOrder, sortSeries, version),
+    R.when(() => version === '2', transformValuesForVersion2),
     addParsingHelperData(csvCodeLabelMappingProjectLevel, csvCodeLabelMapping),
     pivotCSV(chartType, dataSourceType, pivotData),
     filterCSV(vars),

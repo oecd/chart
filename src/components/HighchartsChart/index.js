@@ -154,6 +154,17 @@ const HighchartsChart = ({
     [dotStatUrl, vars],
   );
 
+  const dotStatUrlHasLastNObservationsEqOne = useMemo(() => {
+    if (
+      isNilOrEmpty(finalDotStatUrl) ||
+      dataSourceType === dataSourceTypes.csv.value
+    ) {
+      return false;
+    }
+    const parsedUrl = new URL(finalDotStatUrl);
+    return parsedUrl.searchParams.get('lastNObservations') === '1';
+  }, [finalDotStatUrl, dataSourceType]);
+
   useEffect(() => {
     if (
       isNilOrEmpty(finalDotStatUrl) ||
@@ -232,6 +243,7 @@ const HighchartsChart = ({
         dotStatCodeLabelMapping,
         dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
         latestAvailableData,
+        dotStatUrlHasLastNObservationsEqOne,
         mapCountryDimension,
         pivotData,
         chartType,
@@ -241,6 +253,7 @@ const HighchartsChart = ({
         sortSeries,
         yAxisOrderOverride,
         forceXAxisToBeTreatedAsCategories,
+        version: '2',
       });
     } catch (e) {
       setErrorMessage('An error occured :-(');
@@ -250,6 +263,7 @@ const HighchartsChart = ({
     dataSourceType,
     chartType,
     latestAvailableData,
+    dotStatUrlHasLastNObservationsEqOne,
     mapCountryDimension,
     pivotData,
     sdmxJson,
@@ -288,6 +302,8 @@ const HighchartsChart = ({
         yAxisOrderOverride,
         forceXAxisToBeTreatedAsCategories,
         vars,
+        lang,
+        version: '2',
       });
 
       setErrorMessage(null);
@@ -312,6 +328,7 @@ const HighchartsChart = ({
     vars,
     yAxisOrderOverride,
     forceXAxisToBeTreatedAsCategories,
+    lang,
   ]);
 
   const parsedData = useMemo(() => {
@@ -368,7 +385,7 @@ const HighchartsChart = ({
             const newPreParsedData = await fetchJson(
               `${apiUrl}/api/public/chartConfig/${configParams}?preParsedDataOnly&lang=${R.toLower(
                 lang,
-              )}`,
+              )}&version=2`,
             );
 
             // discard result from outdated request(s)
@@ -548,8 +565,7 @@ const HighchartsChart = ({
         chartType,
         mapColorValueSteps,
         maxNumberOfDecimals,
-        latestYByXCode: parsedData?.latestYByXCode,
-        latestYByXLabel: parsedData?.latestYByXLabel,
+        codeLabelMapping: parsedData?.codeLabelMapping,
         decimalPoint,
         areCategoriesNumbers: parsedData?.areCategoriesNumbers,
         areCategoriesDates: parsedData?.areCategoriesDates,
@@ -560,8 +576,7 @@ const HighchartsChart = ({
       chartType,
       mapColorValueSteps,
       maxNumberOfDecimals,
-      parsedData?.latestYByXCode,
-      parsedData?.latestYByXLabel,
+      parsedData?.codeLabelMapping,
       decimalPoint,
       parsedData?.areCategoriesNumbers,
       parsedData?.areCategoriesDates,

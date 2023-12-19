@@ -69,18 +69,23 @@ const getXAndYDimension = (
     chartType,
     mapCountryDimension,
     latestAvailableData,
+    dotStatUrlHasLastNObservationsEqOne,
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
   },
+  isV8,
 ) => {
   const dimensionsWithMoreThanOneMember = R.filter(
     R.compose(R.gt(R.__, 1), R.length, R.prop('values')),
     dimensions,
   );
 
-  const findDimensionWithPredefinedIdOrThatDoesNotHaveId = (id) => {
+  const findDimensionWithPredefinedIdOrThatDoesNotHaveId = (
+    dimensionList,
+    id,
+  ) => {
     const dimensionWithoutIdToExclude = R.reject(
       R.propEq(id, 'id'),
-      dimensions,
+      dimensionList,
     );
     if (
       isNilOrEmpty(dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember)
@@ -100,9 +105,10 @@ const getXAndYDimension = (
     );
   };
 
-  const timeDimension = latestAvailableData
-    ? R.find(isTimeDimension, dimensionsWithMoreThanOneMember)
-    : null;
+  const timeDimension =
+    latestAvailableData || dotStatUrlHasLastNObservationsEqOne
+      ? R.find(isTimeDimension, dimensionsWithMoreThanOneMember)
+      : null;
 
   if (chartType === chartTypes.map) {
     const countryDimension = R.find(
@@ -118,29 +124,92 @@ const getXAndYDimension = (
     );
 
     if (countryDimension) {
-      const yDimension =
-        R.head(
-          R.reject(
-            R.propEq(countryDimension.id, 'id'),
-            dimensionsWithMoreThanOneMember,
-          ),
-        ) ||
-        findDimensionWithPredefinedIdOrThatDoesNotHaveId(countryDimension.id);
+      if (timeDimension && dotStatUrlHasLastNObservationsEqOne && isV8) {
+        const dimensionsWithMoreThanOneMemberWithoutTime = R.reject(
+          R.propEq(timeDimension.id, 'id'),
+          dimensionsWithMoreThanOneMember,
+        );
+        const dimensionsWithoutTime = R.reject(
+          R.propEq(timeDimension.id, 'id'),
+          dimensions,
+        );
 
-      return [countryDimension, timeDimension ?? yDimension];
+        const yDimension =
+          R.head(
+            R.reject(
+              R.propEq(countryDimension.id, 'id'),
+              dimensionsWithMoreThanOneMemberWithoutTime,
+            ),
+          ) ||
+          findDimensionWithPredefinedIdOrThatDoesNotHaveId(
+            dimensionsWithoutTime,
+            countryDimension.id,
+          );
+
+        return [countryDimension, timeDimension ?? yDimension];
+      }
+
+      if (latestAvailableData) {
+        const yDimension =
+          R.head(
+            R.reject(
+              R.propEq(countryDimension.id, 'id'),
+              dimensionsWithMoreThanOneMember,
+            ),
+          ) ||
+          findDimensionWithPredefinedIdOrThatDoesNotHaveId(
+            dimensions,
+            countryDimension.id,
+          );
+
+        return [countryDimension, timeDimension ?? yDimension];
+      }
     }
   }
 
   if (timeDimension) {
-    const xDimension =
-      R.head(
-        R.reject(
-          R.propEq(timeDimension.id, 'id'),
-          dimensionsWithMoreThanOneMember,
-        ),
-      ) || findDimensionWithPredefinedIdOrThatDoesNotHaveId(timeDimension.id);
+    if (dotStatUrlHasLastNObservationsEqOne && isV8) {
+      const dimensionsWithMoreThanOneMemberWithoutTime = R.reject(
+        R.propEq(timeDimension.id, 'id'),
+        dimensionsWithMoreThanOneMember,
+      );
+      const dimensionsWithoutTime = R.reject(
+        R.propEq(timeDimension.id, 'id'),
+        dimensions,
+      );
 
-    return [xDimension, timeDimension];
+      if (R.length(dimensionsWithMoreThanOneMemberWithoutTime) >= 2) {
+        const x = R.head(dimensionsWithMoreThanOneMemberWithoutTime);
+        const y = R.nth(1, dimensionsWithMoreThanOneMemberWithoutTime);
+        return [x, y];
+      }
+      if (R.length(dimensionsWithMoreThanOneMemberWithoutTime) === 1) {
+        const x = R.head(dimensionsWithMoreThanOneMemberWithoutTime);
+        const y = findDimensionWithPredefinedIdOrThatDoesNotHaveId(
+          dimensionsWithoutTime,
+          x.id,
+        );
+        return [x, y];
+      }
+
+      return [R.head(dimensions), R.nth(1, dimensions)];
+    }
+
+    if (latestAvailableData) {
+      const xDimension =
+        R.head(
+          R.reject(
+            R.propEq(timeDimension.id, 'id'),
+            dimensionsWithMoreThanOneMember,
+          ),
+        ) ||
+        findDimensionWithPredefinedIdOrThatDoesNotHaveId(
+          dimensions,
+          timeDimension.id,
+        );
+
+      return [xDimension, timeDimension];
+    }
   }
 
   return R.cond([
@@ -155,7 +224,10 @@ const getXAndYDimension = (
       R.compose(R.equals(R.__, 1), R.length),
       () => {
         const x = R.head(dimensionsWithMoreThanOneMember);
-        const y = findDimensionWithPredefinedIdOrThatDoesNotHaveId(x.id);
+        const y = findDimensionWithPredefinedIdOrThatDoesNotHaveId(
+          dimensions,
+          x.id,
+        );
 
         return [x, y];
       },
@@ -211,7 +283,7 @@ const fixV7DimensionsBug = (rawDimensions) => {
     : rawDimensions;
 };
 
-export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
+export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
   const isV8 = detectV8(sdmxJson);
 
   const dataSets = isV8
@@ -225,8 +297,10 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
   const dimensions = isV8 ? rawDimensions : fixV7DimensionsBug(rawDimensions);
 
   const [xDimension, yDimension] = tweakDimensionLabels(
-    getXAndYDimension(dimensions, chartConfig),
+    getXAndYDimension(dimensions, chartConfig, isV8),
   );
+
+  const timeDimension = R.find(isTimeDimension, dimensions);
 
   const otherDimensions = R.reject(
     R.propSatisfies(
@@ -241,10 +315,13 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
   const getXDimensionMemberCodeByIndex = (index) =>
     R.compose(R.prop('id'), R.nth(index))(xDimension.values);
 
-  const getYDimensionMemberCodeByIndex = (index) =>
-    R.compose(R.prop('id'), R.nth(index))(yDimension.values);
+  const getTimeDimensionMemberCodeByIndex = (index) =>
+    R.compose(R.prop('id'), R.nth(index))(timeDimension?.values || []);
 
-  const defaultRowValues = R.times(R.always(null), R.length(yDimension.values));
+  const defaultRowValues = R.times(
+    () => (version !== '2' ? null : { value: null }),
+    R.length(yDimension.values),
+  );
 
   // time dimension does not have keyPosition prop (and is supposed to always be the last one)
   // unless v7 sent buggy data (see fixV7DimensionsBug)
@@ -258,6 +335,12 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
     'keyPosition',
     yDimension,
   );
+  const timeDimensionIndexInCoordinate = timeDimension
+    ? R.propOr(R.length(dimensions) - 1, 'keyPosition', timeDimension)
+    : -1;
+
+  const finalLastNObservationsEqOne =
+    timeDimension && chartConfig.dotStatUrlHasLastNObservationsEqOne && isV8;
 
   const finalLatestAvailableData =
     chartConfig.latestAvailableData && isTimeDimension(yDimension);
@@ -276,7 +359,7 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
       }
 
       const emptyData = R.times(
-        R.always(null),
+        () => (version !== '2' ? null : { value: null }),
         R.length(R.head(seriesWithoutEmptyOnes)) - 1,
       );
 
@@ -296,14 +379,36 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
       const xCode = getXDimensionMemberCodeByIndex(x);
       const y = parseInt(R.nth(yDimensionIndexInCoordinate, coordinate), 10);
 
+      if (version !== '2') {
+        if (finalLatestAvailableData) {
+          const yCode = getTimeDimensionMemberCodeByIndex(y);
+          return R.assoc(xCode, [value, yCode], acc);
+        }
+
+        return R.has(xCode, acc)
+          ? R.evolve({ [xCode]: R.update(y, value) }, acc)
+          : R.assoc(xCode, R.update(y, value, defaultRowValues), acc);
+      }
+
+      const finalValue = R.when(
+        () => finalLastNObservationsEqOne || finalLatestAvailableData,
+        (v) => {
+          const time = parseInt(
+            R.nth(timeDimensionIndexInCoordinate, coordinate),
+            10,
+          );
+          const timeCode = getTimeDimensionMemberCodeByIndex(time);
+          return R.assoc('metadata', { timeCode }, v);
+        },
+      )({ value });
+
       if (finalLatestAvailableData) {
-        const yCode = getYDimensionMemberCodeByIndex(y);
-        return R.assoc(xCode, [value, yCode], acc);
+        return R.assoc(xCode, [finalValue], acc);
       }
 
       return R.has(xCode, acc)
-        ? R.evolve({ [xCode]: R.update(y, value) }, acc)
-        : R.assoc(xCode, R.update(y, value, defaultRowValues), acc);
+        ? R.evolve({ [xCode]: R.update(y, finalValue) }, acc)
+        : R.assoc(xCode, R.update(y, finalValue, defaultRowValues), acc);
     }, {}),
   )(R.toPairs(observations));
 
@@ -342,35 +447,52 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
     )(otherDimensions),
   };
 
-  const latestAvailableDataMapping = finalLatestAvailableData
-    ? R.compose(
-        (mapping) => {
-          const orderedLatestY = R.sortBy(R.identity, R.map(R.last, series));
-          return {
-            ...mapping,
-            latestYMin: R.prop(R.head(orderedLatestY), yDimensionLabelByCode),
-            latestYMax: R.prop(R.last(orderedLatestY), yDimensionLabelByCode),
-          };
-        },
-        R.assoc(
-          'latestYByXLabel',
-          R.compose(
-            R.fromPairs,
-            R.map((s) => [
-              R.prop(R.head(s), parsingHelperData.xDimensionLabelByCode),
-              R.prop(R.last(s), yDimensionLabelByCode),
-            ]),
-          )(series),
-        ),
-        R.assoc(
-          'latestYByXCode',
-          R.compose(
-            R.fromPairs,
-            R.map((s) => [R.head(s), R.prop(R.last(s), yDimensionLabelByCode)]),
-          )(series),
-        ),
-      )({})
-    : {};
+  const latestAvailableDataMapping =
+    finalLatestAvailableData || finalLastNObservationsEqOne
+      ? R.compose(
+          R.when(
+            () => version !== '2',
+            R.compose(
+              R.assoc(
+                'latestYByXLabel',
+                R.compose(
+                  R.fromPairs,
+                  R.map((s) => [
+                    R.prop(R.head(s), parsingHelperData.xDimensionLabelByCode),
+                    R.prop(R.last(s), yDimensionLabelByCode),
+                  ]),
+                )(series),
+              ),
+              R.assoc(
+                'latestYByXCode',
+                R.compose(
+                  R.fromPairs,
+                  R.map((s) => [
+                    R.head(s),
+                    R.prop(R.last(s), yDimensionLabelByCode),
+                  ]),
+                )(series),
+              ),
+            ),
+          ),
+          () => {
+            const timeCodes =
+              version !== '2'
+                ? R.map(R.last, series)
+                : R.compose(
+                    R.reject(R.isNil),
+                    R.map(R.path(['metadata', 'timeCode'])),
+                    R.unnest,
+                    R.map(R.tail),
+                  )(series);
+            const orderedTimeCodes = R.sortBy(R.identity, timeCodes);
+            return {
+              latestYMin: R.head(orderedTimeCodes),
+              latestYMax: R.last(orderedTimeCodes),
+            };
+          },
+        )()
+      : {};
 
   const caterories = finalLatestAvailableData
     ? ['Category', fakeMemberLatest.code]
@@ -379,6 +501,7 @@ export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
   return {
     data: R.prepend(caterories, series),
     parsingHelperData,
+    finalLatestAvailableData,
     ...latestAvailableDataMapping,
   };
 };
@@ -392,6 +515,7 @@ export const createDataFromSdmxJson = ({
   sdmxJson,
   dotStatCodeLabelMapping,
   latestAvailableData,
+  dotStatUrlHasLastNObservationsEqOne,
   mapCountryDimension,
   pivotData,
   chartType,
@@ -402,30 +526,41 @@ export const createDataFromSdmxJson = ({
   yAxisOrderOverride,
   forceXAxisToBeTreatedAsCategories,
   dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+  version,
 }) => {
   if (!sdmxJson) {
     return null;
   }
 
   return R.compose(
+    R.assoc('version', version),
     addCodeLabelMapping,
-    handleAreCategoriesNumbers(chartType, forceXAxisToBeTreatedAsCategories),
+    handleAreCategoriesNumbers(
+      chartType,
+      forceXAxisToBeTreatedAsCategories,
+      version,
+    ),
     handleAreCategoriesDates(
       dataSourceType,
       chartType,
       forceXAxisToBeTreatedAsCategories,
+      version,
     ),
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
-    sortCSV(sortBy, sortOrder, sortSeries),
+    sortCSV(sortBy, sortOrder, sortSeries, version),
     pivotCSV(chartType, dataSourceType, pivotData),
-    parseSdmxJson({
-      chartType,
-      pivotData,
-      mapCountryDimension,
-      latestAvailableData,
-      dotStatCodeLabelMapping,
-      dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
-    }),
+    parseSdmxJson(
+      {
+        chartType,
+        pivotData,
+        mapCountryDimension,
+        latestAvailableData,
+        dotStatUrlHasLastNObservationsEqOne,
+        dotStatCodeLabelMapping,
+        dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+      },
+      version,
+    ),
   )(sdmxJson);
 };

@@ -19,6 +19,16 @@ import {
 import { fakeMemberLatest } from '../../constants/chart';
 import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 
+const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
+  if (version !== '2') {
+    return areCategoriesDatesOrNumber ? d : { y: d };
+  }
+
+  return areCategoriesDatesOrNumber
+    ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
+    : { y: d.value, __metadata: d.metadata };
+};
+
 if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);
   BrokenAxisModule(Highcharts);
@@ -53,6 +63,9 @@ const Line = forwardRef(
   ) => {
     const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
 
+    const areCategoriesDatesOrNumber =
+      data.areCategoriesDates || data.areCategoriesNumbers;
+
     const series = useMemo(
       () =>
         mapWithIndex((s, yIdx) => {
@@ -74,10 +87,11 @@ const Line = forwardRef(
           return {
             name: s.label,
             data: R.map((d) => {
-              const dataPoint =
-                data.areCategoriesDates || data.areCategoriesNumbers
-                  ? d
-                  : { y: d };
+              const dataPoint = createDatapoint(
+                d,
+                areCategoriesDatesOrNumber,
+                data.version,
+              );
 
               return dataPoint;
             }, s.data),
@@ -105,7 +119,14 @@ const Line = forwardRef(
             showInLegend: s.code !== fakeMemberLatest.code,
           };
         }, data.series),
-      [data, colorPalette, highlightColors, parsedHighlight, baseline],
+      [
+        data,
+        areCategoriesDatesOrNumber,
+        colorPalette,
+        highlightColors,
+        parsedHighlight,
+        baseline,
+      ],
     );
 
     const defaultOptions = useMemo(
@@ -295,6 +316,7 @@ Line.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
+    version: PropTypes.string,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,

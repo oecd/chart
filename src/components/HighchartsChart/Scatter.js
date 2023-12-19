@@ -60,6 +60,18 @@ const symbols = [
   'triangle-down',
 ];
 
+const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
+  if (version !== '2') {
+    return areCategoriesDatesOrNumber
+      ? { x: R.head(d), y: R.nth(1, d) }
+      : { y: d };
+  }
+
+  return areCategoriesDatesOrNumber
+    ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
+    : { y: d.value, __metadata: d.metadata };
+};
+
 const Scatter = forwardRef(
   (
     {
@@ -87,6 +99,9 @@ const Scatter = forwardRef(
     const minMaxLines = useRef([]);
 
     const parsedHighlight = useMemo(() => R.split('|', highlight), [highlight]);
+
+    const areCategoriesDatesOrNumber =
+      data.areCategoriesDates || data.areCategoriesNumbers;
 
     const firstPaletteColor = R.head(colorPalette);
 
@@ -118,10 +133,11 @@ const Scatter = forwardRef(
                 highlightColors,
               );
 
-              const dataPoint =
-                data.areCategoriesDates || data.areCategoriesNumbers
-                  ? { x: R.head(d), y: R.nth(1, d) }
-                  : { y: d };
+              const dataPoint = createDatapoint(
+                d,
+                areCategoriesDatesOrNumber,
+                data.version,
+              );
 
               return baselineOrHighlightColor
                 ? {
@@ -161,6 +177,7 @@ const Scatter = forwardRef(
       [
         symbolLayout,
         data,
+        areCategoriesDatesOrNumber,
         colorPalette,
         highlightColors,
         parsedHighlight,
@@ -382,6 +399,7 @@ Scatter.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
+    version: PropTypes.string,
   }).isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,
