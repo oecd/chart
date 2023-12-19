@@ -23,7 +23,7 @@ const fixDotStatUrl = (url) => {
 };
 
 const createDotStatHeaders = (lang) => ({
-  Accept: 'application/vnd.sdmx.data+json',
+  Accept: 'application/vnd.sdmx.data+json;version=1.0',
   'Accept-Language': isNilOrEmpty(lang) ? 'en' : R.toLower(lang),
 });
 
@@ -291,7 +291,7 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
     : R.prop('dataSets', sdmxJson);
 
   const rawDimensions = isV8
-    ? R.path(['data', 'structures', 0, 'dimensions', 'observation'], sdmxJson)
+    ? R.path(['data', 'structure', 'dimensions', 'observation'], sdmxJson)
     : R.path(['structure', 'dimensions', 'observation'], sdmxJson);
 
   const dimensions = isV8 ? rawDimensions : fixV7DimensionsBug(rawDimensions);
