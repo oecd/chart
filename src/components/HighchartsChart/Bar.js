@@ -142,7 +142,14 @@ const Bar = forwardRef(
             showInLegend: s.code !== fakeMemberLatest.code,
           };
         }, data.series),
-      [data, colorPalette, highlightColors, highlight, baseline],
+      [
+        data,
+        areCategoriesDatesOrNumber,
+        colorPalette,
+        highlightColors,
+        highlight,
+        baseline,
+      ],
     );
 
     const defaultOptions = useMemo(
