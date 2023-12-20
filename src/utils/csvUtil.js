@@ -28,7 +28,11 @@ export const emptyData = {
 };
 
 const parseRawCSV = (csvString) =>
-  Papa.parse(csvString, { dynamicTyping: true, skipEmptyLines: true });
+  Papa.parse(csvString, {
+    dynamicTyping: true,
+    skipEmptyLines: true,
+    transform: (v) => v.trim(),
+  });
 
 const cleanupCSV = R.compose((data) => {
   if (isNilOrEmpty(data)) {
