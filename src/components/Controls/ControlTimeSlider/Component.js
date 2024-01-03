@@ -27,13 +27,17 @@ const ControlTimeSlider = ({
 
   const [currentRange, setCurrentRange] = useState(() => ({
     minCode: vars[minVarName],
-    minIndex: R.findIndex(R.equals(vars[minVarName]), steps.codes) || 0,
+    minIndex:
+      R.findIndex(R.equals(vars[minVarName]), steps.codes) === -1
+        ? 0
+        : R.findIndex(R.equals(vars[minVarName]), steps.codes),
     ...(isRange
       ? {
           maxCode: vars[maxVarName],
           maxIndex:
-            R.findIndex(R.equals(vars[maxVarName]), steps.codes) ||
-            R.length(steps.codes),
+            R.findIndex(R.equals(vars[maxVarName]), steps.codes) === -1
+              ? R.length(steps.codes) - 1
+              : R.findIndex(R.equals(vars[maxVarName]), steps.codes),
         }
       : {}),
   }));
@@ -59,11 +63,15 @@ const ControlTimeSlider = ({
   );
 
   useEffect(() => {
+    const min =
+      R.findIndex(R.equals(vars[minVarName]), steps.codes) === -1
+        ? 0
+        : R.findIndex(R.equals(vars[minVarName]), steps.codes);
     if (isRange) {
-      const min = R.findIndex(R.equals(vars[minVarName]), steps.codes) || 0;
       const max =
-        R.findIndex(R.equals(vars[maxVarName]), steps.codes) ||
-        R.length(steps.codes);
+        R.findIndex(R.equals(vars[maxVarName]), steps.codes) === -1
+          ? R.length(steps.codes) - 1
+          : R.findIndex(R.equals(vars[maxVarName]), steps.codes);
 
       setCurrentRange({
         minCode: R.nth(min, steps.codes),
@@ -72,7 +80,6 @@ const ControlTimeSlider = ({
         maxIndex: max,
       });
     } else {
-      const min = R.findIndex(R.equals(vars[minVarName]), steps.codes) || 0;
       setCurrentRange({
         minCode: R.nth(min, steps.codes),
         minIndex: min,
