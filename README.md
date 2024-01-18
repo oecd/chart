@@ -23,7 +23,7 @@ const App = () => (
 export default App;
 ```
 
-The only required prop is `chartId` but if the corresponding chart is configured to use variables, `var1`, `var2`, `var3`, `var4` and `var5` can be used as well:
+The only required prop is `chartId` but if the corresponding chart is configured to use variables, `var1`, `var2`, `var3`,... `var10` can be used as well:
 
 ```jsx
 <Chart chartId="xxxxxxx" var1="FRA" var2="USA" />

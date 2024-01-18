@@ -59,6 +59,11 @@ const StandaloneControlWithConfig = ({
       var3: otherProps.var3,
       var4: otherProps.var4,
       var5: otherProps.var5,
+      var6: otherProps.var6,
+      var7: otherProps.var7,
+      var8: otherProps.var8,
+      var9: otherProps.var9,
+      var10: otherProps.var10,
     }),
     [
       otherProps.var1,
@@ -66,6 +71,11 @@ const StandaloneControlWithConfig = ({
       otherProps.var3,
       otherProps.var4,
       otherProps.var5,
+      otherProps.var6,
+      otherProps.var7,
+      otherProps.var8,
+      otherProps.var9,
+      otherProps.var10,
     ],
   );
 

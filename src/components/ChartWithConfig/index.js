@@ -14,11 +14,21 @@ const ChartWithConfig = ({
   var3 = null,
   var4 = null,
   var5 = null,
+  var6 = null,
+  var7 = null,
+  var8 = null,
+  var9 = null,
+  var10 = null,
   var1DefaultValue = null,
   var2DefaultValue = null,
   var3DefaultValue = null,
   var4DefaultValue = null,
   var5DefaultValue = null,
+  var6DefaultValue = null,
+  var7DefaultValue = null,
+  var8DefaultValue = null,
+  var9DefaultValue = null,
+  var10DefaultValue = null,
   ...otherProps
 }) => {
   const ChartWithConfigComponent = height
@@ -31,6 +41,11 @@ const ChartWithConfig = ({
     var3: isNilOrEmpty(var3) ? var3DefaultValue ?? '' : var3,
     var4: isNilOrEmpty(var4) ? var4DefaultValue ?? '' : var4,
     var5: isNilOrEmpty(var5) ? var5DefaultValue ?? '' : var5,
+    var6: isNilOrEmpty(var6) ? var6DefaultValue ?? '' : var6,
+    var7: isNilOrEmpty(var7) ? var7DefaultValue ?? '' : var7,
+    var8: isNilOrEmpty(var8) ? var8DefaultValue ?? '' : var8,
+    var9: isNilOrEmpty(var9) ? var9DefaultValue ?? '' : var9,
+    var10: isNilOrEmpty(var10) ? var10DefaultValue ?? '' : var10,
   });
 
   useEffect(() => {
@@ -40,6 +55,11 @@ const ChartWithConfig = ({
       var3: isNilOrEmpty(var3) ? var3DefaultValue ?? '' : var3,
       var4: isNilOrEmpty(var4) ? var4DefaultValue ?? '' : var4,
       var5: isNilOrEmpty(var5) ? var5DefaultValue ?? '' : var5,
+      var6: isNilOrEmpty(var6) ? var6DefaultValue ?? '' : var6,
+      var7: isNilOrEmpty(var7) ? var7DefaultValue ?? '' : var7,
+      var8: isNilOrEmpty(var8) ? var8DefaultValue ?? '' : var8,
+      var9: isNilOrEmpty(var9) ? var9DefaultValue ?? '' : var9,
+      var10: isNilOrEmpty(var10) ? var10DefaultValue ?? '' : var10,
     });
   }, [
     var1,
@@ -47,11 +67,21 @@ const ChartWithConfig = ({
     var3,
     var4,
     var5,
+    var6,
+    var7,
+    var8,
+    var9,
+    var10,
     var1DefaultValue,
     var2DefaultValue,
     var3DefaultValue,
     var4DefaultValue,
     var5DefaultValue,
+    var6DefaultValue,
+    var7DefaultValue,
+    var8DefaultValue,
+    var9DefaultValue,
+    var10DefaultValue,
   ]);
 
   const changeVar = useCallback((varName, varValue) => {
@@ -75,11 +105,21 @@ ChartWithConfig.propTypes = {
   var3: PropTypes.string,
   var4: PropTypes.string,
   var5: PropTypes.string,
+  var6: PropTypes.string,
+  var7: PropTypes.string,
+  var8: PropTypes.string,
+  var9: PropTypes.string,
+  var10: PropTypes.string,
   var1DefaultValue: PropTypes.string,
   var2DefaultValue: PropTypes.string,
   var3DefaultValue: PropTypes.string,
   var4DefaultValue: PropTypes.string,
   var5DefaultValue: PropTypes.string,
+  var6DefaultValue: PropTypes.string,
+  var7DefaultValue: PropTypes.string,
+  var8DefaultValue: PropTypes.string,
+  var9DefaultValue: PropTypes.string,
+  var10DefaultValue: PropTypes.string,
 };
 
 export default ChartWithConfig;
