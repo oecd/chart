@@ -380,16 +380,19 @@ export const replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax = ({
       latestMin || (replaceMissingVarByBlank ? '&nbsp;' : ''),
     ),
     R.reduce(
-      (acc, varName) =>
-        R.replace(
-          new RegExp(`{${varName}}`, 'gi'),
-          R.propOr(
-            replaceMissingVarByBlank ? '&nbsp;' : '',
-            R.toUpper(R.prop(varName, vars)),
-            mapping,
-          ),
-          acc,
-        ),
+      (acc, varName) => {
+        const labels = R.compose(
+          R.when(R.isEmpty, () => (replaceMissingVarByBlank ? '&nbsp;' : '')),
+          R.join(', '),
+          R.reject(isNilOrEmpty),
+          R.map(R.prop(R.__, mapping)),
+          R.split('|'),
+          R.toUpper,
+          R.prop(varName),
+        )(vars);
+
+        return R.replace(new RegExp(`{${varName}}`, 'gi'), labels, acc);
+      },
       R.__,
       possibleVariables,
     ),
