@@ -191,13 +191,13 @@ export const pivotCSV =
     return { data, ...rest };
   };
 
-const createCodeLabelMapping = (
+export const createCodeLabelMapping = (
   csvCodeLabelMappingProjectLevel,
-  csvCodeLabelMapping,
+  codeLabelMappingChartLevel,
 ) => {
   if (
     isNilOrEmpty(csvCodeLabelMappingProjectLevel) &&
-    isNilOrEmpty(csvCodeLabelMapping)
+    isNilOrEmpty(codeLabelMappingChartLevel)
   ) {
     return {};
   }
@@ -205,9 +205,9 @@ const createCodeLabelMapping = (
   const mappingProjectLevel = isNilOrEmpty(csvCodeLabelMappingProjectLevel)
     ? {}
     : createCodeLabelMap(parseCSV(csvCodeLabelMappingProjectLevel));
-  const mappingChartLevel = isNilOrEmpty(csvCodeLabelMapping)
+  const mappingChartLevel = isNilOrEmpty(codeLabelMappingChartLevel)
     ? {}
-    : createCodeLabelMap(parseCSV(csvCodeLabelMapping));
+    : createCodeLabelMap(parseCSV(codeLabelMappingChartLevel));
 
   return R.mergeRight(mappingProjectLevel, mappingChartLevel);
 };

@@ -241,6 +241,7 @@ const HighchartsChart = ({
       return createDataFromSdmxJson({
         sdmxJson,
         dotStatCodeLabelMapping,
+        csvCodeLabelMappingProjectLevel,
         dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
         latestAvailableData,
         dotStatUrlHasLastNObservationsEqOne,
@@ -272,6 +273,7 @@ const HighchartsChart = ({
     sortSeries,
     yAxisOrderOverride,
     dotStatCodeLabelMapping,
+    csvCodeLabelMappingProjectLevel,
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
     preParsedDataInternal,
     forceXAxisToBeTreatedAsCategories,

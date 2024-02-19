@@ -1,16 +1,15 @@
 import * as R from 'ramda';
 import { chartTypes, fakeMemberLatest } from '../constants/chart';
 import {
-  parseCSV,
   pivotCSV,
   sortCSV,
   parseData,
   sortParsedDataOnYAxis,
+  createCodeLabelMapping,
   addCodeLabelMapping,
   handleAreCategoriesDates,
   handleAreCategoriesNumbers,
 } from './csvUtil';
-import { createCodeLabelMap } from './generalUtil';
 import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import { possibleVariables } from './configUtil';
 import { fetchJson } from './fetchUtil';
@@ -412,8 +411,9 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
     }, {}),
   )(R.toPairs(observations));
 
-  const codeLabelMapping = createCodeLabelMap(
-    parseCSV(chartConfig.dotStatCodeLabelMapping),
+  const codeLabelMapping = createCodeLabelMapping(
+    chartConfig.csvCodeLabelMappingProjectLevel,
+    chartConfig.dotStatCodeLabelMapping,
   );
 
   const yDimensionLabelByCode = createDimensionMemberLabelByCode(
@@ -514,6 +514,7 @@ export const isSdmxJsonEmpty = (sdmxJson) =>
 export const createDataFromSdmxJson = ({
   sdmxJson,
   dotStatCodeLabelMapping,
+  csvCodeLabelMappingProjectLevel,
   latestAvailableData,
   dotStatUrlHasLastNObservationsEqOne,
   mapCountryDimension,
@@ -558,6 +559,7 @@ export const createDataFromSdmxJson = ({
         latestAvailableData,
         dotStatUrlHasLastNObservationsEqOne,
         dotStatCodeLabelMapping,
+        csvCodeLabelMappingProjectLevel,
         dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
       },
       version,
