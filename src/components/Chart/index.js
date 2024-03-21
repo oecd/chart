@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading  */
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import LazyLoad from 'react-lazyload';
+import { LazyLoadComponent } from 'react-lazy-load-image-component';
 import * as R from 'ramda';
 
 import Component from './Component';
@@ -78,11 +78,14 @@ const Chart = ({
     <ChartErrorBoundary
       fallback={<CenteredContainer>Something went wrong :(</CenteredContainer>}
     >
-      <LazyLoad
-        style={finalHeight ? { minHeight: finalHeight } : { height: '100%' }}
-        once
-        offset={100}
-        resize
+      <LazyLoadComponent
+        placeholder={
+          <div
+            style={
+              finalHeight ? { minHeight: finalHeight } : { height: '100%' }
+            }
+          />
+        }
       >
         <Component
           width={finalWidth}
@@ -93,7 +96,7 @@ const Chart = ({
           hideToolbox={finalHideToolbox}
           {...otherProps}
         />
-      </LazyLoad>
+      </LazyLoadComponent>
     </ChartErrorBoundary>
   );
 };

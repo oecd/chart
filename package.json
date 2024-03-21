@@ -39,7 +39,7 @@
     "prop-types": "^15.8.1",
     "ramda": "^0.29.1",
     "rc-slider": "^10.5.0",
-    "react-lazyload": "^3.2.0",
+    "react-lazy-load-image-component": "^1.6.0",
     "react-resize-detector": "^10.0.1",
     "react-select": "^5.8.0",
     "react-to-webcomponent": "^2.0.0",

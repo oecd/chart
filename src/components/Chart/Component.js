@@ -63,10 +63,12 @@ const Chart = ({ chartId, language, ...otherProps }) => {
         ),
       )(possibleVariables);
 
-      const langParam = lang ? `?lang=${R.toLower(lang)}` : '';
+      const langParam = lang
+        ? `?lang=${R.toLower(lang)}&version=2`
+        : '?version=2';
       const configParams = `${id}${
         R.isEmpty(varsParam) ? '' : `/${varsParam}`
-      }${langParam}&version=2`;
+      }${langParam}`;
 
       lastRequestedConfig.current = configParams;
       const config = await fetchJson(
