@@ -25,6 +25,7 @@ const Toolbox = ({
   definition,
   noteAndSource,
   noteAndSourceShouldBeDisplayedInTooltip,
+  tooltipContainerId,
   isSmall,
   exportDisabled = false,
 }) => {
@@ -137,7 +138,7 @@ const Toolbox = ({
           </div>
         </div>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent tooltipContainerId={tooltipContainerId}>
         <div className={`cb-toolbox ${isSmall ? 'cb-small' : ''}`}>
           {(noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition)) &&
             isSmall && (
@@ -153,6 +154,7 @@ const Toolbox = ({
                   </div>
                 </TooltipTrigger>
                 <TooltipContent
+                  tooltipContainerId={tooltipContainerId}
                   className="cb-floating cb-tooltip"
                   dangerouslySetInnerHTML={{
                     __html: noteAndSourceShouldBeDisplayedInTooltip
@@ -202,6 +204,7 @@ Toolbox.propTypes = {
   definition: PropTypes.string,
   noteAndSource: PropTypes.string,
   noteAndSourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
+  tooltipContainerId: PropTypes.string,
   isSmall: PropTypes.bool.isRequired,
   exportDisabled: PropTypes.bool,
 };
