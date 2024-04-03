@@ -29,6 +29,7 @@ const ExportButton = ({
   onDownloadData = null,
   disabled = false,
   style = {},
+  tooltipContainerId,
 }) => {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null);
@@ -133,7 +134,7 @@ const ExportButton = ({
         <DownloadIcon />
       </div>
       {!disabled && (
-        <FloatingPortal>
+        <FloatingPortal id={tooltipContainerId}>
           {open && (
             <FloatingFocusManager
               context={context}
@@ -197,6 +198,7 @@ ExportButton.propTypes = {
   onDownloadData: PropTypes.func,
   disabled: PropTypes.bool,
   style: PropTypes.object,
+  tooltipContainerId: PropTypes.string,
 };
 
 export default ExportButton;

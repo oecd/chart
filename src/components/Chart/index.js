@@ -115,6 +115,7 @@ Chart.propTypes = {
   hideTitle: PropTypes.bool,
   hideSubtitle: PropTypes.bool,
   hideToolbox: PropTypes.bool,
+  tooltipContainerId: PropTypes.string,
 };
 
 export default Chart;

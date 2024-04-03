@@ -55,6 +55,7 @@ const Stacked = forwardRef(
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
+      tooltipOutside,
       csvExportcolumnHeaderFormatter,
       optionsOverride = {},
     },
@@ -213,7 +214,7 @@ const Stacked = forwardRef(
 
         tooltip: {
           ...R.prop('tooltip', formatters),
-          outside: !isFullScreen,
+          outside: tooltipOutside,
         },
 
         series,
@@ -244,7 +245,7 @@ const Stacked = forwardRef(
         stacking,
         formatters,
         fullscreenClose,
-        isFullScreen,
+        tooltipOutside,
         csvExportcolumnHeaderFormatter,
       ],
     );
@@ -290,6 +291,7 @@ Stacked.propTypes = {
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
+  tooltipOutside: PropTypes.bool,
   csvExportcolumnHeaderFormatter: PropTypes.func.isRequired,
   optionsOverride: PropTypes.object,
 };

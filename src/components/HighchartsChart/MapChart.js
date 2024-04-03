@@ -105,6 +105,7 @@ const MapChart = forwardRef(
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
+      tooltipOutside,
       csvExportcolumnHeaderFormatter,
       optionsOverride = {},
     },
@@ -321,7 +322,7 @@ const MapChart = forwardRef(
 
         tooltip: {
           ...R.prop('tooltip', formatters),
-          outside: !isFullScreen,
+          outside: tooltipOutside,
         },
 
         mapNavigation: {
@@ -360,6 +361,7 @@ const MapChart = forwardRef(
         formatters,
         fullscreenClose,
         isFullScreen,
+        tooltipOutside,
         csvExportcolumnHeaderFormatter,
       ],
     );
@@ -404,6 +406,7 @@ MapChart.propTypes = {
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
+  tooltipOutside: PropTypes.bool,
   csvExportcolumnHeaderFormatter: PropTypes.func.isRequired,
   optionsOverride: PropTypes.object,
 };

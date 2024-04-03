@@ -56,6 +56,7 @@ const Line = forwardRef(
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
+      tooltipOutside,
       csvExportcolumnHeaderFormatter,
       optionsOverride = {},
     },
@@ -257,7 +258,7 @@ const Line = forwardRef(
 
         tooltip: {
           ...R.prop('tooltip', formatters),
-          outside: !isFullScreen,
+          outside: tooltipOutside,
         },
 
         series,
@@ -286,7 +287,7 @@ const Line = forwardRef(
         hideYAxisLabels,
         formatters,
         fullscreenClose,
-        isFullScreen,
+        tooltipOutside,
         csvExportcolumnHeaderFormatter,
       ],
     );
@@ -330,6 +331,7 @@ Line.propTypes = {
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
+  tooltipOutside: PropTypes.bool,
   csvExportcolumnHeaderFormatter: PropTypes.func.isRequired,
   optionsOverride: PropTypes.object,
 };

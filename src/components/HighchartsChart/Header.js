@@ -22,6 +22,7 @@ const Header = ({
   onExpandChart = null,
   hideExpand,
   openChartFullScreen,
+  tooltipContainerId,
   chartRef,
 }) => {
   const tooltipState = useTooltipState();
@@ -81,7 +82,7 @@ const Header = ({
                 <InfoIcon />
               </div>
               {tooltipState.open && (
-                <FloatingPortal>
+                <FloatingPortal id={tooltipContainerId}>
                   <div
                     ref={tooltipState.refs.setFloating}
                     style={tooltipState.floatingStyles}
@@ -106,6 +107,7 @@ const Header = ({
             onDownloadData={onDownloadData}
             disabled={exportDisabled}
             style={{ margin: '2px 0px 0px 4px' }}
+            tooltipContainerId={tooltipContainerId}
           />
           {(onExpandChart || !isInIframe) && !hideExpand && (
             <div
@@ -146,6 +148,7 @@ Header.propTypes = {
   onExpandChart: PropTypes.func,
   hideExpand: PropTypes.bool.isRequired,
   openChartFullScreen: PropTypes.func.isRequired,
+  tooltipContainerId: PropTypes.string,
   chartRef: PropTypes.object.isRequired,
 };
 

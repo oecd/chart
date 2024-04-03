@@ -66,6 +66,7 @@ const Bar = forwardRef(
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
+      tooltipOutside,
       csvExportcolumnHeaderFormatter,
       optionsOverride = {},
     },
@@ -235,7 +236,7 @@ const Bar = forwardRef(
 
         tooltip: {
           ...R.prop('tooltip', formatters),
-          outside: !isFullScreen,
+          outside: tooltipOutside,
         },
 
         series,
@@ -266,7 +267,7 @@ const Bar = forwardRef(
         pivotValue,
         formatters,
         fullscreenClose,
-        isFullScreen,
+        tooltipOutside,
         csvExportcolumnHeaderFormatter,
       ],
     );
@@ -312,6 +313,7 @@ Bar.propTypes = {
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
+  tooltipOutside: PropTypes.bool,
   csvExportcolumnHeaderFormatter: PropTypes.func.isRequired,
   optionsOverride: PropTypes.object,
 };

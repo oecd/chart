@@ -50,6 +50,7 @@ const Pie = forwardRef(
       formatters = {},
       fullscreenClose = null,
       isFullScreen = false,
+      tooltipOutside,
       csvExportcolumnHeaderFormatter,
       optionsOverride = {},
     },
@@ -166,7 +167,7 @@ const Pie = forwardRef(
 
         tooltip: {
           ...R.prop('tooltip', formatters),
-          outside: !isFullScreen,
+          outside: tooltipOutside,
         },
 
         series,
@@ -194,7 +195,7 @@ const Pie = forwardRef(
         hideXAxisLabels,
         formatters,
         fullscreenClose,
-        isFullScreen,
+        tooltipOutside,
         csvExportcolumnHeaderFormatter,
       ],
     );
@@ -237,6 +238,7 @@ Pie.propTypes = {
   formatters: PropTypes.object,
   fullscreenClose: PropTypes.func,
   isFullScreen: PropTypes.bool,
+  tooltipOutside: PropTypes.bool,
   csvExportcolumnHeaderFormatter: PropTypes.func.isRequired,
   optionsOverride: PropTypes.object,
 };

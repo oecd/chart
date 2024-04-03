@@ -132,6 +132,7 @@ const HighchartsChart = ({
   hideTitle = false,
   hideSubtitle = false,
   hideToolbox = false,
+  tooltipContainerId,
   ...otherProps
 }) => {
   const chartForType = getChartForType(chartType);
@@ -649,6 +650,8 @@ const HighchartsChart = ({
     ],
   );
 
+  const tooltipOutside = !(isFullScreen || !isNilOrEmpty(tooltipContainerId));
+
   return (
     <div
       className="cb-container"
@@ -711,6 +714,7 @@ const HighchartsChart = ({
             onExpandChart={onExpandChart}
             hideExpand={hideExpand}
             openChartFullScreen={openChartFullScreen}
+            tooltipContainerId={tooltipContainerId}
             chartRef={chartRef}
           />
         )}
@@ -751,6 +755,7 @@ const HighchartsChart = ({
             formatters={formatters}
             fullscreenClose={fullscreenClose}
             isFullScreen={isFullScreen}
+            tooltipOutside={tooltipOutside}
             csvExportcolumnHeaderFormatter={csvExportcolumnHeaderFormatter}
             {...otherProps}
           />
@@ -829,6 +834,7 @@ HighchartsChart.propTypes = {
   hideTitle: PropTypes.bool,
   hideSubtitle: PropTypes.bool,
   hideToolbox: PropTypes.bool,
+  tooltipContainerId: PropTypes.string,
 };
 
 export default memo(HighchartsChart);
