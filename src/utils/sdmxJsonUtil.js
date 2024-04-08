@@ -12,7 +12,6 @@ import {
 } from './csvUtil';
 import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import { possibleVariables } from './configUtil';
-import { fetchJson } from './fetchUtil';
 
 const fixDotStatUrl = (url) => {
   const parsedUrl = new URL(url);
@@ -41,11 +40,38 @@ export const createDotStatUrl = (dotStatUrl, vars) =>
     possibleVariables,
   );
 
-export const fetchDotStatData = async (url, lang, fetchConfig = {}) =>
-  fetchJson(fixDotStatUrl(url), {
+export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
+  const response = await fetch(fixDotStatUrl(url), {
     headers: createDotStatHeaders(lang),
     ...fetchConfig,
   });
+
+  if (response.status >= 200 && response.status < 300) {
+    return response.json();
+  }
+
+  if (response.status === 404) {
+    try {
+      const responseText = await response.text();
+      // handle the response that should be considered as empty
+      // instead of as "404" errors for .Stat v7 and v8 (application/vnd.sdmx.data+json;version=1.0)
+      // application/vnd.sdmx.data+json;version=2.0 responds with 200 status code but can not be used
+      // because it contains other bugs.
+      if (
+        responseText === 'NoRecordsFound' ||
+        R.endsWith('No Results Found', responseText)
+      ) {
+        // send a fake .Stat v8 partial message
+        // so that it will be detected as an "empty" message by the parser
+        return { data: { dataSets: [{}] }, meta: { schema: '' } };
+      }
+    } catch (e) {
+      throw new Error(response.statusText);
+    }
+  }
+
+  throw new Error(response.statusText);
+};
 
 const createDimensionMemberLabelByCode = (members, codeLabelMapping) =>
   R.compose(
