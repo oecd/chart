@@ -12,6 +12,8 @@ const ControlTimeSlider = ({
   isRange,
   minVarName,
   maxVarName = '',
+  frequencyVarName = '',
+  defaultFrequency = null,
   vars,
   changeVar,
   codeLabelMapping = null,
@@ -27,25 +29,25 @@ const ControlTimeSlider = ({
     return R.propOr(label, R.toUpper(label), codeLabelMapping);
   }, [label, codeLabelMapping]);
 
-  // later multiple frenquencies could be supported, but for now simply take the first one
-  const frequency = useMemo(
-    () => R.head(frequencies || [{}]) || {},
-    [frequencies],
-  );
+  const finalDefaultFrequency =
+    defaultFrequency || R.head(frequencies).frequencyTypeCode;
 
   return R.isNil(codeLabelMapping) ? (
     <ControlFallback
       label={label}
       hideTitle={hideTitle}
       isStandalone={isStandalone}
+      frequencies={frequencies}
     />
   ) : (
     <Component
       label={finalLabel}
-      frequency={frequency}
+      frequencies={frequencies}
       isRange={isRange}
       minVarName={minVarName}
       maxVarName={maxVarName}
+      frequencyVarName={frequencyVarName}
+      defaultFrequency={finalDefaultFrequency}
       vars={vars}
       changeVar={changeVar}
       lang={lang}
@@ -62,6 +64,8 @@ ControlTimeSlider.propTypes = {
   isRange: PropTypes.bool.isRequired,
   minVarName: PropTypes.string.isRequired,
   maxVarName: PropTypes.string,
+  frequencyVarName: PropTypes.string,
+  defaultFrequency: PropTypes.string,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,

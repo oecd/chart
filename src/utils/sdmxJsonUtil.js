@@ -58,8 +58,9 @@ export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
       // application/vnd.sdmx.data+json;version=2.0 responds with 200 status code but can not be used
       // because it contains other bugs.
       if (
-        responseText === 'NoRecordsFound' ||
-        R.endsWith('No Results Found', responseText)
+        R.includes('NoResultsFound', responseText) ||
+        R.includes('NoRecordsFound', responseText) ||
+        R.includes('No Results Found', responseText)
       ) {
         // send a fake .Stat v8 partial message
         // so that it will be detected as an "empty" message by the parser

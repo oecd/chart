@@ -176,3 +176,30 @@
 .cb-spinner-animation {
   animation: cb-rotate 600ms infinite linear;
 }
+
+.cb-frequency-button {
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #586179;
+  background-color: #ffffff;
+  border: 1px solid #dee5ed;
+  border-right: 0px;
+  transition: border 150ms;
+  cursor: pointer;
+}
+.cb-frequency-button:hover {
+  background-color: #e8edf2;
+}
+.cb-frequency-button:first-of-type {
+  border-radius: 4px 0px 0px 4px;
+}
+.cb-frequency-button:last-of-type {
+  border-radius: 0px 4px 4px 0px;
+  border-right: 1px solid #dee5ed;
+}
+.cb-frequency-button-selected,
+.cb-frequency-button-selected:hover {
+  background-color: #e0f2ff;
+}

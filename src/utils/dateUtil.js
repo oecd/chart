@@ -8,6 +8,12 @@ import {
   addQuarters,
   addYears,
   isValid,
+  startOfYear,
+  endOfYear,
+  startOfQuarter,
+  endOfQuarter,
+  startOfMonth,
+  endOfMonth,
 } from 'date-fns';
 import * as R from 'ramda';
 
@@ -23,32 +29,43 @@ const tryParseWithFormat = (string, dateFormat) => {
 
 export const frequencies = {
   [frequencyTypes.monthly.value]: {
-    codeStringFormat: 'yyyy-MM',
     tryParse: (string) =>
       R.length(string) === 7 && tryParseWithFormat(string, 'yyyy-MM'),
+    formatToCode: (date) => format(date, 'yyyy-MM'),
     formatToLabel: (date) => format(date, 'MM-yyyy'),
     differenceFunc: differenceInMonths,
     addFunc: addMonths,
+    getStartPeriod: (date) => (isValid(date) ? startOfMonth(date) : ''),
+    getEndPeriod: (date) => (isValid(date) ? endOfMonth(date) : ''),
+    varValue: frequencyTypes.monthly.varValue,
+    getLabel: (lang) => (lang === 'fr' ? 'Mensuelle' : 'Monthly'),
   },
   [frequencyTypes.quaterly.value]: {
-    codeStringFormat: 'yyyy-QQQ',
     tryParse: (string) =>
       R.length(string) === 7 && tryParseWithFormat(string, 'yyyy-QQQ'),
-
+    formatToCode: (date) => format(date, 'yyyy-QQQ'),
     formatToLabel: (date, lang) => {
       const label = format(date, 'Q-yyyy');
       return lang === 'fr' ? `T${label}` : `Q${label}`;
     },
     differenceFunc: differenceInQuarters,
     addFunc: addQuarters,
+    getStartPeriod: (date) => (isValid(date) ? startOfQuarter(date) : ''),
+    getEndPeriod: (date) => (isValid(date) ? endOfQuarter(date) : ''),
+    varValue: frequencyTypes.quaterly.varValue,
+    getLabel: (lang) => (lang === 'fr' ? 'Trimestrielle' : 'Quaterly'),
   },
   [frequencyTypes.yearly.value]: {
-    codeStringFormat: 'yyyy',
     tryParse: (string) =>
       R.length(string) === 4 && tryParseWithFormat(string, 'yyyy'),
+    formatToCode: (date) => format(date, 'yyyy'),
     formatToLabel: (date) => format(date, 'yyyy'),
     differenceFunc: differenceInYears,
     addFunc: addYears,
+    getStartPeriod: (date) => (isValid(date) ? startOfYear(date) : ''),
+    getEndPeriod: (date) => (isValid(date) ? endOfYear(date) : ''),
+    varValue: frequencyTypes.yearly.varValue,
+    getLabel: (lang) => (lang === 'fr' ? 'Annuelle' : 'Yearly'),
   },
 };
 
@@ -57,13 +74,8 @@ export const getSteps = (frequency, lang) => {
   try {
     const frequencyType = R.prop(frequencyTypeCode, frequencies);
 
-    const {
-      tryParse,
-      formatToLabel,
-      codeStringFormat,
-      differenceFunc,
-      addFunc,
-    } = frequencyType;
+    const { tryParse, formatToCode, formatToLabel, differenceFunc, addFunc } =
+      frequencyType;
 
     const minDate = tryParse(minCode);
     const maxDate = tryParse(maxCode);
@@ -74,7 +86,7 @@ export const getSteps = (frequency, lang) => {
       R.map(
         (stepIndex) => {
           const date = addFunc(minDate, stepIndex);
-          const code = format(date, codeStringFormat);
+          const code = formatToCode(date);
           const label = formatToLabel(date, lang);
           return [code, label];
         },
