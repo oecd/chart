@@ -217,7 +217,7 @@ const ControlTimeSlider = ({
         <div
           style={{
             display: 'flex',
-            padding: isStandalone ? '10px 0px 7px 0px' : '5px 0px 7px 0px',
+            padding: isStandalone ? '10px 0px 15px 0px' : '5px 0px 15px 0px',
             justifyContent: 'flex-start',
           }}
         >
