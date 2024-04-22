@@ -268,28 +268,24 @@
 }
 
 .cb-frequency-button {
-  height: 28px;
+  height: 35px;
+  padding: 0px 10px;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #586179;
   background-color: #ffffff;
-  border: 1px solid #dee5ed;
-  border-right: 0px;
+  border: 1px solid #dee3e9;
+  border-radius: 4px;
   transition: border 150ms;
+  margin-right: 8px;
   cursor: pointer;
 }
 .cb-frequency-button:hover {
-  background-color: #e8edf2;
-}
-.cb-frequency-button:first-of-type {
-  border-radius: 4px 0px 0px 4px;
-}
-.cb-frequency-button:last-of-type {
-  border-radius: 0px 4px 4px 0px;
-  border-right: 1px solid #dee5ed;
+  border: 1px solid #156df9;
 }
 .cb-frequency-button-selected,
 .cb-frequency-button-selected:hover {
-  background-color: #e0f2ff;
+  color: #ffffff;
+  background-color: #156df9;
 }
