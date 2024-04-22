@@ -35,7 +35,11 @@ import {
   fetchDotStatData,
   isSdmxJsonEmpty,
 } from '../../utils/sdmxJsonUtil';
-import { emptyData, createDataFromCSV } from '../../utils/csvUtil';
+import {
+  emptyData,
+  createDataFromCSV,
+  createCodeLabelMapping,
+} from '../../utils/csvUtil';
 import Spinner from '../Spinner';
 import {
   replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax,
@@ -219,7 +223,10 @@ const HighchartsChart = ({
 
     if (preParsedDataInternal?.dotStatResponseWasEmpty === true) {
       setNoDataMessage('No data available');
-      return emptyData;
+      return {
+        ...emptyData,
+        codeLabelMapping: preParsedDataInternal.codeLabelMapping,
+      };
     }
 
     if (!R.isNil(preParsedDataInternal)) {
@@ -233,7 +240,16 @@ const HighchartsChart = ({
 
       if (isSdmxJsonEmpty(sdmxJson)) {
         setNoDataMessage('No data available');
-        return emptyData;
+
+        const codeLabelMapping = createCodeLabelMapping(
+          csvCodeLabelMappingProjectLevel,
+          dotStatCodeLabelMapping,
+        );
+
+        return {
+          ...emptyData,
+          codeLabelMapping,
+        };
       }
 
       setErrorMessage(null);

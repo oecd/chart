@@ -213,6 +213,29 @@ const ControlTimeSlider = ({
         <div className="cb-control-label">{label}</div>
       )}
 
+      {R.length(frequencies) > 1 && (
+        <div
+          style={{
+            display: 'flex',
+            padding: isStandalone ? '10px 0px 7px 0px' : '5px 0px 7px 0px',
+            justifyContent: 'flex-start',
+          }}
+        >
+          {R.map((f) => {
+            return (
+              <button
+                key={f.frequencyTypeCode}
+                onClick={() => onFrequencyChange(f.frequencyTypeCode)}
+                className={`cb-frequency-button ${f.frequencyTypeCode === currentFrequencyTypeCode ? 'cb-frequency-button-selected' : ''}`}
+                type="button"
+              >
+                {frequencyTypes[f.frequencyTypeCode].getLabel(lang)}
+              </button>
+            );
+          }, frequencies)}
+        </div>
+      )}
+
       <div style={{ margin: '0px 7px' }}>
         <Slider
           onChange={onRangeChange}
@@ -266,28 +289,6 @@ const ControlTimeSlider = ({
           </>
         )}
       </div>
-      {R.length(frequencies) > 1 && (
-        <div
-          style={{
-            display: 'flex',
-            marginTop: '5px',
-            justifyContent: 'center',
-          }}
-        >
-          {R.map((f) => {
-            return (
-              <button
-                key={f.frequencyTypeCode}
-                onClick={() => onFrequencyChange(f.frequencyTypeCode)}
-                className={`cb-frequency-button ${f.frequencyTypeCode === currentFrequencyTypeCode ? 'cb-frequency-button-selected' : ''}`}
-                type="button"
-              >
-                {frequencyTypes[f.frequencyTypeCode].getLabel(lang)}
-              </button>
-            );
-          }, frequencies)}
-        </div>
-      )}
     </div>
   );
 };
