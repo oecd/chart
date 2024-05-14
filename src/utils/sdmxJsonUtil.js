@@ -119,15 +119,19 @@ const getXAndYDimension = (
       return R.head(dimensionWithoutIdToExclude);
     }
 
-    return R.find(
-      R.compose(
-        R.equals(
-          R.toUpper(dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember),
+    return (
+      R.find(
+        R.compose(
+          R.equals(
+            R.toUpper(
+              dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+            ),
+          ),
+          R.toUpper,
+          R.prop('id'),
         ),
-        R.toUpper,
-        R.prop('id'),
-      ),
-      dimensionWithoutIdToExclude,
+        dimensionWithoutIdToExclude,
+      ) || R.head(dimensionWithoutIdToExclude)
     );
   };
 
