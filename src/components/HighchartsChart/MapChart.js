@@ -1,5 +1,5 @@
 /* eslint-disable react/no-this-in-sfc  */
-import React, { useMemo, forwardRef, memo } from 'react';
+import React, { useMemo, forwardRef, memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
@@ -85,6 +85,27 @@ const createDatapoint = (d, mapType, version) => {
     : { z: d.value, __metadata: d.metadata };
 };
 
+const overrideCountriesLabel = (codeLabelMapping) => {
+  if (isNilOrEmpty(codeLabelMapping)) {
+    return map;
+  }
+
+  return R.modify(
+    ['features'],
+    R.map((c) => {
+      const code = R.path(['properties', 'iso-a3'], c);
+      const label = R.prop(code, codeLabelMapping);
+
+      if (R.has(code, codeLabelMapping) && code !== label) {
+        return R.assocPath(['properties', 'name'], label, c);
+      }
+
+      return c;
+    }),
+    map,
+  );
+};
+
 const MapChart = forwardRef(
   (
     {
@@ -140,12 +161,24 @@ const MapChart = forwardRef(
       [colorPalette, mapAutoShade, mapColorValueSteps],
     );
 
-    const getLabelFromMap = (code) =>
-      R.pathOr(
-        code,
-        ['properties', 'name'],
-        R.find(R.pathEq(code, ['properties', 'iso-a3']), map.features || []),
-      );
+    const finalMap = useMemo(
+      // eslint-disable-next-line react/prop-types
+      () => overrideCountriesLabel(data.codeLabelMapping),
+      [data],
+    );
+
+    const getLabelFromMap = useCallback(
+      (code) =>
+        R.pathOr(
+          code,
+          ['properties', 'name'],
+          R.find(
+            R.pathEq(code, ['properties', 'iso-a3']),
+            finalMap.features || [],
+          ),
+        ),
+      [finalMap],
+    );
 
     const series = useMemo(
       () => [
@@ -218,13 +251,14 @@ const MapChart = forwardRef(
         highlightColors,
         parsedHighlight,
         baseline,
+        getLabelFromMap,
       ],
     );
 
     const defaultOptions = useMemo(
       () => ({
         chart: {
-          map,
+          map: finalMap,
           proj4,
 
           style: {
