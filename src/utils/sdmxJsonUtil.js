@@ -567,6 +567,9 @@ export const createDataFromSdmxJson = ({
   return R.compose(
     R.assoc('version', version),
     addCodeLabelMapping,
+    sortParsedDataOnYAxis(yAxisOrderOverride),
+    parseData,
+    sortCSV(sortBy, sortOrder, sortSeries, version),
     handleAreCategoriesNumbers(
       chartType,
       forceXAxisToBeTreatedAsCategories,
@@ -578,9 +581,6 @@ export const createDataFromSdmxJson = ({
       forceXAxisToBeTreatedAsCategories,
       version,
     ),
-    sortParsedDataOnYAxis(yAxisOrderOverride),
-    parseData,
-    sortCSV(sortBy, sortOrder, sortSeries, version),
     pivotCSV(chartType, dataSourceType, pivotData),
     parseSdmxJson(
       {

@@ -281,18 +281,32 @@ export const sortParsedDataOnYAxis =
 
 export const sortCSV =
   (sortBy, sortOrder, sortSeries, version) =>
-  ({ data, parsingHelperData, ...rest }) => {
+  ({
+    data,
+    parsingHelperData,
+    areCategoriesDates,
+    areCategoriesNumbers,
+    ...rest
+  }) => {
     const orderFunc =
-      !sortOrder || sortOrder === sortOrderOptions.asc.value
+      !sortOrder ||
+      sortOrder === sortOrderOptions.asc.value ||
+      areCategoriesDates ||
+      areCategoriesNumbers
         ? R.ascend
         : R.descend;
 
+    const finalSortBy =
+      areCategoriesDates || areCategoriesNumbers
+        ? sortByOptions.categoriesCode.value
+        : sortBy;
+
     if (
-      sortBy === sortByOptions.categoriesLabel.value ||
-      sortBy === sortByOptions.categoriesCode.value
+      finalSortBy === sortByOptions.categoriesLabel.value ||
+      finalSortBy === sortByOptions.categoriesCode.value
     ) {
       const selector =
-        sortBy === sortByOptions.categoriesLabel.value
+        finalSortBy === sortByOptions.categoriesLabel.value
           ? (code) => R.path(['xDimensionLabelByCode', code], parsingHelperData)
           : R.identity;
       return {
@@ -301,11 +315,13 @@ export const sortCSV =
           R.sort(orderFunc(R.compose(selector, R.head)), R.tail(data)),
         ),
         parsingHelperData,
+        areCategoriesDates,
+        areCategoriesNumbers,
         ...rest,
       };
     }
 
-    if (sortBy === sortByOptions.seriesValue.value) {
+    if (finalSortBy === sortByOptions.seriesValue.value) {
       const seriesCodes = R.map(
         R.toUpper,
         R.keys(parsingHelperData.yDimensionLabelByCode),
@@ -347,11 +363,19 @@ export const sortCSV =
           ),
         ),
         parsingHelperData,
+        areCategoriesDates,
+        areCategoriesNumbers,
         ...rest,
       };
     }
 
-    return { data, parsingHelperData, ...rest };
+    return {
+      data,
+      parsingHelperData,
+      areCategoriesDates,
+      areCategoriesNumbers,
+      ...rest,
+    };
   };
 
 export const handleAreCategoriesDates =
@@ -361,45 +385,50 @@ export const handleAreCategoriesDates =
       forceXAxisToBeTreatedAsCategories ||
       R.includes(chartType, chartTypesForWhichXAxisIsAlwaysTreatedAsCategories);
 
-    if (
-      dataSourceType === dataSourceTypes.dotStat.value &&
-      xAxisToBeTreatedAsCategories
-    ) {
+    if (xAxisToBeTreatedAsCategories) {
       return { ...data, areCategoriesDates: false };
     }
 
-    const categoriesCodes = R.map(R.prop('code'), data.categories);
+    const categoriesCodes = R.compose(
+      R.map(R.head),
+      R.tail,
+      R.prop('data'),
+    )(data);
 
     const {
       isSuccessful,
       dates: categoriesCodesAsDates,
       dateFormat,
     } = tryCastAllToDatesAndDetectFormat(categoriesCodes);
+
     if (isSuccessful) {
-      const newSeries = xAxisToBeTreatedAsCategories
-        ? data.series
-        : R.map(
-            (s) =>
-              R.evolve(
-                {
-                  data: mapWithIndex((y, i) =>
+      const newData = xAxisToBeTreatedAsCategories
+        ? data.data
+        : R.compose(
+            R.prepend(R.head(data.data)),
+            mapWithIndex((d, i) =>
+              R.prepend(
+                R.head(d),
+                R.map(
+                  (point) =>
                     version === '2'
                       ? R.assocPath(
                           ['metadata', 'parsedX'],
                           R.nth(i, categoriesCodesAsDates),
-                          y,
+                          point,
                         )
-                      : [R.nth(i, categoriesCodesAsDates), y],
-                  ),
-                },
-                s,
+                      : [R.nth(i, categoriesCodesAsDates), point],
+                  R.tail(d),
+                ),
               ),
-            data.series,
-          );
+            ),
+            R.tail,
+            R.prop('data'),
+          )(data);
 
       return {
         ...data,
-        series: newSeries,
+        data: newData,
         areCategoriesDates: true,
         categoriesDateFomat: dateFormat,
       };
@@ -418,32 +447,40 @@ export const handleAreCategoriesNumbers =
       return { ...data, areCategoriesNumbers: false };
     }
 
-    const categoriesCodes = R.map(R.prop('code'), data.categories);
+    const categoriesCodes = R.compose(
+      R.map(R.head),
+      R.tail,
+      R.prop('data'),
+    )(data);
 
     if (R.all(isCastableToNumber, categoriesCodes)) {
       const categoriesCodesAsNumbers = R.map(Number, categoriesCodes);
-      const newSeries = R.map(
-        (s) =>
-          R.evolve(
-            {
-              data: mapWithIndex((y, i) =>
+
+      const newData = R.compose(
+        R.prepend(R.head(data.data)),
+        mapWithIndex((d, i) =>
+          R.prepend(
+            R.head(d),
+            R.map(
+              (point) =>
                 version === '2'
                   ? R.assocPath(
                       ['metadata', 'parsedX'],
                       R.nth(i, categoriesCodesAsNumbers),
-                      y,
+                      point,
                     )
-                  : [R.nth(i, categoriesCodesAsNumbers), y],
-              ),
-            },
-            s,
+                  : [R.nth(i, categoriesCodesAsNumbers), point],
+              R.tail(d),
+            ),
           ),
-        data.series,
-      );
+        ),
+        R.tail,
+        R.prop('data'),
+      )(data);
 
       return {
         ...data,
-        series: newSeries,
+        data: newData,
         areCategoriesNumbers: true,
       };
     }
@@ -614,6 +651,9 @@ export const createDataFromCSV = ({
       forceXAxisToBeTreatedAsCategories,
       lang,
     ),
+    sortParsedDataOnYAxis(yAxisOrderOverride),
+    parseData,
+    sortCSV(sortBy, sortOrder, sortSeries, version),
     handleAreCategoriesNumbers(
       chartType,
       forceXAxisToBeTreatedAsCategories,
@@ -625,9 +665,6 @@ export const createDataFromCSV = ({
       forceXAxisToBeTreatedAsCategories,
       version,
     ),
-    sortParsedDataOnYAxis(yAxisOrderOverride),
-    parseData,
-    sortCSV(sortBy, sortOrder, sortSeries, version),
     R.when(() => version === '2', transformValuesForVersion2),
     addParsingHelperData(csvCodeLabelMappingProjectLevel, csvCodeLabelMapping),
     pivotCSV(chartType, dataSourceType, pivotData),
