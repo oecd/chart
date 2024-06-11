@@ -145,7 +145,7 @@ const getXAndYDimension = (
       R.compose(
         R.ifElse(
           () => isNilOrEmpty(mapCountryDimension),
-          R.includes(R.__, ['COU', 'COUNTRY', 'LOC', 'LOCATION']),
+          R.includes(R.__, ['COU', 'COUNTRY', 'LOC', 'LOCATION', 'REF_AREA']),
           R.equals(R.toUpper(mapCountryDimension)),
         ),
         R.prop('id'),
@@ -333,14 +333,22 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
   const timeDimension = R.find(isTimeDimension, dimensions);
 
   const otherDimensions = R.reject(
-    R.propSatisfies(
-      (id) => R.includes(id, [xDimension.id, yDimension.id]),
-      'id',
-    ),
+    R.compose(R.includes(R.__, [xDimension.id, yDimension.id]), R.prop('id')),
     dimensions,
   );
 
+  const unusedDimensions = R.compose(
+    R.map((dim) => ({
+      id: dim.id,
+      name: dim.name,
+      memberCodes: R.map(R.prop('id'), dim.values),
+    })),
+    R.filter(R.compose(R.gt(R.__, 1), R.length, R.prop('values'))),
+  )(otherDimensions);
+
   const observations = R.path([0, 'observations'], dataSets);
+
+  const totalNumberOfDataPoint = R.length(R.keys(observations));
 
   const getXDimensionMemberCodeByIndex = (index) =>
     R.compose(R.prop('id'), R.nth(index))(xDimension.values);
@@ -442,6 +450,17 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
     }, {}),
   )(R.toPairs(observations));
 
+  const numberOfUsedDataPoint = R.compose(
+    R.sum,
+    R.map(
+      R.compose(
+        R.length,
+        R.reject(R.compose(R.isNil, R.prop('value'))),
+        R.tail,
+      ),
+    ),
+  )(series);
+
   const codeLabelMapping = createCodeLabelMapping(
     chartConfig.csvCodeLabelMappingProjectLevel,
     chartConfig.dotStatCodeLabelMapping,
@@ -532,6 +551,11 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
   return {
     data: R.prepend(caterories, series),
     parsingHelperData,
+    dotStatInfo: {
+      unusedDimensions,
+      totalNumberOfDataPoint,
+      numberOfUsedDataPoint,
+    },
     finalLatestAvailableData,
     ...latestAvailableDataMapping,
   };

@@ -17,6 +17,7 @@ import {
   apiUrl,
   chartTypes,
   dataSourceTypes,
+  debugInfoTypes,
   decimalPointTypes,
   sortByOptions,
   sortOrderOptions,
@@ -80,9 +81,15 @@ const getChartForType = R.propOr(
 const actionButtonClick = (id) => {
   document.dispatchEvent(
     new CustomEvent('cbChartActionButtonClicked', {
-      detail: {
-        chartId: id || '',
-      },
+      detail: { chartId: id || '' },
+    }),
+  );
+};
+
+const sendDebugInfo = ({ type, data }) => {
+  document.dispatchEvent(
+    new CustomEvent('cbDebugInfoSent', {
+      detail: { type, data },
     }),
   );
 };
@@ -137,6 +144,7 @@ const HighchartsChart = ({
   hideSubtitle = false,
   hideToolbox = false,
   tooltipContainerId,
+  debug = false,
   ...otherProps
 }) => {
   const chartForType = getChartForType(chartType);
@@ -362,7 +370,16 @@ const HighchartsChart = ({
     if (onDataReady && parsedData) {
       onDataReady(parsedData);
     }
-  }, [parsedData, onDataReady]);
+
+    if (!debug || isNilOrEmpty(parsedData?.dotStatInfo)) {
+      return;
+    }
+
+    sendDebugInfo({
+      type: debugInfoTypes.dotStatInfo,
+      data: parsedData.dotStatInfo,
+    });
+  }, [parsedData, onDataReady, debug]);
 
   useEffect(() => {
     if (preParsedDataInternal) {
@@ -851,6 +868,7 @@ HighchartsChart.propTypes = {
   hideSubtitle: PropTypes.bool,
   hideToolbox: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
+  debug: PropTypes.bool,
 };
 
 export default memo(HighchartsChart);
