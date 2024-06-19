@@ -98,4 +98,8 @@ export const fakeMemberLatest = { code: '_LATEST_', label: 'Latest' };
 
 export const debugInfoTypes = {
   dotStatInfo: 'dotStatInfo',
+  tooManyDataPoint: 'tooManyDataPoint',
+  empty: 'empty',
 };
+
+export const maxSupprortedNumberOfDataPoint = 10000;

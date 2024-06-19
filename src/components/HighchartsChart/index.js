@@ -19,6 +19,7 @@ import {
   dataSourceTypes,
   debugInfoTypes,
   decimalPointTypes,
+  maxSupprortedNumberOfDataPoint,
   sortByOptions,
   sortOrderOptions,
 } from '../../constants/chart';
@@ -211,8 +212,9 @@ const HighchartsChart = ({
             setIsFetching(false);
           }
         } catch (e) {
-          setErrorMessage('An error occured :-(');
           setIsFetching(false);
+          setErrorMessage('An error occured :-(');
+          setSdmxJson(null);
         }
       };
       getDotStatData();
@@ -358,20 +360,59 @@ const HighchartsChart = ({
     lang,
   ]);
 
-  const parsedData = useMemo(() => {
-    if (dataSourceType === dataSourceTypes.dotStat.value) {
-      return parsedSDMXData;
-    }
-
-    return parsedCSVData;
-  }, [dataSourceType, parsedSDMXData, parsedCSVData]);
+  const parsedData = useMemo(
+    () =>
+      dataSourceType === dataSourceTypes.dotStat.value
+        ? parsedSDMXData
+        : parsedCSVData,
+    [dataSourceType, parsedSDMXData, parsedCSVData],
+  );
 
   useEffect(() => {
     if (onDataReady && parsedData) {
       onDataReady(parsedData);
     }
 
-    if (!debug || isNilOrEmpty(parsedData?.dotStatInfo)) {
+    if (isNilOrEmpty(parsedData)) {
+      return;
+    }
+
+    if (isFetching) {
+      setErrorMessage(null);
+      if (debug) {
+        sendDebugInfo({
+          type: debugInfoTypes.empty,
+          data: {},
+        });
+      }
+
+      return;
+    }
+
+    const numberOfCategory = R.length(parsedData.categories);
+    const numberOfSeries = R.length(parsedData.series);
+    if (numberOfCategory * numberOfSeries > maxSupprortedNumberOfDataPoint) {
+      setErrorMessage('An error occured :-(');
+      if (debug) {
+        sendDebugInfo({
+          type: debugInfoTypes.tooManyDataPoint,
+          data: { numberOfCategory, numberOfSeries },
+        });
+      }
+
+      return;
+    }
+
+    if (!debug) {
+      return;
+    }
+
+    if (isNilOrEmpty(parsedData?.dotStatInfo)) {
+      sendDebugInfo({
+        type: debugInfoTypes.empty,
+        data: {},
+      });
+
       return;
     }
 
@@ -379,7 +420,7 @@ const HighchartsChart = ({
       type: debugInfoTypes.dotStatInfo,
       data: parsedData.dotStatInfo,
     });
-  }, [parsedData, onDataReady, debug]);
+  }, [parsedData, onDataReady, debug, isFetching]);
 
   useEffect(() => {
     if (preParsedDataInternal) {
@@ -623,11 +664,15 @@ const HighchartsChart = ({
 
   const chartRef = useRef(null);
 
+  const numberOfDataPoint =
+    R.length(parsedData?.categories || []) * R.length(parsedData?.series || []);
+
   const chartCanBedisplayed =
     !isFetching &&
     R.isNil(noDataMessage) &&
     R.isNil(errorMessage) &&
-    !R.isNil(parsedData);
+    !R.isNil(parsedData) &&
+    numberOfDataPoint <= maxSupprortedNumberOfDataPoint;
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [screenHeight, setScreenHeight] = useState(0);
