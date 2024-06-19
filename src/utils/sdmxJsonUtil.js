@@ -176,7 +176,7 @@ const getXAndYDimension = (
             countryDimension.id,
           );
 
-        return [countryDimension, timeDimension ?? yDimension];
+        return [countryDimension, yDimension];
       }
 
       if (latestAvailableData) {
