@@ -65,9 +65,9 @@ export const frequencyTypes = {
     label: 'Yearly',
     varValue: 'A',
   },
-  quaterly: {
-    value: 'quaterly',
-    label: 'Quaterly',
+  quarterly: {
+    value: 'quarterly',
+    label: 'Quarterly',
     varValue: 'Q',
   },
   monthly: {

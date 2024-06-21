@@ -40,7 +40,7 @@ export const frequencies = {
     varValue: frequencyTypes.monthly.varValue,
     getLabel: (lang) => (lang === 'fr' ? 'Mensuelle' : 'Monthly'),
   },
-  [frequencyTypes.quaterly.value]: {
+  [frequencyTypes.quarterly.value]: {
     tryParse: (string) =>
       R.length(string) === 7 && tryParseWithFormat(string, 'yyyy-QQQ'),
     formatToCode: (date) => format(date, 'yyyy-QQQ'),
@@ -52,8 +52,8 @@ export const frequencies = {
     addFunc: addQuarters,
     getStartPeriod: (date) => (isValid(date) ? startOfQuarter(date) : ''),
     getEndPeriod: (date) => (isValid(date) ? endOfQuarter(date) : ''),
-    varValue: frequencyTypes.quaterly.varValue,
-    getLabel: (lang) => (lang === 'fr' ? 'Trimestrielle' : 'Quaterly'),
+    varValue: frequencyTypes.quarterly.varValue,
+    getLabel: (lang) => (lang === 'fr' ? 'Trimestrielle' : 'Quarterly'),
   },
   [frequencyTypes.yearly.value]: {
     tryParse: (string) =>

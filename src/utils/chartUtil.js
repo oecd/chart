@@ -298,14 +298,17 @@ export const tryCastAllToDatesAndDetectFormat = (values) => {
     }
   }
 
-  const quaterlyFrequency = R.prop(frequencyTypes.quaterly.value, frequencies);
-  if (quaterlyFrequency.tryParse(firstValue)) {
-    const dates = R.map(quaterlyFrequency.tryParse, values);
+  const quarterlyFrequency = R.prop(
+    frequencyTypes.quarterly.value,
+    frequencies,
+  );
+  if (quarterlyFrequency.tryParse(firstValue)) {
+    const dates = R.map(quarterlyFrequency.tryParse, values);
     if (!R.any(R.equals(false), dates)) {
       return {
         isSuccessful: true,
         dates: R.map((d) => d.getTime(), dates),
-        dateFormat: frequencyTypes.quaterly.value,
+        dateFormat: frequencyTypes.quarterly.value,
       };
     }
   }

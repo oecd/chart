@@ -567,7 +567,7 @@ const transformCategoriesLabel =
       data.areCategoriesDates &&
       R.includes(data.categoriesDateFomat, [
         frequencyTypes.monthly.value,
-        frequencyTypes.quaterly.value,
+        frequencyTypes.quarterly.value,
       ])
     ) {
       const frequency = R.prop(data.categoriesDateFomat, frequencies);
