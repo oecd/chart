@@ -102,4 +102,4 @@ export const debugInfoTypes = {
   empty: 'empty',
 };
 
-export const maxSupprortedNumberOfDataPoint = 10000;
+export const maxSupprortedNumberOfDataPoint = 15000;
