@@ -121,6 +121,7 @@ const HighchartsChart = ({
   highlight = '',
   baseline = '',
   colorPalette,
+  smallerColorPalettes = [],
   paletteStartingColor = null,
   paletteStartingColorOverride = null,
   paletteColorsOverride,
@@ -716,13 +717,15 @@ const HighchartsChart = ({
     () =>
       getFinalPalette(
         colorPalette,
-        paletteColorsOverride,
+        smallerColorPalettes,
+        R.length(parsedData?.series || []),
         paletteStartingColor,
         paletteStartingColorOverride,
       ),
     [
       colorPalette,
-      paletteColorsOverride,
+      smallerColorPalettes,
+      parsedData?.series,
       paletteStartingColor,
       paletteStartingColorOverride,
     ],
@@ -889,6 +892,7 @@ HighchartsChart.propTypes = {
   highlight: PropTypes.string,
   baseline: PropTypes.string,
   colorPalette: PropTypes.array.isRequired,
+  smallerColorPalettes: PropTypes.array,
   paletteStartingColor: PropTypes.string,
   paletteStartingColorOverride: PropTypes.string,
   paletteColorsOverride: PropTypes.array.isRequired,

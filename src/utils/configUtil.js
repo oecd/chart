@@ -1,4 +1,5 @@
 import * as R from 'ramda';
+import { isNilOrEmpty } from './ramdaUtil';
 
 export const possibleVariables = [
   'var1',
@@ -23,12 +24,18 @@ export const codeOrLabelEquals = (obj) =>
 
 export const getFinalPalette = (
   colorPalette,
-  paletteColorsOverride,
+  smallerColorPalettes,
+  numberOfSeries,
   paletteStartingColor,
   paletteStartingColorOverride,
 ) => {
-  if (!R.isEmpty(paletteColorsOverride)) {
-    return paletteColorsOverride;
+  if (!isNilOrEmpty(smallerColorPalettes)) {
+    const mostAdaptedPalette = R.find(
+      (s) => R.length(s) <= numberOfSeries,
+      [colorPalette, ...smallerColorPalettes],
+    );
+
+    return mostAdaptedPalette || colorPalette;
   }
 
   const startingColor = paletteStartingColorOverride || paletteStartingColor;
