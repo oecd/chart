@@ -10,7 +10,7 @@ import {
   handleAreCategoriesDates,
   handleAreCategoriesNumbers,
 } from './csvUtil';
-import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
+import { isNilOrEmpty } from './ramdaUtil';
 import { possibleVariables } from './configUtil';
 
 const dotStatTimeout = 15000;
@@ -57,7 +57,7 @@ export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
     try {
       const responseText = await response.text();
       // handle the response that should be considered as empty
-      // instead of as "404" errors for .Stat v7 and v8 (application/vnd.sdmx.data+json;version=1.0)
+      // instead of as "404" errors for .Stat v8 (application/vnd.sdmx.data+json;version=1.0)
       // application/vnd.sdmx.data+json;version=2.0 responds with 200 status code but can not be used
       // because it contains other bugs.
       if (
@@ -100,7 +100,6 @@ const getXAndYDimension = (
     dotStatUrlHasLastNObservationsEqOne,
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
   },
-  isV8,
 ) => {
   const dimensionsWithMoreThanOneMember = R.filter(
     R.compose(R.gt(R.__, 1), R.length, R.prop('values')),
@@ -155,7 +154,7 @@ const getXAndYDimension = (
     );
 
     if (countryDimension) {
-      if (timeDimension && dotStatUrlHasLastNObservationsEqOne && isV8) {
+      if (timeDimension && dotStatUrlHasLastNObservationsEqOne) {
         const dimensionsWithMoreThanOneMemberWithoutTime = R.reject(
           R.propEq(timeDimension.id, 'id'),
           dimensionsWithMoreThanOneMember,
@@ -183,7 +182,7 @@ const getXAndYDimension = (
   }
 
   if (timeDimension) {
-    if (dotStatUrlHasLastNObservationsEqOne && isV8) {
+    if (dotStatUrlHasLastNObservationsEqOne) {
       const dimensionsWithMoreThanOneMemberWithoutTime = R.reject(
         R.propEq(timeDimension.id, 'id'),
         dimensionsWithMoreThanOneMember,
@@ -261,42 +260,18 @@ const tweakDimensionLabels = R.map((dimension) => {
   return dimension;
 });
 
-const detectV8 = R.hasPath(['meta', 'schema']);
-
-const fixV7DimensionsBug = (rawDimensions) => {
-  // only time dimension is supposed to NOT have a keyPosition
-  // but most often, it is the last dimension in the dimensions list
-  // which allows to "guess" its position in data coordinates
-  const isBugPresent = R.compose(
-    (i) => i !== R.length(rawDimensions) - 1,
-    R.findIndex((d) => !R.has('keyPosition', d)),
-  )(rawDimensions);
-
-  // when the bug occurs not only we no longer can assume that the time dimension "keyPosition"
-  // is equal to length - 1 but all dimensions that are after the time one have an incorrect
-  // keyPosition!
-  // since the dimensions order and the their position in data coordinate match, the fix
-  // consists to assoc a "keyPosition" to all dimensions (=> equal to index)
-  return isBugPresent
-    ? mapWithIndex((d, i) => R.assoc('keyPosition', i, d), rawDimensions)
-    : rawDimensions;
-};
-
 export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
-  const isV8 = detectV8(sdmxJson);
+  const dataSets = R.path(['data', 'dataSets'], sdmxJson);
 
-  const dataSets = isV8
-    ? R.path(['data', 'dataSets'], sdmxJson)
-    : R.prop('dataSets', sdmxJson);
+  const rawDimensions = R.path(
+    ['data', 'structure', 'dimensions', 'observation'],
+    sdmxJson,
+  );
 
-  const rawDimensions = isV8
-    ? R.path(['data', 'structure', 'dimensions', 'observation'], sdmxJson)
-    : R.path(['structure', 'dimensions', 'observation'], sdmxJson);
-
-  const dimensions = isV8 ? rawDimensions : fixV7DimensionsBug(rawDimensions);
+  const dimensions = rawDimensions;
 
   const [xDimension, yDimension] = tweakDimensionLabels(
-    getXAndYDimension(dimensions, chartConfig, isV8),
+    getXAndYDimension(dimensions, chartConfig),
   );
 
   const timeDimension = R.find(isTimeDimension, dimensions);
@@ -330,8 +305,6 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
     R.length(yDimension.values),
   );
 
-  // time dimension does not have keyPosition prop (and is supposed to always be the last one)
-  // unless v7 sent buggy data (see fixV7DimensionsBug)
   const xDimensionIndexInCoordinate = R.propOr(
     R.length(dimensions) - 1,
     'keyPosition',
@@ -347,7 +320,7 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
     : -1;
 
   const finalLastNObservationsEqOne =
-    timeDimension && chartConfig.dotStatUrlHasLastNObservationsEqOne && isV8;
+    timeDimension && chartConfig.dotStatUrlHasLastNObservationsEqOne;
 
   const series = R.compose(
     (seriesWithoutEmptyOnes) => {
@@ -510,9 +483,7 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
 };
 
 export const isSdmxJsonEmpty = (sdmxJson) =>
-  detectV8(sdmxJson)
-    ? !R.has('observations', R.path(['data', 'dataSets', 0], sdmxJson))
-    : R.isEmpty(R.path(['structure', 'dimensions', 'observation'], sdmxJson));
+  !R.has('observations', R.path(['data', 'dataSets', 0], sdmxJson));
 
 export const createDataFromSdmxJson = ({
   sdmxJson,
