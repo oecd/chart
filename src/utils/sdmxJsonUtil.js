@@ -13,6 +13,8 @@ import {
 import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import { possibleVariables } from './configUtil';
 
+const dotStatTimeout = 15000;
+
 const fixDotStatUrl = (url) => {
   const parsedUrl = new URL(url);
   parsedUrl.searchParams.set('dimensionAtObservation', 'AllDimensions');
@@ -43,6 +45,7 @@ export const createDotStatUrl = (dotStatUrl, vars) =>
 export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
   const response = await fetch(fixDotStatUrl(url), {
     headers: createDotStatHeaders(lang),
+    signal: AbortSignal.timeout(dotStatTimeout),
     ...fetchConfig,
   });
 
