@@ -18,7 +18,6 @@ import {
   getListItemAtTurningIndex,
   makeColorReadableOnBackgroundColor,
 } from '../../utils/chartUtil';
-import { fakeMemberLatest } from '../../constants/chart';
 import { mapWithIndex } from '../../utils/ramdaUtil';
 
 if (typeof Highcharts === 'object') {
@@ -104,7 +103,7 @@ const Radar = forwardRef(
               },
             },
             color,
-            showInLegend: s.code !== fakeMemberLatest.code,
+            showInLegend: true,
             dataLabels: {
               color: dataLabelColor,
               textShadow:

@@ -5,7 +5,6 @@ import {
   chartTypes,
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   decimalPointTypes,
-  fakeMemberLatest,
 } from '../constants/chart';
 import { isCastableToNumber, roundNumber } from './chartUtil';
 import { isNilOrEmpty } from './ramdaUtil';
@@ -99,27 +98,14 @@ export const createFormatters = ({
 
       return R.compose(
         R.compose(
-          (content) => {
-            if (timeLabel && seriesName === fakeMemberLatest.label) {
-              return R.replace('{series.name}', timeLabel, content);
-            }
-
-            return R.replace('{series.name}', seriesName, content);
-          },
+          (content) => R.replace('{series.name}', seriesName, content),
           (content) => {
             const key =
               chartType === chartTypes.pie
                 ? this.point.name
                 : this.point.category ?? this.series.name;
 
-            if (timeLabel && key === fakeMemberLatest.label) {
-              return R.replace('{point.key}', timeLabel, content);
-            }
-
-            const timeLabelSuffix =
-              timeLabel && seriesName !== fakeMemberLatest.label
-                ? ` - ${timeLabel}`
-                : '';
+            const timeLabelSuffix = ` - ${timeLabel}`;
 
             if (
               R.includes(

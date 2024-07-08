@@ -22,7 +22,6 @@ import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
 } from '../../utils/chartUtil';
-import { fakeMemberLatest } from '../../constants/chart';
 
 if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);
@@ -165,7 +164,7 @@ const Scatter = forwardRef(
                   };
             }, s.data),
             color: seriesColor,
-            showInLegend: s.code !== fakeMemberLatest.code,
+            showInLegend: true,
             marker: {
               symbol,
               lineColor: symbol === 'cross' ? null : '#deeaf1',

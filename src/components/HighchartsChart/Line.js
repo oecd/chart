@@ -17,7 +17,6 @@ import {
   getListItemAtTurningIndex,
   makeColorReadableOnBackgroundColor,
 } from '../../utils/chartUtil';
-import { fakeMemberLatest } from '../../constants/chart';
 import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 
 const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
@@ -125,7 +124,7 @@ const Line = forwardRef(
               },
             },
             ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
-            showInLegend: s.code !== fakeMemberLatest.code,
+            showInLegend: true,
           };
         }, data.series),
       [

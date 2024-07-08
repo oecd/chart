@@ -9,7 +9,7 @@ import {
   possibleVariables,
 } from './configUtil';
 import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
-import { fakeMemberLatest, frequencyTypes } from '../constants/chart';
+import { frequencyTypes } from '../constants/chart';
 import { frequencies } from './dateUtil';
 
 const baselineColor = '#48A7FF';
@@ -135,7 +135,7 @@ export const createStackedDatapoints = (
           },
         },
       },
-      showInLegend: s.code !== fakeMemberLatest.code,
+      showInLegend: true,
       data: mapWithIndex((d, xIdx) => {
         const category = R.nth(xIdx, data.categories);
         const highlightColorsIndex = R.findIndex(

@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import { chartTypes, fakeMemberLatest } from '../constants/chart';
+import { chartTypes } from '../constants/chart';
 import {
   pivotCSV,
   sortCSV,
@@ -97,7 +97,6 @@ const getXAndYDimension = (
   {
     chartType,
     mapCountryDimension,
-    latestAvailableData,
     dotStatUrlHasLastNObservationsEqOne,
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
   },
@@ -138,10 +137,9 @@ const getXAndYDimension = (
     );
   };
 
-  const timeDimension =
-    latestAvailableData || dotStatUrlHasLastNObservationsEqOne
-      ? R.find(isTimeDimension, dimensionsWithMoreThanOneMember)
-      : null;
+  const timeDimension = dotStatUrlHasLastNObservationsEqOne
+    ? R.find(isTimeDimension, dimensionsWithMoreThanOneMember)
+    : null;
 
   if (chartType === chartTypes.map) {
     const countryDimension = R.find(
@@ -181,22 +179,6 @@ const getXAndYDimension = (
 
         return [countryDimension, yDimension];
       }
-
-      if (latestAvailableData) {
-        const yDimension =
-          R.head(
-            R.reject(
-              R.propEq(countryDimension.id, 'id'),
-              dimensionsWithMoreThanOneMember,
-            ),
-          ) ||
-          findDimensionWithPredefinedIdOrThatDoesNotHaveId(
-            dimensions,
-            countryDimension.id,
-          );
-
-        return [countryDimension, timeDimension ?? yDimension];
-      }
     }
   }
 
@@ -226,22 +208,6 @@ const getXAndYDimension = (
       }
 
       return [R.head(dimensions), R.nth(1, dimensions)];
-    }
-
-    if (latestAvailableData) {
-      const xDimension =
-        R.head(
-          R.reject(
-            R.propEq(timeDimension.id, 'id'),
-            dimensionsWithMoreThanOneMember,
-          ),
-        ) ||
-        findDimensionWithPredefinedIdOrThatDoesNotHaveId(
-          dimensions,
-          timeDimension.id,
-        );
-
-      return [xDimension, timeDimension];
     }
   }
 
@@ -383,9 +349,6 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
   const finalLastNObservationsEqOne =
     timeDimension && chartConfig.dotStatUrlHasLastNObservationsEqOne && isV8;
 
-  const finalLatestAvailableData =
-    chartConfig.latestAvailableData && isTimeDimension(yDimension);
-
   const series = R.compose(
     (seriesWithoutEmptyOnes) => {
       const allXMemberCodes = R.map(R.prop('id'), xDimension.values);
@@ -421,18 +384,13 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
       const y = parseInt(R.nth(yDimensionIndexInCoordinate, coordinate), 10);
 
       if (version !== '2') {
-        if (finalLatestAvailableData) {
-          const yCode = getTimeDimensionMemberCodeByIndex(y);
-          return R.assoc(xCode, [value, yCode], acc);
-        }
-
         return R.has(xCode, acc)
           ? R.evolve({ [xCode]: R.update(y, value) }, acc)
           : R.assoc(xCode, R.update(y, value, defaultRowValues), acc);
       }
 
       const finalValue = R.when(
-        () => finalLastNObservationsEqOne || finalLatestAvailableData,
+        () => finalLastNObservationsEqOne,
         (v) => {
           const time = parseInt(
             R.nth(timeDimensionIndexInCoordinate, coordinate),
@@ -442,10 +400,6 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
           return R.assoc('metadata', { timeCode }, v);
         },
       )({ value });
-
-      if (finalLatestAvailableData) {
-        return R.assoc(xCode, [finalValue], acc);
-      }
 
       return R.has(xCode, acc)
         ? R.evolve({ [xCode]: R.update(y, finalValue) }, acc)
@@ -479,16 +433,8 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
       xDimension.values,
       codeLabelMapping,
     ),
-    yDimensionLabelByCode: finalLatestAvailableData
-      ? {
-          [fakeMemberLatest.code]: fakeMemberLatest.label,
-        }
-      : yDimensionLabelByCode,
+    yDimensionLabelByCode,
     otherDimensionsLabelByCode: R.compose(
-      R.when(
-        () => finalLatestAvailableData,
-        R.mergeRight(yDimensionLabelByCode),
-      ),
       R.reduce(
         (acc, d) =>
           R.mergeRight(
@@ -500,56 +446,56 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
     )(otherDimensions),
   };
 
-  const latestAvailableDataMapping =
-    finalLatestAvailableData || finalLastNObservationsEqOne
-      ? R.compose(
-          R.when(
-            () => version !== '2',
-            R.compose(
-              R.assoc(
-                'latestYByXLabel',
-                R.compose(
-                  R.fromPairs,
-                  R.map((s) => [
-                    R.prop(R.head(s), parsingHelperData.xDimensionLabelByCode),
-                    R.prop(R.last(s), yDimensionLabelByCode),
-                  ]),
-                )(series),
-              ),
-              R.assoc(
-                'latestYByXCode',
-                R.compose(
-                  R.fromPairs,
-                  R.map((s) => [
-                    R.head(s),
-                    R.prop(R.last(s), yDimensionLabelByCode),
-                  ]),
-                )(series),
-              ),
+  const latestAvailableDataMapping = finalLastNObservationsEqOne
+    ? R.compose(
+        R.when(
+          () => version !== '2',
+          R.compose(
+            R.assoc(
+              'latestYByXLabel',
+              R.compose(
+                R.fromPairs,
+                R.map((s) => [
+                  R.prop(R.head(s), parsingHelperData.xDimensionLabelByCode),
+                  R.prop(R.last(s), yDimensionLabelByCode),
+                ]),
+              )(series),
+            ),
+            R.assoc(
+              'latestYByXCode',
+              R.compose(
+                R.fromPairs,
+                R.map((s) => [
+                  R.head(s),
+                  R.prop(R.last(s), yDimensionLabelByCode),
+                ]),
+              )(series),
             ),
           ),
-          () => {
-            const timeCodes =
-              version !== '2'
-                ? R.map(R.last, series)
-                : R.compose(
-                    R.reject(R.isNil),
-                    R.map(R.path(['metadata', 'timeCode'])),
-                    R.unnest,
-                    R.map(R.tail),
-                  )(series);
-            const orderedTimeCodes = R.sortBy(R.identity, timeCodes);
-            return {
-              latestYMin: R.head(orderedTimeCodes),
-              latestYMax: R.last(orderedTimeCodes),
-            };
-          },
-        )()
-      : {};
+        ),
+        () => {
+          const timeCodes =
+            version !== '2'
+              ? R.map(R.last, series)
+              : R.compose(
+                  R.reject(R.isNil),
+                  R.map(R.path(['metadata', 'timeCode'])),
+                  R.unnest,
+                  R.map(R.tail),
+                )(series);
+          const orderedTimeCodes = R.sortBy(R.identity, timeCodes);
+          return {
+            latestYMin: R.head(orderedTimeCodes),
+            latestYMax: R.last(orderedTimeCodes),
+          };
+        },
+      )()
+    : {};
 
-  const caterories = finalLatestAvailableData
-    ? ['Category', fakeMemberLatest.code]
-    : R.concat(['Category'], R.map(R.prop('id'), R.prop('values', yDimension)));
+  const caterories = R.concat(
+    ['Category'],
+    R.map(R.prop('id'), R.prop('values', yDimension)),
+  );
 
   return {
     data: R.prepend(caterories, series),
@@ -559,7 +505,6 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
       totalNumberOfDataPoint,
       numberOfUsedDataPoint,
     },
-    finalLatestAvailableData,
     ...latestAvailableDataMapping,
   };
 };
@@ -573,7 +518,6 @@ export const createDataFromSdmxJson = ({
   sdmxJson,
   dotStatCodeLabelMapping,
   csvCodeLabelMappingProjectLevel,
-  latestAvailableData,
   dotStatUrlHasLastNObservationsEqOne,
   mapCountryDimension,
   pivotData,
@@ -614,7 +558,6 @@ export const createDataFromSdmxJson = ({
         chartType,
         pivotData,
         mapCountryDimension,
-        latestAvailableData,
         dotStatUrlHasLastNObservationsEqOne,
         dotStatCodeLabelMapping,
         csvCodeLabelMappingProjectLevel,

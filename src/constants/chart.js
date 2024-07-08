@@ -94,8 +94,6 @@ export const apiUrl =
   process.env.API_URL ||
   'https://oecdch.art';
 
-export const fakeMemberLatest = { code: '_LATEST_', label: 'Latest' };
-
 export const debugInfoTypes = {
   dotStatInfo: 'dotStatInfo',
   tooManyDataPoint: 'tooManyDataPoint',

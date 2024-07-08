@@ -23,7 +23,7 @@ import {
   createShadesFromColor,
   calcChartSpacing,
 } from '../../utils/chartUtil';
-import { mapTypes, fakeMemberLatest } from '../../constants/chart';
+import { mapTypes } from '../../constants/chart';
 import {
   isNilOrEmpty,
   mapWithIndex,
@@ -206,7 +206,7 @@ const MapChart = forwardRef(
                 }
               : {}),
 
-            showInLegend: s.code !== fakeMemberLatest.code,
+            showInLegend: true,
 
             data: reduceWithIndex(
               (acc, d, xIdx) => {

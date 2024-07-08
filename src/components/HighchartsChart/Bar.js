@@ -17,7 +17,6 @@ import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
 } from '../../utils/chartUtil';
-import { fakeMemberLatest } from '../../constants/chart';
 
 if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);
@@ -139,7 +138,7 @@ const Bar = forwardRef(
                 : { name: category.label, ...dataPoint };
             }, s.data),
             color: seriesColor,
-            showInLegend: s.code !== fakeMemberLatest.code,
+            showInLegend: true,
           };
         }, data.series),
       [

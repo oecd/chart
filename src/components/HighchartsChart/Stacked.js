@@ -16,7 +16,7 @@ import {
   createStackedDatapoints,
   deepMergeUserOptionsWithDefaultOptions,
 } from '../../utils/chartUtil';
-import { stackingOptions, fakeMemberLatest } from '../../constants/chart';
+import { stackingOptions } from '../../constants/chart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 
 if (typeof Highcharts === 'object') {
@@ -115,13 +115,6 @@ const Stacked = forwardRef(
       [R.T, R.always('column')],
     ])();
 
-    const hideFakeMemberLatest = useMemo(
-      () =>
-        R.length(data.categories) === 1 &&
-        R.head(data.categories).code === fakeMemberLatest.code,
-      [data.categories],
-    );
-
     const defaultOptions = useMemo(
       () => ({
         chart: {
@@ -179,8 +172,7 @@ const Stacked = forwardRef(
             style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
             ...R.prop('xAxisLabels', formatters),
             ...((hideXAxisLabels && !horizontal) ||
-            (hideYAxisLabels && horizontal) ||
-            hideFakeMemberLatest
+            (hideYAxisLabels && horizontal)
               ? { enabled: false }
               : {}),
           },
@@ -284,7 +276,6 @@ const Stacked = forwardRef(
         csvExportcolumnHeaderFormatter,
         area,
         chartType,
-        hideFakeMemberLatest,
       ],
     );
 
