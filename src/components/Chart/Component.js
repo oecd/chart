@@ -63,9 +63,7 @@ const Chart = ({ chartId, language, ...otherProps }) => {
         ),
       )(possibleVariables);
 
-      const langParam = lang
-        ? `?lang=${R.toLower(lang)}&version=2`
-        : '?version=2';
+      const langParam = lang ? `?lang=${R.toLower(lang)}` : '';
       const configParams = `${id}${
         R.isEmpty(varsParam) ? '' : `/${varsParam}`
       }${langParam}`;

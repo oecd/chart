@@ -60,17 +60,10 @@ const symbols = [
   'triangle-down',
 ];
 
-const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
-  if (version !== '2') {
-    return areCategoriesDatesOrNumber
-      ? { x: R.head(d), y: R.nth(1, d) }
-      : { y: d };
-  }
-
-  return areCategoriesDatesOrNumber
+const createDatapoint = (d, areCategoriesDatesOrNumber) =>
+  areCategoriesDatesOrNumber
     ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
     : { y: d.value, __metadata: d.metadata };
-};
 
 const calcMarginTop = (title, subtitle, isSmall) => {
   if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
@@ -141,11 +134,7 @@ const Scatter = forwardRef(
                 highlightColors,
               );
 
-              const dataPoint = createDatapoint(
-                d,
-                areCategoriesDatesOrNumber,
-                data.version,
-              );
+              const dataPoint = createDatapoint(d, areCategoriesDatesOrNumber);
 
               return baselineOrHighlightColor
                 ? {
@@ -422,7 +411,6 @@ Scatter.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
-    version: PropTypes.string,
   }).isRequired,
   highlight: PropTypes.array,
   baseline: PropTypes.array,

@@ -30,13 +30,10 @@ if (typeof Highcharts === 'object') {
   ExportDataModule(Highcharts);
 }
 
-const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
-  if (version !== '2') {
-    return areCategoriesDatesOrNumber ? R.nth(1, d) : d;
-  }
-
-  return { y: d.value, __metadata: d.metadata };
-};
+const createDatapoint = (d) => ({
+  y: d.value,
+  __metadata: d.metadata,
+});
 
 const Radar = forwardRef(
   (
@@ -86,11 +83,7 @@ const Radar = forwardRef(
 
           return {
             name: s.label,
-            data: R.map(
-              (d) =>
-                createDatapoint(d, areCategoriesDatesOrNumber, data.version),
-              s.data,
-            ),
+            data: R.map((d) => createDatapoint(d), s.data),
             type: 'line',
             marker: {
               symbol: 'circle',
@@ -113,14 +106,7 @@ const Radar = forwardRef(
             ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
           };
         }, data.series),
-      [
-        data,
-        areCategoriesDatesOrNumber,
-        colorPalette,
-        highlightColors,
-        highlight,
-        baseline,
-      ],
+      [data, colorPalette, highlightColors, highlight, baseline],
     );
 
     const defaultOptions = useMemo(
@@ -310,7 +296,6 @@ Radar.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
-    version: PropTypes.string,
   }).isRequired,
   highlight: PropTypes.array,
   baseline: PropTypes.array,

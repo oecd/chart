@@ -273,7 +273,6 @@ const HighchartsChart = ({
         sortSeries,
         yAxisOrderOverride,
         forceXAxisToBeTreatedAsCategories,
-        version: '2',
       });
     } catch (e) {
       setErrorMessage('An error occured :-(');
@@ -323,7 +322,6 @@ const HighchartsChart = ({
         forceXAxisToBeTreatedAsCategories,
         vars,
         lang,
-        version: '2',
       });
 
       setErrorMessage(null);
@@ -453,7 +451,7 @@ const HighchartsChart = ({
             const newPreParsedData = await fetchJson(
               `${apiUrl}/api/public/chartConfig/${configParams}?preParsedDataOnly&lang=${R.toLower(
                 lang,
-              )}&version=2`,
+              )}`,
             );
 
             // discard result from outdated request(s)

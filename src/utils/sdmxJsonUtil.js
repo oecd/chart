@@ -220,7 +220,7 @@ const tweakDimensionLabels = R.map((dimension) => {
   return dimension;
 });
 
-export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
+export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
   const dataSets = R.path(['data', 'dataSets'], sdmxJson);
 
   const rawDimensions = R.path(
@@ -261,7 +261,7 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
     R.compose(R.prop('id'), R.nth(index))(timeDimension?.values || []);
 
   const defaultRowValues = R.times(
-    () => (version !== '2' ? null : { value: null }),
+    () => ({ value: null }),
     R.length(yDimension.values),
   );
 
@@ -296,7 +296,7 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
       }
 
       const emptyData = R.times(
-        () => (version !== '2' ? null : { value: null }),
+        () => ({ value: null }),
         R.length(R.head(seriesWithoutEmptyOnes)) - 1,
       );
 
@@ -315,12 +315,6 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
       const x = parseInt(R.nth(xDimensionIndexInCoordinate, coordinate), 10);
       const xCode = getXDimensionMemberCodeByIndex(x);
       const y = parseInt(R.nth(yDimensionIndexInCoordinate, coordinate), 10);
-
-      if (version !== '2') {
-        return R.has(xCode, acc)
-          ? R.evolve({ [xCode]: R.update(y, value) }, acc)
-          : R.assoc(xCode, R.update(y, value, defaultRowValues), acc);
-      }
 
       const finalValue = R.when(
         () => finalLastNObservationsEqOne,
@@ -380,49 +374,19 @@ export const parseSdmxJson = (chartConfig, version) => (sdmxJson) => {
   };
 
   const latestAvailableDataMapping = finalLastNObservationsEqOne
-    ? R.compose(
-        R.when(
-          () => version !== '2',
-          R.compose(
-            R.assoc(
-              'latestYByXLabel',
-              R.compose(
-                R.fromPairs,
-                R.map((s) => [
-                  R.prop(R.head(s), parsingHelperData.xDimensionLabelByCode),
-                  R.prop(R.last(s), yDimensionLabelByCode),
-                ]),
-              )(series),
-            ),
-            R.assoc(
-              'latestYByXCode',
-              R.compose(
-                R.fromPairs,
-                R.map((s) => [
-                  R.head(s),
-                  R.prop(R.last(s), yDimensionLabelByCode),
-                ]),
-              )(series),
-            ),
-          ),
-        ),
-        () => {
-          const timeCodes =
-            version !== '2'
-              ? R.map(R.last, series)
-              : R.compose(
-                  R.reject(R.isNil),
-                  R.map(R.path(['metadata', 'timeCode'])),
-                  R.unnest,
-                  R.map(R.tail),
-                )(series);
-          const orderedTimeCodes = R.sortBy(R.identity, timeCodes);
-          return {
-            latestYMin: R.head(orderedTimeCodes),
-            latestYMax: R.last(orderedTimeCodes),
-          };
-        },
-      )()
+    ? R.compose(() => {
+        const timeCodes = R.compose(
+          R.reject(R.isNil),
+          R.map(R.path(['metadata', 'timeCode'])),
+          R.unnest,
+          R.map(R.tail),
+        )(series);
+        const orderedTimeCodes = R.sortBy(R.identity, timeCodes);
+        return {
+          latestYMin: R.head(orderedTimeCodes),
+          latestYMax: R.last(orderedTimeCodes),
+        };
+      })()
     : {};
 
   const caterories = R.concat(
@@ -460,41 +424,31 @@ export const createDataFromSdmxJson = ({
   yAxisOrderOverride,
   forceXAxisToBeTreatedAsCategories,
   dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
-  version,
 }) => {
   if (!sdmxJson) {
     return null;
   }
 
   return R.compose(
-    R.assoc('version', version),
     addCodeLabelMapping,
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
-    sortCSV(sortBy, sortOrder, sortSeries, version),
-    handleAreCategoriesNumbers(
-      chartType,
-      forceXAxisToBeTreatedAsCategories,
-      version,
-    ),
+    sortCSV(sortBy, sortOrder, sortSeries),
+    handleAreCategoriesNumbers(chartType, forceXAxisToBeTreatedAsCategories),
     handleAreCategoriesDates(
       dataSourceType,
       chartType,
       forceXAxisToBeTreatedAsCategories,
-      version,
     ),
     pivotCSV(chartType, dataSourceType, pivotData),
-    parseSdmxJson(
-      {
-        chartType,
-        pivotData,
-        mapCountryDimension,
-        dotStatUrlHasLastNObservationsEqOne,
-        dotStatCodeLabelMapping,
-        csvCodeLabelMappingProjectLevel,
-        dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
-      },
-      version,
-    ),
+    parseSdmxJson({
+      chartType,
+      pivotData,
+      mapCountryDimension,
+      dotStatUrlHasLastNObservationsEqOne,
+      dotStatCodeLabelMapping,
+      csvCodeLabelMappingProjectLevel,
+      dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+    }),
   )(sdmxJson);
 };

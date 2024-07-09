@@ -19,15 +19,10 @@ import {
 } from '../../utils/chartUtil';
 import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 
-const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
-  if (version !== '2') {
-    return areCategoriesDatesOrNumber ? d : { y: d };
-  }
-
-  return areCategoriesDatesOrNumber
+const createDatapoint = (d, areCategoriesDatesOrNumber) =>
+  areCategoriesDatesOrNumber
     ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
     : { y: d.value, __metadata: d.metadata };
-};
 
 if (typeof Highcharts === 'object') {
   AnnotationsModule(Highcharts);
@@ -95,11 +90,7 @@ const Line = forwardRef(
           return {
             name: s.label,
             data: R.map((d) => {
-              const dataPoint = createDatapoint(
-                d,
-                areCategoriesDatesOrNumber,
-                data.version,
-              );
+              const dataPoint = createDatapoint(d, areCategoriesDatesOrNumber);
 
               return dataPoint;
             }, s.data),
@@ -333,7 +324,6 @@ Line.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
-    version: PropTypes.string,
   }).isRequired,
   highlight: PropTypes.array,
   baseline: PropTypes.array,

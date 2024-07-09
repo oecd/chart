@@ -38,17 +38,10 @@ const calcMarginTop = (title, subtitle, horizontal, isSmall) => {
   return undefined;
 };
 
-const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
-  if (version !== '2') {
-    return areCategoriesDatesOrNumber
-      ? { x: R.head(d), y: R.nth(1, d) }
-      : { y: d };
-  }
-
-  return areCategoriesDatesOrNumber
+const createDatapoint = (d, areCategoriesDatesOrNumber) =>
+  areCategoriesDatesOrNumber
     ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
     : { y: d.value, __metadata: d.metadata };
-};
 
 const calcLegendMargin = (horizontal, isSmall) => {
   if (isSmall) {
@@ -123,11 +116,7 @@ const Bar = forwardRef(
                 highlightColors,
               );
 
-              const dataPoint = createDatapoint(
-                d,
-                areCategoriesDatesOrNumber,
-                data.version,
-              );
+              const dataPoint = createDatapoint(d, areCategoriesDatesOrNumber);
 
               return baselineOrHighlightColor
                 ? {
@@ -332,7 +321,6 @@ Bar.propTypes = {
     series: PropTypes.array.isRequired,
     areCategoriesDates: PropTypes.bool.isRequired,
     areCategoriesNumbers: PropTypes.bool.isRequired,
-    version: PropTypes.string,
   }).isRequired,
   highlight: PropTypes.array,
   baseline: PropTypes.array,

@@ -76,15 +76,10 @@ if (typeof Highcharts === 'object') {
   );
 }
 
-const createDatapoint = (d, mapType, version) => {
-  if (version !== '2') {
-    return mapType === mapTypes.normal.value ? { value: d } : { z: d };
-  }
-
-  return mapType === mapTypes.normal.value
+const createDatapoint = (d, mapType) =>
+  mapType === mapTypes.normal.value
     ? { value: d.value, __metadata: d.metadata }
     : { z: d.value, __metadata: d.metadata };
-};
 
 const overrideCountriesLabel = (codeLabelMapping) => {
   if (isNilOrEmpty(codeLabelMapping)) {
@@ -228,7 +223,7 @@ const MapChart = forwardRef(
                 return R.append(
                   {
                     code: R.toUpper(`${R.nth(xIdx, data.categories)?.code}`),
-                    ...createDatapoint(d, mapType, data.version),
+                    ...createDatapoint(d, mapType),
                     ...(baselineOrHighlightColor
                       ? { color: baselineOrHighlightColor }
                       : {}),
@@ -443,7 +438,6 @@ MapChart.propTypes = {
   data: PropTypes.shape({
     categories: PropTypes.array.isRequired,
     series: PropTypes.array.isRequired,
-    version: PropTypes.string,
   }).isRequired,
   mapType: PropTypes.string,
   mapDisplayCountriesName: PropTypes.bool,

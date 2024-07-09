@@ -94,17 +94,10 @@ export const getBaselineOrHighlightColor = (
     : getListItemAtTurningIndex(highlightColorsIndex, highlightColors);
 };
 
-const createDatapoint = (d, areCategoriesDatesOrNumber, version) => {
-  if (version !== '2') {
-    return areCategoriesDatesOrNumber
-      ? { x: R.head(d), y: R.nth(1, d) }
-      : { y: d };
-  }
-
-  return areCategoriesDatesOrNumber
+const createDatapoint = (d, areCategoriesDatesOrNumber) =>
+  areCategoriesDatesOrNumber
     ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
     : { y: d.value, __metadata: d.metadata };
-};
 
 export const createStackedDatapoints = (
   data,
@@ -174,7 +167,6 @@ export const createStackedDatapoints = (
         const dataPoint = createDatapoint(
           d,
           data.areCategoriesDates || data.areCategoriesNumbers,
-          data.version,
         );
 
         return color
