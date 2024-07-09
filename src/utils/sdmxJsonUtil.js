@@ -101,10 +101,21 @@ const getXAndYDimension = (
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
   },
 ) => {
-  const dimensionsWithMoreThanOneMember = R.filter(
-    R.compose(R.gt(R.__, 1), R.length, R.prop('values')),
-    dimensions,
-  );
+  const dimensionsWithMoreThanOneMember = R.compose(
+    R.when(
+      () => dotStatUrlHasLastNObservationsEqOne,
+      R.reject(isTimeDimension),
+    ),
+    R.filter(R.compose(R.gt(R.__, 1), R.length, R.prop('values'))),
+  )(dimensions);
+
+  const finalDimensions = R.compose(
+    R.when(R.isEmpty, R.always(dimensions)),
+    R.when(
+      () => dotStatUrlHasLastNObservationsEqOne,
+      R.reject(isTimeDimension),
+    ),
+  )(dimensions);
 
   const findDimensionWithPredefinedIdOrThatDoesNotHaveId = (
     dimensionList,
@@ -136,10 +147,6 @@ const getXAndYDimension = (
     );
   };
 
-  const timeDimension = dotStatUrlHasLastNObservationsEqOne
-    ? R.find(isTimeDimension, dimensionsWithMoreThanOneMember)
-    : null;
-
   if (chartType === chartTypes.map) {
     const countryDimension = R.find(
       R.compose(
@@ -150,88 +157,41 @@ const getXAndYDimension = (
         ),
         R.prop('id'),
       ),
-      dimensions,
+      finalDimensions,
     );
 
     if (countryDimension) {
-      if (timeDimension && dotStatUrlHasLastNObservationsEqOne) {
-        const dimensionsWithMoreThanOneMemberWithoutTime = R.reject(
-          R.propEq(timeDimension.id, 'id'),
-          dimensionsWithMoreThanOneMember,
-        );
-        const dimensionsWithoutTime = R.reject(
-          R.propEq(timeDimension.id, 'id'),
-          dimensions,
+      const yDimension =
+        R.head(
+          R.reject(
+            R.propEq(countryDimension.id, 'id'),
+            dimensionsWithMoreThanOneMember,
+          ),
+        ) ||
+        findDimensionWithPredefinedIdOrThatDoesNotHaveId(
+          finalDimensions,
+          countryDimension.id,
         );
 
-        const yDimension =
-          R.head(
-            R.reject(
-              R.propEq(countryDimension.id, 'id'),
-              dimensionsWithMoreThanOneMemberWithoutTime,
-            ),
-          ) ||
-          findDimensionWithPredefinedIdOrThatDoesNotHaveId(
-            dimensionsWithoutTime,
-            countryDimension.id,
-          );
-
-        return [countryDimension, yDimension];
-      }
+      return [countryDimension, yDimension];
     }
   }
 
-  if (timeDimension) {
-    if (dotStatUrlHasLastNObservationsEqOne) {
-      const dimensionsWithMoreThanOneMemberWithoutTime = R.reject(
-        R.propEq(timeDimension.id, 'id'),
-        dimensionsWithMoreThanOneMember,
-      );
-      const dimensionsWithoutTime = R.reject(
-        R.propEq(timeDimension.id, 'id'),
-        dimensions,
-      );
-
-      if (R.length(dimensionsWithMoreThanOneMemberWithoutTime) >= 2) {
-        const x = R.head(dimensionsWithMoreThanOneMemberWithoutTime);
-        const y = R.nth(1, dimensionsWithMoreThanOneMemberWithoutTime);
-        return [x, y];
-      }
-      if (R.length(dimensionsWithMoreThanOneMemberWithoutTime) === 1) {
-        const x = R.head(dimensionsWithMoreThanOneMemberWithoutTime);
-        const y = findDimensionWithPredefinedIdOrThatDoesNotHaveId(
-          dimensionsWithoutTime,
-          x.id,
-        );
-        return [x, y];
-      }
-
-      return [R.head(dimensions), R.nth(1, dimensions)];
-    }
+  if (R.length(dimensionsWithMoreThanOneMember) >= 2) {
+    const x = R.head(dimensionsWithMoreThanOneMember);
+    const y = R.nth(1, dimensionsWithMoreThanOneMember);
+    return [x, y];
+  }
+  if (R.length(dimensionsWithMoreThanOneMember) === 1) {
+    const x = R.head(dimensionsWithMoreThanOneMember);
+    const y = findDimensionWithPredefinedIdOrThatDoesNotHaveId(
+      finalDimensions,
+      x.id,
+    );
+    return [x, y];
   }
 
-  return R.cond([
-    [
-      R.compose(R.gte(R.__, 2), R.length),
-      R.always([
-        R.head(dimensionsWithMoreThanOneMember),
-        R.nth(1, dimensionsWithMoreThanOneMember),
-      ]),
-    ],
-    [
-      R.compose(R.equals(R.__, 1), R.length),
-      () => {
-        const x = R.head(dimensionsWithMoreThanOneMember);
-        const y = findDimensionWithPredefinedIdOrThatDoesNotHaveId(
-          dimensions,
-          x.id,
-        );
-
-        return [x, y];
-      },
-    ],
-    [R.T, R.always([R.head(dimensions), R.nth(1, dimensions)])],
-  ])(dimensionsWithMoreThanOneMember);
+  return [R.head(finalDimensions), R.nth(1, finalDimensions)];
 };
 
 const matchMonth = R.match(/(\d{4})-(\d{2})/);
