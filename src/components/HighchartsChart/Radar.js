@@ -60,9 +60,6 @@ const Radar = forwardRef(
     },
     ref,
   ) => {
-    const areCategoriesDatesOrNumber =
-      data.areCategoriesDates || data.areCategoriesNumbers;
-
     const series = useMemo(
       () =>
         mapWithIndex((s, xIdx) => {
