@@ -128,13 +128,21 @@ const Chart = ({ chartId, language, ...otherProps }) => {
     return null;
   }
 
-  if (chartConfigData.isLoading || chartConfigData.hasFetchFailed) {
+  if (
+    chartConfigData.isLoading ||
+    chartConfigData.hasFetchFailed ||
+    R.has('error', chartConfigData.chartConfig)
+  ) {
     return (
       <CenteredContainer>
         {chartConfigData.isLoading ? (
           <Spinner />
         ) : (
-          <div className="cb-container">Something went wrong :(</div>
+          <div className="cb-container">
+            {R.has('error', chartConfigData.chartConfig)
+              ? chartConfigData.chartConfig.error
+              : 'Something went wrong :('}
+          </div>
         )}
       </CenteredContainer>
     );
