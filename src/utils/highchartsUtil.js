@@ -105,7 +105,7 @@ export const createFormatters = ({
                 ? this.point.name
                 : this.point.category ?? this.series.name;
 
-            const timeLabelSuffix = ` - ${timeLabel}`;
+            const timeLabelSuffix = timeLabel ? ` - ${timeLabel}` : '';
 
             if (
               R.includes(
