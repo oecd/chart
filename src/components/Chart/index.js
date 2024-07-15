@@ -9,6 +9,7 @@ import { possibleVariables } from '../../utils/configUtil';
 import { isCastableToNumber } from '../../utils/chartUtil';
 import CenteredContainer from '../CenteredContainer';
 import ChartErrorBoundary from '../ChartErrorBoundary';
+import { errorMessages } from '../../constants/chart';
 
 const Chart = ({
   width = null,
@@ -58,7 +59,7 @@ const Chart = ({
     return (
       <ChartErrorBoundary
         fallback={
-          <CenteredContainer>Something went wrong :(</CenteredContainer>
+          <CenteredContainer>{errorMessages.generic}</CenteredContainer>
         }
       >
         <Component
@@ -76,7 +77,7 @@ const Chart = ({
 
   return (
     <ChartErrorBoundary
-      fallback={<CenteredContainer>Something went wrong :(</CenteredContainer>}
+      fallback={<CenteredContainer>{errorMessages.generic}</CenteredContainer>}
     >
       <LazyLoadComponent
         placeholder={

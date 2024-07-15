@@ -14,7 +14,7 @@ import Spinner from '../Spinner';
 import { possibleVariables } from '../../utils/configUtil';
 import { fetchJson } from '../../utils/fetchUtil';
 import CenteredContainer from '../CenteredContainer';
-import { apiUrl } from '../../constants/chart';
+import { apiUrl, errorMessages } from '../../constants/chart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 
 const Chart = ({ chartId, language, ...otherProps }) => {
@@ -141,7 +141,7 @@ const Chart = ({ chartId, language, ...otherProps }) => {
           <div className="cb-container">
             {R.has('error', chartConfigData.chartConfig)
               ? chartConfigData.chartConfig.error
-              : 'Something went wrong :('}
+              : errorMessages.generic}
           </div>
         )}
       </CenteredContainer>

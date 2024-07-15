@@ -101,3 +101,9 @@ export const debugInfoTypes = {
 };
 
 export const maxSupprortedNumberOfDataPoint = 15000;
+
+export const errorMessages = {
+  generic: 'An error occured :-(',
+  noData: 'No data available',
+  underEmbargo: 'Not yet available',
+};

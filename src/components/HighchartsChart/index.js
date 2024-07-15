@@ -19,6 +19,7 @@ import {
   dataSourceTypes,
   debugInfoTypes,
   decimalPointTypes,
+  errorMessages,
   maxSupprortedNumberOfDataPoint,
   sortByOptions,
   sortOrderOptions,
@@ -206,7 +207,7 @@ const HighchartsChart = ({
           }
         } catch (e) {
           setIsFetching(false);
-          setErrorMessage('An error occured :-(');
+          setErrorMessage(errorMessages.generic);
           setSdmxJson(null);
         }
       };
@@ -220,12 +221,12 @@ const HighchartsChart = ({
     }
 
     if (preParsedDataInternal?.dotStatServerFetchFailed === true) {
-      setErrorMessage('An error occured :-(');
+      setErrorMessage(errorMessages.generic);
       return null;
     }
 
     if (preParsedDataInternal?.dotStatResponseWasEmpty === true) {
-      setNoDataMessage('No data available');
+      setNoDataMessage(errorMessages.noData);
       return {
         ...emptyData,
         codeLabelMapping: preParsedDataInternal.codeLabelMapping,
@@ -242,7 +243,7 @@ const HighchartsChart = ({
       }
 
       if (isSdmxJsonEmpty(sdmxJson)) {
-        setNoDataMessage('No data available');
+        setNoDataMessage(errorMessages.noData);
 
         const codeLabelMapping = createCodeLabelMapping(
           csvCodeLabelMappingProjectLevel,
@@ -275,7 +276,7 @@ const HighchartsChart = ({
         forceXAxisToBeTreatedAsCategories,
       });
     } catch (e) {
-      setErrorMessage('An error occured :-(');
+      setErrorMessage(errorMessages.generic);
       return emptyData;
     }
   }, [
@@ -329,7 +330,7 @@ const HighchartsChart = ({
 
       return data;
     } catch (e) {
-      setErrorMessage('An error occured :-(');
+      setErrorMessage(errorMessages.generic);
       return emptyData;
     }
   }, [
@@ -381,7 +382,7 @@ const HighchartsChart = ({
     const numberOfCategory = R.length(parsedData.categories);
     const numberOfSeries = R.length(parsedData.series);
     if (numberOfCategory * numberOfSeries > maxSupprortedNumberOfDataPoint) {
-      setErrorMessage('An error occured :-(');
+      setErrorMessage(errorMessages.generic);
       if (debug) {
         sendDebugInfo({
           type: debugInfoTypes.tooManyDataPoint,
@@ -462,7 +463,7 @@ const HighchartsChart = ({
               setIsFetching(false);
             }
           } catch (e) {
-            setErrorMessage('An error occured :-(');
+            setErrorMessage(errorMessages.generic);
             setIsFetching(false);
           }
         };
