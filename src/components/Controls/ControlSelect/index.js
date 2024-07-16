@@ -6,7 +6,10 @@ import * as R from 'ramda';
 import getBasicStylingConfigs from '../../../utils/reactSelectUtil';
 import { isNilOrEmpty, toggleArrayItem } from '../../../utils/ramdaUtil';
 import ControlFallback from '../../ControlFallback';
-import { controlTypes } from '../../../constants/chart';
+import {
+  controlTypes,
+  selectControlSortByOptions,
+} from '../../../constants/chart';
 import { parseCSVWithoutCleanUp } from '../../../utils/csvUtil';
 import { possibleVariables } from '../../../utils/configUtil';
 import {
@@ -35,17 +38,34 @@ const ControlSelect = ({
   type,
   hideTitle = false,
   isStandalone = false,
+  sortBy,
 }) => {
   const selectInstanceId = useId();
 
   const finalOptions = useMemo(
     () =>
-      R.map(
-        (o) => {
+      R.compose(
+        R.when(
+          () => sortBy === selectControlSortByOptions.label.value,
+          R.sortBy(R.prop('label')),
+        ),
+        R.map((o) => {
           const codeThatCanContainVars =
             type === controlTypes.selectChart.value
               ? R.join('|', R.head(parseCSVWithoutCleanUp(R.prop('value', o))))
               : R.prop('value', o);
+
+          const codeLabelMappingThatCanContainVars =
+            type === controlTypes.selectChart.value
+              ? R.compose(
+                  R.fromPairs,
+                  R.map(([c, l]) => [
+                    R.join('|', R.head(parseCSVWithoutCleanUp(c))),
+                    l,
+                  ]),
+                  R.toPairs,
+                )(codeLabelMapping)
+              : codeLabelMapping;
 
           return R.compose(
             R.assoc('value', codeThatCanContainVars),
@@ -54,14 +74,13 @@ const ControlSelect = ({
               R.propOr(
                 codeThatCanContainVars,
                 R.toUpper(codeThatCanContainVars),
-                codeLabelMapping,
+                codeLabelMappingThatCanContainVars,
               ),
             ),
           )(o);
-        },
-        R.reject(R.compose(isNilOrEmpty, R.prop('value')), options || []),
-      ),
-    [options, codeLabelMapping, type],
+        }),
+      )(R.reject(R.compose(isNilOrEmpty, R.prop('value')), options || [])),
+    [options, codeLabelMapping, type, sortBy],
   );
 
   const finalLabel = useMemo(() => {
@@ -276,6 +295,7 @@ ControlSelect.propTypes = {
   type: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool,
   isStandalone: PropTypes.bool,
+  sortBy: PropTypes.string,
 };
 
 export default ControlSelect;

@@ -56,7 +56,7 @@
             <oecd-control control-id="9cdf4b8b46" var1="BRA" />
           </div>
           <div style="min-height: 79px">
-            <oecd-control control-id="1f7e54141e" var2="INDEX_1990" />
+            <oecd-control control-id="1f7e54141e" var2="FD_GHG" />
           </div>
           <div style="min-height: 79px">
             <oecd-control control-id="2689355508" />
@@ -80,11 +80,8 @@
         <div class="block-container" style="margin-top: 200px">
           <h2 class="block-title">Chart selector</h2>
           <div style="display: flex; min-height: 79px">
-            <div style="width: 50%; margin-right: 7px">
-              <oecd-control control-id="55eda08751" hide-title />
-            </div>
-            <div style="width: 50%; margin-left: 7px">
-              <oecd-control control-id="1617b854de" hide-title />
+            <div style="width: 100%">
+              <oecd-control control-id="fecf86b496" hide-title />
             </div>
           </div>
           <div
@@ -146,8 +143,9 @@
     ></script>
 
     <script>
-      // use int env as a temp workaround
+      // override backend url
       const __CHART_BUILDER_API_URL_OVERRIDE = 'https://int.oecdch.art';
+      //const __CHART_BUILDER_API_URL_OVERRIDE = 'http://localhost:3000';
     </script>
     <script type="module" src="../dist/browser/oecd-chart-latest.js"></script>
 
@@ -156,10 +154,7 @@
         const chartElements = document.querySelectorAll('oecd-chart');
 
         // handle chart selector control
-        if (
-          detail.controlId === '55eda08751' ||
-          detail.controlId === '1617b854de'
-        ) {
+        if (detail.controlId === 'fecf86b496') {
           const chartSelectorChart = chartElements[2];
           chartSelectorChart.setAttribute(
             detail.varName === 'chartId' ? 'chart-id' : detail.varName,
@@ -202,15 +197,15 @@
         const countryControl = document.querySelector(
           'oecd-control[control-id="9cdf4b8b46"]',
         );
-        countryControl.var1 = 'FRA|BRA|MEX';
-        const variableControl = document.querySelector(
+        countryControl.var1 = 'FRA|USA';
+        const measureControl = document.querySelector(
           'oecd-control[control-id="1f7e54141e"]',
         );
         const timeControl = document.querySelector(
           'oecd-control[control-id="2689355508"]',
         );
-        timeControl.var3 = '1990';
-        timeControl.var4 = '2005';
+        timeControl.var3 = '2005';
+        timeControl.var4 = '2015';
       }, 5000);
 
       document.addEventListener('cbChartActionButtonClicked', ({ detail }) => {

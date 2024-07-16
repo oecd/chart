@@ -42,6 +42,11 @@ export const sortOrderOptions = {
   desc: { value: 'desc', label: 'Descending' },
 };
 
+export const selectControlSortByOptions = {
+  none: { value: 'none', label: 'None (options order)' },
+  label: { value: 'label', label: 'Label' },
+};
+
 export const mapTypes = {
   normal: { value: 'normal', label: 'Choropleth' },
   bubble: { value: 'bubble', label: 'Bubble' },
