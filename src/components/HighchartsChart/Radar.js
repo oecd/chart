@@ -82,6 +82,7 @@ const Radar = forwardRef(
             name: s.label,
             data: R.map((d) => createDatapoint(d), s.data),
             type: 'line',
+            lineWidth: 2.5,
             marker: {
               symbol: 'circle',
               radius: 3,
@@ -89,7 +90,7 @@ const Radar = forwardRef(
             },
             states: {
               hover: {
-                lineWidth: 2,
+                lineWidth: 2.5,
               },
             },
             color,

@@ -95,6 +95,7 @@ const Line = forwardRef(
               return dataPoint;
             }, s.data),
             type: 'spline',
+            lineWidth: 2.5,
             marker: {
               symbol: 'circle',
               radius: 3,
@@ -102,7 +103,7 @@ const Line = forwardRef(
             },
             states: {
               hover: {
-                lineWidth: 2,
+                lineWidth: 2.5,
               },
             },
             color,
