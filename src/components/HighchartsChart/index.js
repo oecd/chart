@@ -184,6 +184,36 @@ const HighchartsChart = ({
         setNoDataMessage(null);
         setSdmxJson(null);
       }
+    } else if (dataSourceType === dataSourceTypes.dotStatSnapshot.value) {
+      if (preParsedDataInternal) {
+        return;
+      }
+
+      setIsFetching(true);
+      setErrorMessage(null);
+      setNoDataMessage(null);
+
+      const getSnapshotData = async () => {
+        try {
+          const newPreParsedData = await fetchJson(
+            `${apiUrl}/api/public/chartConfig/${id}?preParsedDataOnly&lang=${R.toLower(
+              lang,
+            )}`,
+          );
+
+          setPreParsedDataInternal(R.prop('preParsedData', newPreParsedData));
+          setIsFetching(false);
+
+          // if (newPreParsedData?.dotStatResponseWasEmpty === true) {
+          //   setNoDataMessage(errorMessages.noData);
+          // }
+        } catch (e) {
+          setIsFetching(false);
+          setErrorMessage(errorMessages.generic);
+          setPreParsedDataInternal(null);
+        }
+      };
+      getSnapshotData();
     } else {
       setIsFetching(true);
       setErrorMessage(null);
@@ -213,7 +243,14 @@ const HighchartsChart = ({
       };
       getDotStatData();
     }
-  }, [dataSourceType, finalDotStatUrl, dotStatLang, preParsedDataInternal]);
+  }, [
+    dataSourceType,
+    finalDotStatUrl,
+    dotStatLang,
+    preParsedDataInternal,
+    id,
+    lang,
+  ]);
 
   const parsedSDMXData = useMemo(() => {
     if (dataSourceType === dataSourceTypes.csv.value) {
@@ -298,7 +335,10 @@ const HighchartsChart = ({
   ]);
 
   const parsedCSVData = useMemo(() => {
-    if (dataSourceType === dataSourceTypes.dotStat.value) {
+    if (
+      dataSourceType === dataSourceTypes.dotStat.value ||
+      dataSourceType === dataSourceTypes.dotStatSnapshot.value
+    ) {
       return null;
     }
     if (
@@ -352,7 +392,8 @@ const HighchartsChart = ({
 
   const parsedData = useMemo(
     () =>
-      dataSourceType === dataSourceTypes.dotStat.value
+      dataSourceType === dataSourceTypes.dotStat.value ||
+      dataSourceType === dataSourceTypes.dotStatSnapshot.value
         ? parsedSDMXData
         : parsedCSVData,
     [dataSourceType, parsedSDMXData, parsedCSVData],
@@ -425,7 +466,7 @@ const HighchartsChart = ({
         R.map(
           (varName) =>
             R.toUpper(varsThatCauseNewPreParsedDataFetch[varName] ?? '') !==
-            R.toUpper(vars[varName] ?? ''),
+            R.replace(/\+/g, '|', R.toUpper(vars[varName] ?? '')),
         ),
       )(R.keys(varsThatCauseNewPreParsedDataFetch));
 

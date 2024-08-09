@@ -143,7 +143,10 @@ const ControlSelect = ({
 
   const selectedOption = useMemo(() => {
     if (multiple) {
-      const optionsFromVar = R.split('|', vars[varName] ?? '');
+      const optionsFromVar = R.split(
+        '|',
+        R.replace(/\+/g, '|', vars[varName] ?? ''),
+      );
       return R.reduce(
         (acc, item) => {
           const option = R.find(
