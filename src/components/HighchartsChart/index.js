@@ -184,6 +184,32 @@ const HighchartsChart = ({
         setNoDataMessage(null);
         setSdmxJson(null);
       }
+    } else if (dataSourceType === dataSourceTypes.dotStatSnapshot.value) {
+      if (preParsedDataInternal) {
+        return;
+      }
+
+      setIsFetching(true);
+      setErrorMessage(null);
+      setNoDataMessage(null);
+
+      const getSnapshotData = async () => {
+        try {
+          const newPreParsedData = await fetchJson(
+            `${apiUrl}/api/public/chartConfig/${id}?preParsedDataOnly&lang=${R.toLower(
+              lang,
+            )}`,
+          );
+
+          setPreParsedDataInternal(R.prop('preParsedData', newPreParsedData));
+          setIsFetching(false);
+        } catch (e) {
+          setIsFetching(false);
+          setErrorMessage(errorMessages.generic);
+          setPreParsedDataInternal(null);
+        }
+      };
+      getSnapshotData();
     } else {
       setIsFetching(true);
       setErrorMessage(null);
@@ -192,6 +218,13 @@ const HighchartsChart = ({
       const getDotStatData = async () => {
         try {
           lastRequestedDataKey.current = `${finalDotStatUrl}|${dotStatLang}`;
+
+          if (debug) {
+            sendDebugInfo({
+              type: debugInfoTypes.empty,
+              data: {},
+            });
+          }
 
           const newSdmxJson = await fetchDotStatData(
             finalDotStatUrl,
@@ -202,6 +235,7 @@ const HighchartsChart = ({
           if (
             lastRequestedDataKey.current === `${finalDotStatUrl}|${dotStatLang}`
           ) {
+            setPreParsedDataInternal(null);
             setSdmxJson(newSdmxJson);
             setIsFetching(false);
           }
@@ -209,11 +243,26 @@ const HighchartsChart = ({
           setIsFetching(false);
           setErrorMessage(errorMessages.generic);
           setSdmxJson(null);
+
+          if (debug) {
+            sendDebugInfo({
+              type: debugInfoTypes.dotStatInfo,
+              data: { error: e.message },
+            });
+          }
         }
       };
       getDotStatData();
     }
-  }, [dataSourceType, finalDotStatUrl, dotStatLang, preParsedDataInternal]);
+  }, [
+    dataSourceType,
+    finalDotStatUrl,
+    dotStatLang,
+    preParsedDataInternal,
+    id,
+    lang,
+    debug,
+  ]);
 
   const parsedSDMXData = useMemo(() => {
     if (dataSourceType === dataSourceTypes.csv.value) {
@@ -261,6 +310,7 @@ const HighchartsChart = ({
 
       return createDataFromSdmxJson({
         sdmxJson,
+        lang: dotStatLang,
         dotStatCodeLabelMapping,
         csvCodeLabelMappingProjectLevel,
         dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
@@ -286,6 +336,7 @@ const HighchartsChart = ({
     mapCountryDimension,
     pivotData,
     sdmxJson,
+    dotStatLang,
     sortBy,
     sortOrder,
     sortSeries,
@@ -298,7 +349,10 @@ const HighchartsChart = ({
   ]);
 
   const parsedCSVData = useMemo(() => {
-    if (dataSourceType === dataSourceTypes.dotStat.value) {
+    if (
+      dataSourceType === dataSourceTypes.dotStat.value ||
+      dataSourceType === dataSourceTypes.dotStatSnapshot.value
+    ) {
       return null;
     }
     if (
@@ -352,7 +406,8 @@ const HighchartsChart = ({
 
   const parsedData = useMemo(
     () =>
-      dataSourceType === dataSourceTypes.dotStat.value
+      dataSourceType === dataSourceTypes.dotStat.value ||
+      dataSourceType === dataSourceTypes.dotStatSnapshot.value
         ? parsedSDMXData
         : parsedCSVData,
     [dataSourceType, parsedSDMXData, parsedCSVData],
@@ -412,24 +467,24 @@ const HighchartsChart = ({
     });
   }, [parsedData, onDataReady, debug, isFetching]);
 
+  const [prevLang, setPrevLang] = useState(lang);
+
+  useEffect(() => setPrevLang(lang), [lang]);
+
   useEffect(() => {
     if (preParsedDataInternal) {
       const { varsThatCauseNewPreParsedDataFetch } = preParsedDataInternal;
-
-      if (isNilOrEmpty(varsThatCauseNewPreParsedDataFetch)) {
-        return;
-      }
 
       const anyVarHasChanged = R.compose(
         R.any(R.equals(true)),
         R.map(
           (varName) =>
             R.toUpper(varsThatCauseNewPreParsedDataFetch[varName] ?? '') !==
-            R.toUpper(vars[varName] ?? ''),
+            R.replace(/\+/g, '|', R.toUpper(vars[varName] ?? '')),
         ),
-      )(R.keys(varsThatCauseNewPreParsedDataFetch));
+      )(R.keys(varsThatCauseNewPreParsedDataFetch || {}));
 
-      if (anyVarHasChanged) {
+      if (anyVarHasChanged || lang !== prevLang) {
         const varsParam = R.compose(
           R.join('/'),
           R.dropLastWhile((v) => v === '-'),
@@ -470,7 +525,7 @@ const HighchartsChart = ({
         getNewPreParsedData();
       }
     }
-  }, [id, vars, lang, preParsedDataInternal]);
+  }, [id, vars, lang, prevLang, preParsedDataInternal]);
 
   const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);

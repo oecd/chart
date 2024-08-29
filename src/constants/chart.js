@@ -28,6 +28,7 @@ export const stackingOptions = {
 export const dataSourceTypes = {
   csv: { value: 'csv', label: 'CSV' },
   dotStat: { value: 'dotStat', label: '.Stat' },
+  dotStatSnapshot: { value: 'dotStatSnapshot', label: '.Stat snapshot' },
 };
 
 export const sortByOptions = {

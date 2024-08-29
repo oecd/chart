@@ -30,11 +30,11 @@ const createDotStatHeaders = (lang) => ({
 export const createDotStatUrl = (dotStatUrl, vars) =>
   R.reduce(
     (acc, varName) => {
-      const varValue = R.prop(varName, vars);
+      const varValue = R.propOr('', varName, vars);
 
       return R.replace(
         new RegExp(`{${varName}}`, 'gi'),
-        R.toUpper(R.replace(/\|/g, '+', varValue)),
+        R.toUpper(R.replace(/\|/g, '+', `${varValue}`)),
         acc,
       );
     },
@@ -45,8 +45,8 @@ export const createDotStatUrl = (dotStatUrl, vars) =>
 export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
   const response = await fetch(fixDotStatUrl(url), {
     headers: createDotStatHeaders(lang),
-    signal: AbortSignal.timeout(dotStatTimeout),
-    ...fetchConfig,
+    signal: AbortSignal.timeout(fetchConfig.timeout || dotStatTimeout),
+    ...R.dissoc('timeout', fetchConfig),
   });
 
   if (response.status >= 200 && response.status < 300) {
@@ -70,30 +70,46 @@ export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
         return { data: { dataSets: [{}] }, meta: { schema: '' } };
       }
     } catch (e) {
-      throw new Error(response.statusText);
+      throw new Error(
+        R.isEmpty(response.statusText) ? response.status : response.statusText,
+      );
     }
   }
 
-  throw new Error(response.statusText);
+  let message = R.isEmpty(response.statusText)
+    ? response.status
+    : response.statusText;
+  try {
+    const responseText = await response.text();
+    message = R.isEmpty(responseText) ? message : responseText;
+    // eslint-disable-next-line no-empty
+  } catch {}
+
+  throw new Error(message);
 };
 
-const createDimensionMemberLabelByCode = (members, codeLabelMapping) =>
+export const createDimensionMemberLabelByCode = (
+  members,
+  lang,
+  codeLabelMapping,
+) =>
   R.compose(
     R.when(
       () => !isNilOrEmpty(codeLabelMapping),
       R.mergeLeft(codeLabelMapping),
     ),
     R.fromPairs,
-    R.map((m) => [m.id, m.name]),
+    R.map((m) => [m.id, R.pathOr(R.prop('name', m), ['names', lang], m)]),
   )(members);
 
-const isTimeDimension = R.either(
+export const isTimeDimension = R.either(
   R.propEq('TIME_PERIOD', 'role'),
   R.compose(R.includes('TIME_PERIOD'), R.propOr([], 'roles')),
 );
 
-const getXAndYDimension = (
-  dimensions,
+export const getXAndYDimension = (
+  allDimensions,
+  dimensionsWithMoreThanOneMember,
   {
     chartType,
     mapCountryDimension,
@@ -101,21 +117,13 @@ const getXAndYDimension = (
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
   },
 ) => {
-  const dimensionsWithMoreThanOneMember = R.compose(
-    R.when(
-      () => dotStatUrlHasLastNObservationsEqOne,
-      R.reject(isTimeDimension),
-    ),
-    R.filter(R.compose(R.gt(R.__, 1), R.length, R.prop('values'))),
-  )(dimensions);
-
   const finalDimensions = R.compose(
-    R.when(R.isEmpty, R.always(dimensions)),
+    R.when(R.isEmpty, R.always(allDimensions)),
     R.when(
       () => dotStatUrlHasLastNObservationsEqOne,
       R.reject(isTimeDimension),
     ),
-  )(dimensions);
+  )(allDimensions);
 
   const findDimensionWithPredefinedIdOrThatDoesNotHaveId = (
     dimensionList,
@@ -196,7 +204,7 @@ const getXAndYDimension = (
 
 const matchMonth = R.match(/(\d{4})-(\d{2})/);
 
-const tweakDimensionLabels = R.map((dimension) => {
+export const tweakDimensionLabels = R.map((dimension) => {
   if (isTimeDimension(dimension)) {
     const membersAreMonths = !R.isEmpty(
       matchMonth(R.head(dimension.values).id),
@@ -220,197 +228,226 @@ const tweakDimensionLabels = R.map((dimension) => {
   return dimension;
 });
 
-export const parseSdmxJson = (chartConfig) => (sdmxJson) => {
-  const dataSets = R.path(['data', 'dataSets'], sdmxJson);
+export const parseSdmxJson =
+  ({
+    chartType,
+    mapCountryDimension,
+    dotStatUrlHasLastNObservationsEqOne,
+    dotStatCodeLabelMapping,
+    csvCodeLabelMappingProjectLevel,
+    lang,
+    dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+  }) =>
+  (sdmxJson) => {
+    const observations = R.path(
+      ['data', 'dataSets', 0, 'observations'],
+      sdmxJson,
+    );
 
-  const rawDimensions = R.path(
-    ['data', 'structure', 'dimensions', 'observation'],
-    sdmxJson,
-  );
+    const dimensions = R.path(
+      ['data', 'structure', 'dimensions', 'observation'],
+      sdmxJson,
+    );
 
-  const dimensions = rawDimensions;
-
-  const [xDimension, yDimension] = tweakDimensionLabels(
-    getXAndYDimension(dimensions, chartConfig),
-  );
-
-  const timeDimension = R.find(isTimeDimension, dimensions);
-
-  const otherDimensions = R.reject(
-    R.compose(R.includes(R.__, [xDimension.id, yDimension.id]), R.prop('id')),
-    dimensions,
-  );
-
-  const unusedDimensions = R.compose(
-    R.map((dim) => ({
-      id: dim.id,
-      name: dim.name,
-      memberCodes: R.map(R.prop('id'), dim.values),
-    })),
-    R.filter(R.compose(R.gt(R.__, 1), R.length, R.prop('values'))),
-  )(otherDimensions);
-
-  const observations = R.path([0, 'observations'], dataSets);
-
-  const totalNumberOfDataPoint = R.length(R.keys(observations));
-
-  const getXDimensionMemberCodeByIndex = (index) =>
-    R.compose(R.prop('id'), R.nth(index))(xDimension.values);
-
-  const getTimeDimensionMemberCodeByIndex = (index) =>
-    R.compose(R.prop('id'), R.nth(index))(timeDimension?.values || []);
-
-  const defaultRowValues = R.times(
-    () => ({ value: null }),
-    R.length(yDimension.values),
-  );
-
-  const xDimensionIndexInCoordinate = R.propOr(
-    R.length(dimensions) - 1,
-    'keyPosition',
-    xDimension,
-  );
-  const yDimensionIndexInCoordinate = R.propOr(
-    R.length(dimensions) - 1,
-    'keyPosition',
-    yDimension,
-  );
-  const timeDimensionIndexInCoordinate = timeDimension
-    ? R.propOr(R.length(dimensions) - 1, 'keyPosition', timeDimension)
-    : -1;
-
-  const finalLastNObservationsEqOne =
-    timeDimension && chartConfig.dotStatUrlHasLastNObservationsEqOne;
-
-  const series = R.compose(
-    (seriesWithoutEmptyOnes) => {
-      const allXMemberCodes = R.map(R.prop('id'), xDimension.values);
-      const seriesMemberCodes = R.map(R.head, seriesWithoutEmptyOnes);
-      const missingEmptySeriesMemberCodes = R.difference(
-        allXMemberCodes,
-        seriesMemberCodes,
-      );
-
-      if (R.isEmpty(missingEmptySeriesMemberCodes)) {
-        return seriesWithoutEmptyOnes;
-      }
-
-      const emptyData = R.times(
-        () => ({ value: null }),
-        R.length(R.head(seriesWithoutEmptyOnes)) - 1,
-      );
-
-      const missingEmptySeries = R.map(
-        (c) => R.prepend(c, emptyData),
-        missingEmptySeriesMemberCodes,
-      );
-
-      return R.concat(seriesWithoutEmptyOnes, missingEmptySeries);
-    },
-    R.map(([k, v]) => R.prepend(k, v)),
-    R.toPairs,
-    R.reduce((acc, [coordinateString, [value]]) => {
-      const coordinate = R.split(':', coordinateString);
-
-      const x = parseInt(R.nth(xDimensionIndexInCoordinate, coordinate), 10);
-      const xCode = getXDimensionMemberCodeByIndex(x);
-      const y = parseInt(R.nth(yDimensionIndexInCoordinate, coordinate), 10);
-
-      const finalValue = R.when(
-        () => finalLastNObservationsEqOne,
-        (v) => {
-          const time = parseInt(
-            R.nth(timeDimensionIndexInCoordinate, coordinate),
-            10,
-          );
-          const timeCode = getTimeDimensionMemberCodeByIndex(time);
-          return R.assoc('metadata', { timeCode }, v);
-        },
-      )({ value });
-
-      return R.has(xCode, acc)
-        ? R.evolve({ [xCode]: R.update(y, finalValue) }, acc)
-        : R.assoc(xCode, R.update(y, finalValue, defaultRowValues), acc);
-    }, {}),
-  )(R.toPairs(observations));
-
-  const numberOfUsedDataPoint = R.compose(
-    R.sum,
-    R.map(
-      R.compose(
-        R.length,
-        R.reject(R.compose(R.isNil, R.prop('value'))),
-        R.tail,
+    const dimensionsWithMoreThanOneMember = R.compose(
+      R.when(
+        () => dotStatUrlHasLastNObservationsEqOne,
+        R.reject(isTimeDimension),
       ),
-    ),
-  )(series);
+      R.filter(R.compose(R.gt(R.__, 1), R.length, R.prop('values'))),
+    )(dimensions);
 
-  const codeLabelMapping = createCodeLabelMapping(
-    chartConfig.csvCodeLabelMappingProjectLevel,
-    chartConfig.dotStatCodeLabelMapping,
-  );
+    const [xDimension, yDimension] = tweakDimensionLabels(
+      getXAndYDimension(dimensions, dimensionsWithMoreThanOneMember, {
+        chartType,
+        mapCountryDimension,
+        dotStatUrlHasLastNObservationsEqOne,
+        dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+      }),
+    );
 
-  const yDimensionLabelByCode = createDimensionMemberLabelByCode(
-    yDimension.values,
-    codeLabelMapping,
-  );
+    const timeDimension = R.find(isTimeDimension, dimensions);
 
-  const parsingHelperData = {
-    xDimensionLabelByCode: createDimensionMemberLabelByCode(
-      xDimension.values,
+    const otherDimensions = R.reject(
+      R.compose(R.includes(R.__, [xDimension.id, yDimension.id]), R.prop('id')),
+      dimensions,
+    );
+
+    const unusedDimensions = R.compose(
+      R.map((dim) => ({
+        id: dim.id,
+        name: dim.name,
+        memberCodes: R.map(R.prop('id'), dim.values),
+      })),
+      R.filter(R.compose(R.gt(R.__, 1), R.length, R.prop('values'))),
+    )(otherDimensions);
+
+    const totalNumberOfDataPoint = R.length(R.keys(observations));
+
+    const getXDimensionMemberCodeByIndex = (index) =>
+      R.compose(R.prop('id'), R.nth(index))(xDimension.values);
+
+    const getTimeDimensionMemberCodeByIndex = (index) =>
+      R.compose(R.prop('id'), R.nth(index))(timeDimension?.values || []);
+
+    const defaultRowValues = R.times(
+      () => ({ value: null }),
+      R.length(yDimension.values),
+    );
+
+    const xDimensionIndexInCoordinate = R.propOr(
+      R.length(dimensions) - 1,
+      'keyPosition',
+      xDimension,
+    );
+    const yDimensionIndexInCoordinate = R.propOr(
+      R.length(dimensions) - 1,
+      'keyPosition',
+      yDimension,
+    );
+    const timeDimensionIndexInCoordinate = timeDimension
+      ? R.propOr(R.length(dimensions) - 1, 'keyPosition', timeDimension)
+      : -1;
+
+    const finalLastNObservationsEqOne =
+      timeDimension && dotStatUrlHasLastNObservationsEqOne;
+
+    const series = R.compose(
+      (seriesWithoutEmptyOnes) => {
+        const allXMemberCodes = R.map(R.prop('id'), xDimension.values);
+        const seriesMemberCodes = R.map(R.head, seriesWithoutEmptyOnes);
+        const missingEmptySeriesMemberCodes = R.difference(
+          allXMemberCodes,
+          seriesMemberCodes,
+        );
+
+        if (R.isEmpty(missingEmptySeriesMemberCodes)) {
+          return seriesWithoutEmptyOnes;
+        }
+
+        const emptyData = R.times(
+          () => ({ value: null }),
+          R.length(R.head(seriesWithoutEmptyOnes)) - 1,
+        );
+
+        const missingEmptySeries = R.map(
+          (c) => R.prepend(c, emptyData),
+          missingEmptySeriesMemberCodes,
+        );
+
+        return R.concat(seriesWithoutEmptyOnes, missingEmptySeries);
+      },
+      R.map(([k, v]) => R.prepend(k, v)),
+      R.toPairs,
+      R.reduce((acc, [coordinateString, [value]]) => {
+        const coordinate = R.split(':', coordinateString);
+
+        const x = parseInt(R.nth(xDimensionIndexInCoordinate, coordinate), 10);
+        const xCode = getXDimensionMemberCodeByIndex(x);
+        const y = parseInt(R.nth(yDimensionIndexInCoordinate, coordinate), 10);
+
+        const finalValue = R.when(
+          () => finalLastNObservationsEqOne,
+          (v) => {
+            const time = parseInt(
+              R.nth(timeDimensionIndexInCoordinate, coordinate),
+              10,
+            );
+            const timeCode = getTimeDimensionMemberCodeByIndex(time);
+            return R.assoc('metadata', { timeCode }, v);
+          },
+        )({ value });
+
+        return R.has(xCode, acc)
+          ? R.evolve({ [xCode]: R.update(y, finalValue) }, acc)
+          : R.assoc(xCode, R.update(y, finalValue, defaultRowValues), acc);
+      }, {}),
+    )(R.toPairs(observations));
+
+    const numberOfUsedDataPoint = R.compose(
+      R.sum,
+      R.map(
+        R.compose(
+          R.length,
+          R.reject(R.compose(R.isNil, R.prop('value'))),
+          R.tail,
+        ),
+      ),
+    )(series);
+
+    const codeLabelMapping = createCodeLabelMapping(
+      csvCodeLabelMappingProjectLevel,
+      dotStatCodeLabelMapping,
+    );
+
+    const yDimensionLabelByCode = createDimensionMemberLabelByCode(
+      yDimension.values,
+      lang,
       codeLabelMapping,
-    ),
-    yDimensionLabelByCode,
-    otherDimensionsLabelByCode: R.compose(
-      R.reduce(
-        (acc, d) =>
-          R.mergeRight(
-            acc,
-            createDimensionMemberLabelByCode(d.values, codeLabelMapping),
-          ),
-        {},
+    );
+
+    const parsingHelperData = {
+      xDimensionLabelByCode: createDimensionMemberLabelByCode(
+        xDimension.values,
+        lang,
+        codeLabelMapping,
       ),
-    )(otherDimensions),
+      yDimensionLabelByCode,
+      otherDimensionsLabelByCode: R.compose(
+        R.reduce(
+          (acc, d) =>
+            R.mergeRight(
+              acc,
+              createDimensionMemberLabelByCode(
+                d.values,
+                lang,
+                codeLabelMapping,
+              ),
+            ),
+          {},
+        ),
+      )(otherDimensions),
+    };
+
+    const latestAvailableDataMapping = finalLastNObservationsEqOne
+      ? R.compose(() => {
+          const timeCodes = R.compose(
+            R.reject(R.isNil),
+            R.map(R.path(['metadata', 'timeCode'])),
+            R.unnest,
+            R.map(R.tail),
+          )(series);
+          const orderedTimeCodes = R.sortBy(R.identity, timeCodes);
+          return {
+            latestYMin: R.head(orderedTimeCodes),
+            latestYMax: R.last(orderedTimeCodes),
+          };
+        })()
+      : {};
+
+    const caterories = R.concat(
+      ['Category'],
+      R.map(R.prop('id'), R.prop('values', yDimension)),
+    );
+
+    return {
+      data: R.prepend(caterories, series),
+      parsingHelperData,
+      dotStatInfo: {
+        unusedDimensions,
+        totalNumberOfDataPoint,
+        numberOfUsedDataPoint,
+      },
+      ...latestAvailableDataMapping,
+    };
   };
-
-  const latestAvailableDataMapping = finalLastNObservationsEqOne
-    ? R.compose(() => {
-        const timeCodes = R.compose(
-          R.reject(R.isNil),
-          R.map(R.path(['metadata', 'timeCode'])),
-          R.unnest,
-          R.map(R.tail),
-        )(series);
-        const orderedTimeCodes = R.sortBy(R.identity, timeCodes);
-        return {
-          latestYMin: R.head(orderedTimeCodes),
-          latestYMax: R.last(orderedTimeCodes),
-        };
-      })()
-    : {};
-
-  const caterories = R.concat(
-    ['Category'],
-    R.map(R.prop('id'), R.prop('values', yDimension)),
-  );
-
-  return {
-    data: R.prepend(caterories, series),
-    parsingHelperData,
-    dotStatInfo: {
-      unusedDimensions,
-      totalNumberOfDataPoint,
-      numberOfUsedDataPoint,
-    },
-    ...latestAvailableDataMapping,
-  };
-};
 
 export const isSdmxJsonEmpty = (sdmxJson) =>
   !R.has('observations', R.path(['data', 'dataSets', 0], sdmxJson));
 
 export const createDataFromSdmxJson = ({
   sdmxJson,
+  lang,
   dotStatCodeLabelMapping,
   csvCodeLabelMappingProjectLevel,
   dotStatUrlHasLastNObservationsEqOne,
@@ -443,11 +480,11 @@ export const createDataFromSdmxJson = ({
     pivotCSV(chartType, dataSourceType, pivotData),
     parseSdmxJson({
       chartType,
-      pivotData,
       mapCountryDimension,
       dotStatUrlHasLastNObservationsEqOne,
       dotStatCodeLabelMapping,
       csvCodeLabelMappingProjectLevel,
+      lang,
       dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
     }),
   )(sdmxJson);

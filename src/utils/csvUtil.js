@@ -184,12 +184,12 @@ export const createCodeLabelMapping = (
     return {};
   }
 
-  const mappingProjectLevel = isNilOrEmpty(csvCodeLabelMappingProjectLevel)
-    ? {}
-    : createCodeLabelMap(parseCSV(csvCodeLabelMappingProjectLevel));
-  const mappingChartLevel = isNilOrEmpty(codeLabelMappingChartLevel)
-    ? {}
-    : createCodeLabelMap(parseCSV(codeLabelMappingChartLevel));
+  const mappingProjectLevel = createCodeLabelMap(
+    parseCSV(csvCodeLabelMappingProjectLevel),
+  );
+  const mappingChartLevel = createCodeLabelMap(
+    parseCSV(codeLabelMappingChartLevel),
+  );
 
   return R.mergeRight(mappingProjectLevel, mappingChartLevel);
 };
