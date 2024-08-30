@@ -240,7 +240,7 @@ const ControlTimeSlider = ({
         <Slider
           onChange={onRangeChange}
           onChangeComplete={onRangeChangeComplete}
-          range={isRange}
+          range={isRange ? { draggableTrack: true } : false}
           min={0}
           max={R.isEmpty(steps.codes) ? 0 : R.length(steps.codes) - 1}
           value={
