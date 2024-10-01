@@ -34,6 +34,7 @@ export const createFormatters = ({
   chartType,
   mapColorValueSteps,
   maxNumberOfDecimals,
+  noThousandsSeparator,
   codeLabelMapping,
   decimalPoint,
   areCategoriesNumbers,
@@ -57,6 +58,7 @@ export const createFormatters = ({
         this.point.value || this.point.z || this.point.y,
         isMaxNumberOrDecimalCastableToNumber ? maxNumberOfDecimals : -1,
         finalDecimalPoint,
+        noThousandsSeparator ? '' : null,
       );
     },
   };
@@ -91,7 +93,12 @@ export const createFormatters = ({
               mapColorValueSteps,
             ) || [],
           ) || value
-        : numberFormat(value, maxNumberOfDecimals, finalDecimalPoint);
+        : numberFormat(
+            value,
+            maxNumberOfDecimals,
+            finalDecimalPoint,
+            noThousandsSeparator ? '' : null,
+          );
 
       const seriesName =
         chartType === chartTypes.map ? this.point.name : this.series.name;
@@ -103,7 +110,7 @@ export const createFormatters = ({
             const key =
               chartType === chartTypes.pie
                 ? this.point.name
-                : this.point.category ?? this.series.name;
+                : (this.point.category ?? this.series.name);
 
             const timeLabelSuffix = timeLabel ? ` - ${timeLabel}` : '';
 
@@ -135,6 +142,7 @@ export const createFormatters = ({
                   key,
                   maxNumberOfDecimals,
                   finalDecimalPoint,
+                  noThousandsSeparator ? '' : null,
                 )}${timeLabelSuffix}`,
                 content,
               );
