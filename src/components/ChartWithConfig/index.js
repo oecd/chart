@@ -36,30 +36,30 @@ const ChartWithConfig = ({
     : ChartWithConfigNonFixedChartHeight;
 
   const [vars, setVars] = useState({
-    var1: isNilOrEmpty(var1) ? var1DefaultValue ?? '' : var1,
-    var2: isNilOrEmpty(var2) ? var2DefaultValue ?? '' : var2,
-    var3: isNilOrEmpty(var3) ? var3DefaultValue ?? '' : var3,
-    var4: isNilOrEmpty(var4) ? var4DefaultValue ?? '' : var4,
-    var5: isNilOrEmpty(var5) ? var5DefaultValue ?? '' : var5,
-    var6: isNilOrEmpty(var6) ? var6DefaultValue ?? '' : var6,
-    var7: isNilOrEmpty(var7) ? var7DefaultValue ?? '' : var7,
-    var8: isNilOrEmpty(var8) ? var8DefaultValue ?? '' : var8,
-    var9: isNilOrEmpty(var9) ? var9DefaultValue ?? '' : var9,
-    var10: isNilOrEmpty(var10) ? var10DefaultValue ?? '' : var10,
+    var1: isNilOrEmpty(var1) ? (var1DefaultValue ?? '') : var1,
+    var2: isNilOrEmpty(var2) ? (var2DefaultValue ?? '') : var2,
+    var3: isNilOrEmpty(var3) ? (var3DefaultValue ?? '') : var3,
+    var4: isNilOrEmpty(var4) ? (var4DefaultValue ?? '') : var4,
+    var5: isNilOrEmpty(var5) ? (var5DefaultValue ?? '') : var5,
+    var6: isNilOrEmpty(var6) ? (var6DefaultValue ?? '') : var6,
+    var7: isNilOrEmpty(var7) ? (var7DefaultValue ?? '') : var7,
+    var8: isNilOrEmpty(var8) ? (var8DefaultValue ?? '') : var8,
+    var9: isNilOrEmpty(var9) ? (var9DefaultValue ?? '') : var9,
+    var10: isNilOrEmpty(var10) ? (var10DefaultValue ?? '') : var10,
   });
 
   useEffect(() => {
     setVars({
-      var1: isNilOrEmpty(var1) ? var1DefaultValue ?? '' : var1,
-      var2: isNilOrEmpty(var2) ? var2DefaultValue ?? '' : var2,
-      var3: isNilOrEmpty(var3) ? var3DefaultValue ?? '' : var3,
-      var4: isNilOrEmpty(var4) ? var4DefaultValue ?? '' : var4,
-      var5: isNilOrEmpty(var5) ? var5DefaultValue ?? '' : var5,
-      var6: isNilOrEmpty(var6) ? var6DefaultValue ?? '' : var6,
-      var7: isNilOrEmpty(var7) ? var7DefaultValue ?? '' : var7,
-      var8: isNilOrEmpty(var8) ? var8DefaultValue ?? '' : var8,
-      var9: isNilOrEmpty(var9) ? var9DefaultValue ?? '' : var9,
-      var10: isNilOrEmpty(var10) ? var10DefaultValue ?? '' : var10,
+      var1: isNilOrEmpty(var1) ? (var1DefaultValue ?? '') : var1,
+      var2: isNilOrEmpty(var2) ? (var2DefaultValue ?? '') : var2,
+      var3: isNilOrEmpty(var3) ? (var3DefaultValue ?? '') : var3,
+      var4: isNilOrEmpty(var4) ? (var4DefaultValue ?? '') : var4,
+      var5: isNilOrEmpty(var5) ? (var5DefaultValue ?? '') : var5,
+      var6: isNilOrEmpty(var6) ? (var6DefaultValue ?? '') : var6,
+      var7: isNilOrEmpty(var7) ? (var7DefaultValue ?? '') : var7,
+      var8: isNilOrEmpty(var8) ? (var8DefaultValue ?? '') : var8,
+      var9: isNilOrEmpty(var9) ? (var9DefaultValue ?? '') : var9,
+      var10: isNilOrEmpty(var10) ? (var10DefaultValue ?? '') : var10,
     });
   }, [
     var1,
