@@ -99,7 +99,10 @@ export const createDimensionMemberLabelByCode = (
       R.mergeLeft(codeLabelMapping),
     ),
     R.fromPairs,
-    R.map((m) => [m.id, R.pathOr(R.prop('name', m), ['names', lang], m)]),
+    R.map((m) => [
+      m.id,
+      R.pathOr(R.propOr(R.prop('id', m), 'name', m), ['names', lang], m),
+    ]),
   )(members);
 
 export const isTimeDimension = R.either(
