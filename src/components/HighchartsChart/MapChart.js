@@ -1,17 +1,25 @@
 /* eslint-disable react/no-this-in-sfc  */
-import React, { useMemo, forwardRef, memo, useCallback } from 'react';
+import React, {
+  useMemo,
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
 import AccessibilityModule from 'highcharts/modules/accessibility';
 import AnnotationsModule from 'highcharts/modules/annotations';
 import HighchartsMap from 'highcharts/modules/map';
-import map from '@highcharts/map-collection/custom/world-robinson-lowres.geo.json';
-import proj4 from 'proj4';
 import ExportingModule from 'highcharts/modules/exporting';
 import OfflineExportingModule from 'highcharts/modules/offline-exporting';
 import ExportDataModule from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
+import { debounce } from 'throttle-debounce';
 import * as R from 'ramda';
+
+import map from '../../utils/world-highres-custom.json';
 
 import {
   deepMergeUserOptionsWithDefaultOptions,
@@ -29,6 +37,7 @@ import {
   mapWithIndex,
   reduceWithIndex,
 } from '../../utils/ramdaUtil';
+import { getDottedMapLines } from '../../utils/mapsUtil';
 
 // inspired example about "Logarithmic color axis with extension to emulate negative values"
 // https://api.highcharts.com/highmaps/colorAxis.type
@@ -86,8 +95,8 @@ const overrideCountriesLabel = (codeLabelMapping) => {
     return map;
   }
 
-  return R.modify(
-    ['features'],
+  return R.modifyPath(
+    ['objects', 'default', 'geometries'],
     R.map((c) => {
       const code = R.path(['properties', 'iso-a3'], c);
       const label = R.prop(code, codeLabelMapping);
@@ -101,6 +110,10 @@ const overrideCountriesLabel = (codeLabelMapping) => {
     map,
   );
 };
+
+// Uncomment to get country polygon coordinates (useful to create new dottedBorders)
+const geo = Highcharts.topo2geo(map);
+console.log(R.find(R.pathEq('PSE', ['properties', 'iso-a3']), geo.features));
 
 const MapChart = forwardRef(
   (
@@ -175,6 +188,11 @@ const MapChart = forwardRef(
       [finalMap],
     );
 
+    const optionalDottedMapLines = useMemo(
+      () => getDottedMapLines(R.map(R.prop('code'), data.categories)),
+      [data.categories],
+    );
+
     const series = useMemo(
       () => [
         {
@@ -237,11 +255,13 @@ const MapChart = forwardRef(
           }),
           data.series,
         ),
+        ...optionalDottedMapLines,
       ],
       [
         mapDisplayCountriesName,
         mapType,
         data,
+        optionalDottedMapLines,
         finalColorPalette,
         highlightColors,
         highlight,
@@ -254,12 +274,11 @@ const MapChart = forwardRef(
       () => ({
         chart: {
           map: finalMap,
-          proj4,
           style: {
             fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
           },
           height,
-          animation: !isFullScreen,
+          animation: false,
           spacing: calcChartSpacing(isFullScreen),
           events: { fullscreenClose },
         },
@@ -348,6 +367,11 @@ const MapChart = forwardRef(
         plotOptions: {
           map: {
             allAreas: false,
+            states: {
+              hover: {
+                enabled: false,
+              },
+            },
           },
           series: {
             animation: false,
@@ -414,6 +438,40 @@ const MapChart = forwardRef(
       ],
     );
 
+    const zoomRef = useRef(null);
+
+    const afterSetView = useCallback(function afterSetView() {
+      if (zoomRef.current !== this.chart.mapView.zoom) {
+        R.forEach(
+          (s) => {
+            s.update({});
+          },
+          R.filter(R.propEq('mapline', 'type'), this.chart.series),
+        );
+        zoomRef.current = this.chart.mapView.zoom;
+      }
+    }, []);
+
+    const debouncedAfterSetView = useMemo(
+      () => debounce(200, afterSetView),
+      [afterSetView],
+    );
+
+    useEffect(() => {
+      if (ref.current?.chart) {
+        const { chart } = ref.current;
+        if (!R.isEmpty(optionalDottedMapLines)) {
+          Highcharts.removeEvent(chart.mapView, 'afterSetView');
+
+          Highcharts.addEvent(
+            chart.mapView,
+            'afterSetView',
+            debouncedAfterSetView,
+          );
+        }
+      }
+    }, [ref, debouncedAfterSetView, zoomRef, optionalDottedMapLines]);
+
     const mergedOptions = useMemo(
       () =>
         deepMergeUserOptionsWithDefaultOptions(defaultOptions, optionsOverride),
@@ -426,7 +484,8 @@ const MapChart = forwardRef(
         constructorType="mapChart"
         highcharts={Highcharts}
         options={mergedOptions}
-        immutable={!isFullScreen}
+        immutable={false}
+        updateArgs={[true, true, false]}
       />
     );
   },
