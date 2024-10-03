@@ -112,8 +112,9 @@ const overrideCountriesLabel = (codeLabelMapping) => {
 };
 
 // Uncomment to get country polygon coordinates (useful to create new dottedBorders)
-const geo = Highcharts.topo2geo(map);
-console.log(R.find(R.pathEq('PSE', ['properties', 'iso-a3']), geo.features));
+// const geo = Highcharts.topo2geo(map);
+// console.log(R.find(R.pathEq('PAK', ['properties', 'iso-a3']), geo.features));
+// console.log(R.find(R.pathEq('DT8', ['properties', 'id']), geo.features));
 
 const MapChart = forwardRef(
   (
@@ -255,7 +256,7 @@ const MapChart = forwardRef(
           }),
           data.series,
         ),
-        ...optionalDottedMapLines,
+        optionalDottedMapLines,
       ],
       [
         mapDisplayCountriesName,
@@ -441,14 +442,14 @@ const MapChart = forwardRef(
     const zoomRef = useRef(null);
 
     const afterSetView = useCallback(function afterSetView() {
-      if (zoomRef.current !== this.chart.mapView.zoom) {
+      if (zoomRef.current !== this.chart?.mapView.zoom) {
         R.forEach(
           (s) => {
             s.update({});
           },
           R.filter(R.propEq('mapline', 'type'), this.chart.series),
         );
-        zoomRef.current = this.chart.mapView.zoom;
+        zoomRef.current = this.chart?.mapView.zoom;
       }
     }, []);
 
@@ -485,6 +486,7 @@ const MapChart = forwardRef(
         highcharts={Highcharts}
         options={mergedOptions}
         immutable={false}
+        // immutable={!isFullScreen}
         updateArgs={[true, true, false]}
       />
     );
