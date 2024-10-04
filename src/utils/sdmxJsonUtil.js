@@ -105,10 +105,11 @@ export const createDimensionMemberLabelByCode = (
     ]),
   )(members);
 
-export const isTimeDimension = R.either(
+export const isTimeDimension = R.anyPass([
+  R.propEq(true, 'isTimeDimension'),
   R.propEq('TIME_PERIOD', 'role'),
   R.compose(R.includes('TIME_PERIOD'), R.propOr([], 'roles')),
-);
+]);
 
 export const getXAndYDimension = (
   allDimensions,
