@@ -1,3 +1,5 @@
+import React from 'react';
+
 export const chartTypes = {
   line: 'Line',
   bar: 'Bar',
@@ -109,7 +111,17 @@ export const debugInfoTypes = {
 export const maxSupprortedNumberOfDataPoint = 15000;
 
 export const errorMessages = {
-  generic: 'An error occured :-(',
-  noData: 'No data available',
-  underEmbargo: 'Not yet available',
+  generic: (
+    <span style={{ textAlign: 'center' }}>
+      An error occured.
+      <br />
+      Please refresh the page.
+    </span>
+  ),
+  noData: (
+    <span style={{ textAlign: 'center' }}>
+      No data available for the current selection.
+    </span>
+  ),
+  underEmbargo: <span style={{ textAlign: 'center' }}>Not yet available</span>,
 };
