@@ -19,8 +19,13 @@ import * as R from 'ramda';
 
 import { frequencyTypes } from '../constants/chart';
 
+const differenceInQinquennials = (maxDate, minDate) =>
+  (maxDate.getFullYear() - minDate.getFullYear()) / 5;
+
+const addQinquennials = (date, amount) => addYears(date, amount * 5);
+
 const tryParseWithFormat = (string, dateFormat) => {
-  const date = parse(string, dateFormat, new Date());
+  const date = parse(`${string}`, dateFormat, new Date());
   if (isValid(date)) {
     return date;
   }
@@ -30,7 +35,7 @@ const tryParseWithFormat = (string, dateFormat) => {
 export const frequencies = {
   [frequencyTypes.monthly.value]: {
     tryParse: (string) =>
-      R.length(string) === 7 && tryParseWithFormat(string, 'yyyy-MM'),
+      R.length(`${string}`) === 7 && tryParseWithFormat(string, 'yyyy-MM'),
     formatToCode: (date) => format(date, 'yyyy-MM'),
     formatToLabel: (date) => format(date, 'MM-yyyy'),
     differenceFunc: differenceInMonths,
@@ -42,7 +47,7 @@ export const frequencies = {
   },
   [frequencyTypes.quarterly.value]: {
     tryParse: (string) =>
-      R.length(string) === 7 && tryParseWithFormat(string, 'yyyy-QQQ'),
+      R.length(`${string}`) === 7 && tryParseWithFormat(string, 'yyyy-QQQ'),
     formatToCode: (date) => format(date, 'yyyy-QQQ'),
     formatToLabel: (date, lang) => {
       const label = format(date, 'Q-yyyy');
@@ -57,7 +62,7 @@ export const frequencies = {
   },
   [frequencyTypes.yearly.value]: {
     tryParse: (string) =>
-      R.length(string) === 4 && tryParseWithFormat(string, 'yyyy'),
+      R.length(`${string}`) === 4 && tryParseWithFormat(string, 'yyyy'),
     formatToCode: (date) => format(date, 'yyyy'),
     formatToLabel: (date) => format(date, 'yyyy'),
     differenceFunc: differenceInYears,
@@ -66,6 +71,39 @@ export const frequencies = {
     getEndPeriod: (date) => (isValid(date) ? endOfYear(date) : ''),
     varValue: frequencyTypes.yearly.varValue,
     getLabel: (lang) => (lang === 'fr' ? 'Annuelle' : 'Yearly'),
+  },
+  [frequencyTypes.quinquennial.value]: {
+    tryParse: (string) => {
+      const parsed = tryParseWithFormat(string, 'yyyy');
+      if (R.length(`${string}`) !== 4 || !parsed) {
+        return false;
+      }
+      return parsed.getFullYear() % 5 === 0 ? parsed : false;
+    },
+    formatToCode: (date) => format(date, 'yyyy'),
+    formatToLabel: (date) => format(date, 'yyyy'),
+    differenceFunc: differenceInQinquennials,
+    addFunc: addQinquennials,
+    getStartPeriod: (date) => {
+      if (isValid(date)) {
+        const year = date.getFullYear();
+        date.setFullYear(year - (year % 5));
+        return startOfYear(date);
+      }
+      return '';
+    },
+    getEndPeriod: (date) => {
+      if (isValid(date)) {
+        const year = date.getFullYear();
+        if (year % 5 !== 0) {
+          date.setFullYear(year + (5 - (year % 5)));
+        }
+        return endOfYear(date);
+      }
+      return '';
+    },
+    varValue: frequencyTypes.quinquennial.varValue,
+    getLabel: (lang) => (lang === 'fr' ? 'Quinquennal' : 'Quinquennial'),
   },
 };
 

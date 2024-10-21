@@ -533,7 +533,10 @@ const transformCategoriesLabel =
   (chartType, forceXAxisToBeTreatedAsCategories, lang) => (data) => {
     if (
       data.areCategoriesDates &&
-      data.categoriesDateFomat === frequencyTypes.yearly.value &&
+      R.includes(data.categoriesDateFomat, [
+        frequencyTypes.quinquennial.value,
+        frequencyTypes.yearly.value,
+      ]) &&
       !forceXAxisToBeTreatedAsCategories &&
       !R.includes(chartType, chartTypesForWhichXAxisIsAlwaysTreatedAsCategories)
     ) {

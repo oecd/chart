@@ -291,6 +291,21 @@ export const addColorAlpha = (color, alphaToAdd) => {
 export const tryCastAllToDatesAndDetectFormat = (values) => {
   const firstValue = R.head(values);
 
+  const quinquennialFrequency = R.prop(
+    frequencyTypes.quinquennial.value,
+    frequencies,
+  );
+  if (quinquennialFrequency.tryParse(firstValue)) {
+    const dates = R.map(quinquennialFrequency.tryParse, values);
+    if (R.length(dates) > 2 && !R.any(R.equals(false), dates)) {
+      return {
+        isSuccessful: true,
+        dates: R.map((d) => d.getTime(), dates),
+        dateFormat: frequencyTypes.quinquennial.value,
+      };
+    }
+  }
+
   const yearlyFrequency = R.prop(frequencyTypes.yearly.value, frequencies);
   if (yearlyFrequency.tryParse(firstValue)) {
     const dates = R.map(yearlyFrequency.tryParse, values);

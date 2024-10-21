@@ -6,8 +6,9 @@ import * as R from 'ramda';
 
 import {
   getSteps,
-  frequencies as frequencyTypes,
+  frequencies as dateUtilFrequencies,
 } from '../../../utils/dateUtil';
+import { frequencyTypes } from '../../../constants/chart';
 import { isNilOrEmpty } from '../../../utils/ramdaUtil';
 
 const ControlTimeSlider = ({
@@ -127,30 +128,37 @@ const ControlTimeSlider = ({
       const newSteps = getSteps(newFrequency, lang);
       setSteps(newSteps);
 
-      changeVar(frequencyVarName, frequencyTypes[value].varValue);
+      changeVar(frequencyVarName, dateUtilFrequencies[value].varValue);
 
-      const currentMinDate = frequencyTypes[currentFrequencyTypeCode].tryParse(
-        vars[minVarName],
-      );
+      const currentMinDate = dateUtilFrequencies[
+        currentFrequencyTypeCode
+      ].tryParse(vars[minVarName]);
 
       if (isRange) {
-        const currentMaxDate = frequencyTypes[
+        const currentMaxDate = dateUtilFrequencies[
           currentFrequencyTypeCode
         ].tryParse(vars[maxVarName]);
 
         if (currentMinDate && currentMaxDate) {
           const newMinDate =
-            frequencyTypes[currentFrequencyTypeCode].getStartPeriod(
-              currentMinDate,
-            );
-          const newMinCode = frequencyTypes[value].formatToCode(newMinDate);
+            dateUtilFrequencies[
+              value === frequencyTypes.quinquennial.value
+                ? value
+                : currentFrequencyTypeCode
+            ].getStartPeriod(currentMinDate);
+          const newMinCode =
+            dateUtilFrequencies[value].formatToCode(newMinDate);
           changeVar(minVarName, newMinCode);
 
           const newMaxDate =
-            frequencyTypes[currentFrequencyTypeCode].getEndPeriod(
-              currentMaxDate,
-            );
-          const newMaxCode = frequencyTypes[value].formatToCode(newMaxDate);
+            dateUtilFrequencies[
+              value === frequencyTypes.quinquennial.value
+                ? value
+                : currentFrequencyTypeCode
+            ].getEndPeriod(currentMaxDate);
+
+          const newMaxCode =
+            dateUtilFrequencies[value].formatToCode(newMaxDate);
           changeVar(maxVarName, newMaxCode);
 
           const newMinStepIndex = R.findIndex(
@@ -170,10 +178,13 @@ const ControlTimeSlider = ({
         }
       } else if (currentMinDate) {
         const newMinDate =
-          frequencyTypes[currentFrequencyTypeCode].getStartPeriod(
-            currentMinDate,
-          );
-        const newMinCode = frequencyTypes[value].formatToCode(newMinDate);
+          dateUtilFrequencies[
+            value === frequencyTypes.quinquennial.value
+              ? value
+              : currentFrequencyTypeCode
+          ].getStartPeriod(currentMinDate);
+
+        const newMinCode = dateUtilFrequencies[value].formatToCode(newMinDate);
         changeVar(minVarName, newMinCode);
         const newMinStepIndex = R.findIndex(
           R.equals(newMinCode),
@@ -219,6 +230,7 @@ const ControlTimeSlider = ({
             display: 'flex',
             padding: isStandalone ? '10px 0px 15px 0px' : '5px 0px 15px 0px',
             justifyContent: 'flex-start',
+            overflow: 'hidden',
           }}
         >
           {R.map((f) => {
@@ -229,7 +241,7 @@ const ControlTimeSlider = ({
                 className={`cb-frequency-button ${f.frequencyTypeCode === currentFrequencyTypeCode ? 'cb-frequency-button-selected' : ''}`}
                 type="button"
               >
-                {frequencyTypes[f.frequencyTypeCode].getLabel(lang)}
+                {dateUtilFrequencies[f.frequencyTypeCode].getLabel(lang)}
               </button>
             );
           }, frequencies)}

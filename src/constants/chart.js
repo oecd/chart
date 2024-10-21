@@ -68,6 +68,11 @@ export const controlTypes = {
 };
 
 export const frequencyTypes = {
+  quinquennial: {
+    value: 'quinquennial',
+    label: 'Quinquennial',
+    varValue: 'A5',
+  },
   yearly: {
     value: 'yearly',
     label: 'Yearly',
