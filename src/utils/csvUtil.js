@@ -483,7 +483,7 @@ export const addCodeLabelMapping = (data) =>
 
 const filterCSV = (vars) => (data) => {
   const headerRow = R.head(data);
-  const varColumnIndex = R.findIndex(
+  const firstVarColumnIndex = R.findIndex(
     R.includes(
       R.__,
       R.map((v) => `{${v}}`, possibleVariables),
@@ -491,41 +491,122 @@ const filterCSV = (vars) => (data) => {
     headerRow,
   );
 
-  if (varColumnIndex === -1) {
+  if (firstVarColumnIndex === -1) {
     return { data };
   }
 
-  const varName = R.nth(varColumnIndex, headerRow);
-  const varValue = R.compose(
-    R.when(() => varColumnIndex === 0, R.split('|')),
+  const firstVarName = R.nth(firstVarColumnIndex, headerRow);
+  const firstVarValue = R.compose(
+    R.when(() => firstVarColumnIndex === 0, R.split('|')),
     R.toUpper,
-    R.prop(R.replace(/{|}/g, '', varName)),
+    R.prop(R.replace(/{|}/g, '', firstVarName)),
   )(vars);
+
+  const secondVarColumnIndex =
+    firstVarColumnIndex +
+    1 +
+    R.findIndex(
+      R.includes(
+        R.__,
+        R.map((v) => `{${v}}`, possibleVariables),
+      ),
+      R.drop(firstVarColumnIndex + 1, headerRow),
+    );
+
+  const secondVarName =
+    secondVarColumnIndex > firstVarColumnIndex
+      ? R.nth(secondVarColumnIndex, headerRow)
+      : null;
+  const secondVarValue = secondVarName
+    ? R.compose(R.toUpper, R.prop(R.replace(/{|}/g, '', secondVarName)))(vars)
+    : null;
 
   return {
     data: R.compose(
-      R.prepend(
-        varColumnIndex === 0
-          ? R.head(data)
-          : R.compose(R.remove(varColumnIndex, 1), R.head)(data),
-      ),
-      R.filter(
-        R.compose(
-          R.ifElse(
-            () => varColumnIndex === 0,
-            R.includes(R.__, varValue),
-            R.equals(varValue),
+      (dataRows) => {
+        if (!secondVarName) {
+          const finalDataRows =
+            firstVarColumnIndex === 0
+              ? dataRows
+              : R.map(R.remove(firstVarColumnIndex, 1), dataRows);
+          return R.prepend(
+            firstVarColumnIndex === 0
+              ? R.head(data)
+              : R.compose(R.remove(firstVarColumnIndex, 1), R.head)(data),
+            finalDataRows,
+          );
+        }
+
+        if (firstVarColumnIndex === 0) {
+          const finalDataRows = R.map(
+            R.remove(secondVarColumnIndex, 1),
+            dataRows,
+          );
+
+          return R.prepend(
+            R.compose(R.remove(secondVarColumnIndex, 1), R.head)(data),
+            finalDataRows,
+          );
+        }
+
+        const finalDataRows = R.map(
+          R.compose(
+            R.remove(secondVarColumnIndex - 1, 1),
+            R.remove(firstVarColumnIndex, 1),
           ),
-          R.toUpper,
-          (v) => `${v}`,
-          R.nth(varColumnIndex),
-        ),
-      ),
+          dataRows,
+        );
+
+        return R.prepend(
+          R.compose(
+            R.remove(secondVarColumnIndex - 1, 1),
+            R.remove(firstVarColumnIndex, 1),
+            R.head,
+          )(data),
+          finalDataRows,
+        );
+      },
+      R.filter((row) => {
+        const firstVarColumnValue = R.toUpper(
+          `${R.nth(firstVarColumnIndex, row)}`,
+        );
+
+        const firstVarValueMatches =
+          firstVarColumnIndex === 0
+            ? R.includes(firstVarColumnValue, firstVarValue)
+            : R.equals(firstVarColumnValue, firstVarValue);
+
+        if (!secondVarName) {
+          return firstVarValueMatches;
+        }
+
+        const secondVarColumnValue = R.toUpper(
+          `${R.nth(secondVarColumnIndex, row)}`,
+        );
+
+        const secondVarValueMatches = R.equals(
+          secondVarColumnValue,
+          secondVarValue,
+        );
+
+        return firstVarValueMatches && secondVarValueMatches;
+      }),
     )(R.tail(data)),
-    varsThatCauseNewPreParsedDataFetch: {
-      [R.replace(/{|}/g, '', R.nth(varColumnIndex, headerRow))]:
-        varColumnIndex === 0 ? R.join('|', varValue) : varValue,
-    },
+    varsThatCauseNewPreParsedDataFetch: secondVarName
+      ? {
+          [R.replace(/{|}/g, '', R.nth(firstVarColumnIndex, headerRow))]:
+            firstVarColumnIndex === 0
+              ? R.join('|', firstVarValue)
+              : firstVarValue,
+          [R.replace(/{|}/g, '', R.nth(secondVarColumnIndex, headerRow))]:
+            secondVarValue,
+        }
+      : {
+          [R.replace(/{|}/g, '', R.nth(firstVarColumnIndex, headerRow))]:
+            firstVarColumnIndex === 0
+              ? R.join('|', firstVarValue)
+              : firstVarValue,
+        },
   };
 };
 
