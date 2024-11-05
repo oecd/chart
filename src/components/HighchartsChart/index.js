@@ -118,7 +118,6 @@ const HighchartsChart = ({
   paletteStartingColor = null,
   paletteStartingColorOverride = null,
   highlightColors,
-  highlightColorsOverride,
   sortBy = sortByOptions.none.value,
   sortOrder = sortOrderOptions.asc.value,
   sortSeries = '',
@@ -867,11 +866,7 @@ const HighchartsChart = ({
             highlight={parsedHighlight}
             baseline={parsedBaseline}
             colorPalette={finalColorPalette}
-            highlightColors={
-              R.isEmpty(highlightColorsOverride)
-                ? highlightColors
-                : highlightColorsOverride
-            }
+            highlightColors={highlightColors}
             formatters={formatters}
             fullscreenClose={fullscreenClose}
             isFullScreen={isFullScreen}
@@ -935,7 +930,6 @@ HighchartsChart.propTypes = {
   paletteStartingColor: PropTypes.string,
   paletteStartingColorOverride: PropTypes.string,
   highlightColors: PropTypes.array.isRequired,
-  highlightColorsOverride: PropTypes.array.isRequired,
   sortBy: PropTypes.string,
   sortOrder: PropTypes.string,
   sortSeries: PropTypes.string,
