@@ -248,10 +248,10 @@ export const parseSdmxJson =
       sdmxJson,
     );
 
-    const dimensions = R.path(
-      ['data', 'structure', 'dimensions', 'observation'],
-      sdmxJson,
-    );
+    const dimensions = R.compose(
+      R.filter(R.has('values')),
+      R.path(['data', 'structure', 'dimensions', 'observation']),
+    )(sdmxJson);
 
     const dimensionsWithMoreThanOneMember = R.compose(
       R.when(
