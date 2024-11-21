@@ -11,7 +11,6 @@ import SvgIcon from '../Icons/SvgIcon';
 import ExpandIcon from '../Icons/ExpandIcon';
 import InfoIcon from '../Icons/InfoIcon';
 import { Popover, PopoverTrigger, PopoverContent } from '../floating/Popover';
-import { Tooltip, TooltipTrigger, TooltipContent } from '../floating/Tooltip';
 
 const Toolbox = ({
   chartRef,
@@ -142,8 +141,12 @@ const Toolbox = ({
         <div className={`cb-toolbox ${isSmall ? 'cb-small' : ''}`}>
           {(noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition)) &&
             isSmall && (
-              <Tooltip placement="left-start" offsetConfig={isSmall ? 4 : 8}>
-                <TooltipTrigger>
+              <Popover
+                placement="left-start"
+                offsetConfig={isSmall ? 4 : 8}
+                openTrigger="hover"
+              >
+                <PopoverTrigger>
                   <div
                     aria-label="Info"
                     className="cb-tool"
@@ -152,17 +155,18 @@ const Toolbox = ({
                   >
                     <InfoIcon />
                   </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  tooltipContainerId={tooltipContainerId}
-                  className="cb-floating cb-tooltip"
-                  dangerouslySetInnerHTML={{
-                    __html: noteAndSourceShouldBeDisplayedInTooltip
-                      ? R.join('', [definition, noteAndSource])
-                      : definition,
-                  }}
-                />
-              </Tooltip>
+                </PopoverTrigger>
+                <PopoverContent tooltipContainerId={tooltipContainerId}>
+                  <div
+                    className="cb-floating cb-tooltip"
+                    dangerouslySetInnerHTML={{
+                      __html: noteAndSourceShouldBeDisplayedInTooltip
+                        ? R.join('', [definition, noteAndSource])
+                        : definition,
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
             )}
           {R.map(
             (i) => (

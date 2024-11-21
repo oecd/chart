@@ -15,6 +15,9 @@ import {
   flip,
   shift,
   useClick,
+  safePolygon,
+  useHover,
+  useFocus,
   useDismiss,
   useRole,
   useInteractions,
@@ -31,6 +34,7 @@ export const usePopover = ({
   offsetConfig = 0,
   open: controlledOpen,
   setOpen: setControlledOpen,
+  openTrigger = 'click',
 }) => {
   const [open, setOpen] = useState(false);
   const data = useFloating({
@@ -51,11 +55,21 @@ export const usePopover = ({
 
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
 
+  const hover = useHover(context, {
+    handleClose: safePolygon(),
+  });
   const click = useClick(context);
+  const focus = useFocus(context);
   const dismiss = useDismiss(context);
-  const role = useRole(context);
+  const role = useRole(context, {
+    role: openTrigger === 'hover' ? 'tooltip' : 'menu',
+  });
 
-  const interactions = useInteractions([click, dismiss, role]);
+  const interactions = useInteractions(
+    openTrigger === 'hover'
+      ? [hover, focus, dismiss, role]
+      : [click, dismiss, role],
+  );
 
   return useMemo(
     () => ({

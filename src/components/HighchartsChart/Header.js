@@ -6,7 +6,7 @@ import * as R from 'ramda';
 import Toolbox from './Toolbox';
 import InfoIcon from '../Icons/InfoIcon';
 import ActionIcon from '../Icons/ActionIcon';
-import { Tooltip, TooltipTrigger, TooltipContent } from '../floating/Tooltip';
+import { Popover, PopoverTrigger, PopoverContent } from '../floating/Popover';
 
 const Header = ({
   title,
@@ -82,8 +82,12 @@ const Header = ({
           )}
           {(noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition)) &&
             !isSmall && (
-              <Tooltip placement="bottom-end">
-                <TooltipTrigger>
+              <Popover
+                placement="bottom-end"
+                offsetConfig={8}
+                openTrigger="hover"
+              >
+                <PopoverTrigger>
                   <div
                     aria-label="Info"
                     className="cb-tool"
@@ -93,17 +97,18 @@ const Header = ({
                   >
                     <InfoIcon />
                   </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  tooltipContainerId={tooltipContainerId}
-                  className="cb-floating cb-tooltip"
-                  dangerouslySetInnerHTML={{
-                    __html: noteAndSourceShouldBeDisplayedInTooltip
-                      ? R.join('', [definition, noteAndSource])
-                      : definition,
-                  }}
-                />
-              </Tooltip>
+                </PopoverTrigger>
+                <PopoverContent tooltipContainerId={tooltipContainerId}>
+                  <div
+                    className="cb-floating cb-tooltip"
+                    dangerouslySetInnerHTML={{
+                      __html: noteAndSourceShouldBeDisplayedInTooltip
+                        ? R.join('', [definition, noteAndSource])
+                        : definition,
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
             )}
           <Toolbox
             chartRef={chartRef}
