@@ -284,6 +284,10 @@ export const parseSdmxJson =
         memberCodes: R.map(R.prop('id'), dim.values),
       })),
       R.filter(R.compose(R.gt(R.__, 1), R.length, R.prop('values'))),
+      R.when(
+        () => dotStatUrlHasLastNObservationsEqOne,
+        R.reject(isTimeDimension),
+      ),
     )(otherDimensions);
 
     const totalNumberOfDataPoint = R.length(R.keys(observations));
