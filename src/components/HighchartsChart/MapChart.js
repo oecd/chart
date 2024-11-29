@@ -335,6 +335,12 @@ const MapChart = forwardRef(
           },
         },
 
+        mapView: {
+          projection: {
+            name: 'Miller',
+          },
+        },
+
         credits: {
           enabled: false,
         },
