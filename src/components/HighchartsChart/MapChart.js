@@ -19,8 +19,7 @@ import HighchartsReact from 'highcharts-react-official';
 import { debounce } from 'throttle-debounce';
 import * as R from 'ramda';
 
-import map from '../../utils/world-highres-custom.json';
-
+import map from '../../utils/world-highres-custom-topo.json';
 import {
   deepMergeUserOptionsWithDefaultOptions,
   getListItemAtTurningIndex,
@@ -111,11 +110,6 @@ const overrideCountriesLabel = (codeLabelMapping) => {
   );
 };
 
-// Uncomment to get country polygon coordinates (useful to create new dottedBorders)
-// const geo = Highcharts.topo2geo(map);
-// console.log(R.find(R.pathEq('PAK', ['properties', 'iso-a3']), geo.features));
-// console.log(R.find(R.pathEq('DT8', ['properties', 'id']), geo.features));
-
 const MapChart = forwardRef(
   (
     {
@@ -190,74 +184,77 @@ const MapChart = forwardRef(
     );
 
     const optionalDottedMapLines = useMemo(
-      () => getDottedMapLines(R.map(R.prop('code'), data.categories)),
-      [data.categories],
+      () => getDottedMapLines(R.map(R.prop('code'), data.categories), mapType),
+      [data.categories, mapType],
     );
 
     const series = useMemo(
-      () => [
-        {
-          type: 'map',
-          enableMouseTracking: false,
-          showInLegend: false,
-          dataLabels: {
-            enabled: mapDisplayCountriesName,
-            format: '{point.name}',
+      () =>
+        R.when(
+          () => optionalDottedMapLines,
+          R.append(optionalDottedMapLines),
+        )([
+          {
+            type: 'map',
+            enableMouseTracking: false,
+            showInLegend: false,
+            dataLabels: {
+              enabled: mapDisplayCountriesName,
+              format: '{point.name}',
+            },
+            allAreas: true,
+            nullColor: '#bbbbbb',
           },
-          allAreas: true,
-          nullColor: '#bbbbbb',
-        },
-        ...mapWithIndex(
-          (s, yIdx) => ({
-            name: s.label,
-            type: mapType === mapTypes.normal.value ? 'map' : 'mapbubble',
-            joinBy: ['iso-a3', 'code'],
-            color: getListItemAtTurningIndex(yIdx, finalColorPalette),
-            ...(mapType !== mapTypes.normal.value
-              ? {
-                  minSize: 8,
-                  maxSize: mapType === mapTypes.point.value ? 8 : '10%',
-                }
-              : {}),
+          ...mapWithIndex(
+            (s, yIdx) => ({
+              name: s.label,
+              type: mapType === mapTypes.normal.value ? 'map' : 'mapbubble',
+              joinBy: ['iso-a3', 'code'],
+              color: getListItemAtTurningIndex(yIdx, finalColorPalette),
+              ...(mapType !== mapTypes.normal.value
+                ? {
+                    minSize: 8,
+                    maxSize: mapType === mapTypes.point.value ? 8 : '10%',
+                  }
+                : {}),
 
-            showInLegend: true,
+              showInLegend: true,
 
-            data: reduceWithIndex(
-              (acc, d, xIdx) => {
-                if (isNilOrEmpty(d)) {
-                  return acc;
-                }
+              data: reduceWithIndex(
+                (acc, d, xIdx) => {
+                  if (isNilOrEmpty(d)) {
+                    return acc;
+                  }
 
-                const countryCode = R.toUpper(
-                  `${R.nth(xIdx, data.categories)?.code}`,
-                );
+                  const countryCode = R.toUpper(
+                    `${R.nth(xIdx, data.categories)?.code}`,
+                  );
 
-                const baselineOrHighlightColor = getBaselineOrHighlightColor(
-                  { code: countryCode, label: getLabelFromMap(countryCode) },
-                  R.map(R.toUpper, highlight),
-                  R.map(R.toUpper, baseline),
-                  highlightColors,
-                );
+                  const baselineOrHighlightColor = getBaselineOrHighlightColor(
+                    { code: countryCode, label: getLabelFromMap(countryCode) },
+                    R.map(R.toUpper, highlight),
+                    R.map(R.toUpper, baseline),
+                    highlightColors,
+                  );
 
-                return R.append(
-                  {
-                    code: R.toUpper(`${R.nth(xIdx, data.categories)?.code}`),
-                    ...createDatapoint(d, mapType),
-                    ...(baselineOrHighlightColor
-                      ? { color: baselineOrHighlightColor }
-                      : {}),
-                  },
-                  acc,
-                );
-              },
-              [],
-              s.data,
-            ),
-          }),
-          data.series,
-        ),
-        optionalDottedMapLines,
-      ],
+                  return R.append(
+                    {
+                      code: R.toUpper(`${R.nth(xIdx, data.categories)?.code}`),
+                      ...createDatapoint(d, mapType),
+                      ...(baselineOrHighlightColor
+                        ? { color: baselineOrHighlightColor }
+                        : {}),
+                    },
+                    acc,
+                  );
+                },
+                [],
+                s.data,
+              ),
+            }),
+            data.series,
+          ),
+        ]),
       [
         mapDisplayCountriesName,
         mapType,
@@ -459,17 +456,15 @@ const MapChart = forwardRef(
     );
 
     useEffect(() => {
-      if (ref.current?.chart) {
+      if (ref.current?.chart && optionalDottedMapLines) {
         const { chart } = ref.current;
-        if (!R.isEmpty(optionalDottedMapLines)) {
-          Highcharts.removeEvent(chart.mapView, 'afterSetView');
+        Highcharts.removeEvent(chart.mapView, 'afterSetView');
 
-          Highcharts.addEvent(
-            chart.mapView,
-            'afterSetView',
-            debouncedAfterSetView,
-          );
-        }
+        Highcharts.addEvent(
+          chart.mapView,
+          'afterSetView',
+          debouncedAfterSetView,
+        );
       }
     }, [ref, debouncedAfterSetView, zoomRef, optionalDottedMapLines]);
 
@@ -485,8 +480,7 @@ const MapChart = forwardRef(
         constructorType="mapChart"
         highcharts={Highcharts}
         options={mergedOptions}
-        immutable={false}
-        // immutable={!isFullScreen}
+        immutable={R.isNil(optionalDottedMapLines) && !isFullScreen}
         updateArgs={[true, true, false]}
       />
     );
