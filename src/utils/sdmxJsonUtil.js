@@ -119,8 +119,18 @@ export const getXAndYDimension = (
     mapCountryDimension,
     dotStatUrlHasLastNObservationsEqOne,
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+    dotStatXAxisDimension,
+    dotStatYAxisDimension,
   },
 ) => {
+  if (!R.isNil(dotStatXAxisDimension) && !R.isNil(dotStatYAxisDimension)) {
+    const x = R.find(R.propEq(dotStatXAxisDimension, 'id'), allDimensions);
+    const y = R.find(R.propEq(dotStatYAxisDimension, 'id'), allDimensions);
+    if (x && y) {
+      return [x, y];
+    }
+  }
+
   const finalDimensions = R.compose(
     R.when(R.isEmpty, R.always(allDimensions)),
     R.when(
@@ -241,6 +251,8 @@ export const parseSdmxJson =
     csvCodeLabelMappingProjectLevel,
     lang,
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+    dotStatXAxisDimension,
+    dotStatYAxisDimension,
   }) =>
   (sdmxJson) => {
     const observations = R.path(
@@ -267,6 +279,8 @@ export const parseSdmxJson =
         mapCountryDimension,
         dotStatUrlHasLastNObservationsEqOne,
         dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+        dotStatXAxisDimension,
+        dotStatYAxisDimension,
       }),
     );
 
@@ -469,6 +483,8 @@ export const createDataFromSdmxJson = ({
   yAxisOrderOverride,
   forceXAxisToBeTreatedAsCategories,
   dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+  dotStatXAxisDimension,
+  dotStatYAxisDimension,
 }) => {
   if (!sdmxJson) {
     return null;
@@ -485,7 +501,13 @@ export const createDataFromSdmxJson = ({
       chartType,
       forceXAxisToBeTreatedAsCategories,
     ),
-    pivotCSV(chartType, dataSourceType, pivotData),
+    pivotCSV(
+      chartType,
+      dataSourceType,
+      pivotData,
+      dotStatXAxisDimension,
+      dotStatYAxisDimension,
+    ),
     parseSdmxJson({
       chartType,
       mapCountryDimension,
@@ -494,6 +516,8 @@ export const createDataFromSdmxJson = ({
       csvCodeLabelMappingProjectLevel,
       lang,
       dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
+      dotStatXAxisDimension,
+      dotStatYAxisDimension,
     }),
   )(sdmxJson);
 };

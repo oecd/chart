@@ -104,11 +104,22 @@ export const parseData = ({ data, parsingHelperData, ...rest }) => {
   return { categories, series, otherDimensions, ...rest };
 };
 
-const shouldPivot = (data, pivotData, chartType, dataSourceType) => {
+const shouldPivot = (
+  data,
+  pivotData,
+  chartType,
+  dataSourceType,
+  dotStatXAxisDimension,
+  dotStatYAxisDimension,
+) => {
   if (
     chartType === chartTypes.map &&
     dataSourceType === dataSourceTypes.dotStat.value
   ) {
+    return false;
+  }
+
+  if (!R.isNil(dotStatXAxisDimension) && !R.isNil(dotStatYAxisDimension)) {
     return false;
   }
 
@@ -140,9 +151,24 @@ const shouldPivot = (data, pivotData, chartType, dataSourceType) => {
 };
 
 export const pivotCSV =
-  (chartType, dataSourceType, pivotData) =>
+  (
+    chartType,
+    dataSourceType,
+    pivotData,
+    dotStatXAxisDimension,
+    dotStatYAxisDimension,
+  ) =>
   ({ data, ...rest }) => {
-    if (shouldPivot(data, pivotData, chartType, dataSourceType)) {
+    if (
+      shouldPivot(
+        data,
+        pivotData,
+        chartType,
+        dataSourceType,
+        dotStatXAxisDimension,
+        dotStatYAxisDimension,
+      )
+    ) {
       const header = R.map(R.head, data);
       const rows = mapWithIndex(
         (category, i) => R.prepend(category, R.map(R.nth(i + 1), R.tail(data))),

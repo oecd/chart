@@ -94,6 +94,8 @@ const HighchartsChart = ({
   dataSourceType = dataSourceTypes.csv.value,
   dotStatUrl = '',
   dotStatLang = 'en',
+  dotStatXAxisDimension,
+  dotStatYAxisDimension,
   staticCsvData = '',
   forceXAxisToBeTreatedAsCategories = false,
   csvCodeLabelMappingProjectLevel = null,
@@ -324,6 +326,8 @@ const HighchartsChart = ({
         sortSeries,
         yAxisOrderOverride,
         forceXAxisToBeTreatedAsCategories,
+        dotStatXAxisDimension,
+        dotStatYAxisDimension,
       });
     } catch (e) {
       setErrorMessage(errorMessages.generic);
@@ -346,6 +350,8 @@ const HighchartsChart = ({
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
     preParsedDataInternal,
     forceXAxisToBeTreatedAsCategories,
+    dotStatXAxisDimension,
+    dotStatYAxisDimension,
   ]);
 
   const parsedCSVData = useMemo(() => {
@@ -906,6 +912,8 @@ HighchartsChart.propTypes = {
   dataSourceType: PropTypes.string,
   dotStatUrl: PropTypes.string,
   dotStatLang: PropTypes.string,
+  dotStatXAxisDimension: PropTypes.string,
+  dotStatYAxisDimension: PropTypes.string,
   staticCsvData: PropTypes.string,
   forceXAxisToBeTreatedAsCategories: PropTypes.bool,
   csvCodeLabelMappingProjectLevel: PropTypes.string,
