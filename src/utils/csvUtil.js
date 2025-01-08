@@ -202,13 +202,33 @@ export const pivotCSV =
 export const createCodeLabelMapping = (
   csvCodeLabelMappingProjectLevel,
   codeLabelMappingChartLevel,
+  dotStatStructure,
+  lang,
 ) => {
   if (
     isNilOrEmpty(csvCodeLabelMappingProjectLevel) &&
-    isNilOrEmpty(codeLabelMappingChartLevel)
+    isNilOrEmpty(codeLabelMappingChartLevel) &&
+    isNilOrEmpty(dotStatStructure?.dimensions)
   ) {
     return {};
   }
+
+  const mappingDotStatMembers = R.compose(
+    R.mergeAll,
+    R.map(
+      R.compose(
+        R.map(
+          ({ labels }) =>
+            R.prop(lang, labels) ||
+            R.prop('en', labels) ||
+            R.prop(R.head(R.keys(labels)), labels) ||
+            '',
+        ),
+        R.prop('members'),
+      ),
+    ),
+    R.reject(R.has('timeRange')),
+  )(dotStatStructure?.dimensions || []);
 
   const mappingProjectLevel = createCodeLabelMap(
     parseCSV(csvCodeLabelMappingProjectLevel),
@@ -217,7 +237,10 @@ export const createCodeLabelMapping = (
     parseCSV(codeLabelMappingChartLevel),
   );
 
-  return R.mergeRight(mappingProjectLevel, mappingChartLevel);
+  return R.compose(
+    R.mergeRight(mappingDotStatMembers),
+    R.mergeRight(mappingProjectLevel),
+  )(mappingChartLevel);
 };
 
 const addParsingHelperData =
@@ -226,6 +249,8 @@ const addParsingHelperData =
     const codeLabelMapping = createCodeLabelMapping(
       csvCodeLabelMappingProjectLevel,
       csvCodeLabelMapping,
+      null,
+      null,
     );
 
     const xDimensionLabelByCode = R.fromPairs(

@@ -250,6 +250,7 @@ export const parseSdmxJson =
     dotStatCodeLabelMapping,
     csvCodeLabelMappingProjectLevel,
     lang,
+    dotStatStructure,
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
     dotStatXAxisDimension,
     dotStatYAxisDimension,
@@ -400,6 +401,8 @@ export const parseSdmxJson =
     const codeLabelMapping = createCodeLabelMapping(
       csvCodeLabelMappingProjectLevel,
       dotStatCodeLabelMapping,
+      dotStatStructure,
+      lang,
     );
 
     const yDimensionLabelByCode = createDimensionMemberLabelByCode(
@@ -470,6 +473,7 @@ export const isSdmxJsonEmpty = (sdmxJson) =>
 export const createDataFromSdmxJson = ({
   sdmxJson,
   lang,
+  dotStatStructure,
   dotStatCodeLabelMapping,
   csvCodeLabelMappingProjectLevel,
   dotStatUrlHasLastNObservationsEqOne,
@@ -515,6 +519,7 @@ export const createDataFromSdmxJson = ({
       dotStatCodeLabelMapping,
       csvCodeLabelMappingProjectLevel,
       lang,
+      dotStatStructure,
       dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
       dotStatXAxisDimension,
       dotStatYAxisDimension,

@@ -96,6 +96,7 @@ const HighchartsChart = ({
   dotStatLang = 'en',
   dotStatXAxisDimension,
   dotStatYAxisDimension,
+  dotStatStructure,
   staticCsvData = '',
   forceXAxisToBeTreatedAsCategories = false,
   csvCodeLabelMappingProjectLevel = null,
@@ -299,6 +300,8 @@ const HighchartsChart = ({
         const codeLabelMapping = createCodeLabelMapping(
           csvCodeLabelMappingProjectLevel,
           dotStatCodeLabelMapping,
+          dotStatStructure,
+          dotStatLang,
         );
 
         return {
@@ -313,6 +316,7 @@ const HighchartsChart = ({
       return createDataFromSdmxJson({
         sdmxJson,
         lang: dotStatLang,
+        dotStatStructure,
         dotStatCodeLabelMapping,
         csvCodeLabelMappingProjectLevel,
         dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
@@ -341,6 +345,7 @@ const HighchartsChart = ({
     pivotData,
     sdmxJson,
     dotStatLang,
+    dotStatStructure,
     sortBy,
     sortOrder,
     sortSeries,
@@ -914,6 +919,7 @@ HighchartsChart.propTypes = {
   dotStatLang: PropTypes.string,
   dotStatXAxisDimension: PropTypes.string,
   dotStatYAxisDimension: PropTypes.string,
+  dotStatStructure: PropTypes.object,
   staticCsvData: PropTypes.string,
   forceXAxisToBeTreatedAsCategories: PropTypes.bool,
   csvCodeLabelMappingProjectLevel: PropTypes.string,
