@@ -780,7 +780,11 @@ const HighchartsChart = ({
       getFinalPalette(
         colorPalette,
         smallerColorPalettes,
-        R.length(parsedData?.series || []),
+        R.length(
+          chartType === chartTypes.pie
+            ? parsedData?.categories
+            : parsedData?.series || [],
+        ),
         paletteStartingColor,
         paletteStartingColorOverride,
       ),
@@ -788,6 +792,8 @@ const HighchartsChart = ({
       colorPalette,
       smallerColorPalettes,
       parsedData?.series,
+      parsedData?.categories,
+      chartType,
       paletteStartingColor,
       paletteStartingColorOverride,
     ],
