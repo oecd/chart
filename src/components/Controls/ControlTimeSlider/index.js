@@ -13,7 +13,6 @@ const ControlTimeSlider = ({
   minVarName,
   maxVarName = '',
   frequencyVarName = '',
-  defaultFrequency = null,
   vars,
   changeVar,
   codeLabelMapping = null,
@@ -28,9 +27,6 @@ const ControlTimeSlider = ({
 
     return R.propOr(label, R.toUpper(label), codeLabelMapping);
   }, [label, codeLabelMapping]);
-
-  const finalDefaultFrequency =
-    defaultFrequency || R.head(frequencies).frequencyTypeCode;
 
   return R.isNil(codeLabelMapping) ? (
     <ControlFallback
@@ -47,11 +43,9 @@ const ControlTimeSlider = ({
       minVarName={minVarName}
       maxVarName={maxVarName}
       frequencyVarName={frequencyVarName}
-      defaultFrequency={finalDefaultFrequency}
       vars={vars}
       changeVar={changeVar}
       lang={lang}
-      codeLabelMapping={codeLabelMapping}
       hideTitle={hideTitle}
       isStandalone={isStandalone}
     />
@@ -65,7 +59,6 @@ ControlTimeSlider.propTypes = {
   minVarName: PropTypes.string.isRequired,
   maxVarName: PropTypes.string,
   frequencyVarName: PropTypes.string,
-  defaultFrequency: PropTypes.string,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,

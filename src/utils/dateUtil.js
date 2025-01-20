@@ -42,7 +42,8 @@ export const frequencies = {
     addFunc: addMonths,
     getStartPeriod: (date) => (isValid(date) ? startOfMonth(date) : ''),
     getEndPeriod: (date) => (isValid(date) ? endOfMonth(date) : ''),
-    varValue: frequencyTypes.monthly.varValue,
+    frequencyTypeCode: frequencyTypes.monthly.value,
+    dotStatId: frequencyTypes.monthly.dotStatId,
     getLabel: (lang) => (lang === 'fr' ? 'Mensuelle' : 'Monthly'),
   },
   [frequencyTypes.quarterly.value]: {
@@ -57,7 +58,8 @@ export const frequencies = {
     addFunc: addQuarters,
     getStartPeriod: (date) => (isValid(date) ? startOfQuarter(date) : ''),
     getEndPeriod: (date) => (isValid(date) ? endOfQuarter(date) : ''),
-    varValue: frequencyTypes.quarterly.varValue,
+    frequencyTypeCode: frequencyTypes.quarterly.value,
+    dotStatId: frequencyTypes.quarterly.dotStatId,
     getLabel: (lang) => (lang === 'fr' ? 'Trimestrielle' : 'Quarterly'),
   },
   [frequencyTypes.yearly.value]: {
@@ -69,7 +71,8 @@ export const frequencies = {
     addFunc: addYears,
     getStartPeriod: (date) => (isValid(date) ? startOfYear(date) : ''),
     getEndPeriod: (date) => (isValid(date) ? endOfYear(date) : ''),
-    varValue: frequencyTypes.yearly.varValue,
+    frequencyTypeCode: frequencyTypes.yearly.value,
+    dotStatId: frequencyTypes.yearly.dotStatId,
     getLabel: (lang) => (lang === 'fr' ? 'Annuelle' : 'Yearly'),
   },
   [frequencyTypes.quinquennial.value]: {
@@ -102,7 +105,8 @@ export const frequencies = {
       }
       return '';
     },
-    varValue: frequencyTypes.quinquennial.varValue,
+    frequencyTypeCode: frequencyTypes.quinquennial.value,
+    dotStatId: frequencyTypes.quinquennial.dotStatId,
     getLabel: (lang) => (lang === 'fr' ? 'Quinquennal' : 'Quinquennial'),
   },
 };

@@ -8,8 +8,25 @@ import {
   getSteps,
   frequencies as dateUtilFrequencies,
 } from '../../../utils/dateUtil';
-import { frequencyTypes } from '../../../constants/chart';
 import { isNilOrEmpty } from '../../../utils/ramdaUtil';
+
+const getFrequency = (dotStatId, frequencies) => {
+  if (!dotStatId) {
+    return R.head(frequencies);
+  }
+
+  const dateUtilFrequency = R.compose(
+    R.find(R.propEq(R.toUpper(dotStatId), 'dotStatId')),
+    R.values,
+  )(dateUtilFrequencies);
+
+  const frequency = R.find(
+    R.propEq(dateUtilFrequency?.frequencyTypeCode, 'frequencyTypeCode'),
+    frequencies,
+  );
+
+  return frequency || R.head(frequencies);
+};
 
 const ControlTimeSlider = ({
   label = null,
@@ -18,32 +35,33 @@ const ControlTimeSlider = ({
   minVarName,
   maxVarName,
   frequencyVarName,
-  defaultFrequency,
   vars,
   changeVar,
   lang,
-  codeLabelMapping,
   hideTitle,
   isStandalone,
 }) => {
-  const [currentFrequencyTypeCode, setCurrentFrequencyTypeCode] =
-    useState(defaultFrequency);
-
-  const [prevDefaultFrequencyTypeCode, setPrevDefaultFrequencyTypeCode] =
-    useState(defaultFrequency);
-
+  const [stateFrequencies, setStateFrequencies] = useState(frequencies);
   useEffect(() => {
-    setPrevDefaultFrequencyTypeCode(defaultFrequency);
-  }, [defaultFrequency]);
+    setStateFrequencies(frequencies);
+  }, [frequencies]);
 
-  const getFrequency = useCallback(
-    (code) => R.find(R.propEq(code, 'frequencyTypeCode'), frequencies),
-    [frequencies],
+  const [statePrevFrequencies, setStatePrevFrequencies] =
+    useState(stateFrequencies);
+  useEffect(() => {
+    setStatePrevFrequencies(stateFrequencies);
+  }, [stateFrequencies]);
+
+  const [currentFrequency, setCurrentFrequency] = useState(
+    getFrequency(vars[frequencyVarName], stateFrequencies),
   );
 
-  const [steps, setSteps] = useState(() =>
-    getSteps(getFrequency(defaultFrequency), lang),
-  );
+  const [prevVars, setPrevVars] = useState(vars);
+  useEffect(() => {
+    setPrevVars(vars);
+  }, [vars]);
+
+  const [steps, setSteps] = useState(() => getSteps(currentFrequency, lang));
 
   const [currentRange, setCurrentRange] = useState(() => ({
     minCode: vars[minVarName],
@@ -61,6 +79,116 @@ const ControlTimeSlider = ({
         }
       : {}),
   }));
+
+  useEffect(() => {
+    const newFrequency = getFrequency(vars[frequencyVarName], stateFrequencies);
+    const prevFrequency = getFrequency(
+      prevVars[frequencyVarName],
+      statePrevFrequencies,
+    );
+    const newSteps = getSteps(newFrequency, lang);
+
+    const frequencyTypeHasChanged =
+      prevFrequency.frequencyTypeCode !== newFrequency.frequencyTypeCode;
+
+    const rangeHasChanged =
+      prevVars[minVarName] !== vars[minVarName] ||
+      prevVars[maxVarName] !== vars[maxVarName];
+
+    const newDateUtilFrequency =
+      dateUtilFrequencies[newFrequency.frequencyTypeCode];
+    const prevDateUtilFrequency =
+      dateUtilFrequencies[prevFrequency.frequencyTypeCode];
+
+    const dateUtilFrequency =
+      frequencyTypeHasChanged && !rangeHasChanged
+        ? prevDateUtilFrequency
+        : newDateUtilFrequency;
+
+    const newMinCode = R.compose((minCode) => {
+      const prevMinDate = dateUtilFrequency.tryParse(minCode)
+        ? dateUtilFrequency.getStartPeriod(dateUtilFrequency.tryParse(minCode))
+        : false;
+
+      const newMinDate =
+        !prevMinDate ||
+        newDateUtilFrequency.getStartPeriod(prevMinDate) <
+          newDateUtilFrequency.getStartPeriod(
+            newDateUtilFrequency.tryParse(newFrequency.minCode),
+          )
+          ? newDateUtilFrequency.getStartPeriod(
+              newDateUtilFrequency.tryParse(newFrequency.minCode),
+            )
+          : newDateUtilFrequency.getStartPeriod(prevMinDate);
+
+      return newDateUtilFrequency.formatToCode(newMinDate);
+    })(vars[minVarName]);
+
+    if (newMinCode !== vars[minVarName]) {
+      changeVar(minVarName, newMinCode);
+    }
+
+    const newMinIndex =
+      R.findIndex(R.equals(newMinCode), newSteps.codes) === -1
+        ? 0
+        : R.findIndex(R.equals(newMinCode), newSteps.codes);
+
+    if (isRange) {
+      const newMaxCode = R.compose((maxCode) => {
+        const prevMaxDate = dateUtilFrequency.tryParse(maxCode)
+          ? dateUtilFrequency.getEndPeriod(dateUtilFrequency.tryParse(maxCode))
+          : false;
+
+        const newMaxDate =
+          !prevMaxDate ||
+          newDateUtilFrequency.getEndPeriod(prevMaxDate) >
+            newDateUtilFrequency.getEndPeriod(
+              newDateUtilFrequency.tryParse(newFrequency.maxCode),
+            )
+            ? newDateUtilFrequency.getEndPeriod(
+                newDateUtilFrequency.tryParse(newFrequency.maxCode),
+              )
+            : newDateUtilFrequency.getEndPeriod(prevMaxDate);
+
+        return newDateUtilFrequency.formatToCode(newMaxDate);
+      })(vars[maxVarName]);
+
+      if (newMaxCode !== vars[maxVarName]) {
+        changeVar(maxVarName, newMaxCode);
+      }
+
+      const newMaxIndex =
+        R.findIndex(R.equals(newMaxCode), newSteps.codes) === -1
+          ? 0
+          : R.findIndex(R.equals(newMaxCode), newSteps.codes);
+
+      setCurrentRange({
+        minCode: R.nth(newMinIndex, newSteps.codes),
+        minIndex: newMinIndex,
+        maxCode: R.nth(newMaxIndex, newSteps.codes),
+        maxIndex: newMaxIndex,
+      });
+    } else {
+      setCurrentRange({
+        minCode: R.nth(newMinIndex, newSteps.codes),
+        minIndex: newMinIndex,
+      });
+    }
+
+    setCurrentFrequency(newFrequency);
+    setSteps(newSteps);
+  }, [
+    changeVar,
+    vars,
+    prevVars,
+    lang,
+    isRange,
+    frequencyVarName,
+    minVarName,
+    maxVarName,
+    stateFrequencies,
+    statePrevFrequencies,
+  ]);
 
   const onRangeChange = useCallback(
     (value) => {
@@ -82,31 +210,6 @@ const ControlTimeSlider = ({
     [isRange, steps.codes],
   );
 
-  useEffect(() => {
-    const min =
-      R.findIndex(R.equals(vars[minVarName]), steps.codes) === -1
-        ? 0
-        : R.findIndex(R.equals(vars[minVarName]), steps.codes);
-    if (isRange) {
-      const max =
-        R.findIndex(R.equals(vars[maxVarName]), steps.codes) === -1
-          ? R.length(steps.codes) - 1
-          : R.findIndex(R.equals(vars[maxVarName]), steps.codes);
-
-      setCurrentRange({
-        minCode: R.nth(min, steps.codes),
-        minIndex: min,
-        maxCode: R.nth(max, steps.codes),
-        maxIndex: max,
-      });
-    } else {
-      setCurrentRange({
-        minCode: R.nth(min, steps.codes),
-        minIndex: min,
-      });
-    }
-  }, [vars, isRange, steps.codes, minVarName, maxVarName]);
-
   const onRangeChangeComplete = useCallback(
     (value) => {
       if (isRange) {
@@ -120,103 +223,7 @@ const ControlTimeSlider = ({
     [isRange, steps.codes, minVarName, maxVarName, changeVar],
   );
 
-  const onFrequencyChange = useCallback(
-    (value) => {
-      setCurrentFrequencyTypeCode(value);
-
-      const newFrequency = getFrequency(value);
-      const newSteps = getSteps(newFrequency, lang);
-      setSteps(newSteps);
-
-      changeVar(frequencyVarName, dateUtilFrequencies[value].varValue);
-
-      const currentMinDate = dateUtilFrequencies[
-        currentFrequencyTypeCode
-      ].tryParse(vars[minVarName]);
-
-      if (isRange) {
-        const currentMaxDate = dateUtilFrequencies[
-          currentFrequencyTypeCode
-        ].tryParse(vars[maxVarName]);
-
-        if (currentMinDate && currentMaxDate) {
-          const newMinDate =
-            dateUtilFrequencies[
-              value === frequencyTypes.quinquennial.value
-                ? value
-                : currentFrequencyTypeCode
-            ].getStartPeriod(currentMinDate);
-          const newMinCode =
-            dateUtilFrequencies[value].formatToCode(newMinDate);
-          changeVar(minVarName, newMinCode);
-
-          const newMaxDate =
-            dateUtilFrequencies[
-              value === frequencyTypes.quinquennial.value
-                ? value
-                : currentFrequencyTypeCode
-            ].getEndPeriod(currentMaxDate);
-
-          const newMaxCode =
-            dateUtilFrequencies[value].formatToCode(newMaxDate);
-          changeVar(maxVarName, newMaxCode);
-
-          const newMinStepIndex = R.findIndex(
-            R.equals(newMinCode),
-            newSteps.codes,
-          );
-          const newMaxStepIndex = R.findIndex(
-            R.equals(newMaxCode),
-            newSteps.codes,
-          );
-          setCurrentRange({
-            minCode: R.nth(newMinStepIndex, newSteps.codes),
-            minIndex: newMinStepIndex,
-            maxCode: R.nth(newMaxStepIndex, newSteps.codes),
-            maxIndex: newMaxStepIndex,
-          });
-        }
-      } else if (currentMinDate) {
-        const newMinDate =
-          dateUtilFrequencies[
-            value === frequencyTypes.quinquennial.value
-              ? value
-              : currentFrequencyTypeCode
-          ].getStartPeriod(currentMinDate);
-
-        const newMinCode = dateUtilFrequencies[value].formatToCode(newMinDate);
-        changeVar(minVarName, newMinCode);
-        const newMinStepIndex = R.findIndex(
-          R.equals(newMinCode),
-          newSteps.codes,
-        );
-        setCurrentRange({
-          minCode: R.nth(newMinStepIndex, newSteps.codes),
-          minIndex: newMinStepIndex,
-        });
-      }
-    },
-    [
-      isRange,
-      changeVar,
-      frequencyVarName,
-      currentFrequencyTypeCode,
-      minVarName,
-      maxVarName,
-      vars,
-      lang,
-      getFrequency,
-    ],
-  );
-
-  useEffect(() => {
-    if (prevDefaultFrequencyTypeCode !== defaultFrequency) {
-      onFrequencyChange(defaultFrequency);
-    }
-  }, [prevDefaultFrequencyTypeCode, defaultFrequency, onFrequencyChange]);
-
-  const getLabel = (code) =>
-    R.propOr(R.propOr('', code, steps.labelByCode), code, codeLabelMapping);
+  const getLabel = (code) => R.propOr('', code, steps.labelByCode);
 
   return (
     <div className={isStandalone ? 'cb-control-standalone' : 'cb-control'}>
@@ -237,8 +244,13 @@ const ControlTimeSlider = ({
             return (
               <button
                 key={f.frequencyTypeCode}
-                onClick={() => onFrequencyChange(f.frequencyTypeCode)}
-                className={`cb-frequency-button ${f.frequencyTypeCode === currentFrequencyTypeCode ? 'cb-frequency-button-selected' : ''}`}
+                onClick={() => {
+                  changeVar(
+                    frequencyVarName,
+                    dateUtilFrequencies[f.frequencyTypeCode].dotStatId,
+                  );
+                }}
+                className={`cb-frequency-button ${f.frequencyTypeCode === currentFrequency.frequencyTypeCode ? 'cb-frequency-button-selected' : ''}`}
                 type="button"
               >
                 {dateUtilFrequencies[f.frequencyTypeCode].getLabel(lang)}
@@ -312,11 +324,9 @@ ControlTimeSlider.propTypes = {
   minVarName: PropTypes.string.isRequired,
   maxVarName: PropTypes.string.isRequired,
   frequencyVarName: PropTypes.string.isRequired,
-  defaultFrequency: PropTypes.string.isRequired,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
-  codeLabelMapping: PropTypes.object.isRequired,
   hideTitle: PropTypes.bool.isRequired,
   isStandalone: PropTypes.bool.isRequired,
 };

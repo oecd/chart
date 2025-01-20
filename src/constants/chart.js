@@ -71,22 +71,22 @@ export const frequencyTypes = {
   quinquennial: {
     value: 'quinquennial',
     label: 'Quinquennial',
-    varValue: 'A5',
+    dotStatId: 'A5',
   },
   yearly: {
     value: 'yearly',
     label: 'Yearly',
-    varValue: 'A',
+    dotStatId: 'A',
   },
   quarterly: {
     value: 'quarterly',
     label: 'Quarterly',
-    varValue: 'Q',
+    dotStatId: 'Q',
   },
   monthly: {
     value: 'monthly',
     label: 'Monthly',
-    varValue: 'M',
+    dotStatId: 'M',
   },
 };
 
