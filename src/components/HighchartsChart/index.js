@@ -486,14 +486,22 @@ const HighchartsChart = ({
     if (preParsedDataInternal) {
       const { varsThatCauseNewPreParsedDataFetch } = preParsedDataInternal;
 
-      const anyVarHasChanged = R.compose(
-        R.any(R.equals(true)),
-        R.map(
-          (varName) =>
+      const varsThatHaveChanged = R.reduce(
+        (acc, varName) => {
+          if (
             R.toUpper(varsThatCauseNewPreParsedDataFetch[varName] ?? '') !==
-            R.replace(/\+/g, '|', R.toUpper(vars[varName] ?? '')),
-        ),
-      )(R.keys(varsThatCauseNewPreParsedDataFetch || {}));
+            R.replace(/\+/g, '|', R.toUpper(vars[varName] ?? ''))
+          ) {
+            return R.append(varName, acc);
+          }
+
+          return acc;
+        },
+        [],
+        R.keys(varsThatCauseNewPreParsedDataFetch || {}),
+      );
+
+      const anyVarHasChanged = !R.isEmpty(varsThatHaveChanged);
 
       if (anyVarHasChanged || lang !== prevLang) {
         const varsParam = R.compose(
@@ -515,10 +523,14 @@ const HighchartsChart = ({
           try {
             lastRequestedDataKey.current = configParams;
 
+            const lastChangedVarParam = anyVarHasChanged
+              ? `&lastChangedVar=${R.head(varsThatHaveChanged)}`
+              : '';
+
             const newPreParsedData = await fetchJson(
               `${apiUrl}/api/public/chartConfig/${configParams}?preParsedDataOnly&lang=${R.toLower(
                 lang,
-              )}`,
+              )}${lastChangedVarParam}`,
             );
 
             // discard result from outdated request(s)
