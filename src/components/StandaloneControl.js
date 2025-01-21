@@ -17,6 +17,7 @@ import { possibleVariables } from '../utils/configUtil';
 
 const StandaloneControl = ({
   controlId,
+  dataComponentId = '',
   hideTitle = false,
   initialValue = null,
   language = null,
@@ -95,6 +96,7 @@ const StandaloneControl = ({
   return (
     <StandaloneControlWithConfig
       id={controlId}
+      dataComponentId={dataComponentId}
       hideTitle={finalHideTitle}
       initialValue={initialValue}
       {...controlConfigData.controlConfig}
@@ -105,6 +107,7 @@ const StandaloneControl = ({
 
 StandaloneControl.propTypes = {
   controlId: PropTypes.string.isRequired,
+  dataComponentId: PropTypes.string,
   hideTitle: PropTypes.bool,
   initialValue: PropTypes.string,
   language: PropTypes.string,

@@ -45,6 +45,7 @@ const calcVarsForSelectChartOptionValue = (value) => {
 
 const StandaloneControlWithConfig = ({
   id = '',
+  dataComponentId = '',
   type,
   codeLabelMapping,
   hideTitle = false,
@@ -168,6 +169,7 @@ const StandaloneControlWithConfig = ({
           new CustomEvent('cbControlValueChange', {
             detail: {
               controlId: id || '',
+              dataComponentId: dataComponentId || '',
               varName,
               varValue: varValue === '-' ? '' : varValue,
               isInitialChange: isInitialChange.current,
@@ -177,7 +179,7 @@ const StandaloneControlWithConfig = ({
       }
     }, R.toPairs(vars));
     isInitialChange.current = false;
-  }, [id, vars, type]);
+  }, [id, dataComponentId, vars, type]);
 
   useEffect(() => {
     if (type === controlTypes.select.value) {
@@ -245,6 +247,7 @@ const StandaloneControlWithConfig = ({
 
 StandaloneControlWithConfig.propTypes = {
   id: PropTypes.string,
+  dataComponentId: PropTypes.string,
   hideTitle: PropTypes.bool,
   type: PropTypes.string.isRequired,
   codeLabelMapping: PropTypes.string.isRequired,
