@@ -29,6 +29,7 @@ const ChartWithConfig = ({
   var8DefaultValue = null,
   var9DefaultValue = null,
   var10DefaultValue = null,
+  controls = null,
   ...otherProps
 }) => {
   const ChartWithConfigComponent = height
@@ -88,11 +89,19 @@ const ChartWithConfig = ({
     setVars(R.assoc(varName, varValue));
   }, []);
 
+  const [stateControls, setStateControls] = useState(controls);
+
+  useEffect(() => {
+    setStateControls(controls);
+  }, [controls, setStateControls]);
+
   return (
     <ChartWithConfigComponent
       height={height}
       vars={vars}
       changeVar={changeVar}
+      controls={stateControls}
+      setControls={setStateControls}
       {...otherProps}
     />
   );
@@ -120,6 +129,7 @@ ChartWithConfig.propTypes = {
   var8DefaultValue: PropTypes.string,
   var9DefaultValue: PropTypes.string,
   var10DefaultValue: PropTypes.string,
+  controls: PropTypes.array,
 };
 
 export default ChartWithConfig;

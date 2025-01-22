@@ -11,6 +11,11 @@ export const MultiValueContainer = ({ selectProps, data }) => {
   if (selectProps.inputValue !== '') {
     return '';
   }
+
+  if (data.disabled) {
+    return '';
+  }
+
   const { label } = data;
   const lastValue = R.prop('value', R.last(selectProps.value));
   return `${label}${lastValue === data.value ? '' : ', '}`;
@@ -26,8 +31,11 @@ export const DropdownIndicator = (props) => {
   );
 };
 
-export const OptionLabelSingle = ({ label }) => (
-  <span dangerouslySetInnerHTML={{ __html: label }} />
+export const OptionLabelSingle = ({ label, disabled }) => (
+  <>
+    <span dangerouslySetInnerHTML={{ __html: label }} />
+    {disabled && ' (disabled)'}
+  </>
 );
 
 const OptionLabelMultiple = ({
@@ -35,6 +43,7 @@ const OptionLabelMultiple = ({
   label,
   selectedOptionValues,
   isStandalone,
+  disabled,
   children,
 }) => (
   <div
@@ -50,6 +59,7 @@ const OptionLabelMultiple = ({
     </div>
     <div style={{ flex: 1, marginLeft: '5px' }}>
       <OptionLabelSingle label={label} />
+      {disabled ? ' (disabled)' : ''}
     </div>
     {children}
   </div>
@@ -57,23 +67,25 @@ const OptionLabelMultiple = ({
 
 export const createOptionLabelMultiple =
   (selectedOptionValues, isStandalone) =>
-  ({ value, label }) => (
+  ({ value, label, disabled }) => (
     <OptionLabelMultiple
       value={value}
       label={label}
       selectedOptionValues={selectedOptionValues}
       isStandalone={isStandalone}
+      disabled={disabled}
     />
   );
 
 export const createOptionLabelMultipleWithStar =
   (selectedOptionValues, starSelectedOptionChanged, starValues, isStandalone) =>
-  ({ value, label }) => (
+  ({ value, label, disabled }) => (
     <OptionLabelMultiple
       value={value}
       label={label}
       selectedOptionValues={selectedOptionValues}
       isStandalone={isStandalone}
+      disabled={disabled}
     >
       <div
         role="button"

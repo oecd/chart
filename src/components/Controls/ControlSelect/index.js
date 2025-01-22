@@ -266,6 +266,7 @@ const ControlSelect = ({
         value={selectedOption}
         options={finalOptions}
         onChange={selectedOptionChanged}
+        isOptionDisabled={(o) => o.disabled}
         formatOptionLabel={formatOptionLabel}
         hideSelectedOptions={false}
         components={selectComponents}

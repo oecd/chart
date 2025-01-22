@@ -114,6 +114,7 @@ const HighchartsChart = ({
   definition = null,
   note = null,
   source = null,
+  setControls,
   highlight = '',
   baseline = '',
   colorPalette,
@@ -205,6 +206,9 @@ const HighchartsChart = ({
           );
 
           setPreParsedDataInternal(R.prop('preParsedData', newPreParsedData));
+          if (R.has('controls', newPreParsedData)) {
+            setControls(R.prop('controls', newPreParsedData));
+          }
           setIsFetching(false);
         } catch (e) {
           setIsFetching(false);
@@ -265,6 +269,7 @@ const HighchartsChart = ({
     id,
     lang,
     debug,
+    setControls,
   ]);
 
   const parsedSDMXData = useMemo(() => {
@@ -538,6 +543,11 @@ const HighchartsChart = ({
               setPreParsedDataInternal(
                 R.prop('preParsedData', newPreParsedData),
               );
+
+              if (R.has('controls', newPreParsedData)) {
+                setControls(R.prop('controls', newPreParsedData));
+              }
+
               setIsFetching(false);
             }
           } catch (e) {
@@ -548,7 +558,7 @@ const HighchartsChart = ({
         getNewPreParsedData();
       }
     }
-  }, [id, vars, lang, prevLang, preParsedDataInternal]);
+  }, [id, vars, lang, prevLang, preParsedDataInternal, setControls]);
 
   const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);
@@ -955,6 +965,7 @@ HighchartsChart.propTypes = {
   definition: PropTypes.string,
   note: PropTypes.string,
   source: PropTypes.string,
+  setControls: PropTypes.func.isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,
   colorPalette: PropTypes.array.isRequired,
