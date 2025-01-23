@@ -94,6 +94,7 @@ const ChartWithConfigFixedChartHeight = ({
                     width={innerContainerWidth}
                     height={innerContainerHeight}
                     vars={vars}
+                    changeVar={changeVar}
                     lang={lang}
                     onDataReady={onDataReady}
                     isSmall={isSmall}

@@ -162,11 +162,24 @@ const ControlTimeSlider = ({
           ? 0
           : R.findIndex(R.equals(newMaxCode), newSteps.codes);
 
+      const finalMinIndex = R.when(
+        () =>
+          newSteps.minIndexFromAvailability &&
+          newSteps.minIndexFromAvailability > newMinIndex,
+        () => newSteps.minIndexFromAvailability,
+      )(newMinIndex);
+      const finalMaxIndex = R.when(
+        () =>
+          newSteps.maxIndexFromAvailability &&
+          newSteps.maxIndexFromAvailability < newMaxIndex,
+        () => newSteps.maxIndexFromAvailability,
+      )(newMaxIndex);
+
       setCurrentRange({
-        minCode: R.nth(newMinIndex, newSteps.codes),
-        minIndex: newMinIndex,
-        maxCode: R.nth(newMaxIndex, newSteps.codes),
-        maxIndex: newMaxIndex,
+        minCode: R.nth(finalMinIndex, newSteps.codes),
+        minIndex: finalMinIndex,
+        maxCode: R.nth(finalMaxIndex, newSteps.codes),
+        maxIndex: finalMaxIndex,
       });
     } else {
       setCurrentRange({
@@ -194,33 +207,66 @@ const ControlTimeSlider = ({
     (value) => {
       if (isRange) {
         const [min, max] = value;
+        const finalMin = R.when(
+          () =>
+            steps.minIndexFromAvailability &&
+            steps.minIndexFromAvailability > min,
+          () => steps.minIndexFromAvailability,
+        )(min);
+        const finalMax = R.when(
+          () =>
+            steps.maxIndexFromAvailability &&
+            steps.maxIndexFromAvailability < max,
+          () => steps.maxIndexFromAvailability,
+        )(max);
+
         setCurrentRange({
-          minCode: R.nth(min, steps.codes),
-          minIndex: min,
-          maxCode: R.nth(max, steps.codes),
-          maxIndex: max,
+          minCode: R.nth(finalMin, steps.codes),
+          minIndex: finalMin,
+          maxCode: R.nth(finalMax, steps.codes),
+          maxIndex: finalMax,
         });
       } else {
+        //TODO: handle non range
         setCurrentRange({
           minCode: R.nth(value, steps.codes),
           minIndex: value,
         });
       }
     },
-    [isRange, steps.codes],
+    [isRange, steps],
   );
 
   const onRangeChangeComplete = useCallback(
     (value) => {
       if (isRange) {
         const [min, max] = value;
+
         changeVar(minVarName, R.nth(min, steps.codes));
-        changeVar(maxVarName, R.nth(max, steps.codes));
+
+        if (steps.maxIndexFromAvailability) {
+          const currentMaxVarValue = vars[maxVarName];
+          const currentMaxVarIndex = R.findIndex(
+            R.equals(currentMaxVarValue),
+            steps.codes,
+          );
+          if (
+            !(
+              currentMaxVarIndex >= steps.maxIndexFromAvailability &&
+              max === steps.maxIndexFromAvailability
+            )
+          ) {
+            changeVar(maxVarName, R.nth(max, steps.codes));
+          }
+        } else {
+          changeVar(maxVarName, R.nth(max, steps.codes));
+        }
       } else {
+        //TODO: handle non range
         changeVar(minVarName, R.nth(value, steps.codes));
       }
     },
-    [isRange, steps.codes, minVarName, maxVarName, changeVar],
+    [isRange, steps, minVarName, maxVarName, vars, changeVar],
   );
 
   const getLabel = (code) => R.propOr('', code, steps.labelByCode);

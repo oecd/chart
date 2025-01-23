@@ -137,6 +137,7 @@ const HighchartsChart = ({
   onDownloadData = null,
   onDataReady = null,
   vars,
+  changeVars,
   lang,
   hideTitle = false,
   hideSubtitle = false,
@@ -528,14 +529,10 @@ const HighchartsChart = ({
           try {
             lastRequestedDataKey.current = configParams;
 
-            const lastChangedVarParam = anyVarHasChanged
-              ? `&lastChangedVar=${R.head(varsThatHaveChanged)}`
-              : '';
-
             const newPreParsedData = await fetchJson(
               `${apiUrl}/api/public/chartConfig/${configParams}?preParsedDataOnly&lang=${R.toLower(
                 lang,
-              )}${lastChangedVarParam}`,
+              )}`,
             );
 
             // discard result from outdated request(s)
@@ -548,6 +545,12 @@ const HighchartsChart = ({
                 setControls(R.prop('controls', newPreParsedData));
               }
 
+              //console.log(newPreParsedData);
+
+              //changeVars(R.assoc('var3'));
+              // console.log(newPreParsedData);
+              // console.log(vars);
+
               setIsFetching(false);
             }
           } catch (e) {
@@ -558,7 +561,15 @@ const HighchartsChart = ({
         getNewPreParsedData();
       }
     }
-  }, [id, vars, lang, prevLang, preParsedDataInternal, setControls]);
+  }, [
+    id,
+    vars,
+    changeVars,
+    lang,
+    prevLang,
+    preParsedDataInternal,
+    setControls,
+  ]);
 
   const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);
@@ -988,6 +999,7 @@ HighchartsChart.propTypes = {
   onDownloadData: PropTypes.func,
   onDataReady: PropTypes.func,
   vars: PropTypes.object.isRequired,
+  changeVars: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool,
   hideSubtitle: PropTypes.bool,
