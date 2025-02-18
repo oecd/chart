@@ -545,12 +545,6 @@ const HighchartsChart = ({
                 setControls(R.prop('controls', newPreParsedData));
               }
 
-              //console.log(newPreParsedData);
-
-              //changeVars(R.assoc('var3'));
-              // console.log(newPreParsedData);
-              // console.log(vars);
-
               setIsFetching(false);
             }
           } catch (e) {

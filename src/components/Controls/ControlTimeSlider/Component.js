@@ -37,6 +37,7 @@ const ControlTimeSlider = ({
   frequencyVarName,
   vars,
   changeVar,
+  noData,
   lang,
   hideTitle,
   isStandalone,
@@ -162,6 +163,16 @@ const ControlTimeSlider = ({
           ? 0
           : R.findIndex(R.equals(newMaxCode), newSteps.codes);
 
+      if (noData) {
+        setCurrentRange({
+          minCode: R.nth(newMinIndex, newSteps.codes),
+          minIndex: newMinIndex,
+          maxCode: R.nth(newMaxIndex, newSteps.codes),
+          maxIndex: newMaxIndex,
+        });
+        return;
+      }
+
       const finalMinIndex = R.when(
         () =>
           newSteps.minIndexFromAvailability &&
@@ -201,6 +212,7 @@ const ControlTimeSlider = ({
     maxVarName,
     stateFrequencies,
     statePrevFrequencies,
+    noData,
   ]);
 
   const onRangeChange = useCallback(
@@ -227,10 +239,24 @@ const ControlTimeSlider = ({
           maxIndex: finalMax,
         });
       } else {
-        //TODO: handle non range
+        const finalMin = R.compose(
+          R.when(
+            () =>
+              steps.maxIndexFromAvailability &&
+              steps.maxIndexFromAvailability < value,
+            () => steps.maxIndexFromAvailability,
+          ),
+          R.when(
+            () =>
+              steps.minIndexFromAvailability &&
+              steps.minIndexFromAvailability > value,
+            () => steps.minIndexFromAvailability,
+          ),
+        )(value);
+
         setCurrentRange({
-          minCode: R.nth(value, steps.codes),
-          minIndex: value,
+          minCode: R.nth(finalMin, steps.codes),
+          minIndex: finalMin,
         });
       }
     },
@@ -242,7 +268,24 @@ const ControlTimeSlider = ({
       if (isRange) {
         const [min, max] = value;
 
-        changeVar(minVarName, R.nth(min, steps.codes));
+        if (steps.minIndexFromAvailability) {
+          const currentMinVarValue = vars[minVarName];
+          const currentMinVarIndex = R.findIndex(
+            R.equals(currentMinVarValue),
+            steps.codes,
+          );
+
+          if (
+            !(
+              currentMinVarIndex <= steps.minIndexFromAvailability &&
+              min === steps.minIndexFromAvailability
+            )
+          ) {
+            changeVar(minVarName, R.nth(min, steps.codes));
+          }
+        } else {
+          changeVar(minVarName, R.nth(min, steps.codes));
+        }
 
         if (steps.maxIndexFromAvailability) {
           const currentMaxVarValue = vars[maxVarName];
@@ -250,6 +293,7 @@ const ControlTimeSlider = ({
             R.equals(currentMaxVarValue),
             steps.codes,
           );
+
           if (
             !(
               currentMaxVarIndex >= steps.maxIndexFromAvailability &&
@@ -261,10 +305,11 @@ const ControlTimeSlider = ({
         } else {
           changeVar(maxVarName, R.nth(max, steps.codes));
         }
-      } else {
-        //TODO: handle non range
-        changeVar(minVarName, R.nth(value, steps.codes));
+
+        return;
       }
+
+      changeVar(minVarName, R.nth(value, steps.codes));
     },
     [isRange, steps, minVarName, maxVarName, vars, changeVar],
   );
@@ -375,6 +420,7 @@ ControlTimeSlider.propTypes = {
   lang: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool.isRequired,
   isStandalone: PropTypes.bool.isRequired,
+  noData: PropTypes.bool.isRequired,
 };
 
 export default ControlTimeSlider;

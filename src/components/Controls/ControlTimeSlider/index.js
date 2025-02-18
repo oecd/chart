@@ -16,6 +16,7 @@ const ControlTimeSlider = ({
   vars,
   changeVar,
   codeLabelMapping = null,
+  noData,
   lang,
   hideTitle = false,
   isStandalone = false,
@@ -45,6 +46,7 @@ const ControlTimeSlider = ({
       frequencyVarName={frequencyVarName}
       vars={vars}
       changeVar={changeVar}
+      noData={noData}
       lang={lang}
       hideTitle={hideTitle}
       isStandalone={isStandalone}
@@ -62,6 +64,7 @@ ControlTimeSlider.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
+  noData: PropTypes.bool.isRequired,
   lang: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool,
   isStandalone: PropTypes.bool,

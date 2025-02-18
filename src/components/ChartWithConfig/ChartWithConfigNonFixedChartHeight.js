@@ -55,11 +55,15 @@ const ChartWithConfigNonFixedChartHeight = ({
 
   const [codeLabelMapping, setCodeLabelMapping] = useState(null);
 
+  const [noData, setNoData] = useState(false);
+
   const onDataReady = useMemo(
     () =>
       !isNilOrEmpty(controls) && !hideControls
         ? (data) => {
             setCodeLabelMapping(R.prop('codeLabelMapping', data));
+
+            setNoData(R.isEmpty(data.categories) && R.isEmpty(data.series));
           }
         : null,
     [controls, hideControls],
@@ -136,6 +140,7 @@ const ChartWithConfigNonFixedChartHeight = ({
             vars={vars}
             changeVar={changeVar}
             codeLabelMapping={codeLabelMapping}
+            noData={noData}
             lang={lang}
             isSmall={isSmall}
           />

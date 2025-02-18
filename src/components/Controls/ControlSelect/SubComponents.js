@@ -17,7 +17,11 @@ export const MultiValueContainer = ({ selectProps, data }) => {
   }
 
   const { label } = data;
-  const lastValue = R.prop('value', R.last(selectProps.value));
+  const lastValue = R.prop(
+    'value',
+    R.last(R.reject(R.propEq(true, 'disabled'), selectProps.value)),
+  );
+
   return `${label}${lastValue === data.value ? '' : ', '}`;
 };
 

@@ -22,6 +22,7 @@ const Controls = ({
   vars,
   changeVar,
   codeLabelMapping = null,
+  noData,
   lang,
   isSmall,
 }) => {
@@ -46,6 +47,7 @@ const Controls = ({
                 vars={vars}
                 changeVar={changeVar}
                 codeLabelMapping={codeLabelMapping}
+                noData={noData}
                 lang={lang}
                 {...R.omit(['codeLabelMapping'], c)}
               />
@@ -62,6 +64,7 @@ Controls.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
+  noData: PropTypes.bool.isRequired,
   lang: PropTypes.string.isRequired,
   isSmall: PropTypes.bool.isRequired,
 };
