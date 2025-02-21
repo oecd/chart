@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading  */
-import React, { useMemo, lazy, Suspense } from 'react';
+import React, { useMemo, lazy, Suspense, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
@@ -23,12 +23,30 @@ const Controls = ({
   changeVar,
   codeLabelMapping = null,
   noData,
+  controlIdForWhichDataLoadingIsPending,
+  onControlChange,
   lang,
   isSmall,
 }) => {
   const validControls = useMemo(
     () => R.filter((c) => R.has(c.type, controlTypes), controls),
     [controls],
+  );
+
+  const disabledControlIds = useMemo(() => {
+    if (!controlIdForWhichDataLoadingIsPending) {
+      return [];
+    }
+
+    return R.compose(
+      R.map(R.prop('id')),
+      R.reject(R.propEq(controlIdForWhichDataLoadingIsPending, 'id')),
+    )(controls);
+  }, [controls, controlIdForWhichDataLoadingIsPending]);
+
+  const isDisabled = useCallback(
+    (id) => R.includes(id, disabledControlIds),
+    [disabledControlIds],
   );
 
   return R.isEmpty(validControls) ? null : (
@@ -48,8 +66,10 @@ const Controls = ({
                 changeVar={changeVar}
                 codeLabelMapping={codeLabelMapping}
                 noData={noData}
+                onControlChange={onControlChange}
                 lang={lang}
                 {...R.omit(['codeLabelMapping'], c)}
+                disabled={isDisabled(c.id)}
               />
             </Suspense>
           );
@@ -65,6 +85,8 @@ Controls.propTypes = {
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
   noData: PropTypes.bool.isRequired,
+  controlIdForWhichDataLoadingIsPending: PropTypes.string,
+  onControlChange: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
   isSmall: PropTypes.bool.isRequired,
 };

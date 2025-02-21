@@ -36,10 +36,10 @@ export const DropdownIndicator = (props) => {
 };
 
 export const OptionLabelSingle = ({ label, disabled }) => (
-  <>
-    <span dangerouslySetInnerHTML={{ __html: label }} />
-    {disabled && ' (disabled)'}
-  </>
+  <span
+    style={disabled ? { color: '#c2cbd6' } : {}}
+    dangerouslySetInnerHTML={{ __html: label }}
+  />
 );
 
 const OptionLabelMultiple = ({
@@ -55,15 +55,16 @@ const OptionLabelMultiple = ({
     className={
       isStandalone
         ? 'cb-control-select-option-multi-standalone'
-        : 'cb-control-select-option-multi'
+        : `cb-control-select-option-multi ${disabled ? 'disabled' : ''}`
     }
   >
     <div className="cb-control-select-option-multi-check">
-      {R.includes(value, selectedOptionValues) && <CheckIcon />}
+      {R.includes(value, selectedOptionValues) && (
+        <CheckIcon color={disabled ? '#dee3e9' : '#156df9'} />
+      )}
     </div>
     <div style={{ flex: 1, marginLeft: '5px' }}>
       <OptionLabelSingle label={label} />
-      {disabled ? ' (disabled)' : ''}
     </div>
     {children}
   </div>

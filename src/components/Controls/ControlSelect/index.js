@@ -23,6 +23,7 @@ import {
 const noOptionsMessage = () => '';
 
 const ControlSelect = ({
+  id,
   label = null,
   options,
   placeholder,
@@ -35,10 +36,12 @@ const ControlSelect = ({
   vars,
   changeVar,
   codeLabelMapping = null,
+  onControlChange,
   type,
   hideTitle = false,
   isStandalone = false,
   sortBy,
+  disabled = false,
 }) => {
   const selectInstanceId = useId();
 
@@ -128,6 +131,7 @@ const ControlSelect = ({
       } else {
         changeVar(varName, value.value);
       }
+      onControlChange(id);
     },
     [
       changeVar,
@@ -138,6 +142,8 @@ const ControlSelect = ({
       starValues,
       displayStars,
       starsVarName,
+      onControlChange,
+      id,
     ],
   );
 
@@ -278,12 +284,14 @@ const ControlSelect = ({
         theme={customSelectTheme}
         styles={customSelectStyles}
         aria-label={finalLabel || ''}
+        isDisabled={disabled}
       />
     </div>
   );
 };
 
 ControlSelect.propTypes = {
+  id: PropTypes.string.isRequired,
   label: PropTypes.string,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.string.isRequired,
@@ -296,10 +304,12 @@ ControlSelect.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
+  onControlChange: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool,
   isStandalone: PropTypes.bool,
   sortBy: PropTypes.string,
+  disabled: PropTypes.bool.isRequired,
 };
 
 export default ControlSelect;

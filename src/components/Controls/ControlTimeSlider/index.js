@@ -7,6 +7,7 @@ import { isNilOrEmpty } from '../../../utils/ramdaUtil';
 import ControlFallback from '../../ControlFallback';
 
 const ControlTimeSlider = ({
+  id,
   label = null,
   frequencies,
   isRange,
@@ -17,9 +18,11 @@ const ControlTimeSlider = ({
   changeVar,
   codeLabelMapping = null,
   noData,
+  onControlChange,
   lang,
   hideTitle = false,
   isStandalone = false,
+  disabled = false,
 }) => {
   const finalLabel = useMemo(() => {
     if (isNilOrEmpty(label) || R.isNil(codeLabelMapping)) {
@@ -38,6 +41,7 @@ const ControlTimeSlider = ({
     />
   ) : (
     <Component
+      id={id}
       label={finalLabel}
       frequencies={frequencies}
       isRange={isRange}
@@ -47,14 +51,17 @@ const ControlTimeSlider = ({
       vars={vars}
       changeVar={changeVar}
       noData={noData}
+      onControlChange={onControlChange}
       lang={lang}
       hideTitle={hideTitle}
       isStandalone={isStandalone}
+      disabled={disabled}
     />
   );
 };
 
 ControlTimeSlider.propTypes = {
+  id: PropTypes.string.isRequired,
   label: PropTypes.string,
   frequencies: PropTypes.array.isRequired,
   isRange: PropTypes.bool.isRequired,
@@ -65,9 +72,11 @@ ControlTimeSlider.propTypes = {
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
   noData: PropTypes.bool.isRequired,
+  onControlChange: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool,
   isStandalone: PropTypes.bool,
+  disabled: PropTypes.bool,
 };
 
 export default ControlTimeSlider;

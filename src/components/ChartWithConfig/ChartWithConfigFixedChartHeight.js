@@ -46,6 +46,7 @@ const ChartWithConfigFixedChartHeight = ({
         ? (data) => {
             setCodeLabelMapping(R.prop('codeLabelMapping', data));
             setNoData(R.isEmpty(data.categories) && R.isEmpty(data.series));
+            console.log('--from onDataReady--');
           }
         : null,
     [controls, hideControls],

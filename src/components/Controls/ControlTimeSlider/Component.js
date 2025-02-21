@@ -29,6 +29,7 @@ const getFrequency = (dotStatId, frequencies) => {
 };
 
 const ControlTimeSlider = ({
+  id,
   label = null,
   frequencies,
   isRange,
@@ -38,9 +39,11 @@ const ControlTimeSlider = ({
   vars,
   changeVar,
   noData,
+  onControlChange,
   lang,
   hideTitle,
   isStandalone,
+  disabled,
 }) => {
   const [stateFrequencies, setStateFrequencies] = useState(frequencies);
   useEffect(() => {
@@ -282,9 +285,15 @@ const ControlTimeSlider = ({
             )
           ) {
             changeVar(minVarName, R.nth(min, steps.codes));
+            console.log('onControlChange 1');
+            onControlChange(id);
           }
         } else {
           changeVar(minVarName, R.nth(min, steps.codes));
+          console.log('onControlChange 2');
+          console.log(vars[minVarName]);
+          console.log(R.nth(min, steps.codes));
+          onControlChange(id);
         }
 
         if (steps.maxIndexFromAvailability) {
@@ -301,17 +310,32 @@ const ControlTimeSlider = ({
             )
           ) {
             changeVar(maxVarName, R.nth(max, steps.codes));
+            console.log('onControlChange 3');
+            onControlChange(id);
           }
         } else {
           changeVar(maxVarName, R.nth(max, steps.codes));
+          console.log('onControlChange 4');
+          onControlChange(id);
         }
 
         return;
       }
 
       changeVar(minVarName, R.nth(value, steps.codes));
+      console.log('onControlChange 5');
+      onControlChange(id);
     },
-    [isRange, steps, minVarName, maxVarName, vars, changeVar],
+    [
+      isRange,
+      steps,
+      minVarName,
+      maxVarName,
+      vars,
+      changeVar,
+      onControlChange,
+      id,
+    ],
   );
 
   const getLabel = (code) => R.propOr('', code, steps.labelByCode);
@@ -367,7 +391,7 @@ const ControlTimeSlider = ({
           draggableTrack
           pushable={1}
           allowCross={false}
-          disabled={R.isEmpty(steps.codes)}
+          disabled={R.isEmpty(steps.codes) || disabled}
           trackStyle={{ backgroundColor: '#156DF9' }}
           railStyle={{
             backgroundColor: '#DEE5ED',
@@ -409,6 +433,7 @@ const ControlTimeSlider = ({
 };
 
 ControlTimeSlider.propTypes = {
+  id: PropTypes.string.isRequired,
   label: PropTypes.string,
   frequencies: PropTypes.array.isRequired,
   isRange: PropTypes.bool.isRequired,
@@ -417,10 +442,12 @@ ControlTimeSlider.propTypes = {
   frequencyVarName: PropTypes.string.isRequired,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
+  noData: PropTypes.bool.isRequired,
+  onControlChange: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool.isRequired,
   isStandalone: PropTypes.bool.isRequired,
-  noData: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
 export default ControlTimeSlider;

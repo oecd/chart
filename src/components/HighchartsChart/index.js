@@ -431,7 +431,7 @@ const HighchartsChart = ({
   );
 
   useEffect(() => {
-    if (onDataReady && parsedData) {
+    if (onDataReady && parsedData && !isFetching) {
       onDataReady(parsedData);
     }
 
