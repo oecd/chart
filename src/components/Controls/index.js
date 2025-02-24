@@ -41,6 +41,7 @@ const Controls = ({
     return R.compose(
       R.map(R.prop('id')),
       R.reject(R.propEq(controlIdForWhichDataLoadingIsPending, 'id')),
+      R.filter(R.propEq(true, 'connectedToDotStat')),
     )(controls);
   }, [controls, controlIdForWhichDataLoadingIsPending]);
 

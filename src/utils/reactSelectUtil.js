@@ -67,7 +67,7 @@ const getBasicStylingConfigs = (isStandalone) => {
     }),
     dropdownIndicator: (provided, state) => ({
       ...provided,
-      color: '#586179b3',
+      color: state.isDisabled ? '#c2cbd6' : '#586179b3',
       padding: state.isMulti ? '6px 6px 7px 6px' : '5px 8px 4px 8px',
     }),
     valueContainer: (provided, state) => ({
@@ -80,6 +80,7 @@ const getBasicStylingConfigs = (isStandalone) => {
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       display: `${state.hasValue && state.isMulti ? 'initial' : 'grid'}`,
+      color: state.isDisabled ? '#c2cbd6' : 'unset',
     }),
     input: (provided, state) =>
       state.isMulti

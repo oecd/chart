@@ -40,13 +40,20 @@ const ChartWithConfigFixedChartHeight = ({
 
   const [noData, setNoData] = useState(false);
 
+  const [
+    controlIdForWhichDataLoadingIsPending,
+    setControlIdForWhichDataLoadingIsPending,
+  ] = useState(null);
+
   const onDataReady = useMemo(
     () =>
       !isNilOrEmpty(controls) && !hideControls
         ? (data) => {
-            setCodeLabelMapping(R.prop('codeLabelMapping', data));
-            setNoData(R.isEmpty(data.categories) && R.isEmpty(data.series));
-            console.log('--from onDataReady--');
+            if (data) {
+              setCodeLabelMapping(R.prop('codeLabelMapping', data));
+              setNoData(R.isEmpty(data.categories) && R.isEmpty(data.series));
+            }
+            setControlIdForWhichDataLoadingIsPending(null);
           }
         : null,
     [controls, hideControls],
@@ -118,6 +125,10 @@ const ChartWithConfigFixedChartHeight = ({
           changeVar={changeVar}
           codeLabelMapping={codeLabelMapping}
           noData={noData}
+          controlIdForWhichDataLoadingIsPending={
+            controlIdForWhichDataLoadingIsPending
+          }
+          onControlChange={setControlIdForWhichDataLoadingIsPending}
           lang={lang}
           isSmall={isSmall}
         />

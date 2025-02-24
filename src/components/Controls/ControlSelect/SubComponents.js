@@ -35,11 +35,8 @@ export const DropdownIndicator = (props) => {
   );
 };
 
-export const OptionLabelSingle = ({ label, disabled }) => (
-  <span
-    style={disabled ? { color: '#c2cbd6' } : {}}
-    dangerouslySetInnerHTML={{ __html: label }}
-  />
+export const OptionLabelSingle = ({ label }) => (
+  <span dangerouslySetInnerHTML={{ __html: label }} />
 );
 
 const OptionLabelMultiple = ({

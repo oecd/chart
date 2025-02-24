@@ -147,6 +147,7 @@ const HighchartsChart = ({
   debug = false,
   ...otherProps
 }) => {
+  console.log(debug);
   const chartForType = getChartForType(chartType);
   const ChartForTypeComponent = chartForType.component;
 
@@ -431,7 +432,7 @@ const HighchartsChart = ({
   );
 
   useEffect(() => {
-    if (onDataReady && parsedData && !isFetching) {
+    if (onDataReady && !isFetching) {
       onDataReady(parsedData);
     }
 

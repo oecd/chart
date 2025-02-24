@@ -263,7 +263,9 @@ const ControlSelect = ({
       isStandalone={isStandalone}
     />
   ) : (
-    <div className={isStandalone ? 'cb-control-standalone' : 'cb-control'}>
+    <div
+      className={`${isStandalone ? 'cb-control-standalone' : 'cb-control'} ${disabled ? 'disabled' : ''}`}
+    >
       {!isNilOrEmpty(finalLabel) && !hideTitle && (
         <div className="cb-control-label">{finalLabel}</div>
       )}

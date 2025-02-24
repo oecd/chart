@@ -252,6 +252,10 @@
   border-color: #dee3e9;
 }
 
+.cb-control.disabled .cb-control-select-magnifying-glass svg {
+  fill: #c2cbd6 !important;
+}
+
 .cb-control .rc-slider-handle-dragging,
 .cb-control-standalone .rc-slider-handle-dragging {
   box-shadow: 0px 0px 4px 2px #156df9 !important;
@@ -264,6 +268,10 @@
 
 .cb-control-standalone .rc-slider-horizontal {
   padding: 16px 0px;
+}
+
+.cb-control .rc-slider-disabled {
+  background-color: unset;
 }
 
 @keyframes cb-rotate {

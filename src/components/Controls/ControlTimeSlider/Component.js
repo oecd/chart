@@ -285,14 +285,10 @@ const ControlTimeSlider = ({
             )
           ) {
             changeVar(minVarName, R.nth(min, steps.codes));
-            console.log('onControlChange 1');
             onControlChange(id);
           }
-        } else {
+        } else if (vars[minVarName] !== R.nth(min, steps.codes)) {
           changeVar(minVarName, R.nth(min, steps.codes));
-          console.log('onControlChange 2');
-          console.log(vars[minVarName]);
-          console.log(R.nth(min, steps.codes));
           onControlChange(id);
         }
 
@@ -310,21 +306,20 @@ const ControlTimeSlider = ({
             )
           ) {
             changeVar(maxVarName, R.nth(max, steps.codes));
-            console.log('onControlChange 3');
             onControlChange(id);
           }
-        } else {
+        } else if (vars[maxVarName] !== R.nth(max, steps.codes)) {
           changeVar(maxVarName, R.nth(max, steps.codes));
-          console.log('onControlChange 4');
           onControlChange(id);
         }
 
         return;
       }
 
-      changeVar(minVarName, R.nth(value, steps.codes));
-      console.log('onControlChange 5');
-      onControlChange(id);
+      if (vars[minVarName] !== R.nth(value, steps.codes)) {
+        changeVar(minVarName, R.nth(value, steps.codes));
+        onControlChange(id);
+      }
     },
     [
       isRange,
@@ -375,7 +370,7 @@ const ControlTimeSlider = ({
         </div>
       )}
 
-      <div style={{ margin: '0px 7px' }}>
+      <div style={{ padding: '0px 7px' }}>
         <Slider
           onChange={onRangeChange}
           onChangeComplete={onRangeChangeComplete}
@@ -401,7 +396,7 @@ const ControlTimeSlider = ({
           handleStyle={{
             opacity: 1,
             border: 'none',
-            backgroundColor: '#156DF9',
+            backgroundColor: disabled ? '#dee3e9' : '#156DF9',
           }}
           ariaLabelForHandle={
             isRange

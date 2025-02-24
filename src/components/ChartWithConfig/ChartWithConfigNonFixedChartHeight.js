@@ -62,14 +62,14 @@ const ChartWithConfigNonFixedChartHeight = ({
     setControlIdForWhichDataLoadingIsPending,
   ] = useState(null);
 
-  console.log(controlIdForWhichDataLoadingIsPending);
-
   const onDataReady = useMemo(
     () =>
       !isNilOrEmpty(controls) && !hideControls
         ? (data) => {
-            setCodeLabelMapping(R.prop('codeLabelMapping', data));
-            setNoData(R.isEmpty(data.categories) && R.isEmpty(data.series));
+            if (data) {
+              setCodeLabelMapping(R.prop('codeLabelMapping', data));
+              setNoData(R.isEmpty(data.categories) && R.isEmpty(data.series));
+            }
             setControlIdForWhichDataLoadingIsPending(null);
           }
         : null,
