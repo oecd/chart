@@ -115,6 +115,7 @@ const HighchartsChart = ({
   note = null,
   source = null,
   setControls,
+  getControlsWithAvailability,
   highlight = '',
   baseline = '',
   colorPalette,
@@ -147,7 +148,6 @@ const HighchartsChart = ({
   debug = false,
   ...otherProps
 }) => {
-  console.log(debug);
   const chartForType = getChartForType(chartType);
   const ChartForTypeComponent = chartForType.component;
 
@@ -235,7 +235,7 @@ const HighchartsChart = ({
             });
           }
 
-          const newSdmxJson = await fetchDotStatData(
+          const newSdmxJsonRequest = fetchDotStatData(
             finalDotStatUrl,
             dotStatLang,
           );
@@ -244,8 +244,21 @@ const HighchartsChart = ({
           if (
             lastRequestedDataKey.current === `${finalDotStatUrl}|${dotStatLang}`
           ) {
+            if (getControlsWithAvailability) {
+              try {
+                const { newControls } = await getControlsWithAvailability(
+                  finalDotStatUrl,
+                  vars,
+                );
+                if (newControls) {
+                  setControls(newControls);
+                }
+              } catch {
+                // too bad; no availability check can be done
+              }
+            }
             setPreParsedDataInternal(null);
-            setSdmxJson(newSdmxJson);
+            setSdmxJson(await newSdmxJsonRequest);
             setIsFetching(false);
           }
         } catch (e) {
@@ -272,6 +285,8 @@ const HighchartsChart = ({
     lang,
     debug,
     setControls,
+    getControlsWithAvailability,
+    vars,
   ]);
 
   const parsedSDMXData = useMemo(() => {
@@ -972,6 +987,7 @@ HighchartsChart.propTypes = {
   note: PropTypes.string,
   source: PropTypes.string,
   setControls: PropTypes.func.isRequired,
+  getControlsWithAvailability: PropTypes.func.isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,
   colorPalette: PropTypes.array.isRequired,

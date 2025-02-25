@@ -16,6 +16,7 @@ const ChartWithConfigFixedChartHeight = ({
   vars,
   changeVar,
   controls = [],
+  getControlsWithAvailability,
   hideControls = false,
   lang = 'default',
   ...otherProps
@@ -109,6 +110,7 @@ const ChartWithConfigFixedChartHeight = ({
                     lang={lang}
                     onDataReady={onDataReady}
                     isSmall={isSmall}
+                    getControlsWithAvailability={getControlsWithAvailability}
                     {...otherProps}
                   />
                 )}
@@ -143,6 +145,7 @@ ChartWithConfigFixedChartHeight.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   controls: PropTypes.array,
+  getControlsWithAvailability: PropTypes.func.isRequired,
   hideControls: PropTypes.bool,
   lang: PropTypes.string,
 };

@@ -30,6 +30,7 @@ const ChartWithConfig = ({
   var9DefaultValue = null,
   var10DefaultValue = null,
   controls = null,
+  getControlsWithAvailability = null,
   ...otherProps
 }) => {
   const ChartWithConfigComponent = height
@@ -102,6 +103,7 @@ const ChartWithConfig = ({
       changeVar={changeVar}
       controls={stateControls}
       setControls={setStateControls}
+      getControlsWithAvailability={getControlsWithAvailability}
       {...otherProps}
     />
   );
@@ -130,6 +132,7 @@ ChartWithConfig.propTypes = {
   var9DefaultValue: PropTypes.string,
   var10DefaultValue: PropTypes.string,
   controls: PropTypes.array,
+  getControlsWithAvailability: PropTypes.func,
 };
 
 export default ChartWithConfig;
