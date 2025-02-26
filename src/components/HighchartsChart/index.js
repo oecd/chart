@@ -114,6 +114,8 @@ const HighchartsChart = ({
   definition = null,
   note = null,
   source = null,
+  setControls,
+  getControlsWithAvailability,
   highlight = '',
   baseline = '',
   colorPalette,
@@ -229,7 +231,7 @@ const HighchartsChart = ({
             });
           }
 
-          const newSdmxJson = await fetchDotStatData(
+          const newSdmxJsonRequest = fetchDotStatData(
             finalDotStatUrl,
             dotStatLang,
           );
@@ -238,8 +240,21 @@ const HighchartsChart = ({
           if (
             lastRequestedDataKey.current === `${finalDotStatUrl}|${dotStatLang}`
           ) {
+            if (getControlsWithAvailability) {
+              try {
+                const { newControls } = await getControlsWithAvailability(
+                  finalDotStatUrl,
+                  vars,
+                );
+                if (newControls) {
+                  setControls(newControls);
+                }
+              } catch {
+                // too bad; no availability check can be done
+              }
+            }
             setPreParsedDataInternal(null);
-            setSdmxJson(newSdmxJson);
+            setSdmxJson(await newSdmxJsonRequest);
             setIsFetching(false);
           }
         } catch (e) {
@@ -265,6 +280,9 @@ const HighchartsChart = ({
     id,
     lang,
     debug,
+    setControls,
+    getControlsWithAvailability,
+    vars,
   ]);
 
   const parsedSDMXData = useMemo(() => {
@@ -425,7 +443,7 @@ const HighchartsChart = ({
   );
 
   useEffect(() => {
-    if (onDataReady && parsedData) {
+    if (onDataReady && !isFetching) {
       onDataReady(parsedData);
     }
 
@@ -486,14 +504,22 @@ const HighchartsChart = ({
     if (preParsedDataInternal) {
       const { varsThatCauseNewPreParsedDataFetch } = preParsedDataInternal;
 
-      const anyVarHasChanged = R.compose(
-        R.any(R.equals(true)),
-        R.map(
-          (varName) =>
+      const varsThatHaveChanged = R.reduce(
+        (acc, varName) => {
+          if (
             R.toUpper(varsThatCauseNewPreParsedDataFetch[varName] ?? '') !==
-            R.replace(/\+/g, '|', R.toUpper(vars[varName] ?? '')),
-        ),
-      )(R.keys(varsThatCauseNewPreParsedDataFetch || {}));
+            R.replace(/\+/g, '|', R.toUpper(vars[varName] ?? ''))
+          ) {
+            return R.append(varName, acc);
+          }
+
+          return acc;
+        },
+        [],
+        R.keys(varsThatCauseNewPreParsedDataFetch || {}),
+      );
+
+      const anyVarHasChanged = !R.isEmpty(varsThatHaveChanged);
 
       if (anyVarHasChanged || lang !== prevLang) {
         const varsParam = R.compose(
@@ -526,6 +552,11 @@ const HighchartsChart = ({
               setPreParsedDataInternal(
                 R.prop('preParsedData', newPreParsedData),
               );
+
+              if (R.has('controls', newPreParsedData)) {
+                setControls(R.prop('controls', newPreParsedData));
+              }
+
               setIsFetching(false);
             }
           } catch (e) {
@@ -536,7 +567,7 @@ const HighchartsChart = ({
         getNewPreParsedData();
       }
     }
-  }, [id, vars, lang, prevLang, preParsedDataInternal]);
+  }, [id, vars, lang, prevLang, preParsedDataInternal, setControls]);
 
   const [headerHeight, setHeaderHeight] = useState(null);
   const [footerHeight, setFooterHeight] = useState(null);
@@ -943,6 +974,8 @@ HighchartsChart.propTypes = {
   definition: PropTypes.string,
   note: PropTypes.string,
   source: PropTypes.string,
+  setControls: PropTypes.func.isRequired,
+  getControlsWithAvailability: PropTypes.func.isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,
   colorPalette: PropTypes.array.isRequired,

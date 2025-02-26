@@ -1,11 +1,12 @@
 /* eslint-disable react/jsx-props-no-spreading  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
 import ChartWithConfigFixedChartHeight from './ChartWithConfigFixedChartHeight';
 import ChartWithConfigNonFixedChartHeight from './ChartWithConfigNonFixedChartHeight';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
+import { trackChartView } from '../../utils/trackingUtil';
 
 const ChartWithConfig = ({
   height = null,
@@ -29,6 +30,9 @@ const ChartWithConfig = ({
   var8DefaultValue = null,
   var9DefaultValue = null,
   var10DefaultValue = null,
+  controls,
+  hideControls = false,
+  getControlsWithAvailability = null,
   ...otherProps
 }) => {
   const ChartWithConfigComponent = height
@@ -88,11 +92,62 @@ const ChartWithConfig = ({
     setVars(R.assoc(varName, varValue));
   }, []);
 
+  const [stateControls, setStateControls] = useState(controls);
+
+  useEffect(() => {
+    setStateControls(controls);
+  }, [controls, setStateControls]);
+
+  const [codeLabelMappingForControls, setCodeLabelMappingForControls] =
+    useState(null);
+
+  const [noDataForControls, setNoDataForControls] = useState(false);
+
+  const [
+    controlIdForWhichDataLoadingIsPending,
+    setControlIdForWhichDataLoadingIsPending,
+  ] = useState(null);
+
+  const onDataReady = useMemo(
+    () =>
+      !isNilOrEmpty(stateControls) && !hideControls
+        ? (data) => {
+            if (data) {
+              setCodeLabelMappingForControls(R.prop('codeLabelMapping', data));
+              setNoDataForControls(
+                R.isEmpty(data.categories) && R.isEmpty(data.series),
+              );
+            } else {
+              setNoDataForControls(true);
+            }
+            setControlIdForWhichDataLoadingIsPending(null);
+          }
+        : null,
+    [stateControls, hideControls],
+  );
+
+  useEffect(() => {
+    trackChartView(otherProps.id);
+  }, [otherProps.id]);
+
   return (
     <ChartWithConfigComponent
       height={height}
       vars={vars}
       changeVar={changeVar}
+      controls={stateControls}
+      hideControls={hideControls}
+      setControls={setStateControls}
+      getControlsWithAvailability={getControlsWithAvailability}
+      codeLabelMappingForControls={codeLabelMappingForControls}
+      noDataForControls={noDataForControls}
+      controlIdForWhichDataLoadingIsPending={
+        controlIdForWhichDataLoadingIsPending
+      }
+      setControlIdForWhichDataLoadingIsPending={
+        setControlIdForWhichDataLoadingIsPending
+      }
+      onDataReady={onDataReady}
       {...otherProps}
     />
   );
@@ -120,6 +175,9 @@ ChartWithConfig.propTypes = {
   var8DefaultValue: PropTypes.string,
   var9DefaultValue: PropTypes.string,
   var10DefaultValue: PropTypes.string,
+  controls: PropTypes.array,
+  hideControls: PropTypes.bool,
+  getControlsWithAvailability: PropTypes.func,
 };
 
 export default ChartWithConfig;

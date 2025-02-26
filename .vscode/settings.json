@@ -24,12 +24,7 @@
     "**/out": true
   },
 
-  // TypeScript.
-
-  // Enable/disable JavaScript validation.
-  // So far vscode does not recognize spread oprator :(
-  // But eslint does a better job anyway..
-  "javascript.validate.enable": false,
+  "javascript.updateImportsOnPaste.enabled": false,
 
   "editor.formatOnSave": true,
 

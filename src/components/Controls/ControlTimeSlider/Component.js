@@ -29,6 +29,7 @@ const getFrequency = (dotStatId, frequencies) => {
 };
 
 const ControlTimeSlider = ({
+  id,
   label = null,
   frequencies,
   isRange,
@@ -37,9 +38,12 @@ const ControlTimeSlider = ({
   frequencyVarName,
   vars,
   changeVar,
+  noData,
+  onControlChange,
   lang,
   hideTitle,
   isStandalone,
+  disabled,
 }) => {
   const [stateFrequencies, setStateFrequencies] = useState(frequencies);
   useEffect(() => {
@@ -162,11 +166,34 @@ const ControlTimeSlider = ({
           ? 0
           : R.findIndex(R.equals(newMaxCode), newSteps.codes);
 
+      if (noData) {
+        setCurrentRange({
+          minCode: R.nth(newMinIndex, newSteps.codes),
+          minIndex: newMinIndex,
+          maxCode: R.nth(newMaxIndex, newSteps.codes),
+          maxIndex: newMaxIndex,
+        });
+        return;
+      }
+
+      const finalMinIndex = R.when(
+        () =>
+          newSteps.minIndexFromAvailability &&
+          newSteps.minIndexFromAvailability > newMinIndex,
+        () => newSteps.minIndexFromAvailability,
+      )(newMinIndex);
+      const finalMaxIndex = R.when(
+        () =>
+          newSteps.maxIndexFromAvailability &&
+          newSteps.maxIndexFromAvailability < newMaxIndex,
+        () => newSteps.maxIndexFromAvailability,
+      )(newMaxIndex);
+
       setCurrentRange({
-        minCode: R.nth(newMinIndex, newSteps.codes),
-        minIndex: newMinIndex,
-        maxCode: R.nth(newMaxIndex, newSteps.codes),
-        maxIndex: newMaxIndex,
+        minCode: R.nth(finalMinIndex, newSteps.codes),
+        minIndex: finalMinIndex,
+        maxCode: R.nth(finalMaxIndex, newSteps.codes),
+        maxIndex: finalMaxIndex,
       });
     } else {
       setCurrentRange({
@@ -188,39 +215,122 @@ const ControlTimeSlider = ({
     maxVarName,
     stateFrequencies,
     statePrevFrequencies,
+    noData,
   ]);
 
   const onRangeChange = useCallback(
     (value) => {
       if (isRange) {
         const [min, max] = value;
+        const finalMin = R.when(
+          () =>
+            steps.minIndexFromAvailability &&
+            steps.minIndexFromAvailability > min,
+          () => steps.minIndexFromAvailability,
+        )(min);
+        const finalMax = R.when(
+          () =>
+            steps.maxIndexFromAvailability &&
+            steps.maxIndexFromAvailability < max,
+          () => steps.maxIndexFromAvailability,
+        )(max);
+
         setCurrentRange({
-          minCode: R.nth(min, steps.codes),
-          minIndex: min,
-          maxCode: R.nth(max, steps.codes),
-          maxIndex: max,
+          minCode: R.nth(finalMin, steps.codes),
+          minIndex: finalMin,
+          maxCode: R.nth(finalMax, steps.codes),
+          maxIndex: finalMax,
         });
       } else {
+        const finalMin = R.compose(
+          R.when(
+            () =>
+              steps.maxIndexFromAvailability &&
+              steps.maxIndexFromAvailability < value,
+            () => steps.maxIndexFromAvailability,
+          ),
+          R.when(
+            () =>
+              steps.minIndexFromAvailability &&
+              steps.minIndexFromAvailability > value,
+            () => steps.minIndexFromAvailability,
+          ),
+        )(value);
+
         setCurrentRange({
-          minCode: R.nth(value, steps.codes),
-          minIndex: value,
+          minCode: R.nth(finalMin, steps.codes),
+          minIndex: finalMin,
         });
       }
     },
-    [isRange, steps.codes],
+    [isRange, steps],
   );
 
   const onRangeChangeComplete = useCallback(
     (value) => {
       if (isRange) {
         const [min, max] = value;
-        changeVar(minVarName, R.nth(min, steps.codes));
-        changeVar(maxVarName, R.nth(max, steps.codes));
-      } else {
+
+        if (steps.minIndexFromAvailability) {
+          const currentMinVarValue = vars[minVarName];
+          const currentMinVarIndex = R.findIndex(
+            R.equals(currentMinVarValue),
+            steps.codes,
+          );
+
+          if (
+            !(
+              currentMinVarIndex <= steps.minIndexFromAvailability &&
+              min === steps.minIndexFromAvailability
+            )
+          ) {
+            changeVar(minVarName, R.nth(min, steps.codes));
+            onControlChange(id);
+          }
+        } else if (vars[minVarName] !== R.nth(min, steps.codes)) {
+          changeVar(minVarName, R.nth(min, steps.codes));
+          onControlChange(id);
+        }
+
+        if (steps.maxIndexFromAvailability) {
+          const currentMaxVarValue = vars[maxVarName];
+          const currentMaxVarIndex = R.findIndex(
+            R.equals(currentMaxVarValue),
+            steps.codes,
+          );
+
+          if (
+            !(
+              currentMaxVarIndex >= steps.maxIndexFromAvailability &&
+              max === steps.maxIndexFromAvailability
+            )
+          ) {
+            changeVar(maxVarName, R.nth(max, steps.codes));
+            onControlChange(id);
+          }
+        } else if (vars[maxVarName] !== R.nth(max, steps.codes)) {
+          changeVar(maxVarName, R.nth(max, steps.codes));
+          onControlChange(id);
+        }
+
+        return;
+      }
+
+      if (vars[minVarName] !== R.nth(value, steps.codes)) {
         changeVar(minVarName, R.nth(value, steps.codes));
+        onControlChange(id);
       }
     },
-    [isRange, steps.codes, minVarName, maxVarName, changeVar],
+    [
+      isRange,
+      steps,
+      minVarName,
+      maxVarName,
+      vars,
+      changeVar,
+      onControlChange,
+      id,
+    ],
   );
 
   const getLabel = (code) => R.propOr('', code, steps.labelByCode);
@@ -276,7 +386,7 @@ const ControlTimeSlider = ({
           draggableTrack
           pushable={1}
           allowCross={false}
-          disabled={R.isEmpty(steps.codes)}
+          disabled={R.isEmpty(steps.codes) || disabled}
           trackStyle={{ backgroundColor: '#156DF9' }}
           railStyle={{
             backgroundColor: '#DEE5ED',
@@ -286,7 +396,7 @@ const ControlTimeSlider = ({
           handleStyle={{
             opacity: 1,
             border: 'none',
-            backgroundColor: '#156DF9',
+            backgroundColor: disabled ? '#dee3e9' : '#156DF9',
           }}
           ariaLabelForHandle={
             isRange
@@ -318,6 +428,7 @@ const ControlTimeSlider = ({
 };
 
 ControlTimeSlider.propTypes = {
+  id: PropTypes.string.isRequired,
   label: PropTypes.string,
   frequencies: PropTypes.array.isRequired,
   isRange: PropTypes.bool.isRequired,
@@ -326,9 +437,12 @@ ControlTimeSlider.propTypes = {
   frequencyVarName: PropTypes.string.isRequired,
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
+  noData: PropTypes.bool.isRequired,
+  onControlChange: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool.isRequired,
   isStandalone: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
 export default ControlTimeSlider;

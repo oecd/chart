@@ -23,6 +23,7 @@ import {
 const noOptionsMessage = () => '';
 
 const ControlSelect = ({
+  id,
   label = null,
   options,
   placeholder,
@@ -35,10 +36,12 @@ const ControlSelect = ({
   vars,
   changeVar,
   codeLabelMapping = null,
+  onControlChange,
   type,
   hideTitle = false,
   isStandalone = false,
   sortBy,
+  disabled = false,
 }) => {
   const selectInstanceId = useId();
 
@@ -128,6 +131,7 @@ const ControlSelect = ({
       } else {
         changeVar(varName, value.value);
       }
+      onControlChange(id);
     },
     [
       changeVar,
@@ -138,6 +142,8 @@ const ControlSelect = ({
       starValues,
       displayStars,
       starsVarName,
+      onControlChange,
+      id,
     ],
   );
 
@@ -257,7 +263,9 @@ const ControlSelect = ({
       isStandalone={isStandalone}
     />
   ) : (
-    <div className={isStandalone ? 'cb-control-standalone' : 'cb-control'}>
+    <div
+      className={`${isStandalone ? 'cb-control-standalone' : 'cb-control'} ${disabled ? 'disabled' : ''}`}
+    >
       {!isNilOrEmpty(finalLabel) && !hideTitle && (
         <div className="cb-control-label">{finalLabel}</div>
       )}
@@ -266,6 +274,7 @@ const ControlSelect = ({
         value={selectedOption}
         options={finalOptions}
         onChange={selectedOptionChanged}
+        isOptionDisabled={(o) => o.disabled}
         formatOptionLabel={formatOptionLabel}
         hideSelectedOptions={false}
         components={selectComponents}
@@ -277,12 +286,14 @@ const ControlSelect = ({
         theme={customSelectTheme}
         styles={customSelectStyles}
         aria-label={finalLabel || ''}
+        isDisabled={disabled}
       />
     </div>
   );
 };
 
 ControlSelect.propTypes = {
+  id: PropTypes.string.isRequired,
   label: PropTypes.string,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.string.isRequired,
@@ -295,10 +306,12 @@ ControlSelect.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
+  onControlChange: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool,
   isStandalone: PropTypes.bool,
   sortBy: PropTypes.string,
+  disabled: PropTypes.bool.isRequired,
 };
 
 export default ControlSelect;

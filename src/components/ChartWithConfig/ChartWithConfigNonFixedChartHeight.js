@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading  */
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useResizeDetector } from 'react-resize-detector';
 import * as R from 'ramda';
@@ -7,7 +7,6 @@ import * as R from 'ramda';
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
-import { trackChartView } from '../../utils/trackingUtil';
 import { calcIsSmall } from '../../utils/chartUtil';
 
 const minChartHeightForControlsDisplay = 280;
@@ -16,7 +15,13 @@ const ChartWithConfigNonFixedChartHeight = ({
   width = null,
   vars,
   changeVar,
-  controls = [],
+  controls,
+  getControlsWithAvailability,
+  codeLabelMappingForControls,
+  noDataForControls,
+  controlIdForWhichDataLoadingIsPending,
+  setControlIdForWhichDataLoadingIsPending,
+  onDataReady,
   hideControls = false,
   lang = 'default',
   ...otherProps
@@ -52,22 +57,6 @@ const ChartWithConfigNonFixedChartHeight = ({
     () => calcIsSmall(fullContainerWidth, fullContainerHeight),
     [fullContainerWidth, fullContainerHeight],
   );
-
-  const [codeLabelMapping, setCodeLabelMapping] = useState(null);
-
-  const onDataReady = useMemo(
-    () =>
-      !isNilOrEmpty(controls) && !hideControls
-        ? (data) => {
-            setCodeLabelMapping(R.prop('codeLabelMapping', data));
-          }
-        : null,
-    [controls, hideControls],
-  );
-
-  useEffect(() => {
-    trackChartView(otherProps.id);
-  }, [otherProps.id]);
 
   return (
     <div
@@ -108,6 +97,7 @@ const ChartWithConfigNonFixedChartHeight = ({
                   lang={lang}
                   onDataReady={onDataReady}
                   isSmall={isSmall}
+                  getControlsWithAvailability={getControlsWithAvailability}
                   {...R.omit(['height'], otherProps)}
                 />
               )}
@@ -134,7 +124,12 @@ const ChartWithConfigNonFixedChartHeight = ({
             controls={controls}
             vars={vars}
             changeVar={changeVar}
-            codeLabelMapping={codeLabelMapping}
+            codeLabelMapping={codeLabelMappingForControls}
+            noData={noDataForControls}
+            controlIdForWhichDataLoadingIsPending={
+              controlIdForWhichDataLoadingIsPending
+            }
+            onControlChange={setControlIdForWhichDataLoadingIsPending}
             lang={lang}
             isSmall={isSmall}
           />
@@ -148,7 +143,13 @@ ChartWithConfigNonFixedChartHeight.propTypes = {
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
-  controls: PropTypes.array,
+  controls: PropTypes.array.isRequired,
+  getControlsWithAvailability: PropTypes.func.isRequired,
+  codeLabelMappingForControls: PropTypes.object.isRequired,
+  noDataForControls: PropTypes.bool.isRequired,
+  controlIdForWhichDataLoadingIsPending: PropTypes.string.isRequired,
+  setControlIdForWhichDataLoadingIsPending: PropTypes.func.isRequired,
+  onDataReady: PropTypes.func.isRequired,
   hideControls: PropTypes.bool,
   lang: PropTypes.string,
 };
