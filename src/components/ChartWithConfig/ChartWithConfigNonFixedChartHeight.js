@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading  */
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+// eslint-disable-next-line import/no-unresolved
 import { useResizeDetector } from 'react-resize-detector';
 import * as R from 'ramda';
 

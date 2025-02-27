@@ -1,11 +1,11 @@
 import React, { useMemo, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
-import AccessibilityModule from 'highcharts/modules/accessibility';
-import AnnotationsModule from 'highcharts/modules/annotations';
-import ExportingModule from 'highcharts/modules/exporting';
-import OfflineExportingModule from 'highcharts/modules/offline-exporting';
-import ExportDataModule from 'highcharts/modules/export-data';
+import 'highcharts/modules/accessibility';
+import 'highcharts/modules/annotations';
+import 'highcharts/modules/exporting';
+import 'highcharts/modules/offline-exporting';
+import 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
 
@@ -17,14 +17,6 @@ import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
 } from '../../utils/chartUtil';
-
-if (typeof Highcharts === 'object') {
-  AnnotationsModule(Highcharts);
-  AccessibilityModule(Highcharts);
-  ExportingModule(Highcharts);
-  OfflineExportingModule(Highcharts);
-  ExportDataModule(Highcharts);
-}
 
 const createDatapoint = (d) => ({ y: d.value, __metadata: d.metadata });
 

@@ -1,12 +1,12 @@
 import React, { useMemo, forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
-import AccessibilityModule from 'highcharts/modules/accessibility';
-import BrokenAxisModule from 'highcharts/modules/broken-axis';
-import AnnotationsModule from 'highcharts/modules/annotations';
-import ExportingModule from 'highcharts/modules/exporting';
-import OfflineExportingModule from 'highcharts/modules/offline-exporting';
-import ExportDataModule from 'highcharts/modules/export-data';
+import 'highcharts/modules/accessibility';
+import 'highcharts/modules/broken-axis';
+import 'highcharts/modules/annotations';
+import 'highcharts/modules/exporting';
+import 'highcharts/modules/offline-exporting';
+import 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import * as R from 'ramda';
 
@@ -23,15 +23,6 @@ const createDatapoint = (d, areCategoriesDatesOrNumber) =>
   areCategoriesDatesOrNumber
     ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
     : { y: d.value, __metadata: d.metadata };
-
-if (typeof Highcharts === 'object') {
-  AnnotationsModule(Highcharts);
-  BrokenAxisModule(Highcharts);
-  AccessibilityModule(Highcharts);
-  ExportingModule(Highcharts);
-  OfflineExportingModule(Highcharts);
-  ExportDataModule(Highcharts);
-}
 
 const calcMarginTop = (title, subtitle, isSmall) => {
   if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {

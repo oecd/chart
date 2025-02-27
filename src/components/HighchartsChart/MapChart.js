@@ -9,12 +9,12 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts';
-import AccessibilityModule from 'highcharts/modules/accessibility';
-import AnnotationsModule from 'highcharts/modules/annotations';
-import HighchartsMap from 'highcharts/modules/map';
-import ExportingModule from 'highcharts/modules/exporting';
-import OfflineExportingModule from 'highcharts/modules/offline-exporting';
-import ExportDataModule from 'highcharts/modules/export-data';
+import 'highcharts/modules/accessibility';
+import 'highcharts/modules/annotations';
+import 'highcharts/modules/map';
+import 'highcharts/modules/exporting';
+import 'highcharts/modules/offline-exporting';
+import 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import { debounce } from 'throttle-debounce';
 import * as R from 'ramda';
@@ -71,12 +71,6 @@ function allowNegativeOnLogarithmicAxis() {
 }
 
 if (typeof Highcharts === 'object') {
-  HighchartsMap(Highcharts);
-  AnnotationsModule(Highcharts);
-  AccessibilityModule(Highcharts);
-  ExportingModule(Highcharts);
-  OfflineExportingModule(Highcharts);
-  ExportDataModule(Highcharts);
   Highcharts.addEvent(
     Highcharts.Axis,
     'afterInit',
