@@ -51,7 +51,7 @@ const getBasicStylingConfigs = (isStandalone) => {
       marginTop: 1,
       boxShadow: 'none',
       borderRadius: '4px',
-      zIndex: 2,
+      zIndex: 702,
     }),
     option: (provided, state) => ({
       ...provided,
