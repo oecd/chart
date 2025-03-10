@@ -36,7 +36,7 @@ const ControlSelect = ({
   vars,
   changeVar,
   codeLabelMapping = null,
-  onControlChange,
+  onControlChange = null,
   type,
   hideTitle = false,
   isStandalone = false,
@@ -131,7 +131,10 @@ const ControlSelect = ({
       } else {
         changeVar(varName, value.value);
       }
-      onControlChange(id);
+
+      if (onControlChange) {
+        onControlChange(id);
+      }
     },
     [
       changeVar,
@@ -306,7 +309,7 @@ ControlSelect.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   codeLabelMapping: PropTypes.object,
-  onControlChange: PropTypes.func.isRequired,
+  onControlChange: PropTypes.func,
   type: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool,
   isStandalone: PropTypes.bool,

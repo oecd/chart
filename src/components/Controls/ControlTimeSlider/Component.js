@@ -39,7 +39,7 @@ const ControlTimeSlider = ({
   vars,
   changeVar,
   noData,
-  onControlChange,
+  onControlChange = null,
   lang,
   hideTitle,
   isStandalone,
@@ -285,11 +285,15 @@ const ControlTimeSlider = ({
             )
           ) {
             changeVar(minVarName, R.nth(min, steps.codes));
-            onControlChange(id);
+            if (onControlChange) {
+              onControlChange(id);
+            }
           }
         } else if (vars[minVarName] !== R.nth(min, steps.codes)) {
           changeVar(minVarName, R.nth(min, steps.codes));
-          onControlChange(id);
+          if (onControlChange) {
+            onControlChange(id);
+          }
         }
 
         if (steps.maxIndexFromAvailability) {
@@ -306,11 +310,15 @@ const ControlTimeSlider = ({
             )
           ) {
             changeVar(maxVarName, R.nth(max, steps.codes));
-            onControlChange(id);
+            if (onControlChange) {
+              onControlChange(id);
+            }
           }
         } else if (vars[maxVarName] !== R.nth(max, steps.codes)) {
           changeVar(maxVarName, R.nth(max, steps.codes));
-          onControlChange(id);
+          if (onControlChange) {
+            onControlChange(id);
+          }
         }
 
         return;
@@ -318,7 +326,9 @@ const ControlTimeSlider = ({
 
       if (vars[minVarName] !== R.nth(value, steps.codes)) {
         changeVar(minVarName, R.nth(value, steps.codes));
-        onControlChange(id);
+        if (onControlChange) {
+          onControlChange(id);
+        }
       }
     },
     [
@@ -438,7 +448,7 @@ ControlTimeSlider.propTypes = {
   vars: PropTypes.object.isRequired,
   changeVar: PropTypes.func.isRequired,
   noData: PropTypes.bool.isRequired,
-  onControlChange: PropTypes.func.isRequired,
+  onControlChange: PropTypes.func,
   lang: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool.isRequired,
   isStandalone: PropTypes.bool.isRequired,
