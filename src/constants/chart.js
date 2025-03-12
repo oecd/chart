@@ -117,16 +117,16 @@ export const maxSupprortedNumberOfDataPoint = 15000;
 
 export const errorMessages = {
   generic: (
-    <span style={{ textAlign: 'center' }}>
+    <div style={{ textAlign: 'center' }}>
       An error occured.
       <br />
       Please refresh the page.
-    </span>
+    </div>
   ),
   noData: (
-    <span style={{ textAlign: 'center' }}>
+    <div style={{ textAlign: 'center' }}>
       No data available for the current selection.
-    </span>
+    </div>
   ),
-  underEmbargo: <span style={{ textAlign: 'center' }}>Not yet available</span>,
+  underEmbargo: <div style={{ textAlign: 'center' }}>Not yet available</div>,
 };
