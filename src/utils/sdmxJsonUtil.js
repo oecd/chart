@@ -19,7 +19,15 @@ const fixDotStatUrl = (url) => {
   const parsedUrl = new URL(url);
   parsedUrl.searchParams.set('dimensionAtObservation', 'AllDimensions');
 
-  return parsedUrl.href;
+  const normalizedUrl = R.compose(
+    R.replace(/lastNObservations=/gi, 'lastNObservations='),
+    R.replace(/firstNObservations=/gi, 'firstNObservations='),
+    R.replace(/updatedAfter=/gi, 'updatedAfter='),
+    R.replace(/endPeriod=/gi, 'endPeriod='),
+    R.replace(/startPeriod=/gi, 'startPeriod='),
+  )(parsedUrl.href);
+
+  return normalizedUrl;
 };
 
 const createDotStatHeaders = (lang) => ({
