@@ -55,6 +55,7 @@ import { fetchJson } from '../../utils/fetchUtil';
 import { getFinalPalette } from '../../utils/configUtil';
 import Header from './Header';
 import useIsFontLoaded from '../../hook/useIsFontLoaded';
+import { trackChartError } from '../../utils/trackingUtil';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -292,6 +293,12 @@ const HighchartsChart = ({
 
     if (preParsedDataInternal?.dotStatServerFetchFailed === true) {
       setErrorMessage(errorMessages.generic);
+
+      trackChartError(
+        id,
+        R.pathOr('', ['dotStatInfo', 'error'], preParsedDataInternal),
+      );
+
       return null;
     }
 
@@ -356,6 +363,7 @@ const HighchartsChart = ({
       return emptyData;
     }
   }, [
+    id,
     dataSourceType,
     chartType,
     dotStatUrlHasLastNObservationsEqOne,
@@ -546,6 +554,17 @@ const HighchartsChart = ({
                 lang,
               )}`,
             );
+
+            if (newPreParsedData?.preParsedData?.dotStatServerFetchFailed) {
+              trackChartError(
+                id,
+                R.pathOr(
+                  '',
+                  ['preParsedData', 'dotStatInfo', 'error'],
+                  newPreParsedData,
+                ),
+              );
+            }
 
             // discard result from outdated request(s)
             if (lastRequestedDataKey.current === configParams) {
