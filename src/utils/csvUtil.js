@@ -355,13 +355,14 @@ export const sortCSV =
     }
 
     if (finalSortBy === sortByOptions.seriesValue.value) {
-      const seriesCodes = R.map(
-        R.toUpper,
-        R.keys(parsingHelperData.yDimensionLabelByCode),
-      );
+      const seriesCodes = R.map((s) => R.toUpper(`${s}`), R.tail(R.head(data)));
+
       const seriesLabels = R.map(
-        R.toUpper,
-        R.values(parsingHelperData.yDimensionLabelByCode),
+        R.compose(
+          R.toUpper,
+          R.propOr('', R.__, parsingHelperData.yDimensionLabelByCode),
+        ),
+        seriesCodes,
       );
 
       const findSeriesIndexByCodeOrLabel = (codeOrLabel) =>
