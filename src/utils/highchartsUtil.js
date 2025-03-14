@@ -107,12 +107,17 @@ export const createFormatters = ({
         R.compose(
           (content) => R.replace('{series.name}', seriesName, content),
           (content) => {
-            const key =
-              chartType === chartTypes.pie
-                ? this.point.name
-                : (this.point.category ?? this.series.name);
+            const key = R.cond([
+              [() => chartType === chartTypes.map, () => this.series.name],
+              [() => chartType === chartTypes.pie, () => this.point.name],
+              [R.T, () => this.point.category ?? this.series.name],
+            ])();
 
-            const timeLabelSuffix = timeLabel ? ` - ${timeLabel}` : '';
+            const timeLabelSuffix = R.cond([
+              [() => isNilOrEmpty(timeLabel), () => ''],
+              [() => R.isEmpty(key), () => timeLabel],
+              [R.T, () => ` - ${timeLabel}`],
+            ])();
 
             if (
               R.includes(
@@ -121,7 +126,7 @@ export const createFormatters = ({
               )
             ) {
               return R.replace(
-                '{point.key}',
+                /{.*point.key}/,
                 `${key}${timeLabelSuffix}`,
                 content,
               );
@@ -129,7 +134,7 @@ export const createFormatters = ({
 
             if (!R.isNil(frequency)) {
               return R.replace(
-                '{point.key}',
+                /{.*point.key}/,
                 frequency.formatToLabel(key, lang),
                 content,
               );
@@ -137,7 +142,7 @@ export const createFormatters = ({
 
             if (areCategoriesNumbers) {
               return R.replace(
-                '{point.key}',
+                /{.*point.key}/,
                 `${numberFormat(
                   key,
                   maxNumberOfDecimals,
@@ -149,7 +154,7 @@ export const createFormatters = ({
             }
 
             return R.replace(
-              '{point.key}',
+              /{.*point.key}/,
               `${key}${timeLabelSuffix}`,
               content,
             );
