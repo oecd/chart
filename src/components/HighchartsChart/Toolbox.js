@@ -6,7 +6,7 @@ import * as R from 'ramda';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import CsvIcon from '../Icons/CsvIcon';
 import DotsIcon from '../Icons/DotsIcon';
-import PngIcon from '../Icons/PngIcon';
+// import PngIcon from '../Icons/PngIcon';
 import SvgIcon from '../Icons/SvgIcon';
 import ExpandIcon from '../Icons/ExpandIcon';
 import InfoIcon from '../Icons/InfoIcon';
@@ -62,28 +62,28 @@ const Toolbox = ({
         setOpen(false);
       },
     },
-    {
-      label: 'PNG',
-      content: <PngIcon />,
-      disabled: exportDisabled,
-      onSelect: () => {
-        chartRef.current?.chart.exportChartLocal(undefined, {
-          title: {
-            text: parsedTitle,
-          },
-          subtitle: {
-            text: parsedSubtitle,
-          },
-          ...(!isNilOrEmpty(parsedTitle) || !isNilOrEmpty(parsedSubtitle)
-            ? { chart: { marginTop: undefined } }
-            : {}),
-        });
-        if (onDownloadData) {
-          onDownloadData();
-        }
-        setOpen(false);
-      },
-    },
+    // {
+    //   label: 'PNG',
+    //   content: <PngIcon />,
+    //   disabled: exportDisabled,
+    //   onSelect: () => {
+    //     chartRef.current?.chart.exportChartLocal(undefined, {
+    //       title: {
+    //         text: parsedTitle,
+    //       },
+    //       subtitle: {
+    //         text: parsedSubtitle,
+    //       },
+    //       ...(!isNilOrEmpty(parsedTitle) || !isNilOrEmpty(parsedSubtitle)
+    //         ? { chart: { marginTop: undefined } }
+    //         : {}),
+    //     });
+    //     if (onDownloadData) {
+    //       onDownloadData();
+    //     }
+    //     setOpen(false);
+    //   },
+    // },
     {
       label: 'SVG',
       content: <SvgIcon />,
