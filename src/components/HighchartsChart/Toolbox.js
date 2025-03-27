@@ -6,7 +6,7 @@ import * as R from 'ramda';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import CsvIcon from '../Icons/CsvIcon';
 import DotsIcon from '../Icons/DotsIcon';
-// import PngIcon from '../Icons/PngIcon';
+import PngIcon from '../Icons/PngIcon';
 import SvgIcon from '../Icons/SvgIcon';
 import ExpandIcon from '../Icons/ExpandIcon';
 import InfoIcon from '../Icons/InfoIcon';
@@ -27,6 +27,7 @@ const Toolbox = ({
   tooltipContainerId,
   isSmall,
   exportDisabled = false,
+  debug = false,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -47,6 +48,31 @@ const Toolbox = ({
         },
       }),
     ),
+    R.when(
+      () => debug,
+      R.insert(1, {
+        label: 'PNG',
+        content: <PngIcon />,
+        disabled: exportDisabled,
+        onSelect: () => {
+          chartRef.current?.chart.exportChartLocal(undefined, {
+            title: {
+              text: parsedTitle,
+            },
+            subtitle: {
+              text: parsedSubtitle,
+            },
+            ...(!isNilOrEmpty(parsedTitle) || !isNilOrEmpty(parsedSubtitle)
+              ? { chart: { marginTop: undefined } }
+              : {}),
+          });
+          if (onDownloadData) {
+            onDownloadData();
+          }
+          setOpen(false);
+        },
+      }),
+    ),
   )([
     {
       label: 'CSV',
@@ -62,28 +88,6 @@ const Toolbox = ({
         setOpen(false);
       },
     },
-    // {
-    //   label: 'PNG',
-    //   content: <PngIcon />,
-    //   disabled: exportDisabled,
-    //   onSelect: () => {
-    //     chartRef.current?.chart.exportChartLocal(undefined, {
-    //       title: {
-    //         text: parsedTitle,
-    //       },
-    //       subtitle: {
-    //         text: parsedSubtitle,
-    //       },
-    //       ...(!isNilOrEmpty(parsedTitle) || !isNilOrEmpty(parsedSubtitle)
-    //         ? { chart: { marginTop: undefined } }
-    //         : {}),
-    //     });
-    //     if (onDownloadData) {
-    //       onDownloadData();
-    //     }
-    //     setOpen(false);
-    //   },
-    // },
     {
       label: 'SVG',
       content: <SvgIcon />,
@@ -211,6 +215,7 @@ Toolbox.propTypes = {
   tooltipContainerId: PropTypes.string,
   isSmall: PropTypes.bool.isRequired,
   exportDisabled: PropTypes.bool,
+  debug: PropTypes.bool,
 };
 
 export default Toolbox;

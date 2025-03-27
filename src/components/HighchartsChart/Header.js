@@ -28,6 +28,7 @@ const Header = ({
   isSmall,
   isFontLoaded,
   chartRef,
+  debug = false,
 }) => {
   const [isInIframe, setIsInIframe] = useState(false);
   useEffect(() => {
@@ -127,6 +128,7 @@ const Header = ({
             tooltipContainerId={tooltipContainerId}
             isSmall={isSmall}
             exportDisabled={exportDisabled}
+            debug={debug}
           />
         </div>
       )}
@@ -154,6 +156,7 @@ Header.propTypes = {
   isSmall: PropTypes.bool.isRequired,
   isFontLoaded: PropTypes.bool.isRequired,
   chartRef: PropTypes.object.isRequired,
+  debug: PropTypes.bool,
 };
 
 export default Header;

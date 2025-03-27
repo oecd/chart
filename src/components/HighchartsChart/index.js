@@ -902,6 +902,7 @@ const HighchartsChart = ({
             isSmall={isSmall}
             isFontLoaded={isFontLoaded}
             chartRef={chartRef}
+            debug={debug}
           />
         )}
       </div>
