@@ -179,6 +179,8 @@ const HighchartsChart = ({
     return parsedUrl.searchParams.get('lastNObservations') === '1';
   }, [finalDotStatUrl, dataSourceType]);
 
+  const newControlHasCausedVarChangedThatShouldBeIgnored = useRef(false);
+
   useEffect(() => {
     if (
       isNilOrEmpty(finalDotStatUrl) ||
@@ -217,6 +219,11 @@ const HighchartsChart = ({
       };
       getSnapshotData();
     } else {
+      if (newControlHasCausedVarChangedThatShouldBeIgnored.current) {
+        newControlHasCausedVarChangedThatShouldBeIgnored.current = false;
+        return;
+      }
+
       setIsFetching(true);
       setErrorMessage(null);
       setNoDataMessage(null);
@@ -237,25 +244,29 @@ const HighchartsChart = ({
             dotStatLang,
           );
 
+          const controlsWithAvailabilityRequest = getControlsWithAvailability
+            ? getControlsWithAvailability(finalDotStatUrl, vars)
+            : null;
+
+          const newSdmxJson = await newSdmxJsonRequest;
+
           // discard result from outdated request(s)
           if (
             lastRequestedDataKey.current === `${finalDotStatUrl}|${dotStatLang}`
           ) {
             if (getControlsWithAvailability) {
               try {
-                const { newControls } = await getControlsWithAvailability(
-                  finalDotStatUrl,
-                  vars,
-                );
+                const { newControls } = await controlsWithAvailabilityRequest;
                 if (newControls) {
-                  setControls(newControls);
+                  newControlHasCausedVarChangedThatShouldBeIgnored.current =
+                    setControls(newControls);
                 }
               } catch {
                 // too bad; no availability check can be done
               }
             }
             setPreParsedDataInternal(null);
-            setSdmxJson(await newSdmxJsonRequest);
+            setSdmxJson(newSdmxJson);
             setIsFetching(false);
           }
         } catch (e) {
@@ -510,6 +521,11 @@ const HighchartsChart = ({
 
   useEffect(() => {
     if (preParsedDataInternal) {
+      if (newControlHasCausedVarChangedThatShouldBeIgnored.current) {
+        newControlHasCausedVarChangedThatShouldBeIgnored.current = false;
+        return;
+      }
+
       const { varsThatCauseNewPreParsedDataFetch } = preParsedDataInternal;
 
       const varsThatHaveChanged = R.reduce(
@@ -573,7 +589,8 @@ const HighchartsChart = ({
               );
 
               if (R.has('controls', newPreParsedData)) {
-                setControls(R.prop('controls', newPreParsedData));
+                newControlHasCausedVarChangedThatShouldBeIgnored.current =
+                  setControls(R.prop('controls', newPreParsedData));
               }
 
               setIsFetching(false);

@@ -7,6 +7,7 @@ import ChartWithConfigFixedChartHeight from './ChartWithConfigFixedChartHeight';
 import ChartWithConfigNonFixedChartHeight from './ChartWithConfigNonFixedChartHeight';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import { trackChartView } from '../../utils/trackingUtil';
+import { controlTypes, frequencyTypes } from '../../constants/chart';
 
 const ChartWithConfig = ({
   height = null,
@@ -96,7 +97,75 @@ const ChartWithConfig = ({
 
   useEffect(() => {
     setStateControls(controls);
-  }, [controls, setStateControls]);
+  }, [controls]);
+
+  const onGotNewControls = useCallback(
+    (newControls) => {
+      const dotStatTimeSliders = R.filter(
+        (c) =>
+          R.propEq(true, 'connectedToDotStat', c) &&
+          R.propEq(controlTypes.timeSlider.value, 'type', c),
+        newControls,
+      );
+
+      const varChanged = R.reduce(
+        (acc, ts) => {
+          const currentFrequency =
+            R.length(ts.frequencies) === 1
+              ? R.head(ts.frequencies)
+              : R.compose(() => {
+                  const frequencyCode = R.compose(
+                    R.prop('value'),
+                    (dotStatFrequencyCode) =>
+                      R.find(
+                        R.propEq(dotStatFrequencyCode, 'dotStatId'),
+                        R.values(frequencyTypes),
+                      ),
+                    R.prop(ts.frequencyVarName),
+                  )(vars);
+
+                  return R.find(
+                    R.propEq(frequencyCode, 'frequencyTypeCode'),
+                    ts.frequencies,
+                  );
+                })(ts.frequencies);
+
+          const frequencyMinCode = R.prop('minCode', currentFrequency);
+          const frequencyMaxCode = R.prop('maxCode', currentFrequency);
+
+          let varHasChanged = false;
+
+          if (ts.isRange) {
+            if (vars[ts.minVarName] < frequencyMinCode) {
+              changeVar(ts.minVarName, frequencyMinCode);
+              varHasChanged = true;
+            }
+            if (vars[ts.maxVarName] > frequencyMaxCode) {
+              changeVar(ts.maxVarName, frequencyMaxCode);
+              varHasChanged = true;
+            }
+          } else {
+            if (vars[ts.minVarName] > frequencyMaxCode) {
+              changeVar(ts.minVarName, frequencyMaxCode);
+              varHasChanged = true;
+            }
+            if (vars[ts.minVarName] < frequencyMinCode) {
+              changeVar(ts.minVarName, frequencyMinCode);
+              varHasChanged = true;
+            }
+          }
+
+          return acc || ts.isRange ? varHasChanged : false;
+        },
+        false,
+        dotStatTimeSliders,
+      );
+
+      setStateControls(newControls);
+      return varChanged;
+    },
+    [vars, changeVar],
+  );
 
   const [codeLabelMappingForControls, setCodeLabelMappingForControls] =
     useState(null);
@@ -137,7 +206,7 @@ const ChartWithConfig = ({
       changeVar={changeVar}
       controls={stateControls}
       hideControls={hideControls}
-      setControls={setStateControls}
+      setControls={onGotNewControls}
       getControlsWithAvailability={getControlsWithAvailability}
       codeLabelMappingForControls={codeLabelMappingForControls}
       noDataForControls={noDataForControls}

@@ -28,6 +28,115 @@ const getFrequency = (dotStatId, frequencies) => {
   return frequency || R.head(frequencies);
 };
 
+const calcNewMinCodeForNonRange = (
+  prevDateUtilFrequency,
+  newDateUtilFrequency,
+  minCode,
+  newFrequencyMinCode,
+  newFrequencyMaxCode,
+) => {
+  const prevMinDate = prevDateUtilFrequency.tryParse(minCode)
+    ? prevDateUtilFrequency.getStartPeriod(
+        prevDateUtilFrequency.tryParse(minCode),
+      )
+    : false;
+
+  const newFrequencyStartPeriod = newDateUtilFrequency.getStartPeriod(
+    newDateUtilFrequency.tryParse(newFrequencyMinCode),
+  );
+
+  if (!prevMinDate) {
+    return newDateUtilFrequency.formatToCode(newFrequencyStartPeriod);
+  }
+
+  const newFrequencyEndPeriod = newDateUtilFrequency.getEndPeriod(
+    newDateUtilFrequency.tryParse(newFrequencyMaxCode),
+  );
+
+  const newMinDate = R.cond([
+    [
+      () =>
+        newDateUtilFrequency.getStartPeriod(prevMinDate) <
+        newFrequencyStartPeriod,
+      () =>
+        newDateUtilFrequency.getStartPeriod(
+          newDateUtilFrequency.tryParse(newFrequencyMinCode),
+        ),
+    ],
+    [
+      () =>
+        newDateUtilFrequency.getEndPeriod(prevMinDate) > newFrequencyEndPeriod,
+      () =>
+        newDateUtilFrequency.getEndPeriod(
+          newDateUtilFrequency.tryParse(newFrequencyMaxCode),
+        ),
+    ],
+    [R.T, () => newDateUtilFrequency.getStartPeriod(prevMinDate)],
+  ])();
+
+  return newDateUtilFrequency.formatToCode(newMinDate);
+};
+
+const calcNewMinCodeForRange = (
+  prevDateUtilFrequency,
+  newDateUtilFrequency,
+  minCode,
+  newFrequencyMinCode,
+) => {
+  const prevMinDate = prevDateUtilFrequency.tryParse(minCode)
+    ? prevDateUtilFrequency.getStartPeriod(
+        prevDateUtilFrequency.tryParse(minCode),
+      )
+    : false;
+
+  const newFrequencyStartPeriod = newDateUtilFrequency.getStartPeriod(
+    newDateUtilFrequency.tryParse(newFrequencyMinCode),
+  );
+
+  if (!prevMinDate) {
+    return newDateUtilFrequency.formatToCode(newFrequencyStartPeriod);
+  }
+
+  const newMinDate =
+    newDateUtilFrequency.getStartPeriod(prevMinDate) < newFrequencyStartPeriod
+      ? newDateUtilFrequency.getStartPeriod(
+          newDateUtilFrequency.tryParse(newFrequencyMinCode),
+        )
+      : newDateUtilFrequency.getStartPeriod(prevMinDate);
+
+  return newDateUtilFrequency.formatToCode(newMinDate);
+};
+
+const calcNewMaxCodeForRange = (
+  prevDateUtilFrequency,
+  newDateUtilFrequency,
+  maxCode,
+  newFrequencyMaxCode,
+) => {
+  const prevMaxDate = prevDateUtilFrequency.tryParse(maxCode)
+    ? prevDateUtilFrequency.getEndPeriod(
+        prevDateUtilFrequency.tryParse(maxCode),
+      )
+    : false;
+
+  const newFrequencyEndPeriod = newDateUtilFrequency.getEndPeriod(
+    newDateUtilFrequency.tryParse(newFrequencyMaxCode),
+  );
+
+  if (!prevMaxDate) {
+    return newDateUtilFrequency.formatToCode(newFrequencyEndPeriod);
+  }
+
+  const newMaxDate =
+    newDateUtilFrequency.getEndPeriod(prevMaxDate) > newFrequencyEndPeriod
+      ? newDateUtilFrequency.getEndPeriod(
+          newDateUtilFrequency.tryParse(newFrequencyMaxCode),
+        )
+      : newDateUtilFrequency.getEndPeriod(prevMaxDate);
+
+  return newDateUtilFrequency.formatToCode(newMaxDate);
+};
+
 const ControlTimeSlider = ({
   id,
   label = null,
@@ -109,24 +218,20 @@ const ControlTimeSlider = ({
         ? prevDateUtilFrequency
         : newDateUtilFrequency;
 
-    const newMinCode = R.compose((minCode) => {
-      const prevMinDate = dateUtilFrequency.tryParse(minCode)
-        ? dateUtilFrequency.getStartPeriod(dateUtilFrequency.tryParse(minCode))
-        : false;
-
-      const newMinDate =
-        !prevMinDate ||
-        newDateUtilFrequency.getStartPeriod(prevMinDate) <
-          newDateUtilFrequency.getStartPeriod(
-            newDateUtilFrequency.tryParse(newFrequency.minCode),
-          )
-          ? newDateUtilFrequency.getStartPeriod(
-              newDateUtilFrequency.tryParse(newFrequency.minCode),
-            )
-          : newDateUtilFrequency.getStartPeriod(prevMinDate);
-
-      return newDateUtilFrequency.formatToCode(newMinDate);
-    })(vars[minVarName]);
+    const newMinCode = isRange
+      ? calcNewMinCodeForRange(
+          dateUtilFrequency,
+          newDateUtilFrequency,
+          vars[minVarName],
+          newFrequency.minCode,
+        )
+      : calcNewMinCodeForNonRange(
+          dateUtilFrequency,
+          newDateUtilFrequency,
+          vars[minVarName],
+          newFrequency.minCode,
+          newFrequency.maxCode,
+        );
 
     if (newMinCode !== vars[minVarName]) {
       changeVar(minVarName, newMinCode);
@@ -138,24 +243,12 @@ const ControlTimeSlider = ({
         : R.findIndex(R.equals(newMinCode), newSteps.codes);
 
     if (isRange) {
-      const newMaxCode = R.compose((maxCode) => {
-        const prevMaxDate = dateUtilFrequency.tryParse(maxCode)
-          ? dateUtilFrequency.getEndPeriod(dateUtilFrequency.tryParse(maxCode))
-          : false;
-
-        const newMaxDate =
-          !prevMaxDate ||
-          newDateUtilFrequency.getEndPeriod(prevMaxDate) >
-            newDateUtilFrequency.getEndPeriod(
-              newDateUtilFrequency.tryParse(newFrequency.maxCode),
-            )
-            ? newDateUtilFrequency.getEndPeriod(
-                newDateUtilFrequency.tryParse(newFrequency.maxCode),
-              )
-            : newDateUtilFrequency.getEndPeriod(prevMaxDate);
-
-        return newDateUtilFrequency.formatToCode(newMaxDate);
-      })(vars[maxVarName]);
+      const newMaxCode = calcNewMaxCodeForRange(
+        dateUtilFrequency,
+        newDateUtilFrequency,
+        vars[maxVarName],
+        newFrequency.maxCode,
+      );
 
       if (newMaxCode !== vars[maxVarName]) {
         changeVar(maxVarName, newMaxCode);
@@ -176,24 +269,11 @@ const ControlTimeSlider = ({
         return;
       }
 
-      const finalMinIndex = R.when(
-        () =>
-          newSteps.minIndexFromAvailability &&
-          newSteps.minIndexFromAvailability > newMinIndex,
-        () => newSteps.minIndexFromAvailability,
-      )(newMinIndex);
-      const finalMaxIndex = R.when(
-        () =>
-          newSteps.maxIndexFromAvailability &&
-          newSteps.maxIndexFromAvailability < newMaxIndex,
-        () => newSteps.maxIndexFromAvailability,
-      )(newMaxIndex);
-
       setCurrentRange({
-        minCode: R.nth(finalMinIndex, newSteps.codes),
-        minIndex: finalMinIndex,
-        maxCode: R.nth(finalMaxIndex, newSteps.codes),
-        maxIndex: finalMaxIndex,
+        minCode: R.nth(newMinIndex, newSteps.codes),
+        minIndex: newMinIndex,
+        maxCode: R.nth(newMaxIndex, newSteps.codes),
+        maxIndex: newMaxIndex,
       });
     } else {
       setCurrentRange({
@@ -222,44 +302,17 @@ const ControlTimeSlider = ({
     (value) => {
       if (isRange) {
         const [min, max] = value;
-        const finalMin = R.when(
-          () =>
-            steps.minIndexFromAvailability &&
-            steps.minIndexFromAvailability > min,
-          () => steps.minIndexFromAvailability,
-        )(min);
-        const finalMax = R.when(
-          () =>
-            steps.maxIndexFromAvailability &&
-            steps.maxIndexFromAvailability < max,
-          () => steps.maxIndexFromAvailability,
-        )(max);
 
         setCurrentRange({
-          minCode: R.nth(finalMin, steps.codes),
-          minIndex: finalMin,
-          maxCode: R.nth(finalMax, steps.codes),
-          maxIndex: finalMax,
+          minCode: R.nth(min, steps.codes),
+          minIndex: min,
+          maxCode: R.nth(max, steps.codes),
+          maxIndex: max,
         });
       } else {
-        const finalMin = R.compose(
-          R.when(
-            () =>
-              steps.maxIndexFromAvailability &&
-              steps.maxIndexFromAvailability < value,
-            () => steps.maxIndexFromAvailability,
-          ),
-          R.when(
-            () =>
-              steps.minIndexFromAvailability &&
-              steps.minIndexFromAvailability > value,
-            () => steps.minIndexFromAvailability,
-          ),
-        )(value);
-
         setCurrentRange({
-          minCode: R.nth(finalMin, steps.codes),
-          minIndex: finalMin,
+          minCode: R.nth(value, steps.codes),
+          minIndex: value,
         });
       }
     },
@@ -271,50 +324,14 @@ const ControlTimeSlider = ({
       if (isRange) {
         const [min, max] = value;
 
-        if (steps.minIndexFromAvailability) {
-          const currentMinVarValue = vars[minVarName];
-          const currentMinVarIndex = R.findIndex(
-            R.equals(currentMinVarValue),
-            steps.codes,
-          );
-
-          if (
-            !(
-              currentMinVarIndex <= steps.minIndexFromAvailability &&
-              min === steps.minIndexFromAvailability
-            )
-          ) {
-            changeVar(minVarName, R.nth(min, steps.codes));
-            if (onControlChange) {
-              onControlChange(id);
-            }
-          }
-        } else if (vars[minVarName] !== R.nth(min, steps.codes)) {
+        if (vars[minVarName] !== R.nth(min, steps.codes)) {
           changeVar(minVarName, R.nth(min, steps.codes));
           if (onControlChange) {
             onControlChange(id);
           }
         }
 
-        if (steps.maxIndexFromAvailability) {
-          const currentMaxVarValue = vars[maxVarName];
-          const currentMaxVarIndex = R.findIndex(
-            R.equals(currentMaxVarValue),
-            steps.codes,
-          );
-
-          if (
-            !(
-              currentMaxVarIndex >= steps.maxIndexFromAvailability &&
-              max === steps.maxIndexFromAvailability
-            )
-          ) {
-            changeVar(maxVarName, R.nth(max, steps.codes));
-            if (onControlChange) {
-              onControlChange(id);
-            }
-          }
-        } else if (vars[maxVarName] !== R.nth(max, steps.codes)) {
+        if (vars[maxVarName] !== R.nth(max, steps.codes)) {
           changeVar(maxVarName, R.nth(max, steps.codes));
           if (onControlChange) {
             onControlChange(id);
@@ -343,6 +360,51 @@ const ControlTimeSlider = ({
     ],
   );
 
+  const onChangeFrequency = (dotStatId) => {
+    changeVar(frequencyVarName, dotStatId);
+
+    const prevFrequency = getFrequency(
+      vars[frequencyVarName],
+      stateFrequencies,
+    );
+    const newFrequency = getFrequency(dotStatId, stateFrequencies);
+
+    const prevDateUtilFrequency =
+      dateUtilFrequencies[prevFrequency.frequencyTypeCode];
+    const newDateUtilFrequency =
+      dateUtilFrequencies[newFrequency.frequencyTypeCode];
+
+    const newMinCode = isRange
+      ? calcNewMinCodeForRange(
+          prevDateUtilFrequency,
+          newDateUtilFrequency,
+          vars[minVarName],
+          newFrequency.minCode,
+        )
+      : calcNewMinCodeForNonRange(
+          prevDateUtilFrequency,
+          newDateUtilFrequency,
+          vars[minVarName],
+          newFrequency.minCode,
+          newFrequency.maxCode,
+        );
+
+    changeVar(minVarName, newMinCode);
+
+    if (isRange) {
+      const newMaxCode = calcNewMaxCodeForRange(
+        prevDateUtilFrequency,
+        newDateUtilFrequency,
+        vars[maxVarName],
+        newFrequency.maxCode,
+      );
+
+      changeVar(maxVarName, newMaxCode);
+    }
+
+    onControlChange(id);
+  };
+
   const getLabel = (code) => R.propOr('', code, steps.labelByCode);
 
   return (
@@ -365,8 +427,7 @@ const ControlTimeSlider = ({
               <button
                 key={f.frequencyTypeCode}
                 onClick={() => {
-                  changeVar(
-                    frequencyVarName,
+                  onChangeFrequency(
                     dateUtilFrequencies[f.frequencyTypeCode].dotStatId,
                   );
                 }}

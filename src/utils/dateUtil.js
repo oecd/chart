@@ -112,13 +112,7 @@ export const frequencies = {
 };
 
 export const getSteps = (frequency, lang) => {
-  const {
-    frequencyTypeCode,
-    minCode,
-    maxCode,
-    minCodeFromAvailability,
-    maxCodeFromAvailability,
-  } = frequency;
+  const { frequencyTypeCode, minCode, maxCode } = frequency;
   try {
     const frequencyType = R.prop(frequencyTypeCode, frequencies);
 
@@ -143,19 +137,8 @@ export const getSteps = (frequency, lang) => {
     );
 
     const codes = R.keys(labelByCode);
-    const minIndexFromAvailability = minCodeFromAvailability
-      ? R.findIndex(R.equals(minCodeFromAvailability), codes)
-      : null;
-    const maxIndexFromAvailability = maxCodeFromAvailability
-      ? R.findIndex(R.equals(maxCodeFromAvailability), codes)
-      : null;
 
-    return {
-      codes,
-      labelByCode,
-      minIndexFromAvailability,
-      maxIndexFromAvailability,
-    };
+    return { codes, labelByCode };
   } catch {
     return { codes: [], labelByCode: [] };
   }
