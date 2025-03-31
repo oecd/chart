@@ -179,7 +179,7 @@ const HighchartsChart = ({
     return parsedUrl.searchParams.get('lastNObservations') === '1';
   }, [finalDotStatUrl, dataSourceType]);
 
-  const newControlHasCausedVarChangedThatShouldBeIgnored = useRef(false);
+  const newControlWillCauseVarChange = useRef(false);
 
   useEffect(() => {
     if (
@@ -219,10 +219,7 @@ const HighchartsChart = ({
       };
       getSnapshotData();
     } else {
-      if (newControlHasCausedVarChangedThatShouldBeIgnored.current) {
-        newControlHasCausedVarChangedThatShouldBeIgnored.current = false;
-        return;
-      }
+      newControlWillCauseVarChange.current = false;
 
       setIsFetching(true);
       setErrorMessage(null);
@@ -239,16 +236,14 @@ const HighchartsChart = ({
             });
           }
 
-          const newSdmxJsonRequest = fetchDotStatData(
-            finalDotStatUrl,
-            dotStatLang,
-          );
-
           const controlsWithAvailabilityRequest = getControlsWithAvailability
             ? getControlsWithAvailability(finalDotStatUrl, vars)
             : null;
 
-          const newSdmxJson = await newSdmxJsonRequest;
+          const newSdmxJsonRequest = fetchDotStatData(
+            finalDotStatUrl,
+            dotStatLang,
+          );
 
           // discard result from outdated request(s)
           if (
@@ -258,13 +253,20 @@ const HighchartsChart = ({
               try {
                 const { newControls } = await controlsWithAvailabilityRequest;
                 if (newControls) {
-                  newControlHasCausedVarChangedThatShouldBeIgnored.current =
+                  newControlWillCauseVarChange.current =
                     setControls(newControls);
+
+                  if (newControlWillCauseVarChange.current) {
+                    return;
+                  }
                 }
               } catch {
                 // too bad; no availability check can be done
               }
             }
+
+            const newSdmxJson = await newSdmxJsonRequest;
+
             setPreParsedDataInternal(null);
             setSdmxJson(newSdmxJson);
             setIsFetching(false);
@@ -521,10 +523,7 @@ const HighchartsChart = ({
 
   useEffect(() => {
     if (preParsedDataInternal) {
-      if (newControlHasCausedVarChangedThatShouldBeIgnored.current) {
-        newControlHasCausedVarChangedThatShouldBeIgnored.current = false;
-        return;
-      }
+      newControlWillCauseVarChange.current = false;
 
       const { varsThatCauseNewPreParsedDataFetch } = preParsedDataInternal;
 
@@ -584,14 +583,18 @@ const HighchartsChart = ({
 
             // discard result from outdated request(s)
             if (lastRequestedDataKey.current === configParams) {
+              if (R.has('controls', newPreParsedData)) {
+                newControlWillCauseVarChange.current = setControls(
+                  R.prop('controls', newPreParsedData),
+                );
+                if (newControlWillCauseVarChange.current) {
+                  return;
+                }
+              }
+
               setPreParsedDataInternal(
                 R.prop('preParsedData', newPreParsedData),
               );
-
-              if (R.has('controls', newPreParsedData)) {
-                newControlHasCausedVarChangedThatShouldBeIgnored.current =
-                  setControls(R.prop('controls', newPreParsedData));
-              }
 
               setIsFetching(false);
             }

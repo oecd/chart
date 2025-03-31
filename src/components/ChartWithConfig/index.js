@@ -155,7 +155,7 @@ const ChartWithConfig = ({
             }
           }
 
-          return acc || ts.isRange ? varHasChanged : false;
+          return acc || varHasChanged;
         },
         false,
         dotStatTimeSliders,
