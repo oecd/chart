@@ -431,8 +431,9 @@ const ControlTimeSlider = ({
                     dateUtilFrequencies[f.frequencyTypeCode].dotStatId,
                   );
                 }}
-                className={`cb-frequency-button ${f.frequencyTypeCode === currentFrequency.frequencyTypeCode ? 'cb-frequency-button-selected' : ''}`}
+                className={`cb-frequency-button ${f.frequencyTypeCode === currentFrequency.frequencyTypeCode ? 'cb-frequency-button-selected' : ''} ${R.isEmpty(steps.codes) || disabled ? 'disabled' : ''}`}
                 type="button"
+                disabled={R.isEmpty(steps.codes) || disabled}
               >
                 {dateUtilFrequencies[f.frequencyTypeCode].getLabel(lang)}
               </button>

@@ -306,3 +306,6 @@
   color: #ffffff;
   background-color: #156df9;
 }
+.cb-frequency-button:hover.disabled {
+  border: 1px solid #dee3e9;
+}
