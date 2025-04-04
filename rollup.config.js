@@ -108,6 +108,7 @@ export default [
         react: 'React',
         'react-dom/client': 'ReactDOM',
         'react-dom': 'ReactDOM',
+        'react/jsx-runtime': 'jsxRuntime',
       }),
       json(),
       postcss(),
