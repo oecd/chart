@@ -98,7 +98,10 @@ export default [
       external(),
       resolve(),
       babel({
-        presets: ['@babel/preset-env', '@babel/preset-react'],
+        presets: [
+          '@babel/preset-env',
+          ['@babel/preset-react', { runtime: 'classic' }],
+        ],
         exclude: [/node_modules/],
         babelHelpers: 'bundled',
       }),

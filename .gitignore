@@ -3,3 +3,4 @@ dist
 dist-browser
 .env
 .npmrc
+react-jsx-runtime.js

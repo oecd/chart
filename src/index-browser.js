@@ -3,10 +3,13 @@ import * as ReactDOM from 'react-dom/client';
 import reactToWebComponent from 'react-to-webcomponent';
 import 'rc-slider/assets/index.css';
 
+import * as jsxRuntime from './react-jsx-runtime';
 import './index.css';
 
 import Chart from './components/Chart';
 import StandaloneControl from './components/StandaloneControl';
+
+window.jsxRuntime = jsxRuntime;
 
 customElements.define(
   'oecd-chart',

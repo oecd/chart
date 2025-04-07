@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "lint": "eslint src/**/*.js",
-    "prebuild": "rimraf ./dist",
+    "prebuild": "rimraf ./dist && cp ./node_modules/react/cjs/react-jsx-runtime.production.min.js ./src/react-jsx-runtime.js",
     "build": "rollup -c"
   },
   "repository": {
@@ -79,8 +79,8 @@
     "rollup-plugin-postcss": "^4.0.2"
   },
   "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
   },
   "author": "Bertrand Riviere <bertrand.riviere@oecd.org>",
   "license": "ISC",
