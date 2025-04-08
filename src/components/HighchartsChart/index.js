@@ -245,33 +245,52 @@ const HighchartsChart = ({
             dotStatLang,
           );
 
-          // discard result from outdated request(s)
-          if (
-            lastRequestedDataKey.current === `${finalDotStatUrl}|${dotStatLang}`
-          ) {
-            if (getControlsWithAvailability) {
-              try {
-                const { newControls } = await controlsWithAvailabilityRequest;
-                if (newControls) {
-                  newControlWillCauseVarChange.current =
-                    setControls(newControls);
+          if (getControlsWithAvailability) {
+            try {
+              const controlsWithAvailabilityResponse =
+                await controlsWithAvailabilityRequest;
 
-                  if (newControlWillCauseVarChange.current) {
-                    return;
-                  }
-                }
-              } catch {
-                // too bad; no availability check can be done
+              if (
+                lastRequestedDataKey.current !==
+                `${finalDotStatUrl}|${dotStatLang}`
+              ) {
+                // discard result from outdated request(s)
+                return;
               }
+              if (
+                controlsWithAvailabilityResponse.newControls &&
+                !controlsWithAvailabilityResponse.error
+              ) {
+                newControlWillCauseVarChange.current = setControls(
+                  controlsWithAvailabilityResponse.newControls,
+                );
+
+                if (newControlWillCauseVarChange.current) {
+                  return;
+                }
+              }
+            } catch {
+              // too bad; no availability check can be done
             }
-
-            const newSdmxJson = await newSdmxJsonRequest;
-
-            setPreParsedDataInternal(null);
-            setSdmxJson(newSdmxJson);
-            setIsFetching(false);
           }
+
+          const newSdmxJson = await newSdmxJsonRequest;
+          if (
+            lastRequestedDataKey.current !== `${finalDotStatUrl}|${dotStatLang}`
+          ) {
+            // discard result from outdated request(s)
+            return;
+          }
+
+          setPreParsedDataInternal(null);
+          setSdmxJson(newSdmxJson);
+          setIsFetching(false);
         } catch (e) {
+          if (
+            lastRequestedDataKey.current !== `${finalDotStatUrl}|${dotStatLang}`
+          ) {
+            return;
+          }
           setIsFetching(false);
           setErrorMessage(errorMessages.generic);
           setSdmxJson(null);
@@ -581,23 +600,23 @@ const HighchartsChart = ({
               );
             }
 
-            // discard result from outdated request(s)
-            if (lastRequestedDataKey.current === configParams) {
-              if (R.has('controls', newPreParsedData)) {
-                newControlWillCauseVarChange.current = setControls(
-                  R.prop('controls', newPreParsedData),
-                );
-                if (newControlWillCauseVarChange.current) {
-                  return;
-                }
-              }
-
-              setPreParsedDataInternal(
-                R.prop('preParsedData', newPreParsedData),
-              );
-
-              setIsFetching(false);
+            if (lastRequestedDataKey.current !== configParams) {
+              // discard result from outdated request(s)
+              return;
             }
+
+            if (R.has('controls', newPreParsedData)) {
+              newControlWillCauseVarChange.current = setControls(
+                R.prop('controls', newPreParsedData),
+              );
+              if (newControlWillCauseVarChange.current) {
+                return;
+              }
+            }
+
+            setPreParsedDataInternal(R.prop('preParsedData', newPreParsedData));
+
+            setIsFetching(false);
           } catch (e) {
             setErrorMessage(errorMessages.generic);
             setIsFetching(false);
