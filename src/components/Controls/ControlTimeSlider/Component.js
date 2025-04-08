@@ -402,7 +402,9 @@ const ControlTimeSlider = ({
       changeVar(maxVarName, newMaxCode);
     }
 
-    onControlChange(id);
+    if (onControlChange) {
+      onControlChange(id);
+    }
   };
 
   const getLabel = (code) => R.propOr('', code, steps.labelByCode);
@@ -417,7 +419,7 @@ const ControlTimeSlider = ({
         <div
           style={{
             display: 'flex',
-            padding: isStandalone ? '10px 0px 15px 0px' : '5px 0px 15px 0px',
+            padding: isStandalone ? '10px 0px 12px 0px' : '0px 0px 12px 0px',
             justifyContent: 'flex-start',
             overflow: 'hidden',
           }}
@@ -442,7 +444,13 @@ const ControlTimeSlider = ({
         </div>
       )}
 
-      <div style={{ margin: '0px 7px' }}>
+      <div
+        style={{
+          padding: '0px 7px',
+          borderLeft: '1px solid #DEE5ED',
+          borderRight: '1px solid #DEE5ED',
+        }}
+      >
         <Slider
           onChange={onRangeChange}
           onChangeComplete={onRangeChangeComplete}
@@ -459,11 +467,11 @@ const ControlTimeSlider = ({
           pushable={1}
           allowCross={false}
           disabled={R.isEmpty(steps.codes) || disabled}
-          trackStyle={{ backgroundColor: '#156DF9' }}
+          trackStyle={{ backgroundColor: disabled ? '#dee3e9' : '#156DF9' }}
           railStyle={{
             backgroundColor: '#DEE5ED',
-            left: '-7px',
-            width: 'calc(100% + 14px)',
+            left: '-8px',
+            width: 'calc(100% + 16px)',
           }}
           handleStyle={{
             opacity: 1,
@@ -486,12 +494,27 @@ const ControlTimeSlider = ({
           marginTop: '5px',
           marginBottom: '0px',
           justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
         {!R.isEmpty(steps.codes) && (
           <>
-            <div>{getLabel(currentRange.minCode)}</div>
-            {isRange && <div>{getLabel(currentRange.maxCode)}</div>}
+            <div style={{ fontSize: '13px' }}>
+              {getLabel(currentFrequency.minCode)}
+            </div>
+            <div
+              style={{
+                padding: '5px',
+                border: '2px solid #DEE5ED',
+                borderRadius: '9px',
+              }}
+            >
+              {getLabel(currentRange.minCode)}
+              {isRange && <> &mdash; {getLabel(currentRange.maxCode)}</>}
+            </div>
+            <div style={{ fontSize: '13px', textAlign: 'right' }}>
+              {getLabel(currentFrequency.maxCode)}
+            </div>
           </>
         )}
       </div>

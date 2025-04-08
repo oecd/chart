@@ -178,13 +178,13 @@
   font-size: 14px;
   flex: 1;
   padding: 5px 8px;
-  min-width: 200px;
+  min-width: 250px;
 }
 .cb-control-standalone {
   font-family: 'Noto Sans', Helvetica, sans-serif;
   font-size: 14px;
   flex: 1;
-  min-width: 200px;
+  min-width: 250px;
 }
 
 .cb-control-label {

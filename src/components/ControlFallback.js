@@ -29,7 +29,7 @@ const ControlFallback = ({
   <div
     style={{
       flex: '1',
-      minWidth: '200px',
+      minWidth: '250px',
       minHeight: getMinHeight(
         label,
         hideTitle,
