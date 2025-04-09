@@ -153,6 +153,7 @@ const ControlTimeSlider = ({
   hideTitle,
   isStandalone,
   disabled,
+  isDisplayedOnRightSide,
 }) => {
   const [stateFrequencies, setStateFrequencies] = useState(frequencies);
   useEffect(() => {
@@ -410,7 +411,9 @@ const ControlTimeSlider = ({
   const getLabel = (code) => R.propOr('', code, steps.labelByCode);
 
   return (
-    <div className={isStandalone ? 'cb-control-standalone' : 'cb-control'}>
+    <div
+      className={`${isStandalone ? 'cb-control-standalone' : 'cb-control'} ${isDisplayedOnRightSide ? 'cb-control-right-side' : ''}`}
+    >
       {!isNilOrEmpty(label) && !hideTitle && (
         <div className="cb-control-label">{label}</div>
       )}
@@ -419,7 +422,10 @@ const ControlTimeSlider = ({
         <div
           style={{
             display: 'flex',
-            padding: isStandalone ? '10px 0px 12px 0px' : '0px 0px 12px 0px',
+            padding:
+              isStandalone || isDisplayedOnRightSide
+                ? '10px 0px 12px 0px'
+                : '0px 0px 12px 0px',
             justifyContent: 'flex-start',
             overflow: 'hidden',
           }}
@@ -538,6 +544,7 @@ ControlTimeSlider.propTypes = {
   hideTitle: PropTypes.bool.isRequired,
   isStandalone: PropTypes.bool.isRequired,
   disabled: PropTypes.bool.isRequired,
+  isDisplayedOnRightSide: PropTypes.bool.isRequired,
 };
 
 export default ControlTimeSlider;

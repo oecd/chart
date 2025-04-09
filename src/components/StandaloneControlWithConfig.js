@@ -229,7 +229,12 @@ const StandaloneControlWithConfig = ({
   return (
     <Suspense
       fallback={
-        <ControlFallback {...otherProps} hideTitle={hideTitle} isStandalone />
+        <ControlFallback
+          type={type}
+          {...otherProps}
+          hideTitle={hideTitle}
+          isStandalone
+        />
       }
     >
       <ControlComponent

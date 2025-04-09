@@ -27,6 +27,7 @@ const Controls = ({
   onControlChange,
   lang,
   isSmall,
+  isDisplayedOnRightSide = false,
 }) => {
   const validControls = useMemo(
     () => R.filter((c) => R.has(c.type, controlTypes), controls),
@@ -52,7 +53,11 @@ const Controls = ({
 
   return R.isEmpty(validControls) ? null : (
     <>
-      <div className={`cb-controls-separator ${isSmall ? 'cb-small' : ''}`} />
+      {isDisplayedOnRightSide ? (
+        <div style={{ height: '7px' }} />
+      ) : (
+        <div className={`cb-controls-separator ${isSmall ? 'cb-small' : ''}`} />
+      )}
       <div
         className={`cb-controls ${isSmall ? 'cb-small' : ''}`}
         style={{ display: 'flex', flexWrap: 'wrap' }}
@@ -71,6 +76,7 @@ const Controls = ({
                 lang={lang}
                 {...R.omit(['codeLabelMapping'], c)}
                 disabled={isDisabled(c.id)}
+                isDisplayedOnRightSide={isDisplayedOnRightSide}
               />
             </Suspense>
           );
@@ -90,6 +96,7 @@ Controls.propTypes = {
   onControlChange: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
   isSmall: PropTypes.bool.isRequired,
+  isDisplayedOnRightSide: PropTypes.bool,
 };
 
 export default Controls;

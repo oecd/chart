@@ -130,3 +130,6 @@ export const errorMessages = {
   ),
   underEmbargo: <div style={{ textAlign: 'center' }}>Not yet available</div>,
 };
+
+export const minChartWidthForControlsDisplayOnRightSide = 850;
+export const minChartHeightForControlsDisplayBelow = 280;

@@ -42,6 +42,7 @@ const ControlSelect = ({
   isStandalone = false,
   sortBy,
   disabled = false,
+  isDisplayedOnRightSide = false,
 }) => {
   const selectInstanceId = useId();
 
@@ -255,19 +256,20 @@ const ControlSelect = ({
   );
 
   const { customSelectTheme, customSelectStyles } = useMemo(
-    () => getBasicStylingConfigs(isStandalone),
-    [isStandalone],
+    () => getBasicStylingConfigs(isStandalone, isDisplayedOnRightSide),
+    [isStandalone, isDisplayedOnRightSide],
   );
 
   return R.isNil(codeLabelMapping) ? (
     <ControlFallback
+      type={controlTypes.select.value}
       label={label}
       hideTitle={hideTitle}
       isStandalone={isStandalone}
     />
   ) : (
     <div
-      className={`${isStandalone ? 'cb-control-standalone' : 'cb-control'} ${disabled ? 'disabled' : ''}`}
+      className={`${isStandalone ? 'cb-control-standalone' : 'cb-control'} ${isDisplayedOnRightSide ? 'cb-control-right-side' : ''}  ${disabled ? 'disabled' : ''}`}
     >
       {!isNilOrEmpty(finalLabel) && !hideTitle && (
         <div className="cb-control-label">{finalLabel}</div>
@@ -315,6 +317,7 @@ ControlSelect.propTypes = {
   isStandalone: PropTypes.bool,
   sortBy: PropTypes.string,
   disabled: PropTypes.bool.isRequired,
+  isDisplayedOnRightSide: PropTypes.bool,
 };
 
 export default ControlSelect;

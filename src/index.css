@@ -179,6 +179,7 @@
   flex: 1;
   padding: 5px 8px;
   min-width: 250px;
+  box-sizing: border-box;
 }
 .cb-control-standalone {
   font-family: 'Noto Sans', Helvetica, sans-serif;
@@ -261,13 +262,17 @@
   box-shadow: 0px 0px 4px 2px #156df9 !important;
 }
 
-.cb-control .rc-slider-horizontal,
-.cb-control-standalone .rc-slider-horizontal {
+.cb-control .rc-slider-horizontal {
   padding: 5px 0px;
 }
 
-.cb-control-standalone .rc-slider-horizontal {
-  padding: 16px 0px;
+.cb-control-standalone .rc-slider-horizontal,
+.cb-control.cb-control-right-side .rc-slider-horizontal {
+  padding: 11px 0px 14px 0px;
+}
+
+.cb-control.cb-control-right-side {
+  margin-bottom: 64px;
 }
 
 .cb-control .rc-slider-disabled {

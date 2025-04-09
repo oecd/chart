@@ -1,12 +1,12 @@
-const getOptionPadding = (isMulti, isStandalone) => {
+const getOptionPadding = (isMulti, isStandalone, isDisplayedOnRightSide) => {
   if (isMulti) {
     return '0px';
   }
 
-  return isStandalone ? '8px 17px' : '4px 7px';
+  return isStandalone || isDisplayedOnRightSide ? '8px 17px' : '4px 7px';
 };
 
-const getBasicStylingConfigs = (isStandalone) => {
+const getBasicStylingConfigs = (isStandalone, isDisplayedOnRightSide) => {
   const customSelectTheme = (theme) => ({
     ...theme,
     colors: {
@@ -30,7 +30,7 @@ const getBasicStylingConfigs = (isStandalone) => {
   const customSelectStyles = {
     control: (provided, state) => ({
       ...provided,
-      padding: isStandalone ? '10px' : '0px',
+      padding: isStandalone || isDisplayedOnRightSide ? '10px' : '0px',
       backgroundColor: '#E8EDF2',
       boxShadow: 'none',
       fontSize: '14px',
@@ -58,7 +58,11 @@ const getBasicStylingConfigs = (isStandalone) => {
       backgroundColor: getOptionBackgroundColor(state),
       color: !state.isMulti && state.isSelected ? '#ffffff' : '#101D40',
       fontSize: '14px',
-      padding: getOptionPadding(state.isMulti, isStandalone),
+      padding: getOptionPadding(
+        state.isMulti,
+        isStandalone,
+        isDisplayedOnRightSide,
+      ),
     }),
     clearIndicator: (provided) => ({
       ...provided,

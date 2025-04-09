@@ -5,6 +5,7 @@ import * as R from 'ramda';
 import Component from './Component';
 import { isNilOrEmpty } from '../../../utils/ramdaUtil';
 import ControlFallback from '../../ControlFallback';
+import { controlTypes } from '../../../constants/chart';
 
 const ControlTimeSlider = ({
   id,
@@ -23,6 +24,7 @@ const ControlTimeSlider = ({
   hideTitle = false,
   isStandalone = false,
   disabled = false,
+  isDisplayedOnRightSide = false,
 }) => {
   const finalLabel = useMemo(() => {
     if (isNilOrEmpty(label) || R.isNil(codeLabelMapping)) {
@@ -34,6 +36,7 @@ const ControlTimeSlider = ({
 
   return R.isNil(codeLabelMapping) ? (
     <ControlFallback
+      type={controlTypes.timeSlider.value}
       label={label}
       hideTitle={hideTitle}
       isStandalone={isStandalone}
@@ -56,6 +59,7 @@ const ControlTimeSlider = ({
       hideTitle={hideTitle}
       isStandalone={isStandalone}
       disabled={disabled}
+      isDisplayedOnRightSide={isDisplayedOnRightSide}
     />
   );
 };
@@ -77,6 +81,7 @@ ControlTimeSlider.propTypes = {
   hideTitle: PropTypes.bool,
   isStandalone: PropTypes.bool,
   disabled: PropTypes.bool,
+  isDisplayedOnRightSide: PropTypes.bool,
 };
 
 export default ControlTimeSlider;

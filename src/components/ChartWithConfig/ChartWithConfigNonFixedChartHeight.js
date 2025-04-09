@@ -9,8 +9,10 @@ import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
 import { calcIsSmall } from '../../utils/chartUtil';
-
-const minChartHeightForControlsDisplay = 280;
+import {
+  minChartHeightForControlsDisplayBelow,
+  minChartWidthForControlsDisplayOnRightSide,
+} from '../../constants/chart';
 
 const ChartWithConfigNonFixedChartHeight = ({
   width = null,
@@ -33,26 +35,44 @@ const ChartWithConfigNonFixedChartHeight = ({
     ref: fullContainerRef,
   } = useResizeDetector();
   const {
-    width: innerContainerWidth,
-    height: innerContainerHeight,
-    ref: innerContainerRef,
+    width: chartWithControlsBelowContainerWidth,
+    height: chartWithControlsBelowContainerHeight,
+    ref: chartWithControlsBelowContainerRef,
+  } = useResizeDetector();
+  const {
+    width: chartOnlyContainerWidth,
+    height: chartOnlyContainerHeight,
+    ref: chartOnlyContainerRef,
   } = useResizeDetector();
 
   const { height: controlsAutoSizerHeight, ref: controlsRef } =
     useResizeDetector();
 
+  const controlsCanFitOnRightSide = useMemo(
+    () =>
+      fullContainerWidth
+        ? fullContainerWidth >= minChartWidthForControlsDisplayOnRightSide
+        : false,
+    [fullContainerWidth],
+  );
+
   const finalChartHeight = useMemo(() => {
-    if (!fullContainerHeight) {
+    if (!chartWithControlsBelowContainerHeight) {
       return null;
     }
     if (
-      fullContainerHeight - controlsAutoSizerHeight >
-      minChartHeightForControlsDisplay
+      !controlsCanFitOnRightSide &&
+      chartWithControlsBelowContainerHeight - controlsAutoSizerHeight >
+        minChartHeightForControlsDisplayBelow
     ) {
-      return fullContainerHeight - controlsAutoSizerHeight;
+      return chartWithControlsBelowContainerHeight - controlsAutoSizerHeight;
     }
-    return fullContainerHeight;
-  }, [fullContainerHeight, controlsAutoSizerHeight]);
+    return chartWithControlsBelowContainerHeight;
+  }, [
+    chartWithControlsBelowContainerHeight,
+    controlsAutoSizerHeight,
+    controlsCanFitOnRightSide,
+  ]);
 
   const isSmall = useMemo(
     () => calcIsSmall(fullContainerWidth, fullContainerHeight),
@@ -63,79 +83,118 @@ const ChartWithConfigNonFixedChartHeight = ({
     <div
       ref={fullContainerRef}
       style={{
-        position: 'relative',
+        display: 'flex',
         width: '100%',
         maxWidth: width || '100%',
         height: '100%',
       }}
     >
       <div
+        ref={chartWithControlsBelowContainerRef}
         style={{
+          flex: '2',
           position: 'relative',
-          width: '0px',
-          height: '0px',
-          overflow: 'visible',
+          height: '100%',
         }}
       >
-        {finalChartHeight && (
+        <div
+          style={{
+            position: 'relative',
+            width: '0px',
+            height: '0px',
+            overflow: 'visible',
+          }}
+        >
+          {finalChartHeight && (
+            <div
+              className={`cb-container ${isSmall ? 'cb-small' : ''}`}
+              style={{
+                width: chartWithControlsBelowContainerWidth,
+                height: finalChartHeight,
+                boxSizing: 'border-box',
+              }}
+            >
+              <div
+                ref={chartOnlyContainerRef}
+                style={{ wdth: '100%', height: '100%' }}
+              >
+                {chartOnlyContainerHeight && (
+                  <HighchartsChart
+                    width={chartOnlyContainerWidth}
+                    height={chartOnlyContainerHeight}
+                    vars={vars}
+                    lang={lang}
+                    onDataReady={onDataReady}
+                    isSmall={isSmall}
+                    getControlsWithAvailability={getControlsWithAvailability}
+                    {...R.omit(['height'], otherProps)}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        {!controlsCanFitOnRightSide && (
           <div
-            className={`cb-container ${isSmall ? 'cb-small' : ''}`}
+            ref={controlsRef}
             style={{
-              width: fullContainerWidth,
-              height: finalChartHeight,
-              boxSizing: 'border-box',
+              position: 'relative',
+              top:
+                finalChartHeight &&
+                chartWithControlsBelowContainerHeight !== finalChartHeight
+                  ? finalChartHeight
+                  : '-1000px',
+              visibility:
+                finalChartHeight &&
+                chartWithControlsBelowContainerHeight !== finalChartHeight
+                  ? 'visible'
+                  : 'hidden',
             }}
           >
-            <div
-              ref={innerContainerRef}
-              style={{ wdth: '100%', height: '100%' }}
-            >
-              {innerContainerHeight && (
-                <HighchartsChart
-                  width={innerContainerWidth}
-                  height={innerContainerHeight}
-                  vars={vars}
-                  lang={lang}
-                  onDataReady={onDataReady}
-                  isSmall={isSmall}
-                  getControlsWithAvailability={getControlsWithAvailability}
-                  {...R.omit(['height'], otherProps)}
-                />
-              )}
-            </div>
+            {!isNilOrEmpty(controls) && !hideControls && (
+              <Controls
+                controls={controls}
+                vars={vars}
+                changeVar={changeVar}
+                codeLabelMapping={codeLabelMappingForControls}
+                noData={noDataForControls}
+                controlIdForWhichDataLoadingIsPending={
+                  controlIdForWhichDataLoadingIsPending
+                }
+                onControlChange={setControlIdForWhichDataLoadingIsPending}
+                lang={lang}
+                isSmall={isSmall}
+              />
+            )}
           </div>
         )}
       </div>
-      <div
-        ref={controlsRef}
-        style={{
-          position: 'relative',
-          top:
-            finalChartHeight && fullContainerHeight !== finalChartHeight
-              ? finalChartHeight
-              : '-1000px',
-          visibility:
-            finalChartHeight && fullContainerHeight !== finalChartHeight
-              ? 'visible'
-              : 'hidden',
-        }}
-      >
-        {!isNilOrEmpty(controls) && !hideControls && (
-          <Controls
-            controls={controls}
-            vars={vars}
-            changeVar={changeVar}
-            codeLabelMapping={codeLabelMappingForControls}
-            noData={noDataForControls}
-            controlIdForWhichDataLoadingIsPending={
-              controlIdForWhichDataLoadingIsPending
-            }
-            onControlChange={setControlIdForWhichDataLoadingIsPending}
-            lang={lang}
-            isSmall={isSmall}
-          />
+      {controlsCanFitOnRightSide &&
+        !isNilOrEmpty(controls) &&
+        !hideControls && (
+          <div
+            style={{
+              flex: '1',
+              minWidth: '300px',
+              maxWidth: '430px',
+            }}
+          >
+            <Controls
+              controls={controls}
+              vars={vars}
+              changeVar={changeVar}
+              codeLabelMapping={codeLabelMappingForControls}
+              noData={noDataForControls}
+              controlIdForWhichDataLoadingIsPending={
+                controlIdForWhichDataLoadingIsPending
+              }
+              onControlChange={setControlIdForWhichDataLoadingIsPending}
+              lang={lang}
+              isSmall={isSmall}
+              isDisplayedOnRightSide
+            />
+          </div>
         )}
-      </div>
     </div>
   );
 };

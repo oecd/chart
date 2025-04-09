@@ -3,24 +3,32 @@ import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
 import { isNilOrEmpty } from '../utils/ramdaUtil';
+import { controlTypes } from '../constants/chart';
 
-const getMinHeight = (label, hideTitle, isStandalone, hasFrequencyButtons) => {
+const getMinHeight = (
+  type,
+  label,
+  hideTitle,
+  isStandalone,
+  hasFrequencyButtons,
+) => {
   if (isStandalone) {
     return R.compose(
       (h) => `${h}px`,
-      R.when(() => hasFrequencyButtons, R.add(33)),
+      R.when(() => hasFrequencyButtons, R.add(57)),
       R.when(() => !hideTitle && !isNilOrEmpty(label), R.add(18)),
-    )(51);
+    )(type === controlTypes.timeSlider.value ? 58 : 51);
   }
 
   return R.compose(
     (h) => `${h}px`,
-    R.when(() => hasFrequencyButtons, R.add(33)),
+    R.when(() => hasFrequencyButtons, R.add(47)),
     R.when(() => !isNilOrEmpty(label), R.add(18)),
-  )(43);
+  )(type === controlTypes.timeSlider.value ? 57 : 43);
 };
 
 const ControlFallback = ({
+  type = controlTypes.select.value,
   label = null,
   hideTitle = false,
   isStandalone = false,
@@ -31,6 +39,7 @@ const ControlFallback = ({
       flex: '1',
       minWidth: '250px',
       minHeight: getMinHeight(
+        type,
         label,
         hideTitle,
         isStandalone,
@@ -41,6 +50,7 @@ const ControlFallback = ({
 );
 
 ControlFallback.propTypes = {
+  type: PropTypes.string,
   label: PropTypes.string,
   hideTitle: PropTypes.bool,
   isStandalone: PropTypes.bool,
