@@ -4,9 +4,6 @@ import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
 import Toolbox from './Toolbox';
-import InfoIcon from '../Icons/InfoIcon';
-import ActionIcon from '../Icons/ActionIcon';
-import { Popover, PopoverTrigger, PopoverContent } from '../floating/Popover';
 
 const Header = ({
   title,
@@ -63,54 +60,6 @@ const Header = ({
             flexWrap: 'nowrap',
           }}
         >
-          {displayActionButton && (
-            <div
-              role="button"
-              aria-label={actionButtonLabel}
-              className="cb-tool"
-              tabIndex={0}
-              onClick={onActionButtonClick}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  onActionButtonClick();
-                  e.stopPropagation();
-                }
-              }}
-              style={{ marginLeft: '4px' }}
-            >
-              <ActionIcon />
-            </div>
-          )}
-          {(noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition)) &&
-            !isSmall && (
-              <Popover
-                placement="bottom-end"
-                offsetConfig={8}
-                openTrigger="hover"
-              >
-                <PopoverTrigger>
-                  <div
-                    aria-label="Info"
-                    className="cb-tool"
-                    style={{ marginLeft: '8px' }}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <InfoIcon />
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent tooltipContainerId={tooltipContainerId}>
-                  <div
-                    className="cb-floating cb-tooltip"
-                    dangerouslySetInnerHTML={{
-                      __html: noteAndSourceShouldBeDisplayedInTooltip
-                        ? R.join('', [definition, noteAndSource])
-                        : definition,
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            )}
           <Toolbox
             chartRef={chartRef}
             parsedTitle={title}
@@ -126,6 +75,9 @@ const Header = ({
               noteAndSourceShouldBeDisplayedInTooltip
             }
             tooltipContainerId={tooltipContainerId}
+            displayActionButton={displayActionButton}
+            actionButtonLabel={actionButtonLabel}
+            onActionButtonClick={onActionButtonClick}
             isSmall={isSmall}
             exportDisabled={exportDisabled}
             debug={debug}

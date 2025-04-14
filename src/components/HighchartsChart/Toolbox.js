@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 
 import * as R from 'ramda';
@@ -10,7 +10,24 @@ import PngIcon from '../Icons/PngIcon';
 import SvgIcon from '../Icons/SvgIcon';
 import ExpandIcon from '../Icons/ExpandIcon';
 import InfoIcon from '../Icons/InfoIcon';
-import { Popover, PopoverTrigger, PopoverContent } from '../floating/Popover';
+import ActionIcon from '../Icons/ActionIcon';
+import { MenuContext, Menu, MenuItem, PopoverContent } from '../floating/Menu';
+
+const RootTrigger = () => {
+  const { isOpen } = useContext(MenuContext);
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'all 250ms',
+      }}
+    >
+      <DotsIcon />
+    </div>
+  );
+};
 
 const Toolbox = ({
   chartRef,
@@ -25,12 +42,13 @@ const Toolbox = ({
   noteAndSource,
   noteAndSourceShouldBeDisplayedInTooltip,
   tooltipContainerId,
+  displayActionButton,
+  actionButtonLabel,
+  onActionButtonClick,
   isSmall,
   exportDisabled = false,
   debug = false,
 }) => {
-  const [open, setOpen] = useState(false);
-
   const menuItems = R.compose(
     R.when(
       () => (onExpandChart || !isInIframe) && !hideExpand,
@@ -44,7 +62,6 @@ const Toolbox = ({
           } else {
             openChartFullScreen();
           }
-          setOpen(false);
         },
       }),
     ),
@@ -69,7 +86,6 @@ const Toolbox = ({
           if (onDownloadData) {
             onDownloadData();
           }
-          setOpen(false);
         },
       }),
     ),
@@ -85,7 +101,6 @@ const Toolbox = ({
             onDownloadData();
           }
         }
-        setOpen(false);
       },
     },
     {
@@ -110,56 +125,71 @@ const Toolbox = ({
         if (onDownloadData) {
           onDownloadData();
         }
-        setOpen(false);
       },
     },
   ]);
 
   return (
-    <Popover
-      placement="bottom-end"
-      offsetConfig={isSmall ? 4 : 8}
-      open={open}
-      setOpen={setOpen}
-    >
-      <PopoverTrigger>
+    <>
+      {displayActionButton && (
         <div
-          className="cb-tool"
-          style={{ marginLeft: isSmall ? '4px' : '8px' }}
           role="button"
+          aria-label={actionButtonLabel}
+          className="cb-tool"
           tabIndex={0}
-          aria-label="Toolbox"
+          onClick={onActionButtonClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              onActionButtonClick();
+              e.stopPropagation();
+            }
+          }}
+          style={{ marginLeft: '4px' }}
         >
-          <div
-            style={{
-              display: 'flex',
-              transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'all 250ms',
-            }}
-          >
-            <DotsIcon />
-          </div>
+          <ActionIcon />
         </div>
-      </PopoverTrigger>
-      <PopoverContent tooltipContainerId={tooltipContainerId}>
+      )}
+
+      {(noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition)) &&
+        !isSmall && (
+          <Menu
+            label={<InfoIcon />}
+            placement="bottom-end"
+            className="cb-tool"
+            isSmall={false}
+            tooltipContainerId={tooltipContainerId}
+            containsPopover
+          >
+            <PopoverContent tooltipContainerId={tooltipContainerId}>
+              <div
+                className="cb-floating cb-tooltip"
+                dangerouslySetInnerHTML={{
+                  __html: noteAndSourceShouldBeDisplayedInTooltip
+                    ? R.join('', [definition, noteAndSource])
+                    : definition,
+                }}
+              />
+            </PopoverContent>
+          </Menu>
+        )}
+      <Menu
+        label={<RootTrigger />}
+        className="cb-tool"
+        isSmall={isSmall}
+        tooltipContainerId={tooltipContainerId}
+        style={{ marginLeft: isSmall ? '4px' : '8px' }}
+      >
         <div className={`cb-toolbox ${isSmall ? 'cb-small' : ''}`}>
           {(noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition)) &&
             isSmall && (
-              <Popover
-                placement="left-start"
-                offsetConfig={isSmall ? 4 : 8}
-                openTrigger="hover"
+              <Menu
+                label={<InfoIcon />}
+                placement="left"
+                className="cb-tool"
+                isSmall={isSmall}
+                tooltipContainerId={tooltipContainerId}
+                containsPopover
               >
-                <PopoverTrigger>
-                  <div
-                    aria-label="Info"
-                    className="cb-tool"
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <InfoIcon />
-                  </div>
-                </PopoverTrigger>
                 <PopoverContent tooltipContainerId={tooltipContainerId}>
                   <div
                     className="cb-floating cb-tooltip"
@@ -170,17 +200,14 @@ const Toolbox = ({
                     }}
                   />
                 </PopoverContent>
-              </Popover>
+              </Menu>
             )}
+
           {R.map(
             (i) => (
-              <div
+              <MenuItem
                 key={i.label}
                 aria-label={i.label}
-                className={`cb-tool ${i.disabled ? 'cb-disabled' : ''}`}
-                disabled
-                role="button"
-                tabIndex={0}
                 onClick={i.onSelect}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -188,15 +215,17 @@ const Toolbox = ({
                     i.onSelect();
                   }
                 }}
+                className={`cb-tool ${i.disabled ? 'cb-disabled' : ''}`}
+                disabled={i.disabled}
               >
                 {i.content}
-              </div>
+              </MenuItem>
             ),
             menuItems,
           )}
         </div>
-      </PopoverContent>
-    </Popover>
+      </Menu>
+    </>
   );
 };
 
@@ -213,6 +242,9 @@ Toolbox.propTypes = {
   noteAndSource: PropTypes.string,
   noteAndSourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   tooltipContainerId: PropTypes.string,
+  displayActionButton: PropTypes.bool.isRequired,
+  actionButtonLabel: PropTypes.string.isRequired,
+  onActionButtonClick: PropTypes.func.isRequired,
   isSmall: PropTypes.bool.isRequired,
   exportDisabled: PropTypes.bool,
   debug: PropTypes.bool,
