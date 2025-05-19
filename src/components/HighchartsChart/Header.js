@@ -6,6 +6,7 @@ import * as R from 'ramda';
 import Toolbox from './Toolbox';
 
 const Header = ({
+  chartType,
   title,
   subtitle,
   definition = null,
@@ -25,7 +26,6 @@ const Header = ({
   isSmall,
   isFontLoaded,
   chartRef,
-  debug = false,
 }) => {
   const [isInIframe, setIsInIframe] = useState(false);
   useEffect(() => {
@@ -62,6 +62,7 @@ const Header = ({
         >
           <Toolbox
             chartRef={chartRef}
+            chartType={chartType}
             parsedTitle={title}
             parsedSubtitle={subtitle}
             onDownloadData={onDownloadData}
@@ -80,7 +81,6 @@ const Header = ({
             onActionButtonClick={onActionButtonClick}
             isSmall={isSmall}
             exportDisabled={exportDisabled}
-            debug={debug}
           />
         </div>
       )}
@@ -89,6 +89,7 @@ const Header = ({
 };
 
 Header.propTypes = {
+  chartType: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string.isRequired,
   definition: PropTypes.string,
@@ -108,7 +109,6 @@ Header.propTypes = {
   isSmall: PropTypes.bool.isRequired,
   isFontLoaded: PropTypes.bool.isRequired,
   chartRef: PropTypes.object.isRequired,
-  debug: PropTypes.bool,
 };
 
 export default Header;

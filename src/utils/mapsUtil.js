@@ -1,5 +1,16 @@
 import * as R from 'ramda';
-import { mapTypes } from '../constants/chart';
+import { chartSpacing, mapTypes } from '../constants/chart';
+
+import map from './world-highres-custom-topo.json';
+import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
+import {
+  convertColorToHex,
+  createExportFileName,
+  createLighterColor,
+  createShadesFromColor,
+  getBaselineOrHighlightColor,
+  getListItemAtTurningIndex,
+} from './chartUtilCommon';
 
 const dottedBorderNames = {
   ETH_SOM: 'ETH_SOM',
@@ -302,7 +313,7 @@ const dottedBordersByCountry = {
   ],
 };
 
-export const getDottedMapLines = (countrycodes, mapType) => {
+const getDottedMapLines = (countrycodes, mapType) => {
   if (mapType !== mapTypes.normal.value) {
     return null;
   }
@@ -334,4 +345,350 @@ export const getDottedMapLines = (countrycodes, mapType) => {
           },
         ],
       };
+};
+
+const createMapDataClasses = (steps, stepsHaveLabels) => {
+  const stepsLength = R.length(steps);
+
+  if (stepsLength === 0) {
+    return [];
+  }
+
+  if (stepsHaveLabels) {
+    return mapWithIndex((s, idx) => {
+      if (idx === stepsLength - 1) {
+        return {
+          from: R.head(R.last(steps)),
+          name: R.nth(1, R.last(steps)),
+        };
+      }
+      return {
+        from: R.head(R.nth(idx, steps)),
+        to: R.head(R.nth(idx + 1, steps)),
+        name: R.nth(1, R.nth(idx, steps)),
+      };
+    }, steps);
+  }
+
+  return R.prepend(
+    { to: R.head(R.head(steps)), name: `< ${R.head(R.head(steps))}` },
+    mapWithIndex((s, idx) => {
+      if (idx === stepsLength - 1) {
+        return {
+          from: R.head(R.nth(idx, steps)),
+          name: `> ${R.head(R.nth(idx, steps))}`,
+        };
+      }
+      return {
+        from: R.head(R.nth(idx, steps)),
+        to: R.head(R.nth(idx + 1, steps)),
+        name: `${R.head(R.nth(idx, steps))} - ${R.head(R.nth(idx + 1, steps))}`,
+      };
+    }, steps),
+  );
+};
+
+export const createOptionsForMapChart = async ({
+  data,
+  formatters,
+  title,
+  subtitle,
+  colorPalette,
+  highlight,
+  baseline,
+  highlightColors,
+  hideLegend,
+  fullscreenClose = null,
+  tooltipOutside = false,
+  csvExportcolumnHeaderFormatter = null,
+  isFullScreen = false,
+  height,
+  isSmall = false,
+  isForExport = false,
+  exportWidth = 600,
+  exportHeight = 400,
+  mapType = mapTypes.normal.value,
+  mapColorValueSteps = [],
+  mapAutoShade = true,
+  mapDisplayCountriesName = false,
+}) => {
+  const createMapDatapoint = (d) =>
+    mapType === mapTypes.normal.value
+      ? { value: d.value, __metadata: d.metadata }
+      : { z: d.value, __metadata: d.metadata };
+
+  const overrideCountriesLabel = (codeLabelMapping) => {
+    if (isNilOrEmpty(codeLabelMapping)) {
+      return map;
+    }
+
+    return R.modifyPath(
+      ['objects', 'default', 'geometries'],
+      R.map((c) => {
+        const code = R.path(['properties', 'iso-a3'], c);
+        const label = R.prop(code, codeLabelMapping);
+
+        if (R.has(code, codeLabelMapping) && code !== label) {
+          return R.assocPath(['properties', 'name'], label, c);
+        }
+
+        return c;
+      }),
+      map,
+    );
+  };
+
+  const stepsHaveLabels =
+    !isNilOrEmpty(mapColorValueSteps) &&
+    R.all(R.compose(R.equals(2), R.length), mapColorValueSteps);
+
+  const finalMap = overrideCountriesLabel(data.codeLabelMapping);
+
+  const getLabelFromMap = (code) =>
+    R.pathOr(
+      code,
+      ['properties', 'name'],
+      R.find(R.pathEq(code, ['properties', 'iso-a3']), finalMap.features || []),
+    );
+
+  const finalColorPalette = R.when(
+    (cp) =>
+      R.equals(1, R.length(cp)) &&
+      !mapAutoShade &&
+      !isNilOrEmpty(mapColorValueSteps),
+    (cp) => {
+      const nbShadesToCreate = R.min(6, R.length(mapColorValueSteps) + 1);
+      return R.compose(
+        R.reverse,
+        R.take(nbShadesToCreate),
+        createShadesFromColor,
+        R.head,
+      )(cp);
+    },
+  )(colorPalette);
+
+  const optionalDottedMapLines = getDottedMapLines(
+    R.map(R.prop('code'), data.categories),
+    mapType,
+  );
+
+  const series = R.when(
+    () => optionalDottedMapLines,
+    R.append(optionalDottedMapLines),
+  )([
+    {
+      type: 'map',
+      enableMouseTracking: false,
+      showInLegend: false,
+      dataLabels: {
+        enabled: mapDisplayCountriesName,
+        format: '{point.name}',
+      },
+      allAreas: true,
+      nullColor: '#bbbbbb',
+    },
+    ...mapWithIndex(
+      (s, yIdx) => ({
+        name: s.label,
+        type: mapType === mapTypes.normal.value ? 'map' : 'mapbubble',
+        joinBy: ['iso-a3', 'code'],
+        color: getListItemAtTurningIndex(yIdx, finalColorPalette),
+        ...(mapType !== mapTypes.normal.value
+          ? {
+              minSize: 8,
+              maxSize: mapType === mapTypes.point.value ? 8 : '10%',
+            }
+          : {}),
+
+        showInLegend: true,
+
+        data: reduceWithIndex(
+          (acc, d, xIdx) => {
+            if (isNilOrEmpty(d)) {
+              return acc;
+            }
+
+            const countryCode = R.toUpper(
+              `${R.nth(xIdx, data.categories)?.code}`,
+            );
+
+            const baselineOrHighlightColor = getBaselineOrHighlightColor(
+              { code: countryCode, label: getLabelFromMap(countryCode) },
+              R.map(R.toUpper, highlight),
+              R.map(R.toUpper, baseline),
+              highlightColors,
+            );
+
+            return R.append(
+              {
+                code: R.toUpper(`${R.nth(xIdx, data.categories)?.code}`),
+                ...createMapDatapoint(d, mapType),
+                ...(baselineOrHighlightColor
+                  ? { color: baselineOrHighlightColor }
+                  : {}),
+              },
+              acc,
+            );
+          },
+          [],
+          s.data,
+        ),
+      }),
+      data.series,
+    ),
+  ]);
+
+  return {
+    chart: {
+      map: finalMap,
+      style: {
+        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
+      },
+      height,
+      animation: false,
+      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      events: { fullscreenClose },
+    },
+
+    colors: finalColorPalette,
+
+    colorAxis: R.cond([
+      [
+        R.always(mapAutoShade),
+        R.always([
+          {
+            type: 'logarithmic',
+            allowNegativeLog: true,
+            minColor: createLighterColor(R.head(finalColorPalette), 90),
+            maxColor: convertColorToHex(R.head(finalColorPalette)),
+            labels: {
+              style: {
+                color: '#586179',
+                fontSize: isSmall ? '13px' : '16px',
+              },
+            },
+          },
+        ]),
+      ],
+      [
+        R.always(!isNilOrEmpty(mapColorValueSteps)),
+        R.always([
+          {
+            dataClassColor: 'category',
+            dataClasses: createMapDataClasses(
+              mapColorValueSteps,
+              stepsHaveLabels,
+            ),
+          },
+        ]),
+      ],
+      [R.T, R.always([])],
+    ])(),
+
+    title: {
+      text: title,
+      align: 'left',
+      margin: 20,
+      style: {
+        color: '#101d40',
+        fontWeight: 'bold',
+        fontSize: '18px',
+      },
+    },
+    subtitle: {
+      text: subtitle,
+      align: 'left',
+      style: {
+        color: '#586179',
+        fontSize: '17px',
+      },
+    },
+
+    mapView: {
+      projection: {
+        name: 'Miller',
+      },
+    },
+
+    credits: {
+      enabled: false,
+    },
+
+    legend: {
+      enabled: !hideLegend,
+      itemDistance: 10,
+      verticalAlign: 'top',
+      x: -7,
+      margin: isSmall ? 16 : 24,
+      itemStyle: {
+        fontWeight: 'normal',
+        color: '#586179',
+        fontSize: isSmall ? '13px' : '16px',
+      },
+      align: 'left',
+      squareSymbol: false,
+      symbolRadius: mapType === mapTypes.normal.value ? 0 : undefined,
+      symbolWidth:
+        R.includes(mapType, [mapTypes.point.value, mapTypes.bubble.value]) &&
+        !mapAutoShade
+          ? 12
+          : undefined,
+    },
+
+    plotOptions: {
+      map: {
+        allAreas: false,
+        states: {
+          hover: {
+            enabled: false,
+          },
+        },
+      },
+      series: {
+        animation: false,
+        dataLabels: {
+          ...R.prop('dataLabels', formatters),
+          color: '#586179',
+        },
+        borderColor: '#bbbbbb',
+      },
+    },
+
+    tooltip: {
+      ...R.prop('tooltip', formatters),
+      outside: tooltipOutside,
+    },
+
+    mapNavigation: {
+      enabled: true,
+      buttonOptions: {
+        verticalAlign: 'bottom',
+      },
+
+      buttons: {
+        zoomIn: {
+          y: -29,
+        },
+        zoomOut: {
+          y: -1,
+        },
+      },
+    },
+
+    series,
+
+    exporting: {
+      enabled: false,
+      sourceWidth: exportWidth,
+      sourceHeight: exportHeight,
+      filename: createExportFileName(),
+      ...(isForExport
+        ? {}
+        : {
+            csv: {
+              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+            },
+          }),
+    },
+  };
 };

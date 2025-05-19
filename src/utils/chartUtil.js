@@ -4,60 +4,29 @@ import * as R from 'ramda';
 
 import {
   codeOrLabelEquals,
+  getFinalPalette,
   latestMaxVariable,
   latestMinVariable,
   possibleVariables,
 } from './configUtil';
-import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
-import { frequencyTypes } from '../constants/chart';
+import { forEachWithIndex, isNilOrEmpty, mapWithIndex } from './ramdaUtil';
+import {
+  baselineColorShades,
+  chartSpacing,
+  chartTypes,
+  frequencyTypes,
+  stackingOptions,
+} from '../constants/chart';
 import { frequencies } from './dateUtil';
+import { createFormatters } from './highchartsUtil';
+import {
+  createExportFileName,
+  createShadesFromColor,
+  getBaselineOrHighlightColor,
+  getListItemAtTurningIndex,
+} from './chartUtilCommon';
 
-const baselineColor = '#48A7FF';
-const baselineColorShades = [
-  ['#0A4095', '#0E51B5', '#1162D4', '#2379E2', '#3690F1', '#48A7FF', '#73BCFF'],
-  ['#0A4095', '#0E51B5', '#1162D4', '#3690F1', '#48A7FF', '#73BCFF'],
-  ['#0A4095', '#0E51B5', '#1162D4', '#48A7FF', '#73BCFF'],
-  ['#0A4095', '#0E51B5', '#1162D4', '#48A7FF'],
-  ['#0A4095', '#1162D4', '#48A7FF'],
-  ['#0E51B5', '#48A7FF'],
-  [baselineColor],
-];
-
-const lightenColor = (color, percent) => {
-  const num = parseInt(color.replace('#', ''), 16);
-  const amt = Math.round(2.55 * percent);
-  const red = (num >> 16) + amt;
-  const blue = ((num >> 8) & 0x00ff) + amt;
-  const green = (num & 0x0000ff) + amt;
-  return `#${(
-    0x1000000 +
-    (red < 255 ? (red < 1 ? 0 : red) : 255) * 0x10000 +
-    (blue < 255 ? (blue < 1 ? 0 : blue) : 255) * 0x100 +
-    (green < 255 ? (green < 1 ? 0 : green) : 255)
-  )
-    .toString(16)
-    .slice(1)}`;
-};
-
-export const convertColorToHex = (color) =>
-  new TinyColor(color || 'black').toHexString();
-
-export const createLighterColor = (color, percent) => {
-  const hex = convertColorToHex(color);
-
-  return lightenColor(hex, percent);
-};
-
-export const createShadesFromColor = (color) => {
-  const hex = convertColorToHex(color);
-  return R.map(
-    (n) => {
-      const percent = n * 10;
-      return lightenColor(hex, percent);
-    },
-    R.times(R.identity, 9),
-  );
-};
+const mapsUtil = import('./mapsUtil');
 
 export const makeColorReadableOnBackgroundColor = (color, backgroundColor) =>
   R.reduceWhile(
@@ -67,37 +36,13 @@ export const makeColorReadableOnBackgroundColor = (color, backgroundColor) =>
     R.times(R.identity, 3),
   ).toHexString();
 
-export const getListItemAtTurningIndex = (idx, list) =>
-  R.nth(idx % R.length(list), list);
-
-export const getBaselineOrHighlightColor = (
-  objWithCodeAndLabel,
-  highlight,
-  baseline,
-  highlightColors,
-) => {
-  const baselineIndex = R.findIndex(
-    codeOrLabelEquals(objWithCodeAndLabel),
-    baseline,
-  );
-  if (baselineIndex !== -1) {
-    return baselineColor;
-  }
-
-  const highlightColorsIndex = R.findIndex(
-    codeOrLabelEquals(objWithCodeAndLabel),
-    highlight,
-  );
-
-  return highlightColorsIndex === -1
-    ? null
-    : getListItemAtTurningIndex(highlightColorsIndex, highlightColors);
-};
-
-const createDatapoint = (d, areCategoriesDatesOrNumber) =>
-  areCategoriesDatesOrNumber
+const createDatapoint = (d, categoriesAreDatesOrNumber) =>
+  categoriesAreDatesOrNumber
     ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
     : { y: d.value, __metadata: d.metadata };
+
+const areCategoriesDatesOrNumber = (data) =>
+  data.areCategoriesDates || data.areCategoriesNumbers;
 
 export const createStackedDatapoints = (
   data,
@@ -106,6 +51,8 @@ export const createStackedDatapoints = (
   highlight,
   baseline,
 ) => {
+  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
+
   const baselineColors = R.find(
     (shade) => R.length(shade) <= R.length(data.series),
     baselineColorShades,
@@ -164,10 +111,7 @@ export const createStackedDatapoints = (
           [R.T, R.always(null)],
         ])();
 
-        const dataPoint = createDatapoint(
-          d,
-          data.areCategoriesDates || data.areCategoriesNumbers,
-        );
+        const dataPoint = createDatapoint(d, categoriesAreDatesOrNumber);
 
         return color
           ? { name: category.label, ...dataPoint, color }
@@ -268,17 +212,6 @@ export const deepMergeUserOptionsWithDefaultOptions = (
   )({});
 };
 
-export const isCastableToNumber = R.ifElse(
-  isNilOrEmpty,
-  R.always(false),
-  R.compose(R.complement(Number.isNaN), Number),
-);
-
-export const roundNumber = (number, maxNumberOfDecimal) =>
-  isCastableToNumber(number)
-    ? Number(Number(number).toFixed(maxNumberOfDecimal))
-    : number;
-
 export const addColorAlpha = (color, alphaToAdd) => {
   const colorObject = new TinyColor(color || 'black');
   const newAlpha = R.compose(
@@ -348,47 +281,6 @@ export const tryCastAllToDatesAndDetectFormat = (values) => {
   return { isSuccessful: false, dates: null, dateFormat: null };
 };
 
-export const createMapDataClasses = (steps, stepsHaveLabels) => {
-  const stepsLength = R.length(steps);
-
-  if (stepsLength === 0) {
-    return [];
-  }
-
-  if (stepsHaveLabels) {
-    return mapWithIndex((s, idx) => {
-      if (idx === stepsLength - 1) {
-        return {
-          from: R.head(R.last(steps)),
-          name: R.nth(1, R.last(steps)),
-        };
-      }
-      return {
-        from: R.head(R.nth(idx, steps)),
-        to: R.head(R.nth(idx + 1, steps)),
-        name: R.nth(1, R.nth(idx, steps)),
-      };
-    }, steps);
-  }
-
-  return R.prepend(
-    { to: R.head(R.head(steps)), name: `< ${R.head(R.head(steps))}` },
-    mapWithIndex((s, idx) => {
-      if (idx === stepsLength - 1) {
-        return {
-          from: R.head(R.nth(idx, steps)),
-          name: `> ${R.head(R.nth(idx, steps))}`,
-        };
-      }
-      return {
-        from: R.head(R.nth(idx, steps)),
-        to: R.head(R.nth(idx + 1, steps)),
-        name: `${R.head(R.nth(idx, steps))} - ${R.head(R.nth(idx + 1, steps))}`,
-      };
-    }, steps),
-  );
-};
-
 export const replaceVarsNameByVarsValue = (string, vars) =>
   R.reduce(
     (acc, varName) =>
@@ -446,4 +338,1423 @@ export const doesStringContainVar = R.test(new RegExp(anyVarRegExp, 'i'));
 export const calcIsSmall = (width, height) =>
   !width || !height ? false : width < 540 || height < 350;
 
-export const calcChartSpacing = (isFullScreen) => (isFullScreen ? 22 : 0);
+export const calcMarginTop = (title, subtitle, isSmall) => {
+  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
+    return isSmall ? 20 : 32;
+  }
+
+  return undefined;
+};
+
+export const calcMarginTopWithHorizontal = (
+  title,
+  subtitle,
+  horizontal,
+  isSmall,
+) => {
+  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
+    if (isSmall) {
+      return 22;
+    }
+    return horizontal ? 22 : 32;
+  }
+
+  return undefined;
+};
+
+const createOptionsForLineChart = ({
+  data,
+  formatters,
+  title,
+  subtitle,
+  colorPalette,
+  highlight,
+  baseline,
+  highlightColors,
+  hideLegend,
+  hideXAxisLabels,
+  hideYAxisLabels,
+  fullscreenClose = null,
+  tooltipOutside = false,
+  csvExportcolumnHeaderFormatter = null,
+  isFullScreen = false,
+  height,
+  isSmall = false,
+  isForExport = false,
+  exportWidth = 600,
+  exportHeight = 400,
+}) => {
+  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
+
+  const series = mapWithIndex((s, yIdx) => {
+    const highlightOrBaselineColor = getBaselineOrHighlightColor(
+      s,
+      highlight,
+      baseline,
+      highlightColors,
+    );
+    const color =
+      highlightOrBaselineColor || getListItemAtTurningIndex(yIdx, colorPalette);
+
+    const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
+
+    return {
+      name: s.label,
+      data: R.map((d) => {
+        const dataPoint = createDatapoint(d, categoriesAreDatesOrNumber);
+
+        return dataPoint;
+      }, s.data),
+      type: 'spline',
+      lineWidth: 2.5,
+      marker: {
+        symbol: 'circle',
+        radius: 3,
+        lineWidth: 2,
+      },
+      states: {
+        hover: {
+          lineWidth: 2.5,
+        },
+      },
+      color,
+      dataLabels: {
+        style: {
+          color: dataLabelColor,
+          textShadow:
+            '0px -1px 3px white, 1px 0px 3px white, 0px 1px 3px white, -1px 0px 3px white, -1px -1px 3px white, 1px -1px 3px white, 1px 1px 3px white, -1px 1px 3px white',
+          textOutline: 'none',
+        },
+      },
+      ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
+      showInLegend: true,
+    };
+  }, data.series);
+
+  return {
+    chart: {
+      style: {
+        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
+      },
+      marginTop: hideLegend
+        ? calcMarginTop(title, subtitle, isSmall)
+        : undefined,
+      height,
+      animation: false,
+      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      events: {
+        fullscreenClose,
+      },
+    },
+
+    colors: [R.head(colorPalette)],
+
+    title: {
+      text: title,
+      align: 'left',
+      margin: 20,
+      style: {
+        color: '#101d40',
+        fontWeight: 'bold',
+        fontSize: '18px',
+      },
+    },
+    subtitle: {
+      text: subtitle,
+      align: 'left',
+      style: {
+        color: '#586179',
+        fontSize: '17px',
+      },
+    },
+
+    credits: {
+      enabled: false,
+    },
+
+    xAxis: {
+      categories: categoriesAreDatesOrNumber
+        ? null
+        : R.map(R.prop('label'), data.categories),
+      ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
+      labels: {
+        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        ...R.prop('xAxisLabels', formatters),
+        ...(hideXAxisLabels ? { enabled: false } : {}),
+      },
+      gridLineColor: '#c2cbd6',
+      lineColor: 'transparent',
+      left: categoriesAreDatesOrNumber ? '10%' : '5%',
+      width: categoriesAreDatesOrNumber ? '85%' : '95%',
+      tickWidth: 0,
+    },
+
+    yAxis: {
+      title: {
+        enabled: false,
+      },
+      startOnTick: false,
+      gridLineColor: '#c2cbd6',
+      lineColor: '#c2cbd6',
+      labels: {
+        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        enabled: !hideYAxisLabels,
+        align: 'left',
+        x: 0,
+        y: -4,
+      },
+    },
+
+    legend: {
+      enabled: !hideLegend,
+      itemDistance: 10,
+      itemStyle: {
+        fontWeight: 'normal',
+        color: '#586179',
+        fontSize: isSmall ? '13px' : '16px',
+      },
+      align: 'left',
+      symbolWidth: 18,
+      x: -7,
+      verticalAlign: 'top',
+      margin: isSmall ? 26 : 34,
+    },
+
+    plotOptions: {
+      series: {
+        animation: false,
+        events: {
+          mouseOver: (e) => {
+            e.target.data.forEach((p) => {
+              p.update(
+                {
+                  dataLabels: {
+                    enabled: true,
+                    ...R.prop('dataLabels', formatters),
+                  },
+                },
+                false,
+                false,
+                false,
+              );
+            });
+            e.target.chart.redraw();
+          },
+          mouseOut: (e) => {
+            e.target.data.forEach((p) => {
+              p.update(
+                {
+                  dataLabels: {
+                    enabled: false,
+                  },
+                },
+                false,
+                false,
+                false,
+              );
+            });
+            e.target.chart.redraw();
+          },
+        },
+      },
+    },
+
+    tooltip: {
+      ...R.prop('tooltip', formatters),
+      outside: tooltipOutside,
+    },
+
+    series,
+
+    exporting: {
+      enabled: false,
+      sourceWidth: exportWidth,
+      sourceHeight: exportHeight,
+      filename: createExportFileName(),
+      ...(isForExport
+        ? {}
+        : {
+            csv: {
+              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+            },
+          }),
+    },
+  };
+};
+
+const createOptionsForBarChart = ({
+  chartType,
+  data,
+  formatters,
+  title,
+  subtitle,
+  colorPalette,
+  highlight,
+  baseline,
+  highlightColors,
+  hideLegend,
+  hideXAxisLabels,
+  hideYAxisLabels,
+  pivotValue = 0,
+  fullscreenClose = null,
+  tooltipOutside = false,
+  csvExportcolumnHeaderFormatter = null,
+  isFullScreen = false,
+  height,
+  isSmall = false,
+  isForExport = false,
+  exportWidth = 600,
+  exportHeight = 400,
+}) => {
+  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
+
+  const series = mapWithIndex((s, xIdx) => {
+    const seriesColor =
+      getBaselineOrHighlightColor(s, highlight, baseline, highlightColors) ||
+      getListItemAtTurningIndex(xIdx, colorPalette);
+
+    return {
+      name: s.label,
+      data: mapWithIndex((d, dIdx) => {
+        const category = R.nth(dIdx, data.categories);
+
+        const baselineOrHighlightColor = getBaselineOrHighlightColor(
+          category,
+          highlight,
+          baseline,
+          highlightColors,
+        );
+
+        const dataPoint = createDatapoint(d, categoriesAreDatesOrNumber);
+
+        return baselineOrHighlightColor
+          ? {
+              name: category.label,
+              color: baselineOrHighlightColor,
+              ...dataPoint,
+            }
+          : { name: category.label, ...dataPoint };
+      }, s.data),
+      color: seriesColor,
+      showInLegend: true,
+    };
+  }, data.series);
+
+  const horizontal = chartType === chartTypes.row;
+
+  const calcXAxisLayout = () => {
+    if (horizontal) {
+      return categoriesAreDatesOrNumber
+        ? { top: '7.5%', height: '88.9%' }
+        : { top: '8%', height: '88%' };
+    }
+
+    return categoriesAreDatesOrNumber
+      ? { left: '8%', width: '89%' }
+      : { left: '9%', width: '87%' };
+  };
+
+  const calcLegendMargin = () => {
+    if (isSmall) {
+      return horizontal ? 10 : 26;
+    }
+
+    return horizontal ? 14 : 34;
+  };
+
+  return {
+    chart: {
+      type: horizontal ? 'bar' : 'column',
+      style: {
+        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
+      },
+      marginTop: hideLegend
+        ? calcMarginTopWithHorizontal(title, subtitle, horizontal, isSmall)
+        : undefined,
+      height,
+      animation: false,
+      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      events: {
+        fullscreenClose,
+      },
+    },
+
+    colors: colorPalette,
+
+    title: {
+      text: title,
+      align: 'left',
+      margin: 20,
+      style: {
+        color: '#101d40',
+        fontSize: '18px',
+        fontWeight: 'bold',
+      },
+    },
+    subtitle: {
+      text: subtitle,
+      align: 'left',
+      style: {
+        color: '#586179',
+        fontSize: '17px',
+      },
+    },
+
+    credits: {
+      enabled: false,
+    },
+
+    xAxis: {
+      categories: categoriesAreDatesOrNumber
+        ? null
+        : R.map(R.prop('label'), data.categories),
+      ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
+      labels: {
+        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        ...R.prop('xAxisLabels', formatters),
+        ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
+          ? { enabled: false }
+          : {}),
+      },
+      gridLineColor: '#c2cbd6',
+      lineColor: 'transparent',
+      ...calcXAxisLayout(),
+      tickWidth: 0,
+    },
+
+    yAxis: {
+      title: {
+        enabled: false,
+      },
+      gridLineColor: '#c2cbd6',
+      lineColor: '#c2cbd6',
+      labels: {
+        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        enabled:
+          (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
+
+        align: 'left',
+        ...(horizontal ? { x: 4, y: isSmall ? 28 : 35 } : { x: 0, y: -4 }),
+      },
+      opposite: horizontal,
+    },
+
+    legend: {
+      enabled: !hideLegend,
+      itemDistance: 10,
+      itemStyle: {
+        fontWeight: 'normal',
+        color: '#586179',
+        fontSize: isSmall ? '13px' : '16px',
+      },
+      align: 'left',
+      squareSymbol: false,
+      symbolRadius: 0,
+      symbolWidth: 18,
+      x: -7,
+      verticalAlign: 'top',
+      margin: calcLegendMargin(),
+    },
+
+    plotOptions: {
+      series: {
+        animation: false,
+        pointPadding: 0.1,
+        groupPadding: 0.1,
+        borderWidth: 0.3,
+        borderColor: '#ffffff',
+        borderRadius: 0,
+        threshold: parseFloat(pivotValue) || 0,
+        dataLabels: {
+          ...R.prop('dataLabels', formatters),
+        },
+      },
+    },
+
+    tooltip: {
+      ...R.prop('tooltip', formatters),
+      outside: tooltipOutside,
+    },
+
+    series,
+
+    exporting: {
+      enabled: false,
+      sourceWidth: exportWidth,
+      sourceHeight: exportHeight,
+      filename: createExportFileName(),
+      ...(isForExport
+        ? {}
+        : {
+            csv: {
+              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+            },
+          }),
+    },
+  };
+};
+
+const createOptionsForStackedChart = ({
+  chartType,
+  data,
+  formatters,
+  title,
+  subtitle,
+  colorPalette,
+  highlight,
+  baseline,
+  highlightColors,
+  hideLegend,
+  hideXAxisLabels,
+  hideYAxisLabels,
+  fullscreenClose = null,
+  tooltipOutside = false,
+  csvExportcolumnHeaderFormatter = null,
+  isFullScreen = false,
+  height,
+  isSmall = false,
+  stacking = stackingOptions.percent.value,
+  isForExport = false,
+  exportWidth = 600,
+  exportHeight = 400,
+}) => {
+  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
+
+  const series = createStackedDatapoints(
+    data,
+    colorPalette,
+    highlightColors,
+    highlight,
+    baseline,
+  );
+
+  const horizontal = chartType === chartTypes.stackedRow;
+  const area = chartType === chartTypes.stackedArea;
+
+  const highChartsChartType = R.cond([
+    [R.always(area), R.always('areaspline')],
+    [R.always(horizontal), R.always('bar')],
+    [R.T, R.always('column')],
+  ])();
+
+  const calcXAxisLayout = () => {
+    if (area) {
+      return categoriesAreDatesOrNumber
+        ? { left: '10%', width: '85%' }
+        : { left: '5%', width: '95%' };
+    }
+
+    return horizontal
+      ? { top: '8%', height: '88%' }
+      : { left: '9%', width: '87%' };
+  };
+
+  const calcLegendMargin = () => {
+    if (isSmall) {
+      return horizontal ? 10 : 26;
+    }
+
+    return horizontal ? 14 : 34;
+  };
+
+  return {
+    chart: {
+      type: highChartsChartType,
+      style: {
+        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
+      },
+      marginTop: hideLegend
+        ? calcMarginTopWithHorizontal(title, subtitle, horizontal, isSmall)
+        : undefined,
+      height,
+      animation: false,
+      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      events: {
+        fullscreenClose,
+      },
+    },
+
+    colors: colorPalette,
+
+    title: {
+      text: title,
+      align: 'left',
+      margin: 20,
+      style: {
+        color: '#101d40',
+        fontWeight: 'bold',
+        fontSize: '18px',
+      },
+    },
+    subtitle: {
+      text: subtitle,
+      align: 'left',
+      style: {
+        color: '#586179',
+        fontSize: '17px',
+      },
+    },
+
+    credits: {
+      enabled: false,
+    },
+
+    xAxis: {
+      categories:
+        area && categoriesAreDatesOrNumber
+          ? null
+          : R.map(R.prop('label'), data.categories),
+      ...(data.areCategoriesDates
+        ? {
+            type: 'datetime',
+          }
+        : {}),
+      labels: {
+        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        ...R.prop('xAxisLabels', formatters),
+        ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
+          ? { enabled: false }
+          : {}),
+      },
+      gridLineColor: '#c2cbd6',
+      lineColor: 'transparent',
+      ...calcXAxisLayout(),
+      tickWidth: 0,
+    },
+
+    yAxis: {
+      title: {
+        enabled: false,
+      },
+      startOnTick: false,
+      gridLineColor: '#c2cbd6',
+      lineColor: '#c2cbd6',
+      labels: {
+        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        enabled:
+          (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
+        align: 'left',
+        ...(horizontal ? { x: 4, y: isSmall ? 28 : 35 } : { x: 0, y: -4 }),
+      },
+      opposite: horizontal,
+      reversedStacks: false,
+    },
+
+    legend: {
+      enabled: !hideLegend,
+      reversed: false,
+      itemDistance: 10,
+      itemStyle: {
+        fontWeight: 'normal',
+        color: '#586179',
+        fontSize: isSmall ? '13px' : '16px',
+      },
+      align: 'left',
+      squareSymbol: false,
+      symbolRadius: 0,
+      symbolWidth: 18,
+      x: -7,
+      verticalAlign: 'top',
+      margin: calcLegendMargin(),
+    },
+
+    plotOptions: {
+      series: {
+        animation: false,
+        stacking: stacking || stackingOptions.percent.value,
+        pointPadding: 0.1,
+        groupPadding: 0.1,
+        borderWidth: 0.3,
+        borderColor: '#ffffff',
+        borderRadius: 0,
+        dataLabels: {
+          ...R.prop('dataLabels', formatters),
+        },
+      },
+    },
+
+    tooltip: {
+      ...R.prop('tooltip', formatters),
+      outside: tooltipOutside,
+    },
+
+    series,
+
+    exporting: {
+      enabled: false,
+      sourceWidth: exportWidth,
+      sourceHeight: exportHeight,
+      filename: createExportFileName(),
+      ...(isForExport
+        ? {}
+        : {
+            csv: {
+              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+            },
+          }),
+    },
+  };
+};
+
+const symbols = [
+  'circle',
+  'diamond',
+  'cross',
+  'square',
+  'triangle',
+  'triangle-down',
+];
+
+const createOptionsForScatterChart = ({
+  chartType,
+  data,
+  formatters,
+  title,
+  subtitle,
+  colorPalette,
+  highlight,
+  baseline,
+  highlightColors,
+  hideLegend,
+  hideXAxisLabels,
+  hideYAxisLabels,
+  fullscreenClose = null,
+  tooltipOutside = false,
+  csvExportcolumnHeaderFormatter = null,
+  isFullScreen = false,
+  height,
+  isSmall = false,
+  isForExport = false,
+  exportWidth = 600,
+  exportHeight = 400,
+}) => {
+  const symbolLayout = chartType === chartTypes.symbol;
+
+  const firstPaletteColor = R.head(colorPalette);
+
+  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
+
+  const series = mapWithIndex((s, yIdx) => {
+    const symbol = getListItemAtTurningIndex(yIdx, symbols);
+
+    const seriesBaselineOrHighlightColor = getBaselineOrHighlightColor(
+      s,
+      highlight,
+      baseline,
+      highlightColors,
+    );
+
+    const seriesColor =
+      seriesBaselineOrHighlightColor ||
+      getListItemAtTurningIndex(yIdx, colorPalette);
+
+    return {
+      name: s.label,
+      data: mapWithIndex((d, xIdx) => {
+        const category = R.nth(xIdx, data.categories);
+
+        const baselineOrHighlightColor = getBaselineOrHighlightColor(
+          category,
+          highlight,
+          baseline,
+          highlightColors,
+        );
+
+        const dataPoint = createDatapoint(d, categoriesAreDatesOrNumber);
+
+        return baselineOrHighlightColor
+          ? {
+              name: category.label,
+              ...dataPoint,
+              color: baselineOrHighlightColor,
+              marker: {
+                fillColor: !symbolLayout
+                  ? addColorAlpha(baselineOrHighlightColor, -0.4)
+                  : baselineOrHighlightColor,
+              },
+            }
+          : {
+              name: category.label,
+              ...dataPoint,
+            };
+      }, s.data),
+      color: seriesColor,
+      showInLegend: true,
+      marker: {
+        symbol,
+        lineColor: symbol === 'cross' ? null : '#deeaf1',
+        lineWidth: symbol === 'cross' ? 2 : 1,
+        radius: symbol === 'cross' ? 5 : 6,
+        fillColor: !symbolLayout
+          ? addColorAlpha(seriesColor, -0.4)
+          : seriesColor,
+        states: {
+          hover: {
+            lineWidth: symbol === 'cross' ? 2 : 1,
+            radius: symbol === 'cross' ? 5 : 6,
+          },
+        },
+      },
+    };
+  }, data.series);
+
+  let minMaxLines = [];
+
+  const chartRender = ({ target: chart }) => {
+    if (symbolLayout) {
+      // remove previous lines (user can make series visible or not which requires to
+      // redraw the lines)
+      forEachWithIndex((l) => l?.destroy(), minMaxLines);
+
+      console.log('------------');
+
+      const seriesData2 = chart.series
+        .filter((s) => s.visible === true)
+        .map((s) => s.data.map((d) => d.y));
+
+      const categoriesMinMax2 = [...Array(seriesData2[0].length).keys()]
+        .map((i) => seriesData2.map((sd) => sd[i]))
+        .map((categoryData) => {
+          const validData = categoryData.filter((d) => d !== null);
+          return validData.length === 0
+            ? []
+            : [Math.min(...validData), Math.max(...validData)];
+        });
+
+      categoriesMinMax2.map((c, i) => {
+        if (categoriesMinMax2[i].length === 0) {
+          return null;
+        }
+
+        const { x } = chart.series[0].data[i];
+        const ax = chart.xAxis[0]?.toPixels(x);
+        const ay = chart.yAxis[0]?.toPixels(categoriesMinMax2[i][0]);
+        const bx = ax;
+        const by = chart.yAxis[0]?.toPixels(categoriesMinMax2[i][1]);
+
+        return chart.renderer
+          .path(['M', ax, ay, 'L', bx, by])
+          .attr({
+            stroke: addColorAlpha('#264042', -0.6),
+            'stroke-width': 1,
+            zIndex: 1,
+          })
+          .add();
+      });
+      //console.log(seriesData2);
+      console.log(categoriesMinMax2);
+
+      // const categoriesMinMax = R.compose(
+      //   (seriesData) =>
+      //     R.compose(
+      //       R.map((categoryData) => {
+      //         const validData = R.reject(R.isNil, categoryData);
+      //         return R.isEmpty(validData)
+      //           ? []
+      //           : [Math.min(...validData), Math.max(...validData)];
+      //       }),
+      //       R.map((idx) => R.map(R.nth(idx), seriesData)),
+      //     )(R.times(R.identity, R.length(data.categories))),
+
+      //   R.map(R.compose(R.map(R.prop('y')), R.prop('data'))),
+      // )(R.filter(R.propEq(true, 'visible'), chart.series));
+
+      // console.log(categoriesMinMax);
+
+      // minMaxLines = mapWithIndex((category, idx) => {
+      //   if (R.isEmpty(categoriesMinMax[idx])) {
+      //     return null;
+      //   }
+
+      //   const x = R.path([0, 'data', idx, 'x'], chart.series);
+      //   const ax = chart.xAxis[0]?.toPixels(x);
+      //   const ay = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][0]);
+      //   const bx = ax;
+      //   const by = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][1]);
+
+      //   const lineColor =
+      //     getBaselineOrHighlightColor(
+      //       category,
+      //       highlight,
+      //       baseline,
+      //       highlightColors,
+      //     ) || firstPaletteColor;
+
+      //   console.log(lineColor);
+
+      //   return chart.renderer
+      //     .path(['M', ax, ay, 'L', bx, by])
+      //     .attr({
+      //       stroke: addColorAlpha(lineColor, -0.6),
+      //       'stroke-width': 1,
+      //       zIndex: 1,
+      //     })
+      //     .add();
+      // }, data.categories);
+    }
+  };
+
+  return {
+    chart: {
+      type: 'scatter',
+      style: {
+        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
+      },
+      marginTop: hideLegend
+        ? calcMarginTop(title, subtitle, isSmall)
+        : undefined,
+      height,
+      animation: false,
+      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      events: {
+        fullscreenClose,
+        render: chartRender,
+      },
+    },
+
+    colors: colorPalette,
+
+    title: {
+      text: title,
+      align: 'left',
+      margin: 20,
+      style: {
+        color: '#101d40',
+        fontWeight: 'bold',
+        fontSize: '18px',
+      },
+    },
+    subtitle: {
+      text: subtitle,
+      align: 'left',
+      style: {
+        color: '#586179',
+        fontSize: '17px',
+      },
+    },
+
+    credits: {
+      enabled: false,
+    },
+
+    xAxis: {
+      categories: categoriesAreDatesOrNumber
+        ? null
+        : R.map(R.prop('label'), data.categories),
+      ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
+      labels: {
+        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        ...R.prop('xAxisLabels', formatters),
+        ...(hideXAxisLabels ? { enabled: false } : {}),
+      },
+      gridLineColor: '#c2cbd6',
+      lineColor: 'transparent',
+      left: categoriesAreDatesOrNumber ? '10%' : '5%',
+      width: categoriesAreDatesOrNumber ? '85%' : '95%',
+      tickWidth: 0,
+    },
+
+    yAxis: {
+      title: {
+        enabled: false,
+      },
+      gridLineColor: '#c2cbd6',
+      lineColor: '#c2cbd6',
+      labels: {
+        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        enabled: !hideYAxisLabels,
+        align: 'left',
+        x: 0,
+        y: -4,
+      },
+    },
+
+    legend: {
+      enabled: !hideLegend,
+      itemDistance: 10,
+      itemStyle: {
+        fontWeight: 'normal',
+        color: '#586179',
+        fontSize: isSmall ? '13px' : '16px',
+      },
+      align: 'left',
+      squareSymbol: false,
+      symbolRadius: 0,
+      symbolWidth: 18,
+      x: -7,
+      verticalAlign: 'top',
+      margin: isSmall ? 26 : 34,
+    },
+
+    plotOptions: {
+      series: {
+        animation: false,
+        dataLabels: {
+          ...R.prop('dataLabels', formatters),
+        },
+      },
+      scatter: {
+        tooltip: { pointFormat: '{point.name}: {point.y}' },
+      },
+    },
+
+    tooltip: {
+      ...R.prop('tooltip', formatters),
+      outside: tooltipOutside,
+    },
+
+    series,
+
+    exporting: {
+      enabled: false,
+      sourceWidth: exportWidth,
+      sourceHeight: exportHeight,
+      filename: createExportFileName(),
+      ...(isForExport
+        ? {}
+        : {
+            csv: {
+              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+            },
+          }),
+    },
+  };
+};
+
+const createOptionsForRadarChart = ({
+  data,
+  formatters,
+  title,
+  subtitle,
+  colorPalette,
+  highlight,
+  baseline,
+  highlightColors,
+  hideLegend,
+  hideXAxisLabels = false,
+  hideYAxisLabels = false,
+  fullscreenClose = null,
+  tooltipOutside = false,
+  csvExportcolumnHeaderFormatter = null,
+  isFullScreen = false,
+  height,
+  isSmall = false,
+  isForExport = false,
+  exportWidth = 600,
+  exportHeight = 400,
+}) => {
+  const series = mapWithIndex((s, xIdx) => {
+    const highlightOrBaselineColor = getBaselineOrHighlightColor(
+      s,
+      highlight,
+      baseline,
+      highlightColors,
+    );
+    const color =
+      highlightOrBaselineColor || getListItemAtTurningIndex(xIdx, colorPalette);
+
+    const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
+
+    return {
+      name: s.label,
+      data: R.map((d) => createDatapoint(d), s.data),
+      type: 'line',
+      lineWidth: 2.5,
+      marker: {
+        symbol: 'circle',
+        radius: 3,
+        lineWidth: 2,
+      },
+      states: {
+        hover: {
+          lineWidth: 2.5,
+        },
+      },
+      color,
+      showInLegend: true,
+      dataLabels: {
+        color: dataLabelColor,
+        textShadow:
+          '0px -1px 3px white, 1px 0px 3px white, 0px 1px 3px white, -1px 0px 3px white, -1px -1px 3px white, 1px -1px 3px white, 1px 1px 3px white, -1px 1px 3px white',
+        textOutline: 'none',
+      },
+      ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
+    };
+  }, data.series);
+
+  return {
+    chart: {
+      polar: true,
+      type: 'line',
+      style: {
+        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
+      },
+      height,
+      animation: false,
+      margin: hideLegend ? 40 : undefined,
+      marginBottom: !hideLegend && isSmall ? 5 : undefined,
+      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      events: { fullscreenClose },
+    },
+
+    colors: colorPalette,
+
+    title: {
+      text: title,
+      align: 'left',
+      margin: 20,
+      style: {
+        color: '#101d40',
+        fontWeight: 'bold',
+        fontSize: '18px',
+      },
+    },
+    subtitle: {
+      text: subtitle,
+      align: 'left',
+      style: {
+        color: '#586179',
+        fontSize: '17px',
+      },
+    },
+
+    credits: {
+      enabled: false,
+    },
+
+    pane: {
+      startAngle: 0,
+      endAngle: 360,
+      size: isSmall ? '70%' : '85%',
+    },
+
+    xAxis: {
+      categories: R.map(R.prop('label'), data.categories),
+      labels: {
+        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        enabled: !hideXAxisLabels,
+      },
+      gridLineColor: '#c2cbd6',
+      lineColor: 'transparent',
+    },
+
+    yAxis: {
+      title: {
+        enabled: false,
+      },
+      gridLineColor: '#c2cbd6',
+      lineColor: '#c2cbd6',
+      labels: {
+        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        enabled: !hideYAxisLabels,
+      },
+    },
+
+    legend: {
+      enabled: !hideLegend,
+      itemDistance: 10,
+      itemStyle: {
+        fontWeight: 'normal',
+        color: '#586179',
+        fontSize: isSmall ? '13px' : '16px',
+      },
+      align: 'left',
+      symbolWidth: 18,
+      x: -7,
+      verticalAlign: 'top',
+      margin: isSmall ? 16 : 24,
+    },
+
+    plotOptions: {
+      series: {
+        animation: false,
+        pointPadding: 0,
+        groupPadding: 0,
+        events: {
+          mouseOver: (e) => {
+            e.target.data.forEach((p) => {
+              p.update(
+                {
+                  dataLabels: {
+                    enabled: true,
+                    ...R.prop('dataLabels', formatters),
+                  },
+                },
+                false,
+                false,
+                false,
+              );
+            });
+            e.target.chart.redraw();
+          },
+          mouseOut: (e) => {
+            e.target.data.forEach((p) => {
+              p.update(
+                {
+                  dataLabels: {
+                    enabled: false,
+                  },
+                },
+                false,
+                false,
+                false,
+              );
+            });
+            e.target.chart.redraw();
+          },
+        },
+      },
+    },
+
+    tooltip: {
+      ...R.prop('tooltip', formatters),
+      outside: tooltipOutside,
+    },
+
+    series,
+
+    exporting: {
+      enabled: false,
+      sourceWidth: exportWidth,
+      sourceHeight: exportHeight,
+      filename: createExportFileName(),
+      ...(isForExport
+        ? {}
+        : {
+            csv: {
+              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+            },
+          }),
+    },
+  };
+};
+
+const createOptionsForPieChart = ({
+  data,
+  formatters,
+  title,
+  subtitle,
+  colorPalette,
+  highlight,
+  baseline,
+  highlightColors,
+  hideLegend,
+  hideXAxisLabels,
+  fullscreenClose = null,
+  tooltipOutside = false,
+  csvExportcolumnHeaderFormatter = null,
+  isFullScreen = false,
+  height,
+  isSmall = false,
+  isForExport = false,
+  exportWidth = 600,
+  exportHeight = 400,
+}) => {
+  const series = R.map(
+    (s) => ({
+      name: s.label,
+      data: mapWithIndex((d, xIdx) => {
+        const category = R.nth(xIdx, data.categories);
+
+        const color =
+          getBaselineOrHighlightColor(
+            category,
+            highlight,
+            baseline,
+            highlightColors,
+          ) || getListItemAtTurningIndex(xIdx, colorPalette);
+
+        const dataPoint = createDatapoint(d);
+
+        return { name: category.label, ...dataPoint, color };
+      }, s.data),
+    }),
+    R.isEmpty(data.series) ? [] : [R.head(data.series)],
+  );
+
+  return {
+    chart: {
+      type: 'pie',
+      style: {
+        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
+      },
+      height,
+      animation: false,
+      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      marginLeft: 10,
+      marginRight: 10,
+      events: { fullscreenClose },
+    },
+
+    title: {
+      text: title,
+      align: 'left',
+      margin: 20,
+      style: {
+        color: '#101d40',
+        fontWeight: 'bold',
+        fontSize: '18px',
+      },
+    },
+    subtitle: {
+      text: subtitle,
+      align: 'left',
+      style: {
+        color: '#586179',
+        fontSize: '17px',
+      },
+    },
+
+    credits: {
+      enabled: false,
+    },
+
+    legend: {
+      itemDistance: 10,
+      itemStyle: {
+        fontWeight: 'normal',
+        color: '#586179',
+        fontSize: isSmall ? '13px' : '16px',
+      },
+      align: 'left',
+      symbolWidth: 18,
+      x: -7,
+      verticalAlign: 'top',
+      margin: isSmall ? 16 : 24,
+    },
+
+    plotOptions: {
+      series: {
+        animation: false,
+        borderWidth: 0.3,
+        borderColor: '#ffffff',
+        borderRadius: 0,
+      },
+      pie: {
+        dataLabels: {
+          enabled: !hideXAxisLabels,
+          style: {
+            fontSize: isSmall ? '13px' : '16px',
+            color: '#586179',
+            fontWeight: 'normal',
+          },
+        },
+        showInLegend: !hideLegend,
+      },
+    },
+
+    tooltip: {
+      ...R.prop('tooltip', formatters),
+      outside: tooltipOutside,
+    },
+
+    series,
+
+    exporting: {
+      enabled: false,
+      sourceWidth: exportWidth,
+      sourceHeight: exportHeight,
+      filename: createExportFileName(),
+      ...(isForExport
+        ? {}
+        : {
+            csv: {
+              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+            },
+          }),
+    },
+  };
+};
+
+const getCreateOptionsFuncForChartType = async (chartType) => {
+  switch (chartType) {
+    case chartTypes.line:
+      return createOptionsForLineChart;
+
+    case chartTypes.bar:
+    case chartTypes.row:
+      return createOptionsForBarChart;
+
+    case chartTypes.stackedBar:
+    case chartTypes.stackedRow:
+    case chartTypes.stackedArea:
+      return createOptionsForStackedChart;
+
+    case chartTypes.map:
+      return (await mapsUtil).createOptionsForMapChart;
+
+    case chartTypes.symbol:
+    case chartTypes.scatter:
+      return createOptionsForScatterChart;
+
+    case chartTypes.radar:
+      return createOptionsForRadarChart;
+
+    case chartTypes.pie:
+      return createOptionsForPieChart;
+
+    default:
+      return () => ({});
+  }
+};
+
+export const createChartOptions = async ({
+  highlight,
+  baseline,
+  colorPalette,
+  smallerColorPalettes = [],
+  paletteStartingColor = null,
+  paletteStartingColorOverride = null,
+  mapColorValueSteps,
+  maxNumberOfDecimals,
+  noThousandsSeparator,
+  decimalPoint,
+  vars,
+  lang,
+  ...otherProps
+}) => {
+  const func = await getCreateOptionsFuncForChartType(otherProps.chartType);
+
+  const finalColorPalette = getFinalPalette(
+    colorPalette,
+    smallerColorPalettes,
+    R.length(
+      otherProps.chartType === chartTypes.pie
+        ? otherProps.data.categories
+        : otherProps.data.series || [],
+    ),
+    paletteStartingColor,
+    paletteStartingColorOverride,
+  );
+
+  const parsedHighlight = R.compose(
+    R.reject(R.isEmpty),
+    R.split('|'),
+  )(replaceVarsNameByVarsValue(highlight, vars));
+
+  const parsedBaseline = R.compose(
+    R.reject(R.isEmpty),
+    R.split('|'),
+  )(replaceVarsNameByVarsValue(baseline, vars));
+
+  const formatters = createFormatters({
+    chartType: otherProps.chartType,
+    mapColorValueSteps,
+    maxNumberOfDecimals,
+    noThousandsSeparator,
+    codeLabelMapping: otherProps.data.codeLabelMapping,
+    decimalPoint,
+    areCategoriesNumbers: otherProps.data.areCategoriesNumbers,
+    areCategoriesDates: otherProps.data.areCategoriesDates,
+    categoriesDateFomat: otherProps.data.categoriesDateFomat,
+    lang,
+  });
+
+  return func({
+    ...otherProps,
+    colorPalette: finalColorPalette,
+    highlight: parsedHighlight,
+    baseline: parsedBaseline,
+    formatters,
+  });
+};

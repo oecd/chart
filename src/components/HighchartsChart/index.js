@@ -24,12 +24,6 @@ import {
   sortByOptions,
   sortOrderOptions,
 } from '../../constants/chart';
-import Radar from './Radar';
-import Line from './Line';
-import Bar from './Bar';
-import Stacked from './Stacked';
-import Scatter from './Scatter';
-import Pie from './Pie';
 import NullComponent from '../NullComponent';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import {
@@ -46,16 +40,17 @@ import {
 import Spinner from '../Spinner';
 import {
   replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax,
-  replaceVarsNameByVarsValue,
   doesStringContainVar,
+  deepMergeUserOptionsWithDefaultOptions,
+  createChartOptions,
 } from '../../utils/chartUtil';
-import { createFormatters } from '../../utils/highchartsUtil';
 import CenteredContainer from '../CenteredContainer';
 import { fetchJson } from '../../utils/fetchUtil';
-import { getFinalPalette } from '../../utils/configUtil';
 import Header from './Header';
 import useIsFontLoaded from '../../hook/useIsFontLoaded';
 import { trackChartError } from '../../utils/trackingUtil';
+import GenericChart from './GenericChart';
+import ScatterChart from './ScatterChart';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -63,24 +58,20 @@ const MapChart = lazy(() => import('./MapChart'));
 const minChartHeightForFooterDisplay = 280;
 
 const chartByType = {
-  [chartTypes.line]: { component: Line, props: {} },
-  [chartTypes.bar]: { component: Bar, props: {} },
-  [chartTypes.row]: { component: Bar, props: { horizontal: true } },
-  [chartTypes.stackedBar]: { component: Stacked, props: {} },
-  [chartTypes.stackedRow]: { component: Stacked, props: { horizontal: true } },
-  [chartTypes.stackedArea]: { component: Stacked, props: { area: true } },
-  [chartTypes.map]: { component: MapChart, props: {} },
-  [chartTypes.symbol]: { component: Scatter, props: { symbolLayout: true } },
-  [chartTypes.scatter]: { component: Scatter, props: {} },
-  [chartTypes.radar]: { component: Radar, props: {} },
-  [chartTypes.pie]: { component: Pie, props: {} },
+  [chartTypes.line]: GenericChart,
+  [chartTypes.bar]: GenericChart,
+  [chartTypes.row]: GenericChart,
+  [chartTypes.stackedBar]: GenericChart,
+  [chartTypes.stackedRow]: GenericChart,
+  [chartTypes.stackedArea]: GenericChart,
+  [chartTypes.map]: MapChart,
+  [chartTypes.symbol]: ScatterChart,
+  [chartTypes.scatter]: ScatterChart,
+  [chartTypes.radar]: GenericChart,
+  [chartTypes.pie]: GenericChart,
 };
 
-const getChartForType = R.propOr(
-  { component: NullComponent, props: {} },
-  R.__,
-  chartByType,
-);
+const getChartForType = R.propOr(NullComponent, R.__, chartByType);
 
 const sendDebugInfo = ({ type, data }) => {
   document.dispatchEvent(
@@ -119,6 +110,10 @@ const HighchartsChart = ({
   getControlsWithAvailability,
   highlight = '',
   baseline = '',
+  hideLegend = false,
+  hideXAxisLabels = false,
+  hideYAxisLabels = false,
+  mapColorValueSteps = [],
   colorPalette,
   smallerColorPalettes = [],
   paletteStartingColor = null,
@@ -145,11 +140,10 @@ const HighchartsChart = ({
   hideToolbox = false,
   tooltipContainerId,
   isSmall,
+  optionsOverride = {},
   debug = false,
-  ...otherProps
 }) => {
-  const chartForType = getChartForType(chartType);
-  const ChartForTypeComponent = chartForType.component;
+  const ChartForType = getChartForType(chartType);
 
   const lastRequestedDataKey = useRef(null);
   const [sdmxJson, setSdmxJson] = useState(null);
@@ -766,71 +760,27 @@ const HighchartsChart = ({
     displayFooterAsTooltip,
   ]);
 
-  const parsedHighlight = useMemo(
-    () =>
-      R.compose(
-        R.reject(R.isEmpty),
-        R.split('|'),
-      )(replaceVarsNameByVarsValue(highlight, vars)),
-    [highlight, vars],
-  );
-
-  const parsedBaseline = useMemo(
-    () =>
-      R.compose(
-        R.reject(R.isEmpty),
-        R.split('|'),
-      )(replaceVarsNameByVarsValue(baseline, vars)),
-    [baseline, vars],
-  );
-
-  const { mapColorValueSteps } = otherProps;
-
-  const formatters = useMemo(
-    () =>
-      createFormatters({
-        chartType,
-        mapColorValueSteps,
-        maxNumberOfDecimals,
-        noThousandsSeparator,
-        codeLabelMapping: parsedData?.codeLabelMapping,
-        decimalPoint,
-        areCategoriesNumbers: parsedData?.areCategoriesNumbers,
-        areCategoriesDates: parsedData?.areCategoriesDates,
-        categoriesDateFomat: parsedData?.categoriesDateFomat,
-        lang,
-      }),
-    [
-      chartType,
-      mapColorValueSteps,
-      maxNumberOfDecimals,
-      noThousandsSeparator,
-      parsedData?.codeLabelMapping,
-      decimalPoint,
-      parsedData?.areCategoriesNumbers,
-      parsedData?.areCategoriesDates,
-      parsedData?.categoriesDateFomat,
-      lang,
-    ],
-  );
-
   const chartRef = useRef(null);
 
   const numberOfDataPoint =
     R.length(parsedData?.categories || []) * R.length(parsedData?.series || []);
+
+  const [defaultOptions, setDefaultOptions] = useState({});
 
   const chartCanBedisplayed =
     !isFetching &&
     R.isNil(noDataMessage) &&
     R.isNil(errorMessage) &&
     !R.isNil(parsedData) &&
-    numberOfDataPoint <= maxSupprortedNumberOfDataPoint;
+    numberOfDataPoint <= maxSupprortedNumberOfDataPoint &&
+    !R.isEmpty(defaultOptions);
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [screenHeight, setScreenHeight] = useState(0);
   useEffect(() => {
     setScreenHeight(window.screen.height);
   }, []);
+
   const openChartFullScreen = () => {
     setIsFullScreen(true);
     chartRef.current?.chart.fullscreen.open();
@@ -843,7 +793,7 @@ const HighchartsChart = ({
     !R.isNil(parsedNoteAndSource) &&
     (footerHeight === 0 || displayFooterAsTooltip);
 
-  const csvExportcolumnHeaderFormatter = useMemo(() => {
+  const csvExportColumnHeaderFormatter = useMemo(() => {
     if (isNilOrEmpty(parsedTitle) && isNilOrEmpty(parsedSubtitle)) {
       return () => false;
     }
@@ -864,30 +814,6 @@ const HighchartsChart = ({
     };
   }, [parsedTitle, parsedSubtitle, chartType]);
 
-  const finalColorPalette = useMemo(
-    () =>
-      getFinalPalette(
-        colorPalette,
-        smallerColorPalettes,
-        R.length(
-          chartType === chartTypes.pie
-            ? parsedData?.categories
-            : parsedData?.series || [],
-        ),
-        paletteStartingColor,
-        paletteStartingColorOverride,
-      ),
-    [
-      colorPalette,
-      smallerColorPalettes,
-      parsedData?.series,
-      parsedData?.categories,
-      chartType,
-      paletteStartingColor,
-      paletteStartingColorOverride,
-    ],
-  );
-
   const actionButtonClick = useCallback(() => {
     document.dispatchEvent(
       new CustomEvent('cbChartActionButtonClicked', {
@@ -899,6 +825,79 @@ const HighchartsChart = ({
   }, [id]);
 
   const tooltipOutside = !(isFullScreen || !isNilOrEmpty(tooltipContainerId));
+
+  useEffect(() => {
+    if (!parsedData) {
+      setDefaultOptions({});
+    } else {
+      const getOptions = async () => {
+        setDefaultOptions(
+          await createChartOptions({
+            chartType,
+            data: parsedData,
+            vars,
+            title: isFullScreen ? parsedTitle : '',
+            subtitle: isFullScreen ? parsedSubtitle : '',
+            colorPalette,
+            smallerColorPalettes,
+            paletteStartingColor,
+            paletteStartingColorOverride,
+            highlight,
+            baseline,
+            highlightColors,
+            mapColorValueSteps,
+            maxNumberOfDecimals,
+            noThousandsSeparator,
+            decimalPoint,
+            height: isFullScreen ? screenHeight : chartHeight,
+            isSmall,
+            hideLegend,
+            hideXAxisLabels,
+            hideYAxisLabels,
+            fullscreenClose,
+            tooltipOutside,
+            csvExportcolumnHeaderFormatter: csvExportColumnHeaderFormatter,
+            isFullScreen,
+          }),
+        );
+      };
+
+      getOptions();
+    }
+  }, [
+    baseline,
+    chartHeight,
+    chartType,
+    colorPalette,
+    csvExportColumnHeaderFormatter,
+    decimalPoint,
+    fullscreenClose,
+    hideLegend,
+    hideXAxisLabels,
+    hideYAxisLabels,
+    highlight,
+    highlightColors,
+    isFullScreen,
+    isSmall,
+    mapColorValueSteps,
+    maxNumberOfDecimals,
+    noThousandsSeparator,
+    paletteStartingColor,
+    paletteStartingColorOverride,
+    parsedData,
+    parsedSubtitle,
+    parsedTitle,
+    screenHeight,
+    smallerColorPalettes,
+    tooltipOutside,
+    vars,
+  ]);
+
+  const mergedOptions = useMemo(
+    () =>
+      deepMergeUserOptionsWithDefaultOptions(defaultOptions, optionsOverride),
+    [defaultOptions, optionsOverride],
+  );
 
   return (
     <div>
@@ -920,6 +919,7 @@ const HighchartsChart = ({
           hideToolbox
         ) && (
           <Header
+            chartType={chartType}
             title={parsedTitle}
             subtitle={parsedSubtitle}
             definition={parsedDefinition}
@@ -941,7 +941,6 @@ const HighchartsChart = ({
             isSmall={isSmall}
             isFontLoaded={isFontLoaded}
             chartRef={chartRef}
-            debug={debug}
           />
         )}
       </div>
@@ -962,25 +961,10 @@ const HighchartsChart = ({
             </CenteredContainer>
           }
         >
-          <ChartForTypeComponent
-            {...chartForType.props}
+          <ChartForType
             ref={chartRef}
-            width={width}
-            height={isFullScreen ? screenHeight : chartHeight}
-            title={isFullScreen ? parsedTitle : ''}
-            subtitle={isFullScreen ? parsedSubtitle : ''}
-            data={parsedData}
-            highlight={parsedHighlight}
-            baseline={parsedBaseline}
-            colorPalette={finalColorPalette}
-            highlightColors={highlightColors}
-            formatters={formatters}
-            fullscreenClose={fullscreenClose}
+            options={mergedOptions}
             isFullScreen={isFullScreen}
-            tooltipOutside={tooltipOutside}
-            csvExportcolumnHeaderFormatter={csvExportcolumnHeaderFormatter}
-            isSmall={isSmall}
-            {...otherProps}
           />
         </Suspense>
       )}
@@ -1037,6 +1021,10 @@ HighchartsChart.propTypes = {
   getControlsWithAvailability: PropTypes.func.isRequired,
   highlight: PropTypes.string,
   baseline: PropTypes.string,
+  hideLegend: PropTypes.bool,
+  hideXAxisLabels: PropTypes.bool,
+  hideYAxisLabels: PropTypes.bool,
+  mapColorValueSteps: PropTypes.array,
   colorPalette: PropTypes.array.isRequired,
   smallerColorPalettes: PropTypes.array,
   paletteStartingColor: PropTypes.string,
@@ -1064,6 +1052,7 @@ HighchartsChart.propTypes = {
   tooltipContainerId: PropTypes.string,
   isSmall: PropTypes.bool.isRequired,
   debug: PropTypes.bool,
+  optionsOverride: PropTypes.object,
 };
 
 export default memo(HighchartsChart);

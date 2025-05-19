@@ -133,3 +133,17 @@ export const errorMessages = {
 
 export const minChartWidthForControlsDisplayOnRightSide = 850;
 export const minChartHeightForControlsDisplayBelow = 280;
+
+export const chartSpacing = 25;
+
+export const baselineColor = '#48A7FF';
+
+export const baselineColorShades = [
+  ['#0A4095', '#0E51B5', '#1162D4', '#2379E2', '#3690F1', '#48A7FF', '#73BCFF'],
+  ['#0A4095', '#0E51B5', '#1162D4', '#3690F1', '#48A7FF', '#73BCFF'],
+  ['#0A4095', '#0E51B5', '#1162D4', '#48A7FF', '#73BCFF'],
+  ['#0A4095', '#0E51B5', '#1162D4', '#48A7FF'],
+  ['#0A4095', '#1162D4', '#48A7FF'],
+  ['#0E51B5', '#48A7FF'],
+  [baselineColor],
+];

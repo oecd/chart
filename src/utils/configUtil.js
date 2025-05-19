@@ -16,6 +16,17 @@ export const possibleVariables = [
 export const latestMinVariable = 'latest_min';
 export const latestMaxVariable = 'latest_max';
 
+export const isCastableToNumber = R.ifElse(
+  isNilOrEmpty,
+  R.always(false),
+  R.compose(R.complement(Number.isNaN), Number),
+);
+
+export const roundNumber = (number, maxNumberOfDecimal) =>
+  isCastableToNumber(number)
+    ? Number(Number(number).toFixed(maxNumberOfDecimal))
+    : number;
+
 export const codeOrLabelEquals = (obj) =>
   R.compose(
     R.either(R.equals(R.toUpper(obj.code)), R.equals(R.toUpper(obj.label))),

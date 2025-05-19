@@ -1,9 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import PropTypes from 'prop-types';
 
 import * as R from 'ramda';
 
-import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import CsvIcon from '../Icons/CsvIcon';
 import DotsIcon from '../Icons/DotsIcon';
 import PngIcon from '../Icons/PngIcon';
@@ -12,6 +11,9 @@ import ExpandIcon from '../Icons/ExpandIcon';
 import InfoIcon from '../Icons/InfoIcon';
 import ActionIcon from '../Icons/ActionIcon';
 import { MenuContext, Menu, MenuItem, PopoverContent } from '../floating/Menu';
+import { postJson } from '../../utils/fetchUtil';
+import { apiUrl } from '../../constants/chart';
+import { createExportFileName } from '../../utils/chartUtilCommon';
 
 const RootTrigger = () => {
   const { isOpen } = useContext(MenuContext);
@@ -31,6 +33,7 @@ const RootTrigger = () => {
 
 const Toolbox = ({
   chartRef,
+  chartType,
   parsedTitle,
   parsedSubtitle,
   onDownloadData = null,
@@ -47,8 +50,36 @@ const Toolbox = ({
   onActionButtonClick,
   isSmall,
   exportDisabled = false,
-  debug = false,
 }) => {
+  const exportImage = useCallback(
+    async (chartOptions, format) => {
+      const options = R.compose(
+        R.assocPath(['subtitle', 'text'], parsedSubtitle),
+        R.assocPath(['title', 'text'], parsedTitle),
+      )(chartOptions);
+
+      try {
+        const { exportId } = await postJson(`${apiUrl}/api/public/export`, {
+          chartOptions: options,
+          format,
+          fileName: createExportFileName(),
+          chartType,
+        });
+
+        console.log(options);
+
+        window.location.href = `${apiUrl}/api/public/export/${exportId}`;
+
+        if (onDownloadData) {
+          onDownloadData();
+        }
+      } catch {
+        // too bad, the export has failed but there is no elegant way to notify the user
+      }
+    },
+    [onDownloadData, parsedSubtitle, parsedTitle],
+  );
+
   const menuItems = R.compose(
     R.when(
       () => (onExpandChart || !isInIframe) && !hideExpand,
@@ -61,30 +92,6 @@ const Toolbox = ({
             onExpandChart();
           } else {
             openChartFullScreen();
-          }
-        },
-      }),
-    ),
-    R.when(
-      () => debug,
-      R.insert(1, {
-        label: 'PNG',
-        content: <PngIcon />,
-        disabled: exportDisabled,
-        onSelect: () => {
-          chartRef.current?.chart.exportChartLocal(undefined, {
-            title: {
-              text: parsedTitle,
-            },
-            subtitle: {
-              text: parsedSubtitle,
-            },
-            ...(!isNilOrEmpty(parsedTitle) || !isNilOrEmpty(parsedSubtitle)
-              ? { chart: { marginTop: undefined } }
-              : {}),
-          });
-          if (onDownloadData) {
-            onDownloadData();
           }
         },
       }),
@@ -104,27 +111,19 @@ const Toolbox = ({
       },
     },
     {
+      label: 'PNG',
+      content: <PngIcon />,
+      disabled: exportDisabled,
+      onSelect: async () => {
+        exportImage(chartRef.current?.chart.options, 'png');
+      },
+    },
+    {
       label: 'SVG',
       content: <SvgIcon />,
       disabled: exportDisabled,
       onSelect: () => {
-        chartRef.current?.chart.exportChartLocal(
-          { type: 'image/svg+xml' },
-          {
-            title: {
-              text: parsedTitle,
-            },
-            subtitle: {
-              text: parsedSubtitle,
-            },
-            ...(!isNilOrEmpty(parsedTitle) || !isNilOrEmpty(parsedSubtitle)
-              ? { chart: { marginTop: undefined } }
-              : {}),
-          },
-        );
-        if (onDownloadData) {
-          onDownloadData();
-        }
+        exportImage(chartRef.current?.chart.options, 'svg');
       },
     },
   ]);
@@ -231,6 +230,7 @@ const Toolbox = ({
 
 Toolbox.propTypes = {
   chartRef: PropTypes.object.isRequired,
+  chartType: PropTypes.string.isRequired,
   parsedTitle: PropTypes.string.isRequired,
   parsedSubtitle: PropTypes.string.isRequired,
   onDownloadData: PropTypes.func,
@@ -247,7 +247,6 @@ Toolbox.propTypes = {
   onActionButtonClick: PropTypes.func.isRequired,
   isSmall: PropTypes.bool.isRequired,
   exportDisabled: PropTypes.bool,
-  debug: PropTypes.bool,
 };
 
 export default Toolbox;

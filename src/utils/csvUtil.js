@@ -8,11 +8,12 @@ import {
   sortByOptions,
   sortOrderOptions,
 } from '../constants/chart';
+import { tryCastAllToDatesAndDetectFormat } from './chartUtil';
 import {
-  tryCastAllToDatesAndDetectFormat,
+  codeOrLabelEquals,
+  possibleVariables,
   isCastableToNumber,
-} from './chartUtil';
-import { codeOrLabelEquals, possibleVariables } from './configUtil';
+} from './configUtil';
 import { createCodeLabelMap } from './generalUtil';
 
 import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
