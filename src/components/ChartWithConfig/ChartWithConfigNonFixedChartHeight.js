@@ -95,6 +95,7 @@ const ChartWithConfigNonFixedChartHeight = ({
           flex: '2',
           position: 'relative',
           height: '100%',
+          maxWidth: '100%',
         }}
       >
         <div

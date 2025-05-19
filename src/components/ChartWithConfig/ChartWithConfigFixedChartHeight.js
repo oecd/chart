@@ -71,6 +71,7 @@ const ChartWithConfigFixedChartHeight = ({
             flex: '2',
             position: 'relative',
             height,
+            maxWidth: '100%',
           }}
         >
           <div
