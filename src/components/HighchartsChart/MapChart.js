@@ -13,6 +13,7 @@ import 'highcharts/modules/accessibility';
 import 'highcharts/modules/annotations';
 import 'highcharts/modules/map';
 import 'highcharts/modules/export-data';
+import 'highcharts/modules/exporting';
 import HighchartsReact from 'highcharts-react-official';
 import { debounce } from 'throttle-debounce';
 import * as R from 'ramda';

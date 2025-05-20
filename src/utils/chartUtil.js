@@ -1106,91 +1106,43 @@ const createOptionsForScatterChart = ({
       // redraw the lines)
       forEachWithIndex((l) => l?.destroy(), minMaxLines);
 
-      console.log('------------');
+      const categoriesMinMax = R.compose(
+        (seriesData) =>
+          R.compose(
+            R.map((categoryData) => {
+              const validData = R.reject(R.isNil, categoryData);
+              return R.isEmpty(validData)
+                ? []
+                : [Math.min(...validData), Math.max(...validData)];
+            }),
+            R.map((idx) => R.map(R.nth(idx), seriesData)),
+          )(R.times(R.identity, R.length(data.categories))),
 
-      const seriesData2 = chart.series
-        .filter((s) => s.visible === true)
-        .map((s) => s.data.map((d) => d.y));
+        R.map(R.compose(R.map(R.prop('y')), R.prop('data'))),
+      )(R.filter(R.propEq(true, 'visible'), chart.series));
 
-      const categoriesMinMax2 = [...Array(seriesData2[0].length).keys()]
-        .map((i) => seriesData2.map((sd) => sd[i]))
-        .map((categoryData) => {
-          const validData = categoryData.filter((d) => d !== null);
-          return validData.length === 0
-            ? []
-            : [Math.min(...validData), Math.max(...validData)];
-        });
-
-      categoriesMinMax2.map((c, i) => {
-        if (categoriesMinMax2[i].length === 0) {
+      minMaxLines = mapWithIndex((category, idx) => {
+        if (R.isEmpty(categoriesMinMax[idx])) {
           return null;
         }
 
-        const { x } = chart.series[0].data[i];
+        const x = R.path([0, 'data', idx, 'x'], chart.series);
         const ax = chart.xAxis[0]?.toPixels(x);
-        const ay = chart.yAxis[0]?.toPixels(categoriesMinMax2[i][0]);
+        const ay = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][0]);
         const bx = ax;
-        const by = chart.yAxis[0]?.toPixels(categoriesMinMax2[i][1]);
+        const by = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][1]);
+
+        const lineColor = chart.series[0].color || firstPaletteColor;
 
         return chart.renderer
           .path(['M', ax, ay, 'L', bx, by])
           .attr({
-            stroke: addColorAlpha('#264042', -0.6),
+            stroke: addColorAlpha(lineColor, -0.6),
             'stroke-width': 1,
             zIndex: 1,
           })
           .add();
-      });
-      //console.log(seriesData2);
-      console.log(categoriesMinMax2);
-
-      // const categoriesMinMax = R.compose(
-      //   (seriesData) =>
-      //     R.compose(
-      //       R.map((categoryData) => {
-      //         const validData = R.reject(R.isNil, categoryData);
-      //         return R.isEmpty(validData)
-      //           ? []
-      //           : [Math.min(...validData), Math.max(...validData)];
-      //       }),
-      //       R.map((idx) => R.map(R.nth(idx), seriesData)),
-      //     )(R.times(R.identity, R.length(data.categories))),
-
-      //   R.map(R.compose(R.map(R.prop('y')), R.prop('data'))),
-      // )(R.filter(R.propEq(true, 'visible'), chart.series));
-
-      // console.log(categoriesMinMax);
-
-      // minMaxLines = mapWithIndex((category, idx) => {
-      //   if (R.isEmpty(categoriesMinMax[idx])) {
-      //     return null;
-      //   }
-
-      //   const x = R.path([0, 'data', idx, 'x'], chart.series);
-      //   const ax = chart.xAxis[0]?.toPixels(x);
-      //   const ay = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][0]);
-      //   const bx = ax;
-      //   const by = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][1]);
-
-      //   const lineColor =
-      //     getBaselineOrHighlightColor(
-      //       category,
-      //       highlight,
-      //       baseline,
-      //       highlightColors,
-      //     ) || firstPaletteColor;
-
-      //   console.log(lineColor);
-
-      //   return chart.renderer
-      //     .path(['M', ax, ay, 'L', bx, by])
-      //     .attr({
-      //       stroke: addColorAlpha(lineColor, -0.6),
-      //       'stroke-width': 1,
-      //       zIndex: 1,
-      //     })
-      //     .add();
-      // }, data.categories);
+      }, data.categories);
     }
   };
 

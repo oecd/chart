@@ -54,6 +54,18 @@ const Toolbox = ({
   const exportImage = useCallback(
     async (chartOptions, format) => {
       const options = R.compose(
+        R.omit([
+          'lang',
+          'global',
+          'time',
+          'loading',
+          'scrollbar',
+          'accessibility',
+          'navigator',
+          'navigation',
+          'defs',
+          'colorAxis',
+        ]),
         R.assocPath(['subtitle', 'text'], parsedSubtitle),
         R.assocPath(['title', 'text'], parsedTitle),
       )(chartOptions);
@@ -66,8 +78,6 @@ const Toolbox = ({
           chartType,
         });
 
-        console.log(options);
-
         window.location.href = `${apiUrl}/api/public/export/${exportId}`;
 
         if (onDownloadData) {
@@ -77,7 +87,7 @@ const Toolbox = ({
         // too bad, the export has failed but there is no elegant way to notify the user
       }
     },
-    [onDownloadData, parsedSubtitle, parsedTitle],
+    [chartType, onDownloadData, parsedSubtitle, parsedTitle],
   );
 
   const menuItems = R.compose(

@@ -5,6 +5,7 @@ import 'highcharts/modules/accessibility';
 import 'highcharts/modules/broken-axis';
 import 'highcharts/modules/annotations';
 import 'highcharts/modules/export-data';
+import 'highcharts/modules/exporting';
 import HighchartsReact from 'highcharts-react-official';
 
 if (typeof Highcharts === 'object') {
