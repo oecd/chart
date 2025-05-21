@@ -113,9 +113,9 @@ const HighchartsChart = ({
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
-  mapColorValueSteps = [],
+  mapColorValueSteps = null,
   colorPalette,
-  smallerColorPalettes = [],
+  smallerColorPalettes = null,
   paletteStartingColor = null,
   paletteStartingColorOverride = null,
   highlightColors,
@@ -140,7 +140,7 @@ const HighchartsChart = ({
   hideToolbox = false,
   tooltipContainerId,
   isSmall,
-  optionsOverride = {},
+  optionsOverride = null,
   debug = false,
 }) => {
   const ChartForType = getChartForType(chartType);
@@ -765,7 +765,7 @@ const HighchartsChart = ({
   const numberOfDataPoint =
     R.length(parsedData?.categories || []) * R.length(parsedData?.series || []);
 
-  const [defaultOptions, setDefaultOptions] = useState({});
+  const [mergedOptions, setMergedOptions] = useState({});
 
   const chartCanBedisplayed =
     !isFetching &&
@@ -773,7 +773,7 @@ const HighchartsChart = ({
     R.isNil(errorMessage) &&
     !R.isNil(parsedData) &&
     numberOfDataPoint <= maxSupprortedNumberOfDataPoint &&
-    !R.isEmpty(defaultOptions);
+    !R.isEmpty(mergedOptions);
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [screenHeight, setScreenHeight] = useState(0);
@@ -828,40 +828,44 @@ const HighchartsChart = ({
 
   useEffect(() => {
     if (!parsedData) {
-      setDefaultOptions({});
+      setMergedOptions({});
     } else {
       const getOptions = async () => {
-        setDefaultOptions(
-          await createChartOptions({
-            chartType,
-            data: parsedData,
-            vars,
-            title: isFullScreen ? parsedTitle : '',
-            subtitle: isFullScreen ? parsedSubtitle : '',
-            colorPalette,
-            smallerColorPalettes,
-            paletteStartingColor,
-            paletteStartingColorOverride,
-            highlight,
-            baseline,
-            highlightColors,
-            mapColorValueSteps,
-            maxNumberOfDecimals,
-            noThousandsSeparator,
-            decimalPoint,
-            height: isFullScreen ? screenHeight : chartHeight,
-            isSmall,
-            hideLegend,
-            hideXAxisLabels,
-            hideYAxisLabels,
-            fullscreenClose,
-            tooltipOutside,
-            csvExportcolumnHeaderFormatter: csvExportColumnHeaderFormatter,
-            isFullScreen,
-          }),
+        const defaultOptions = await createChartOptions({
+          chartType,
+          data: parsedData,
+          vars,
+          title: isFullScreen ? parsedTitle : '',
+          subtitle: isFullScreen ? parsedSubtitle : '',
+          colorPalette,
+          smallerColorPalettes,
+          paletteStartingColor,
+          paletteStartingColorOverride,
+          highlight,
+          baseline,
+          highlightColors,
+          mapColorValueSteps,
+          maxNumberOfDecimals,
+          noThousandsSeparator,
+          decimalPoint,
+          height: isFullScreen ? screenHeight : chartHeight,
+          isSmall,
+          hideLegend,
+          hideXAxisLabels,
+          hideYAxisLabels,
+          fullscreenClose,
+          tooltipOutside,
+          csvExportcolumnHeaderFormatter: csvExportColumnHeaderFormatter,
+          isFullScreen,
+        });
+
+        setMergedOptions(
+          deepMergeUserOptionsWithDefaultOptions(
+            defaultOptions,
+            optionsOverride || {},
+          ),
         );
       };
-
       getOptions();
     }
   }, [
@@ -891,13 +895,8 @@ const HighchartsChart = ({
     smallerColorPalettes,
     tooltipOutside,
     vars,
+    optionsOverride,
   ]);
-
-  const mergedOptions = useMemo(
-    () =>
-      deepMergeUserOptionsWithDefaultOptions(defaultOptions, optionsOverride),
-    [defaultOptions, optionsOverride],
-  );
 
   return (
     <div>
