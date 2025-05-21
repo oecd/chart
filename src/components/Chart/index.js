@@ -5,8 +5,7 @@ import { LazyLoadComponent } from 'react-lazy-load-image-component';
 import * as R from 'ramda';
 
 import Component from './Component';
-import { possibleVariables } from '../../utils/configUtil';
-import { isCastableToNumber } from '../../utils/chartUtil';
+import { possibleVariables, isCastableToNumber } from '../../utils/configUtil';
 import CenteredContainer from '../CenteredContainer';
 import ChartErrorBoundary from '../ChartErrorBoundary';
 import { errorMessages } from '../../constants/chart';

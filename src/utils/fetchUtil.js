@@ -21,3 +21,18 @@ export const fetchJson = async (url, config = {}) => {
   const response = await fetch(url, config);
   return handleResponse(response);
 };
+
+export const postJson = async (url, json, config = {}) => {
+  const newConfig = {
+    ...config,
+    method: 'POST',
+    headers: {
+      ...config.headers,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(json),
+  };
+  const response = await fetch(url, newConfig);
+  return handleResponse(response);
+};

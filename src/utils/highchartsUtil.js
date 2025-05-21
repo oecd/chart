@@ -6,7 +6,7 @@ import {
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   decimalPointTypes,
 } from '../constants/chart';
-import { isCastableToNumber, roundNumber } from './chartUtil';
+import { isCastableToNumber, roundNumber } from './configUtil';
 import { isNilOrEmpty } from './ramdaUtil';
 import { frequencies } from './dateUtil';
 
