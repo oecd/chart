@@ -8,12 +8,12 @@ import React, {
   useRef,
 } from 'react';
 import PropTypes from 'prop-types';
-import Highcharts from 'highcharts';
-import 'highcharts/modules/accessibility';
-import 'highcharts/modules/annotations';
-import 'highcharts/modules/map';
-import 'highcharts/modules/export-data';
-import 'highcharts/modules/exporting';
+import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
+import 'highcharts/es-modules/masters/modules/accessibility.src';
+import 'highcharts/es-modules/masters/modules/annotations.src';
+import 'highcharts/es-modules/masters/modules/map.src';
+import 'highcharts/es-modules/masters/modules/exporting.src';
+import 'highcharts/es-modules/masters/modules/export-data.src';
 import HighchartsReact from 'highcharts-react-official';
 import { debounce } from 'throttle-debounce';
 import * as R from 'ramda';

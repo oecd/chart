@@ -1,4 +1,4 @@
-import Highcharts from 'highcharts';
+import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
 import * as R from 'ramda';
 
 import {

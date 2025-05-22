@@ -1,12 +1,12 @@
 import React, { forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
-import Highcharts from 'highcharts';
-import 'highcharts/highcharts-more';
-import 'highcharts/modules/accessibility';
-import 'highcharts/modules/broken-axis';
-import 'highcharts/modules/annotations';
-import 'highcharts/modules/export-data';
-import 'highcharts/modules/exporting';
+import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
+import 'highcharts/es-modules/masters/highcharts-more.src';
+import 'highcharts/es-modules/masters/modules/accessibility.src';
+import 'highcharts/es-modules/masters/modules/broken-axis.src';
+import 'highcharts/es-modules/masters/modules/annotations.src';
+import 'highcharts/es-modules/masters/modules/exporting.src';
+import 'highcharts/es-modules/masters/modules/export-data.src';
 import HighchartsReact from 'highcharts-react-official';
 
 const GenericChart = forwardRef(({ options, isFullScreen = false }, ref) => (
