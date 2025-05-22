@@ -1708,6 +1708,8 @@ export const createChartOptions = async ({
     colorPalette: finalColorPalette,
     highlight: parsedHighlight,
     baseline: parsedBaseline,
+    mapColorValueSteps,
+    maxNumberOfDecimals,
     formatters,
   });
 };
