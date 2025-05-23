@@ -54,6 +54,7 @@ const Toolbox = ({
   const exportImage = useCallback(
     async (chartOptions, format) => {
       const options = R.compose(
+        R.when((o) => !R.has('map', o.chart), R.omit(['colorAxis'])),
         R.assocPath(['subtitle', 'text'], parsedSubtitle),
         R.assocPath(['title', 'text'], parsedTitle),
       )(chartOptions);
