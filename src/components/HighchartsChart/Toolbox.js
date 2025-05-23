@@ -54,18 +54,6 @@ const Toolbox = ({
   const exportImage = useCallback(
     async (chartOptions, format) => {
       const options = R.compose(
-        R.omit([
-          'lang',
-          'global',
-          'time',
-          'loading',
-          'scrollbar',
-          'accessibility',
-          'navigator',
-          'navigation',
-          'defs',
-          'colorAxis',
-        ]),
         R.assocPath(['subtitle', 'text'], parsedSubtitle),
         R.assocPath(['title', 'text'], parsedTitle),
       )(chartOptions);
