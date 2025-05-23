@@ -148,4 +148,4 @@ export const baselineColorShades = [
   [baselineColor],
 ];
 
-export const defaultExportSize = { width: 800, height: 600 };
+export const defaultExportSize = { width: 1024, height: 768 };
