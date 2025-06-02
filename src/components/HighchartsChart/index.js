@@ -355,12 +355,12 @@ const HighchartsChart = ({
       if (isSdmxJsonEmpty(sdmxJson)) {
         setNoDataMessage(errorMessages.noData);
 
-        const codeLabelMapping = createCodeLabelMapping(
+        const codeLabelMapping = createCodeLabelMapping({
           csvCodeLabelMappingProjectLevel,
-          dotStatCodeLabelMapping,
+          codeLabelMappingChartLevel: dotStatCodeLabelMapping,
           dotStatStructure,
-          dotStatLang,
-        );
+          lang: dotStatLang,
+        });
 
         return {
           ...emptyData,

@@ -406,12 +406,12 @@ export const parseSdmxJson =
       ),
     )(series);
 
-    const codeLabelMapping = createCodeLabelMapping(
+    const codeLabelMapping = createCodeLabelMapping({
       csvCodeLabelMappingProjectLevel,
-      dotStatCodeLabelMapping,
+      codeLabelMappingChartLevel: dotStatCodeLabelMapping,
       dotStatStructure,
       lang,
-    );
+    });
 
     const yDimensionLabelByCode = createDimensionMemberLabelByCode(
       yDimension.values,

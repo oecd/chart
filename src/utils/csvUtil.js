@@ -200,16 +200,18 @@ export const pivotCSV =
     return { data, ...rest };
   };
 
-export const createCodeLabelMapping = (
+export const createCodeLabelMapping = ({
   csvCodeLabelMappingProjectLevel,
   codeLabelMappingChartLevel,
   dotStatStructure,
   lang,
-) => {
+  vars,
+}) => {
   if (
     isNilOrEmpty(csvCodeLabelMappingProjectLevel) &&
     isNilOrEmpty(codeLabelMappingChartLevel) &&
-    isNilOrEmpty(dotStatStructure?.dimensions)
+    isNilOrEmpty(dotStatStructure?.dimensions) &&
+    isNilOrEmpty(vars)
   ) {
     return {};
   }
@@ -231,6 +233,13 @@ export const createCodeLabelMapping = (
     R.reject(R.has('timeRange')),
   )(dotStatStructure?.dimensions || []);
 
+  const mappingVars = R.compose(
+    createCodeLabelMap,
+    R.map((v) => [v, v]),
+    R.reject(R.isEmpty),
+    R.values,
+  )(vars || {});
+
   const mappingProjectLevel = createCodeLabelMap(
     parseCSV(csvCodeLabelMappingProjectLevel),
   );
@@ -239,20 +248,20 @@ export const createCodeLabelMapping = (
   );
 
   return R.compose(
+    R.mergeRight(mappingVars),
     R.mergeRight(mappingDotStatMembers),
     R.mergeRight(mappingProjectLevel),
   )(mappingChartLevel);
 };
 
 const addParsingHelperData =
-  (csvCodeLabelMappingProjectLevel, csvCodeLabelMapping) =>
+  (csvCodeLabelMappingProjectLevel, csvCodeLabelMapping, vars) =>
   ({ data, ...rest }) => {
-    const codeLabelMapping = createCodeLabelMapping(
+    const codeLabelMapping = createCodeLabelMapping({
       csvCodeLabelMappingProjectLevel,
-      csvCodeLabelMapping,
-      null,
-      null,
-    );
+      codeLabelMappingChartLevel: csvCodeLabelMapping,
+      vars,
+    });
 
     const xDimensionLabelByCode = R.fromPairs(
       R.map(
@@ -773,7 +782,11 @@ export const createDataFromCSV = ({
       forceXAxisToBeTreatedAsCategories,
     ),
     transformValues,
-    addParsingHelperData(csvCodeLabelMappingProjectLevel, csvCodeLabelMapping),
+    addParsingHelperData(
+      csvCodeLabelMappingProjectLevel,
+      csvCodeLabelMapping,
+      vars,
+    ),
     pivotCSV(chartType, dataSourceType, pivotData),
     filterCSV(vars),
     parseCSV,
