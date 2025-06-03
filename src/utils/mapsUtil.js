@@ -391,6 +391,8 @@ const createMapDataClasses = (steps, stepsHaveLabels) => {
 export const createOptionsForMapChart = async ({
   data,
   formatters = {},
+  decimalPoint,
+  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -657,6 +659,11 @@ export const createOptionsForMapChart = async ({
     tooltip: {
       ...R.prop('tooltip', formatters),
       outside: tooltipOutside,
+    },
+
+    lang: {
+      decimalPoint,
+      thousandsSep: noThousandsSeparator ? '' : null,
     },
 
     mapNavigation: {

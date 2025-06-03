@@ -366,6 +366,8 @@ export const calcMarginTopWithHorizontal = (
 const createOptionsForLineChart = ({
   data,
   formatters = {},
+  decimalPoint,
+  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -565,6 +567,11 @@ const createOptionsForLineChart = ({
       outside: tooltipOutside,
     },
 
+    lang: {
+      decimalPoint,
+      thousandsSep: noThousandsSeparator ? '' : null,
+    },
+
     series,
 
     exporting: {
@@ -587,6 +594,8 @@ const createOptionsForBarChart = ({
   chartType,
   data,
   formatters = {},
+  decimalPoint,
+  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -777,6 +786,11 @@ const createOptionsForBarChart = ({
       outside: tooltipOutside,
     },
 
+    lang: {
+      decimalPoint,
+      thousandsSep: noThousandsSeparator ? '' : null,
+    },
+
     series,
 
     exporting: {
@@ -799,6 +813,8 @@ const createOptionsForStackedChart = ({
   chartType,
   data,
   formatters = {},
+  decimalPoint,
+  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -979,6 +995,11 @@ const createOptionsForStackedChart = ({
       outside: tooltipOutside,
     },
 
+    lang: {
+      decimalPoint,
+      thousandsSep: noThousandsSeparator ? '' : null,
+    },
+
     series,
 
     exporting: {
@@ -1010,6 +1031,8 @@ const createOptionsForScatterChart = ({
   chartType,
   data,
   formatters = {},
+  decimalPoint,
+  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -1258,6 +1281,11 @@ const createOptionsForScatterChart = ({
 
     series,
 
+    lang: {
+      decimalPoint,
+      thousandsSep: noThousandsSeparator ? '' : null,
+    },
+
     exporting: {
       enabled: false,
       sourceWidth: exportWidth,
@@ -1277,6 +1305,8 @@ const createOptionsForScatterChart = ({
 const createOptionsForRadarChart = ({
   data,
   formatters = {},
+  decimalPoint,
+  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -1464,6 +1494,11 @@ const createOptionsForRadarChart = ({
       outside: tooltipOutside,
     },
 
+    lang: {
+      decimalPoint,
+      thousandsSep: noThousandsSeparator ? '' : null,
+    },
+
     series,
 
     exporting: {
@@ -1485,6 +1520,8 @@ const createOptionsForRadarChart = ({
 const createOptionsForPieChart = ({
   data,
   formatters = {},
+  decimalPoint,
+  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -1601,6 +1638,11 @@ const createOptionsForPieChart = ({
       outside: tooltipOutside,
     },
 
+    lang: {
+      decimalPoint,
+      thousandsSep: noThousandsSeparator ? '' : null,
+    },
+
     series,
 
     exporting: {
@@ -1711,5 +1753,7 @@ export const createChartOptions = async ({
     mapColorValueSteps,
     maxNumberOfDecimals,
     formatters,
+    decimalPoint,
+    noThousandsSeparator,
   });
 };
