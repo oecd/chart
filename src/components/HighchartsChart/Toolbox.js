@@ -42,8 +42,10 @@ const Toolbox = ({
   hideExpand,
   openChartFullScreen,
   definition,
-  noteAndSource,
-  noteAndSourceShouldBeDisplayedInTooltip,
+  note,
+  source,
+  noteShouldBeDisplayedInTooltip,
+  sourceShouldBeDisplayedInTooltip,
   tooltipContainerId,
   displayActionButton,
   actionButtonLabel,
@@ -148,7 +150,9 @@ const Toolbox = ({
         </div>
       )}
 
-      {(noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition)) &&
+      {(noteShouldBeDisplayedInTooltip ||
+        sourceShouldBeDisplayedInTooltip ||
+        !R.isNil(definition)) &&
         !isSmall && (
           <Menu
             label={<InfoIcon />}
@@ -162,9 +166,17 @@ const Toolbox = ({
               <div
                 className="cb-floating cb-tooltip"
                 dangerouslySetInnerHTML={{
-                  __html: noteAndSourceShouldBeDisplayedInTooltip
-                    ? R.join('', [definition, noteAndSource])
-                    : definition,
+                  __html: R.compose(
+                    R.join(''),
+                    R.when(
+                      () => sourceShouldBeDisplayedInTooltip,
+                      R.append(source),
+                    ),
+                    R.when(
+                      () => noteShouldBeDisplayedInTooltip,
+                      R.append(note),
+                    ),
+                  )([definition]),
                 }}
               />
             </PopoverContent>
@@ -178,7 +190,9 @@ const Toolbox = ({
         style={{ marginLeft: isSmall ? '4px' : '8px' }}
       >
         <div className={`cb-toolbox ${isSmall ? 'cb-small' : ''}`}>
-          {(noteAndSourceShouldBeDisplayedInTooltip || !R.isNil(definition)) &&
+          {(noteShouldBeDisplayedInTooltip ||
+            sourceShouldBeDisplayedInTooltip ||
+            !R.isNil(definition)) &&
             isSmall && (
               <Menu
                 label={<InfoIcon />}
@@ -192,9 +206,17 @@ const Toolbox = ({
                   <div
                     className="cb-floating cb-tooltip"
                     dangerouslySetInnerHTML={{
-                      __html: noteAndSourceShouldBeDisplayedInTooltip
-                        ? R.join('', [definition, noteAndSource])
-                        : definition,
+                      __html: R.compose(
+                        R.join(''),
+                        R.when(
+                          () => sourceShouldBeDisplayedInTooltip,
+                          R.append(source),
+                        ),
+                        R.when(
+                          () => noteShouldBeDisplayedInTooltip,
+                          R.append(note),
+                        ),
+                      )([definition]),
                     }}
                   />
                 </PopoverContent>
@@ -238,8 +260,10 @@ Toolbox.propTypes = {
   hideExpand: PropTypes.bool.isRequired,
   openChartFullScreen: PropTypes.func.isRequired,
   definition: PropTypes.string,
-  noteAndSource: PropTypes.string,
-  noteAndSourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
+  note: PropTypes.string,
+  source: PropTypes.string,
+  noteShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
+  sourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   tooltipContainerId: PropTypes.string,
   displayActionButton: PropTypes.bool.isRequired,
   actionButtonLabel: PropTypes.string.isRequired,

@@ -133,7 +133,8 @@ const HighchartsChart = ({
   maxNumberOfDecimals = '',
   noThousandsSeparator = false,
   mapCountryDimension = '',
-  displayFooterAsTooltip = false,
+  displayNoteAsTooltip = false,
+  displaySourceAsTooltip = false,
   displayActionButton = false,
   actionButtonLabel = '',
   onExpandChart = null,
@@ -632,26 +633,36 @@ const HighchartsChart = ({
   const [footerHeight, setFooterHeight] = useState(null);
   const [chartHeight, setChartHeight] = useState(height);
 
-  const parsedNoteAndSource = useMemo(() => {
-    const nonEmpyItems = R.reject(R.either(R.equals('<p></p>'), isNilOrEmpty), [
+  const parsedNote = useMemo(() => {
+    const parsed =
       replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
         string: note,
         vars,
         latestMin: parsedData?.latestYMin,
         latestMax: parsedData?.latestYMax,
         mapping: parsedData?.codeLabelMapping,
-      }),
+      });
+    return R.either(R.equals('<p></p>'), isNilOrEmpty)(parsed) ? null : parsed;
+  }, [
+    note,
+    vars,
+    parsedData?.latestYMin,
+    parsedData?.latestYMax,
+    parsedData?.codeLabelMapping,
+  ]);
+
+  const parsedSource = useMemo(() => {
+    const parsed =
       replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
         string: source,
         vars,
         latestMin: parsedData?.latestYMin,
         latestMax: parsedData?.latestYMax,
         mapping: parsedData?.codeLabelMapping,
-      }),
-    ]);
-    return R.isEmpty(nonEmpyItems) ? null : R.join('', nonEmpyItems);
+      });
+
+    return R.either(R.equals('<p></p>'), isNilOrEmpty)(parsed) ? null : parsed;
   }, [
-    note,
     source,
     vars,
     parsedData?.latestYMin,
@@ -660,7 +671,7 @@ const HighchartsChart = ({
   ]);
 
   const parsedDefinition = useMemo(() => {
-    const definitionWithVars =
+    const parsed =
       replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
         string: definition,
         vars,
@@ -669,9 +680,7 @@ const HighchartsChart = ({
         mapping: parsedData?.codeLabelMapping,
       });
 
-    return R.either(R.equals('<p></p>'), isNilOrEmpty)(definitionWithVars)
-      ? null
-      : definitionWithVars;
+    return R.either(R.equals('<p></p>'), isNilOrEmpty)(parsed) ? null : parsed;
   }, [
     definition,
     vars,
@@ -739,10 +748,11 @@ const HighchartsChart = ({
   const isFontLoaded = useIsFontLoaded();
 
   useEffect(() => {
-    const isThereEnoughSpaceForFooter = displayFooterAsTooltip
-      ? false
-      : height - footerRef.current.clientHeight >=
-        minChartHeightForFooterDisplay;
+    const isThereEnoughSpaceForFooter =
+      displayNoteAsTooltip && displaySourceAsTooltip
+        ? false
+        : height - footerRef.current.clientHeight >=
+          minChartHeightForFooterDisplay;
 
     setHeaderHeight(headerRef.current.clientHeight);
 
@@ -764,7 +774,8 @@ const HighchartsChart = ({
     parsedSubtitle,
     note,
     source,
-    displayFooterAsTooltip,
+    displayNoteAsTooltip,
+    displaySourceAsTooltip,
   ]);
 
   const chartRef = useRef(null);
@@ -796,9 +807,11 @@ const HighchartsChart = ({
     setIsFullScreen(false);
   }, []);
 
-  const noteAndSourceShouldBeDisplayedInTooltip =
-    !R.isNil(parsedNoteAndSource) &&
-    (footerHeight === 0 || displayFooterAsTooltip);
+  const noteShouldBeDisplayedInTooltip =
+    !R.isNil(parsedNote) && (footerHeight === 0 || displayNoteAsTooltip);
+
+  const sourceShouldBeDisplayedInTooltip =
+    !R.isNil(parsedSource) && (footerHeight === 0 || displaySourceAsTooltip);
 
   const csvExportColumnHeaderFormatter = useMemo(() => {
     if (isNilOrEmpty(parsedTitle) && isNilOrEmpty(parsedSubtitle)) {
@@ -939,11 +952,11 @@ const HighchartsChart = ({
             title={parsedTitle}
             subtitle={parsedSubtitle}
             definition={parsedDefinition}
-            noteAndSource={parsedNoteAndSource}
+            note={parsedNote}
+            source={parsedSource}
             canTitleAndSubtitleBeDisplayed={canTitleAndSubtitleBeDisplayed}
-            noteAndSourceShouldBeDisplayedInTooltip={
-              noteAndSourceShouldBeDisplayedInTooltip
-            }
+            noteShouldBeDisplayedInTooltip={noteShouldBeDisplayedInTooltip}
+            sourceShouldBeDisplayedInTooltip={sourceShouldBeDisplayedInTooltip}
             hideToolbox={hideToolbox}
             exportDisabled={!chartCanBedisplayed}
             onDownloadData={onDownloadData}
@@ -1000,7 +1013,11 @@ const HighchartsChart = ({
       >
         <div
           dangerouslySetInnerHTML={{
-            __html: parsedNoteAndSource,
+            __html: R.compose(
+              R.join(''),
+              R.when(() => !displaySourceAsTooltip, R.append(parsedSource)),
+              R.when(() => !displayNoteAsTooltip, R.append(parsedNote)),
+            )([]),
           }}
         />
       </div>
@@ -1058,7 +1075,8 @@ HighchartsChart.propTypes = {
   maxNumberOfDecimals: PropTypes.string,
   noThousandsSeparator: PropTypes.bool,
   mapCountryDimension: PropTypes.string,
-  displayFooterAsTooltip: PropTypes.bool,
+  displayNoteAsTooltip: PropTypes.bool,
+  displaySourceAsTooltip: PropTypes.bool,
   displayActionButton: PropTypes.bool,
   actionButtonLabel: PropTypes.string,
   onExpandChart: PropTypes.func,

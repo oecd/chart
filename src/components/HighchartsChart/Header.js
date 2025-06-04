@@ -10,9 +10,11 @@ const Header = ({
   title,
   subtitle,
   definition = null,
-  noteAndSource = null,
+  note = null,
+  source = null,
   canTitleAndSubtitleBeDisplayed,
-  noteAndSourceShouldBeDisplayedInTooltip,
+  noteShouldBeDisplayedInTooltip,
+  sourceShouldBeDisplayedInTooltip,
   hideToolbox,
   exportDisabled,
   onDownloadData = null,
@@ -71,10 +73,10 @@ const Header = ({
             hideExpand={hideExpand}
             openChartFullScreen={openChartFullScreen}
             definition={definition}
-            noteAndSource={noteAndSource}
-            noteAndSourceShouldBeDisplayedInTooltip={
-              noteAndSourceShouldBeDisplayedInTooltip
-            }
+            note={note}
+            source={source}
+            noteShouldBeDisplayedInTooltip={noteShouldBeDisplayedInTooltip}
+            sourceShouldBeDisplayedInTooltip={sourceShouldBeDisplayedInTooltip}
             tooltipContainerId={tooltipContainerId}
             displayActionButton={displayActionButton}
             actionButtonLabel={actionButtonLabel}
@@ -93,9 +95,11 @@ Header.propTypes = {
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string.isRequired,
   definition: PropTypes.string,
-  noteAndSource: PropTypes.string,
+  note: PropTypes.string,
+  source: PropTypes.string,
   canTitleAndSubtitleBeDisplayed: PropTypes.bool.isRequired,
-  noteAndSourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
+  noteShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
+  sourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   hideToolbox: PropTypes.bool.isRequired,
   exportDisabled: PropTypes.bool.isRequired,
   onDownloadData: PropTypes.func,
