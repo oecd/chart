@@ -39,8 +39,17 @@ export const makeColorReadableOnBackgroundColor = (color, backgroundColor) =>
 
 const createDatapoint = (d, categoriesAreDatesOrNumber) =>
   categoriesAreDatesOrNumber
-    ? { x: d.metadata.parsedX, y: d.value, __metadata: d.metadata }
-    : { y: d.value, __metadata: d.metadata };
+    ? {
+        x: d.metadata.parsedX,
+        y: d.value,
+        __metadata: d.metadata,
+        custom: d.custom,
+      }
+    : {
+        y: d.value,
+        __metadata: d.metadata,
+        custom: d.custom,
+      };
 
 const areCategoriesDatesOrNumber = (data) =>
   data.areCategoriesDates || data.areCategoriesNumbers;
@@ -366,8 +375,6 @@ export const calcMarginTopWithHorizontal = (
 const createOptionsForLineChart = ({
   data,
   formatters = {},
-  decimalPoint,
-  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -378,14 +385,10 @@ const createOptionsForLineChart = ({
   hideXAxisLabels = false,
   hideYAxisLabels = false,
   fullscreenClose = null,
-  tooltipOutside,
-  csvExportcolumnHeaderFormatter = null,
   isFullScreen = false,
   height,
   isSmall = false,
   isForExport = false,
-  exportWidth = defaultExportSize.width,
-  exportHeight = defaultExportSize.height,
 }) => {
   const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
 
@@ -562,31 +565,7 @@ const createOptionsForLineChart = ({
       },
     },
 
-    tooltip: {
-      ...R.prop('tooltip', formatters),
-      outside: tooltipOutside,
-    },
-
-    lang: {
-      decimalPoint,
-      thousandsSep: noThousandsSeparator ? '' : null,
-    },
-
     series,
-
-    exporting: {
-      enabled: false,
-      sourceWidth: exportWidth,
-      sourceHeight: exportHeight,
-      filename: createExportFileName(),
-      ...(isForExport
-        ? {}
-        : {
-            csv: {
-              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
-            },
-          }),
-    },
   };
 };
 
@@ -594,8 +573,6 @@ const createOptionsForBarChart = ({
   chartType,
   data,
   formatters = {},
-  decimalPoint,
-  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -607,14 +584,10 @@ const createOptionsForBarChart = ({
   hideYAxisLabels = false,
   pivotValue = 0,
   fullscreenClose = null,
-  tooltipOutside = false,
-  csvExportcolumnHeaderFormatter = null,
   isFullScreen = false,
   height,
   isSmall = false,
   isForExport = false,
-  exportWidth = defaultExportSize.width,
-  exportHeight = defaultExportSize.height,
 }) => {
   const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
 
@@ -781,31 +754,7 @@ const createOptionsForBarChart = ({
       },
     },
 
-    tooltip: {
-      ...R.prop('tooltip', formatters),
-      outside: tooltipOutside,
-    },
-
-    lang: {
-      decimalPoint,
-      thousandsSep: noThousandsSeparator ? '' : null,
-    },
-
     series,
-
-    exporting: {
-      enabled: false,
-      sourceWidth: exportWidth,
-      sourceHeight: exportHeight,
-      filename: createExportFileName(),
-      ...(isForExport
-        ? {}
-        : {
-            csv: {
-              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
-            },
-          }),
-    },
   };
 };
 
@@ -813,8 +762,6 @@ const createOptionsForStackedChart = ({
   chartType,
   data,
   formatters = {},
-  decimalPoint,
-  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -825,15 +772,11 @@ const createOptionsForStackedChart = ({
   hideXAxisLabels = false,
   hideYAxisLabels = false,
   fullscreenClose = null,
-  tooltipOutside = false,
-  csvExportcolumnHeaderFormatter = null,
   isFullScreen = false,
   height,
   isSmall = false,
   stacking = stackingOptions.percent.value,
   isForExport = false,
-  exportWidth = defaultExportSize.width,
-  exportHeight = defaultExportSize.height,
 }) => {
   const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
 
@@ -990,31 +933,7 @@ const createOptionsForStackedChart = ({
       },
     },
 
-    tooltip: {
-      ...R.prop('tooltip', formatters),
-      outside: tooltipOutside,
-    },
-
-    lang: {
-      decimalPoint,
-      thousandsSep: noThousandsSeparator ? '' : null,
-    },
-
     series,
-
-    exporting: {
-      enabled: false,
-      sourceWidth: exportWidth,
-      sourceHeight: exportHeight,
-      filename: createExportFileName(),
-      ...(isForExport
-        ? {}
-        : {
-            csv: {
-              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
-            },
-          }),
-    },
   };
 };
 
@@ -1031,8 +950,6 @@ const createOptionsForScatterChart = ({
   chartType,
   data,
   formatters = {},
-  decimalPoint,
-  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -1043,14 +960,10 @@ const createOptionsForScatterChart = ({
   hideXAxisLabels = false,
   hideYAxisLabels = false,
   fullscreenClose = null,
-  tooltipOutside = false,
-  csvExportcolumnHeaderFormatter = null,
   isFullScreen = false,
   height,
   isSmall = false,
   isForExport = false,
-  exportWidth = defaultExportSize.width,
-  exportHeight = defaultExportSize.height,
 }) => {
   const symbolLayout = chartType === chartTypes.symbol;
 
@@ -1269,44 +1182,15 @@ const createOptionsForScatterChart = ({
           ...R.prop('dataLabels', formatters),
         },
       },
-      scatter: {
-        tooltip: { pointFormat: '{point.name}: {point.y}' },
-      },
-    },
-
-    tooltip: {
-      ...R.prop('tooltip', formatters),
-      outside: tooltipOutside,
     },
 
     series,
-
-    lang: {
-      decimalPoint,
-      thousandsSep: noThousandsSeparator ? '' : null,
-    },
-
-    exporting: {
-      enabled: false,
-      sourceWidth: exportWidth,
-      sourceHeight: exportHeight,
-      filename: createExportFileName(),
-      ...(isForExport
-        ? {}
-        : {
-            csv: {
-              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
-            },
-          }),
-    },
   };
 };
 
 const createOptionsForRadarChart = ({
   data,
   formatters = {},
-  decimalPoint,
-  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -1317,14 +1201,10 @@ const createOptionsForRadarChart = ({
   hideXAxisLabels = false,
   hideYAxisLabels = false,
   fullscreenClose = null,
-  tooltipOutside = false,
-  csvExportcolumnHeaderFormatter = null,
   isFullScreen = false,
   height,
   isSmall = false,
   isForExport = false,
-  exportWidth = defaultExportSize.width,
-  exportHeight = defaultExportSize.height,
 }) => {
   const series = mapWithIndex((s, xIdx) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
@@ -1489,39 +1369,12 @@ const createOptionsForRadarChart = ({
       },
     },
 
-    tooltip: {
-      ...R.prop('tooltip', formatters),
-      outside: tooltipOutside,
-    },
-
-    lang: {
-      decimalPoint,
-      thousandsSep: noThousandsSeparator ? '' : null,
-    },
-
     series,
-
-    exporting: {
-      enabled: false,
-      sourceWidth: exportWidth,
-      sourceHeight: exportHeight,
-      filename: createExportFileName(),
-      ...(isForExport
-        ? {}
-        : {
-            csv: {
-              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
-            },
-          }),
-    },
   };
 };
 
 const createOptionsForPieChart = ({
   data,
-  formatters = {},
-  decimalPoint,
-  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -1531,14 +1384,10 @@ const createOptionsForPieChart = ({
   hideLegend = false,
   hideXAxisLabels = false,
   fullscreenClose = null,
-  tooltipOutside = false,
-  csvExportcolumnHeaderFormatter = null,
   isFullScreen = false,
   height,
   isSmall = false,
   isForExport = false,
-  exportWidth = defaultExportSize.width,
-  exportHeight = defaultExportSize.height,
 }) => {
   const series = R.map(
     (s) => ({
@@ -1633,31 +1482,7 @@ const createOptionsForPieChart = ({
       },
     },
 
-    tooltip: {
-      ...R.prop('tooltip', formatters),
-      outside: tooltipOutside,
-    },
-
-    lang: {
-      decimalPoint,
-      thousandsSep: noThousandsSeparator ? '' : null,
-    },
-
     series,
-
-    exporting: {
-      enabled: false,
-      sourceWidth: exportWidth,
-      sourceHeight: exportHeight,
-      filename: createExportFileName(),
-      ...(isForExport
-        ? {}
-        : {
-            csv: {
-              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
-            },
-          }),
-    },
   };
 };
 
@@ -1704,6 +1529,12 @@ export const createChartOptions = async ({
   maxNumberOfDecimals,
   noThousandsSeparator,
   decimalPoint,
+  customTooltip,
+  tooltipOutside,
+  csvExportcolumnHeaderFormatter,
+  exportWidth = defaultExportSize.width,
+  exportHeight = defaultExportSize.height,
+  isForExport,
   vars,
   lang,
   ...otherProps
@@ -1743,9 +1574,10 @@ export const createChartOptions = async ({
     areCategoriesDates: otherProps.data.areCategoriesDates,
     categoriesDateFomat: otherProps.data.categoriesDateFomat,
     lang,
+    isCustomTooltipDefined: !isNilOrEmpty(customTooltip),
   });
 
-  return func({
+  const options = await func({
     ...otherProps,
     colorPalette: finalColorPalette,
     highlight: parsedHighlight,
@@ -1755,5 +1587,31 @@ export const createChartOptions = async ({
     formatters,
     decimalPoint,
     noThousandsSeparator,
+    isForExport,
   });
+
+  return R.compose(
+    R.assoc('lang', {
+      decimalPoint,
+      thousandsSep: noThousandsSeparator ? '' : null,
+    }),
+    R.assoc('tooltip', {
+      ...R.prop('tooltip', formatters),
+      ...(isNilOrEmpty(customTooltip) ? {} : { format: customTooltip }),
+      outside: tooltipOutside,
+    }),
+    R.assoc('exporting', {
+      enabled: false,
+      sourceWidth: exportWidth,
+      sourceHeight: exportHeight,
+      filename: createExportFileName(),
+      ...(isForExport
+        ? {}
+        : {
+            csv: {
+              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+            },
+          }),
+    }),
+  )(options);
 };

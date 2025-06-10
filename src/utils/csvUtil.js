@@ -730,19 +730,70 @@ const transformCategoriesLabel =
     )(data);
   };
 
-const transformValues = ({ data, ...rest }) => {
+const transformValuesAndExtractMetadata = ({ data, ...rest }) => {
   const headerRow = R.head(data);
 
-  const newData = R.map(
-    (row) =>
-      R.prepend(
-        R.head(row),
-        R.map((v) => ({ value: v }), R.tail(row)),
-      ),
-    R.tail(data),
+  const matedata1ColumnIndex = R.findIndex(
+    R.test(/{metadata1}/i),
+    R.tail(headerRow),
+  );
+  const matedata2ColumnIndex = R.findIndex(
+    R.test(/{metadata2}/i),
+    R.tail(headerRow),
   );
 
-  return { data: R.prepend(headerRow, newData), ...rest };
+  if (matedata1ColumnIndex === -1 && matedata2ColumnIndex === -1) {
+    const newData = R.map(
+      (row) =>
+        R.prepend(
+          R.head(row),
+          R.map((v) => ({ value: v }), R.tail(row)),
+        ),
+      R.tail(data),
+    );
+
+    return { data: R.prepend(headerRow, newData), ...rest };
+  }
+
+  const newData = R.map((row) => {
+    const metadata1 =
+      matedata1ColumnIndex !== -1
+        ? R.head(
+            parseCSVWithoutCleanUp(R.nth(matedata1ColumnIndex, R.tail(row))),
+          ) || []
+        : [];
+    const metadata2 =
+      matedata2ColumnIndex !== -1
+        ? R.head(
+            parseCSVWithoutCleanUp(R.nth(matedata2ColumnIndex, R.tail(row))),
+          ) || []
+        : [];
+
+    return R.prepend(
+      R.head(row),
+      reduceWithIndex(
+        (acc, v, i) =>
+          i === matedata1ColumnIndex || i === matedata2ColumnIndex
+            ? acc
+            : R.append(
+                {
+                  value: v,
+                  custom: {
+                    metadata1: R.nth(i, metadata1),
+                    metadata2: R.nth(i, metadata2),
+                  },
+                },
+                acc,
+              ),
+        [],
+        R.tail(row),
+      ),
+    );
+  }, R.tail(data));
+
+  const finalHeaderRow = R.reject(R.test(/{metadata[12]}/i), headerRow);
+
+  return { data: R.prepend(finalHeaderRow, newData), ...rest };
 };
 
 export const createDataFromCSV = ({
@@ -781,7 +832,7 @@ export const createDataFromCSV = ({
       chartType,
       forceXAxisToBeTreatedAsCategories,
     ),
-    transformValues,
+    transformValuesAndExtractMetadata,
     addParsingHelperData(
       csvCodeLabelMappingProjectLevel,
       csvCodeLabelMapping,

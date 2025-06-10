@@ -41,6 +41,7 @@ export const createFormatters = ({
   areCategoriesDates,
   categoriesDateFomat,
   lang,
+  isCustomTooltipDefined,
 }) => {
   const isMaxNumberOrDecimalCastableToNumber =
     isCastableToNumber(maxNumberOfDecimals);
@@ -77,94 +78,98 @@ export const createFormatters = ({
         }
       : {};
 
-  const tooltip = {
-    formatter: function format(tooltipInfo) {
-      const fullFormat = `${tooltipInfo.options.headerFormat}${tooltipInfo.options.pointFormat}`;
+  const tooltip = isCustomTooltipDefined
+    ? {}
+    : {
+        formatter: function format(tooltipInfo) {
+          const fullFormat = `${tooltipInfo.options.headerFormat}${tooltipInfo.options.pointFormat}`;
 
-      const value = this.point.y ?? this.point.value ?? this.point.z;
-      const timeCode = this.point.__metadata?.timeCode;
-      const timeLabel = timeCode ? R.prop(timeCode, codeLabelMapping) : null;
+          const value = this.point.y ?? this.point.value ?? this.point.z;
+          const timeCode = this.point.__metadata?.timeCode;
+          const timeLabel = timeCode
+            ? R.prop(timeCode, codeLabelMapping)
+            : null;
 
-      const newValue = stepsHaveLabels
-        ? R.nth(
-            1,
-            R.find(
-              R.compose(R.equals(`${value}`), R.head),
-              mapColorValueSteps,
-            ) || [],
-          ) || value
-        : numberFormat(
-            value,
-            maxNumberOfDecimals,
-            finalDecimalPoint,
-            noThousandsSeparator ? '' : null,
-          );
-
-      const seriesName =
-        chartType === chartTypes.map ? this.point.name : this.series.name;
-
-      return R.compose(
-        R.compose(
-          (content) => R.replace('{series.name}', seriesName, content),
-          (content) => {
-            const key = R.cond([
-              [() => chartType === chartTypes.map, () => this.series.name],
-              [() => chartType === chartTypes.pie, () => this.point.name],
-              [R.T, () => this.point.category ?? this.series.name],
-            ])();
-
-            const timeLabelSuffix = R.cond([
-              [() => isNilOrEmpty(timeLabel), () => ''],
-              [() => R.isEmpty(key), () => timeLabel],
-              [R.T, () => ` - ${timeLabel}`],
-            ])();
-
-            if (
-              R.includes(
-                chartType,
-                chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
-              )
-            ) {
-              return R.replace(
-                /{.*point.key}/,
-                `${key}${timeLabelSuffix}`,
-                content,
+          const newValue = stepsHaveLabels
+            ? R.nth(
+                1,
+                R.find(
+                  R.compose(R.equals(`${value}`), R.head),
+                  mapColorValueSteps,
+                ) || [],
+              ) || value
+            : numberFormat(
+                value,
+                maxNumberOfDecimals,
+                finalDecimalPoint,
+                noThousandsSeparator ? '' : null,
               );
-            }
 
-            if (!R.isNil(frequency)) {
-              return R.replace(
-                /{.*point.key}/,
-                frequency.formatToLabel(key, lang),
-                content,
-              );
-            }
+          const seriesName =
+            chartType === chartTypes.map ? this.point.name : this.series.name;
 
-            if (areCategoriesNumbers) {
-              return R.replace(
-                /{.*point.key}/,
-                `${numberFormat(
-                  key,
-                  maxNumberOfDecimals,
-                  finalDecimalPoint,
-                  noThousandsSeparator ? '' : null,
-                )}${timeLabelSuffix}`,
-                content,
-              );
-            }
+          return R.compose(
+            R.compose(
+              (content) => R.replace('{series.name}', seriesName, content),
+              (content) => {
+                const key = R.cond([
+                  [() => chartType === chartTypes.map, () => this.series.name],
+                  [() => chartType === chartTypes.pie, () => this.point.name],
+                  [R.T, () => this.point.category ?? this.series.name],
+                ])();
 
-            return R.replace(
-              /{.*point.key}/,
-              `${key}${timeLabelSuffix}`,
-              content,
-            );
-          },
-        ),
-        R.replace('{point.color}', this.color),
-        R.replace('{point.y}', newValue),
-      )(fullFormat);
-    },
-  };
+                const timeLabelSuffix = R.cond([
+                  [() => isNilOrEmpty(timeLabel), () => ''],
+                  [() => R.isEmpty(key), () => timeLabel],
+                  [R.T, () => ` - ${timeLabel}`],
+                ])();
+
+                if (
+                  R.includes(
+                    chartType,
+                    chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
+                  )
+                ) {
+                  return R.replace(
+                    /{.*point.key}/,
+                    `${key}${timeLabelSuffix}`,
+                    content,
+                  );
+                }
+
+                if (!R.isNil(frequency)) {
+                  return R.replace(
+                    /{.*point.key}/,
+                    frequency.formatToLabel(key, lang),
+                    content,
+                  );
+                }
+
+                if (areCategoriesNumbers) {
+                  return R.replace(
+                    /{.*point.key}/,
+                    `${numberFormat(
+                      key,
+                      maxNumberOfDecimals,
+                      finalDecimalPoint,
+                      noThousandsSeparator ? '' : null,
+                    )}${timeLabelSuffix}`,
+                    content,
+                  );
+                }
+
+                return R.replace(
+                  /{.*point.key}/,
+                  `${key}${timeLabelSuffix}`,
+                  content,
+                );
+              },
+            ),
+            R.replace('{point.color}', this.color),
+            R.replace('{point.y}', newValue),
+          )(fullFormat);
+        },
+      };
 
   return { dataLabels, tooltip, xAxisLabels };
 };

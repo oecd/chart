@@ -1,11 +1,10 @@
 import * as R from 'ramda';
-import { chartSpacing, defaultExportSize, mapTypes } from '../constants/chart';
+import { chartSpacing, mapTypes } from '../constants/chart';
 
 import map from './world-highres-custom-topo.json';
 import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
 import {
   convertColorToHex,
-  createExportFileName,
   createLighterColor,
   createShadesFromColor,
   getBaselineOrHighlightColor,
@@ -391,8 +390,6 @@ const createMapDataClasses = (steps, stepsHaveLabels) => {
 export const createOptionsForMapChart = async ({
   data,
   formatters = {},
-  decimalPoint,
-  noThousandsSeparator,
   title = '',
   subtitle = '',
   colorPalette,
@@ -401,14 +398,10 @@ export const createOptionsForMapChart = async ({
   highlightColors,
   hideLegend = false,
   fullscreenClose = null,
-  tooltipOutside = false,
-  csvExportcolumnHeaderFormatter = null,
   isFullScreen = false,
   height,
   isSmall = false,
   isForExport = false,
-  exportWidth = defaultExportSize.width,
-  exportHeight = defaultExportSize.height,
   mapType = mapTypes.normal.value,
   mapColorValueSteps = [],
   mapAutoShade = true,
@@ -656,16 +649,6 @@ export const createOptionsForMapChart = async ({
       },
     },
 
-    tooltip: {
-      ...R.prop('tooltip', formatters),
-      outside: tooltipOutside,
-    },
-
-    lang: {
-      decimalPoint,
-      thousandsSep: noThousandsSeparator ? '' : null,
-    },
-
     mapNavigation: {
       enabled: true,
       buttonOptions: {
@@ -683,19 +666,5 @@ export const createOptionsForMapChart = async ({
     },
 
     series,
-
-    exporting: {
-      enabled: false,
-      sourceWidth: exportWidth,
-      sourceHeight: exportHeight,
-      filename: createExportFileName(),
-      ...(isForExport
-        ? {}
-        : {
-            csv: {
-              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
-            },
-          }),
-    },
   };
 };

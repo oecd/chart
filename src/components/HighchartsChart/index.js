@@ -132,6 +132,7 @@ const HighchartsChart = ({
   yAxisOrderOverride = '',
   maxNumberOfDecimals = '',
   noThousandsSeparator = false,
+  customTooltip = '',
   mapCountryDimension = '',
   displayNoteAsTooltip = false,
   displaySourceAsTooltip = false,
@@ -846,6 +847,11 @@ const HighchartsChart = ({
 
   const tooltipOutside = !(isFullScreen || !isNilOrEmpty(tooltipContainerId));
 
+  const finalCustomTooltip = useMemo(
+    () => R.replace(/\r\n/gm, '', customTooltip || ''),
+    [customTooltip],
+  );
+
   useEffect(() => {
     if (!parsedData) {
       setMergedOptions({});
@@ -873,6 +879,7 @@ const HighchartsChart = ({
           maxNumberOfDecimals,
           noThousandsSeparator,
           decimalPoint,
+          customTooltip: finalCustomTooltip,
           height: isFullScreen ? screenHeight : chartHeight,
           isSmall,
           hideLegend,
@@ -916,6 +923,7 @@ const HighchartsChart = ({
     stacking,
     maxNumberOfDecimals,
     noThousandsSeparator,
+    finalCustomTooltip,
     paletteStartingColor,
     paletteStartingColorOverride,
     parsedData,
@@ -1074,6 +1082,7 @@ HighchartsChart.propTypes = {
   yAxisOrderOverride: PropTypes.string,
   maxNumberOfDecimals: PropTypes.string,
   noThousandsSeparator: PropTypes.bool,
+  customTooltip: PropTypes.string,
   mapCountryDimension: PropTypes.string,
   displayNoteAsTooltip: PropTypes.bool,
   displaySourceAsTooltip: PropTypes.bool,
