@@ -1599,6 +1599,9 @@ export const createChartOptions = async ({
       ...R.prop('tooltip', formatters),
       ...(isNilOrEmpty(customTooltip) ? {} : { format: customTooltip }),
       outside: tooltipOutside,
+      style: {
+        zIndex: 702,
+      },
     }),
     R.assoc('exporting', {
       enabled: false,
