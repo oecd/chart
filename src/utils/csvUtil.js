@@ -779,8 +779,14 @@ const transformValuesAndExtractMetadata = ({ data, ...rest }) => {
                 {
                   value: v,
                   custom: {
-                    metadata1: R.nth(i, metadata1),
-                    metadata2: R.nth(i, metadata2),
+                    metadata1:
+                      R.length(metadata1) === 1
+                        ? R.head(metadata1)
+                        : R.nth(i, metadata1),
+                    metadata2:
+                      R.length(metadata2) === 1
+                        ? R.head(metadata2)
+                        : R.nth(i, metadata2),
                   },
                 },
                 acc,
