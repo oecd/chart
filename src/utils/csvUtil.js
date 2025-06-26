@@ -28,14 +28,17 @@ export const emptyData = {
   codeLabelMapping: {},
 };
 
-const parseRawCSV = (csvString) =>
+const parseRawCSV = (csvString, options = {}) =>
   Papa.parse(csvString, {
     dynamicTyping: true,
     skipEmptyLines: true,
     transform: (v) => v.trim(),
+    ...options,
   });
 
-const cleanupCSV = R.compose((data) => {
+export const serializeCSV = (data, options) => Papa.unparse(data, options);
+
+const cleanupCSV = (data) => {
   if (isNilOrEmpty(data)) {
     return [];
   }
@@ -54,16 +57,21 @@ const cleanupCSV = R.compose((data) => {
       R.times(R.always(null), numberOfColumn - R.length(row)),
     );
   }, data);
-}, R.prop('data'));
+};
 
-export const parseCSV = (csvString) =>
-  R.compose(cleanupCSV, R.pick(['data']), parseRawCSV)(csvString ?? '');
+export const parseCSV = (csvString, options = {}) =>
+  R.compose(cleanupCSV, R.prop('data'), (s) => parseRawCSV(s, options))(
+    csvString ?? '',
+  );
 
-export const parseCSVWithoutCleanUp = (csvString) =>
-  R.compose(
-    R.when(isNilOrEmpty, R.always([])),
-    R.prop('data'),
-    parseRawCSV,
+export const parseCSVAndIncludeParsingMetadata = (csvString, options = {}) =>
+  R.compose(R.modify('data', cleanupCSV), (s) => parseRawCSV(s, options))(
+    csvString ?? '',
+  );
+
+export const parseCSVWithoutCleanUp = (csvString, options = {}) =>
+  R.compose(R.when(isNilOrEmpty, R.always([])), R.prop('data'), (s) =>
+    parseRawCSV(s, options),
   )(csvString ?? '');
 
 export const parseData = ({ data, parsingHelperData, ...rest }) => {
@@ -171,6 +179,7 @@ export const pivotCSV =
       )
     ) {
       const header = R.map(R.head, data);
+
       const rows = mapWithIndex(
         (category, i) => R.prepend(category, R.map(R.nth(i + 1), R.tail(data))),
         R.tail(R.head(data)),
