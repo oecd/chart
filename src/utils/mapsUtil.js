@@ -390,8 +390,6 @@ const createMapDataClasses = (steps, stepsHaveLabels) => {
 export const createOptionsForMapChart = async ({
   data,
   formatters = {},
-  title = '',
-  subtitle = '',
   colorPalette,
   highlight = null,
   baseline = null,
@@ -580,33 +578,10 @@ export const createOptionsForMapChart = async ({
       [R.T, R.always([])],
     ])(),
 
-    title: {
-      text: title,
-      align: 'left',
-      margin: 20,
-      style: {
-        color: '#101d40',
-        fontWeight: 'bold',
-        fontSize: '18px',
-      },
-    },
-    subtitle: {
-      text: subtitle,
-      align: 'left',
-      style: {
-        color: '#586179',
-        fontSize: '17px',
-      },
-    },
-
     mapView: {
       projection: {
         name: 'Miller',
       },
-    },
-
-    credits: {
-      enabled: false,
     },
 
     legend: {

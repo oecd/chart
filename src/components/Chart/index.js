@@ -10,6 +10,9 @@ import CenteredContainer from '../CenteredContainer';
 import ChartErrorBoundary from '../ChartErrorBoundary';
 import { errorMessages } from '../../constants/chart';
 
+const textPropIsEqualToTrue = (textProp) =>
+  textProp === true || textProp === 'true' || textProp === '';
+
 const Chart = ({
   width = null,
   height = null,
@@ -17,6 +20,8 @@ const Chart = ({
   displayActionButton = false,
   hideTitle = false,
   hideSubtitle = false,
+  hideNote = false,
+  hideSource = false,
   hideToolbox = false,
   ...otherProps
 }) => {
@@ -39,18 +44,27 @@ const Chart = ({
   );
 
   const finalHideTitle = useMemo(
-    () => hideTitle === true || hideTitle === 'true' || hideTitle === '',
+    () => textPropIsEqualToTrue(hideTitle),
     [hideTitle],
   );
 
   const finalHideSubtitle = useMemo(
-    () =>
-      hideSubtitle === true || hideSubtitle === 'true' || hideSubtitle === '',
+    () => textPropIsEqualToTrue(hideSubtitle),
     [hideSubtitle],
   );
 
+  const finalHideNote = useMemo(
+    () => textPropIsEqualToTrue(hideNote),
+    [hideNote],
+  );
+
+  const finalHideSource = useMemo(
+    () => textPropIsEqualToTrue(hideSource),
+    [hideSource],
+  );
+
   const finalHideToolbox = useMemo(
-    () => hideToolbox === true || hideToolbox === 'true' || hideToolbox === '',
+    () => textPropIsEqualToTrue(hideToolbox),
     [hideToolbox],
   );
 
@@ -67,6 +81,8 @@ const Chart = ({
           displayActionButton={finalDisplayActionButton}
           hideTitle={finalHideTitle}
           hideSubtitle={finalHideSubtitle}
+          hideNote={finalHideNote}
+          hideSource={finalHideSource}
           hideToolbox={finalHideToolbox}
           {...otherProps}
         />
@@ -93,6 +109,8 @@ const Chart = ({
           displayActionButton={finalDisplayActionButton}
           hideTitle={finalHideTitle}
           hideSubtitle={finalHideSubtitle}
+          hideNote={finalHideNote}
+          hideSource={finalHideSource}
           hideToolbox={finalHideToolbox}
           {...otherProps}
         />
@@ -114,6 +132,8 @@ Chart.propTypes = {
   actionButtonLabel: PropTypes.string,
   hideTitle: PropTypes.bool,
   hideSubtitle: PropTypes.bool,
+  hideNote: PropTypes.bool,
+  hideSource: PropTypes.bool,
   hideToolbox: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
 };

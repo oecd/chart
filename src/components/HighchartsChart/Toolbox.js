@@ -14,6 +14,7 @@ import { MenuContext, Menu, MenuItem, PopoverContent } from '../floating/Menu';
 import { postJson } from '../../utils/fetchUtil';
 import { apiUrl } from '../../constants/chart';
 import { createExportFileName } from '../../utils/chartUtilCommon';
+import { createFooter } from '../../utils/chartUtil';
 
 const RootTrigger = () => {
   const { isOpen } = useContext(MenuContext);
@@ -44,6 +45,8 @@ const Toolbox = ({
   definition,
   note,
   source,
+  lang,
+  displayNoteAsTooltip,
   noteShouldBeDisplayedInTooltip,
   sourceShouldBeDisplayedInTooltip,
   tooltipContainerId,
@@ -57,6 +60,14 @@ const Toolbox = ({
     async (chartOptions, format) => {
       const options = R.compose(
         R.when((o) => !R.has('map', o.chart), R.omit(['colorAxis'])),
+        R.assocPath(
+          ['caption', 'text'],
+          createFooter({
+            source,
+            note: displayNoteAsTooltip ? '' : note,
+            lang,
+          }),
+        ),
         R.assocPath(['subtitle', 'text'], parsedSubtitle),
         R.assocPath(['title', 'text'], parsedTitle),
       )(chartOptions);
@@ -78,7 +89,16 @@ const Toolbox = ({
         // too bad, the export has failed but there is no elegant way to notify the user
       }
     },
-    [chartType, onDownloadData, parsedSubtitle, parsedTitle],
+    [
+      chartType,
+      displayNoteAsTooltip,
+      lang,
+      note,
+      onDownloadData,
+      parsedSubtitle,
+      parsedTitle,
+      source,
+    ],
   );
 
   const menuItems = R.compose(
@@ -262,6 +282,8 @@ Toolbox.propTypes = {
   definition: PropTypes.string,
   note: PropTypes.string,
   source: PropTypes.string,
+  lang: PropTypes.string.isRequired,
+  displayNoteAsTooltip: PropTypes.bool.isRequired,
   noteShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   sourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   tooltipContainerId: PropTypes.string,

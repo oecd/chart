@@ -45,6 +45,7 @@ import {
   doesStringContainVar,
   deepMergeUserOptionsWithDefaultOptions,
   createChartOptions,
+  createFooter,
 } from '../../utils/chartUtil';
 import CenteredContainer from '../CenteredContainer';
 import { fetchJson } from '../../utils/fetchUtil';
@@ -146,6 +147,8 @@ const HighchartsChart = ({
   lang,
   hideTitle = false,
   hideSubtitle = false,
+  hideNote = false,
+  hideSource = false,
   hideToolbox = false,
   tooltipContainerId,
   isSmall,
@@ -635,16 +638,18 @@ const HighchartsChart = ({
   const [chartHeight, setChartHeight] = useState(height);
 
   const parsedNote = useMemo(() => {
-    const parsed =
-      replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
-        string: note,
-        vars,
-        latestMin: parsedData?.latestYMin,
-        latestMax: parsedData?.latestYMax,
-        mapping: parsedData?.codeLabelMapping,
-      });
+    const parsed = hideNote
+      ? ''
+      : replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+          string: note,
+          vars,
+          latestMin: parsedData?.latestYMin,
+          latestMax: parsedData?.latestYMax,
+          mapping: parsedData?.codeLabelMapping,
+        });
     return R.either(R.equals('<p></p>'), isNilOrEmpty)(parsed) ? null : parsed;
   }, [
+    hideNote,
     note,
     vars,
     parsedData?.latestYMin,
@@ -653,17 +658,19 @@ const HighchartsChart = ({
   ]);
 
   const parsedSource = useMemo(() => {
-    const parsed =
-      replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
-        string: source,
-        vars,
-        latestMin: parsedData?.latestYMin,
-        latestMax: parsedData?.latestYMax,
-        mapping: parsedData?.codeLabelMapping,
-      });
+    const parsed = hideSource
+      ? ''
+      : replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+          string: source,
+          vars,
+          latestMin: parsedData?.latestYMin,
+          latestMax: parsedData?.latestYMax,
+          mapping: parsedData?.codeLabelMapping,
+        });
 
     return R.either(R.equals('<p></p>'), isNilOrEmpty)(parsed) ? null : parsed;
   }, [
+    hideSource,
     source,
     vars,
     parsedData?.latestYMin,
@@ -863,6 +870,13 @@ const HighchartsChart = ({
           vars,
           title: isFullScreen ? parsedTitle : '',
           subtitle: isFullScreen ? parsedSubtitle : '',
+          footer: isFullScreen
+            ? createFooter({
+                source: parsedSource,
+                note: parsedNote,
+                lang,
+              })
+            : '',
           colorPalette,
           smallerColorPalettes,
           paletteStartingColor,
@@ -934,6 +948,10 @@ const HighchartsChart = ({
     tooltipOutside,
     vars,
     optionsOverride,
+    parsedDefinition,
+    parsedSource,
+    parsedNote,
+    lang,
   ]);
 
   return (
@@ -960,9 +978,11 @@ const HighchartsChart = ({
             title={parsedTitle}
             subtitle={parsedSubtitle}
             definition={parsedDefinition}
+            lang={lang}
             note={parsedNote}
             source={parsedSource}
             canTitleAndSubtitleBeDisplayed={canTitleAndSubtitleBeDisplayed}
+            displayNoteAsTooltip={displayNoteAsTooltip}
             noteShouldBeDisplayedInTooltip={noteShouldBeDisplayedInTooltip}
             sourceShouldBeDisplayedInTooltip={sourceShouldBeDisplayedInTooltip}
             hideToolbox={hideToolbox}
@@ -1096,6 +1116,8 @@ HighchartsChart.propTypes = {
   lang: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool,
   hideSubtitle: PropTypes.bool,
+  hideNote: PropTypes.bool,
+  hideSource: PropTypes.bool,
   hideToolbox: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
   isSmall: PropTypes.bool.isRequired,

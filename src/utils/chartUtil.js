@@ -1,5 +1,6 @@
 /* eslint-disable no-bitwise, no-nested-ternary */
 import { TinyColor, isReadable } from '@ctrl/tinycolor';
+import truncatise from 'truncatise';
 import * as R from 'ramda';
 
 import {
@@ -455,29 +456,6 @@ const createOptionsForLineChart = ({
 
     colors: [R.head(colorPalette)],
 
-    title: {
-      text: title,
-      align: 'left',
-      margin: 20,
-      style: {
-        color: '#101d40',
-        fontWeight: 'bold',
-        fontSize: '18px',
-      },
-    },
-    subtitle: {
-      text: subtitle,
-      align: 'left',
-      style: {
-        color: '#586179',
-        fontSize: '17px',
-      },
-    },
-
-    credits: {
-      enabled: false,
-    },
-
     xAxis: {
       categories: categoriesAreDatesOrNumber
         ? null
@@ -664,29 +642,6 @@ const createOptionsForBarChart = ({
 
     colors: colorPalette,
 
-    title: {
-      text: title,
-      align: 'left',
-      margin: 20,
-      style: {
-        color: '#101d40',
-        fontSize: '18px',
-        fontWeight: 'bold',
-      },
-    },
-    subtitle: {
-      text: subtitle,
-      align: 'left',
-      style: {
-        color: '#586179',
-        fontSize: '17px',
-      },
-    },
-
-    credits: {
-      enabled: false,
-    },
-
     xAxis: {
       categories: categoriesAreDatesOrNumber
         ? null
@@ -835,29 +790,6 @@ const createOptionsForStackedChart = ({
     },
 
     colors: colorPalette,
-
-    title: {
-      text: title,
-      align: 'left',
-      margin: 20,
-      style: {
-        color: '#101d40',
-        fontWeight: 'bold',
-        fontSize: '18px',
-      },
-    },
-    subtitle: {
-      text: subtitle,
-      align: 'left',
-      style: {
-        color: '#586179',
-        fontSize: '17px',
-      },
-    },
-
-    credits: {
-      enabled: false,
-    },
 
     xAxis: {
       categories:
@@ -1103,29 +1035,6 @@ const createOptionsForScatterChart = ({
 
     colors: colorPalette,
 
-    title: {
-      text: title,
-      align: 'left',
-      margin: 20,
-      style: {
-        color: '#101d40',
-        fontWeight: 'bold',
-        fontSize: '18px',
-      },
-    },
-    subtitle: {
-      text: subtitle,
-      align: 'left',
-      style: {
-        color: '#586179',
-        fontSize: '17px',
-      },
-    },
-
-    credits: {
-      enabled: false,
-    },
-
     xAxis: {
       categories: categoriesAreDatesOrNumber
         ? null
@@ -1191,8 +1100,6 @@ const createOptionsForScatterChart = ({
 const createOptionsForRadarChart = ({
   data,
   formatters = {},
-  title = '',
-  subtitle = '',
   colorPalette,
   highlight = null,
   baseline = null,
@@ -1261,29 +1168,6 @@ const createOptionsForRadarChart = ({
     },
 
     colors: colorPalette,
-
-    title: {
-      text: title,
-      align: 'left',
-      margin: 20,
-      style: {
-        color: '#101d40',
-        fontWeight: 'bold',
-        fontSize: '18px',
-      },
-    },
-    subtitle: {
-      text: subtitle,
-      align: 'left',
-      style: {
-        color: '#586179',
-        fontSize: '17px',
-      },
-    },
-
-    credits: {
-      enabled: false,
-    },
 
     pane: {
       startAngle: 0,
@@ -1375,8 +1259,6 @@ const createOptionsForRadarChart = ({
 
 const createOptionsForPieChart = ({
   data,
-  title = '',
-  subtitle = '',
   colorPalette,
   highlight = null,
   baseline = null,
@@ -1423,29 +1305,6 @@ const createOptionsForPieChart = ({
       marginLeft: 10,
       marginRight: 10,
       events: { fullscreenClose },
-    },
-
-    title: {
-      text: title,
-      align: 'left',
-      margin: 20,
-      style: {
-        color: '#101d40',
-        fontWeight: 'bold',
-        fontSize: '18px',
-      },
-    },
-    subtitle: {
-      text: subtitle,
-      align: 'left',
-      style: {
-        color: '#586179',
-        fontSize: '17px',
-      },
-    },
-
-    credits: {
-      enabled: false,
     },
 
     legend: {
@@ -1539,7 +1398,9 @@ export const createChartOptions = async ({
   lang,
   ...otherProps
 }) => {
-  const func = await getCreateOptionsFuncForChartType(otherProps.chartType);
+  const createOptionsForChartType = await getCreateOptionsFuncForChartType(
+    otherProps.chartType,
+  );
 
   const finalColorPalette = getFinalPalette(
     colorPalette,
@@ -1577,7 +1438,7 @@ export const createChartOptions = async ({
     isCustomTooltipDefined: !isNilOrEmpty(customTooltip),
   });
 
-  const options = await func({
+  const options = await createOptionsForChartType({
     ...otherProps,
     colorPalette: finalColorPalette,
     highlight: parsedHighlight,
@@ -1591,6 +1452,9 @@ export const createChartOptions = async ({
   });
 
   return R.compose(
+    R.assoc('credits', {
+      enabled: false,
+    }),
     R.assoc('lang', {
       decimalPoint,
       thousandsSep: noThousandsSeparator ? '' : null,
@@ -1616,5 +1480,56 @@ export const createChartOptions = async ({
             },
           }),
     }),
+    R.assoc('caption', {
+      text: otherProps.footer,
+      align: 'left',
+      margin: 20,
+      useHTML: true,
+      style: {
+        color: '#586179',
+        fontSize: '13px',
+      },
+    }),
+    R.assoc('subtitle', {
+      text: otherProps.subtitle,
+      align: 'left',
+      style: {
+        color: '#586179',
+        fontSize: '17px',
+      },
+    }),
+    R.assoc('title', {
+      text: otherProps.title,
+      align: 'left',
+      margin: 20,
+      style: {
+        color: '#101d40',
+        fontWeight: 'bold',
+        fontSize: '18px',
+      },
+    }),
   )(options);
 };
+
+export const createFooter = ({ source, note, hideLogo = false, lang }) =>
+  R.compose(
+    R.when(
+      () => !hideLogo,
+      R.concat(
+        R.__,
+        // TODO: use prod URL once deployed
+        `<img src="https://lab.oecdch.art/chart-oecd-logo-${lang === 'fr' ? 'fr' : 'en'}.svg" width="94" height="23" style="margin-top: 3px">`,
+      ),
+    ),
+    R.replace(/<p>/g, '<p style="margin: 0px 0px 5px 0px">'),
+    (html) =>
+      truncatise(html, {
+        TruncateLength: 800,
+        TruncateBy: 'characters',
+        Strict: false,
+        StripHTML: false,
+        Suffix: '...',
+      }),
+    R.join(''),
+    R.reject(isNilOrEmpty),
+  )([source, note]);

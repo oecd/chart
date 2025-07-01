@@ -12,7 +12,9 @@ const Header = ({
   definition = null,
   note = null,
   source = null,
+  lang,
   canTitleAndSubtitleBeDisplayed,
+  displayNoteAsTooltip,
   noteShouldBeDisplayedInTooltip,
   sourceShouldBeDisplayedInTooltip,
   hideToolbox,
@@ -75,6 +77,8 @@ const Header = ({
             definition={definition}
             note={note}
             source={source}
+            lang={lang}
+            displayNoteAsTooltip={displayNoteAsTooltip}
             noteShouldBeDisplayedInTooltip={noteShouldBeDisplayedInTooltip}
             sourceShouldBeDisplayedInTooltip={sourceShouldBeDisplayedInTooltip}
             tooltipContainerId={tooltipContainerId}
@@ -97,7 +101,9 @@ Header.propTypes = {
   definition: PropTypes.string,
   note: PropTypes.string,
   source: PropTypes.string,
+  lang: PropTypes.string.isRequired,
   canTitleAndSubtitleBeDisplayed: PropTypes.bool.isRequired,
+  displayNoteAsTooltip: PropTypes.bool.isRequired,
   noteShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   sourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   hideToolbox: PropTypes.bool.isRequired,

@@ -83,12 +83,14 @@ e.g.: `language="fr"`.
 
 If omitted (or the requested language has not been configured) the default one will be used.
 
-## Hiding header elements
+## Hiding elements
 
 The following props are supported:
 
 - `hideTitle`: hides the title
 - `hideSubtitle`: hides the subtitle
+- `hideSource`: hides the source
+- `hideNote`: hides the note
 - `hideToolbox`: hides the toolbox
 
 ## Web components
