@@ -1,5 +1,7 @@
+import { parse } from 'date-fns';
 import * as R from 'ramda';
-import { chartTypes } from '../constants/chart';
+
+import { chartTypes, frequencyTypes } from '../constants/chart';
 import {
   pivotCSV,
   sortCSV,
@@ -11,7 +13,13 @@ import {
   handleAreCategoriesNumbers,
 } from './csvUtil';
 import { isNilOrEmpty } from './ramdaUtil';
-import { possibleVariables } from './configUtil';
+import {
+  maxDateAvailableVariable,
+  minDateAvailableVariable,
+  possibleVariables,
+} from './configUtil';
+import { fetchJson } from './fetchUtil';
+import { frequencies } from './dateUtil';
 
 const dotStatTimeout = 15000;
 
@@ -35,9 +43,103 @@ const createDotStatHeaders = (lang) => ({
   'Accept-Language': isNilOrEmpty(lang) ? 'en' : R.toLower(lang),
 });
 
-export const createDotStatUrl = (dotStatUrl, vars) =>
-  R.reduce(
-    (acc, varName) => {
+const doesUrlContainMinOrMaxDateAvailableVariable = (url) =>
+  R.test(new RegExp(`{${minDateAvailableVariable}}`, 'gi'), url) ||
+  R.test(new RegExp(`{${maxDateAvailableVariable}}`, 'gi'), url);
+
+export const getAvailabilityUrlFromDotStatUrl = R.compose(
+  (url) => {
+    const urlObject = new URL(url);
+    urlObject.searchParams.set('mode', 'available');
+
+    if (doesUrlContainMinOrMaxDateAvailableVariable(url)) {
+      urlObject.searchParams.delete('startPeriod');
+      urlObject.searchParams.delete('endPeriod');
+    }
+
+    return urlObject.toString();
+  },
+  R.replace(/\/data\//g, '/availableconstraint/'),
+);
+
+const detectFrequencyCode = (dotStatUrl) => {
+  const frequencyMatches = R.compose(
+    (codes) => new RegExp(`[./](${codes})[./?]`, 'gi').exec(dotStatUrl),
+    R.join('|'),
+    R.map(R.prop('dotStatId')),
+    R.values,
+  )(frequencyTypes);
+
+  if (R.length(frequencyMatches) >= 2) {
+    return R.nth(1, frequencyMatches);
+  }
+
+  return frequencyTypes.yearly.dotStatId;
+};
+
+export const createDotStatUrl = (
+  dotStatUrl,
+  vars,
+  getDotStatAvailabilityFunc,
+) =>
+  R.compose(
+    async (url) => fixDotStatUrl(await url),
+    R.when(doesUrlContainMinOrMaxDateAvailableVariable, async (url) => {
+      try {
+        const availabilityUrl = getAvailabilityUrlFromDotStatUrl(url);
+
+        const availableMembersByDimension = getDotStatAvailabilityFunc
+          ? await getDotStatAvailabilityFunc(availabilityUrl)
+          : await fetchJson(
+              `/api/backend/dotStat/availability?availabilityUrl=${encodeURIComponent(availabilityUrl)}`,
+            );
+
+        const timeRange = R.find(
+          R.has('startPeriod'),
+          R.values(availableMembersByDimension),
+        );
+
+        if (!timeRange) {
+          throw new Error(
+            'Could not get {min_date} or {max_date}: no time range found in availability response.',
+          );
+        }
+
+        const frequencyCode = detectFrequencyCode(url);
+
+        const frequency = R.find(
+          R.propEq(frequencyCode, 'dotStatId'),
+          R.values(frequencies),
+        );
+
+        const minDateCodeFromAvailability = frequency.formatToCode(
+          frequency.getStartPeriod(
+            parse(timeRange.startPeriod, "yyyy-MM-dd'T'HH:mm:ss", new Date()),
+          ),
+        );
+        const maxDateCodeFromAvailability = frequency.formatToCode(
+          frequency.getEndPeriod(
+            parse(timeRange.endPeriod, "yyyy-MM-dd'T'HH:mm:ss", new Date()),
+          ),
+        );
+
+        return R.compose(
+          R.replace(
+            new RegExp(`{${maxDateAvailableVariable}}`, 'gi'),
+            maxDateCodeFromAvailability,
+          ),
+          R.replace(
+            new RegExp(`{${minDateAvailableVariable}}`, 'gi'),
+            minDateCodeFromAvailability,
+          ),
+        )(url);
+      } catch (e) {
+        throw new Error(
+          `Could not get {min_date} or {max_date}: ${e.message}.`,
+        );
+      }
+    }),
+    R.reduce((acc, varName) => {
       const varValue = R.propOr('', varName, vars);
 
       return R.replace(
@@ -45,10 +147,8 @@ export const createDotStatUrl = (dotStatUrl, vars) =>
         R.toUpper(R.replace(/\|/g, '+', `${varValue}`)),
         acc,
       );
-    },
-    dotStatUrl,
-    possibleVariables,
-  );
+    }, dotStatUrl),
+  )(possibleVariables);
 
 export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
   const response = await fetch(fixDotStatUrl(url), {

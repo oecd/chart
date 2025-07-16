@@ -16,6 +16,9 @@ export const possibleVariables = [
 export const latestMinVariable = 'latest_min';
 export const latestMaxVariable = 'latest_max';
 
+export const minDateAvailableVariable = 'min_date';
+export const maxDateAvailableVariable = 'max_date';
+
 export const isCastableToNumber = R.ifElse(
   isNilOrEmpty,
   R.always(false),

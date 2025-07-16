@@ -169,10 +169,24 @@ const HighchartsChart = ({
   const [preParsedDataInternal, setPreParsedDataInternal] =
     useState(preParsedData);
 
-  const finalDotStatUrl = useMemo(
-    () => createDotStatUrl(dotStatUrl, vars),
-    [dotStatUrl, vars],
-  );
+  const [finalDotStatUrl, setFinalDotStatUrl] = useState(null);
+
+  useEffect(() => {
+    const getDotStatUrl = async () => {
+      try {
+        setFinalDotStatUrl(await createDotStatUrl(dotStatUrl, vars));
+      } catch (e) {
+        if (debug) {
+          sendDebugInfo({
+            type: debugInfoTypes.dotStatInfo,
+            data: { error: e.message },
+          });
+        }
+      }
+    };
+
+    getDotStatUrl();
+  }, [debug, dotStatUrl, vars]);
 
   const dotStatUrlHasLastNObservationsEqOne = useMemo(() => {
     if (
