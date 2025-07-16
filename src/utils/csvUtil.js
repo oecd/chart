@@ -422,6 +422,36 @@ export const sortCSV =
       };
     }
 
+    if (finalSortBy === sortByOptions.allSeriesValue.value) {
+      const yIndexes = R.compose(
+        R.times(R.identity),
+        R.length,
+        R.tail,
+        R.head,
+      )(data);
+
+      return {
+        data: R.prepend(
+          R.head(data),
+          R.sort(
+            orderFunc(
+              R.compose(
+                R.sum,
+                R.props(yIndexes),
+                R.map(R.prop('value')),
+                R.tail,
+              ),
+            ),
+            R.tail(data),
+          ),
+        ),
+        parsingHelperData,
+        areCategoriesDates,
+        areCategoriesNumbers,
+        ...rest,
+      };
+    }
+
     return {
       data,
       parsingHelperData,

@@ -38,6 +38,7 @@ export const sortByOptions = {
   categoriesLabel: { value: 'categoriesLabel', label: 'Categories label' },
   categoriesCode: { value: 'categoriesCode', label: 'Categories code' },
   seriesValue: { value: 'seriesValue', label: 'Series value' },
+  allSeriesValue: { value: 'allSeriesValue', label: 'Sum of all series value' },
 };
 
 export const sortOrderOptions = {
