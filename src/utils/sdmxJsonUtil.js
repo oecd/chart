@@ -62,7 +62,7 @@ export const getAvailabilityUrlFromDotStatUrl = R.compose(
   R.replace(/\/data\//g, '/availableconstraint/'),
 );
 
-const detectFrequencyCode = (dotStatUrl) => {
+const detectFrequencyCode = (dotStatUrl, availableMembersByDimension) => {
   const frequencyMatches = R.compose(
     (codes) => new RegExp(`[./](${codes})[./?]`, 'gi').exec(dotStatUrl),
     R.join('|'),
@@ -72,6 +72,11 @@ const detectFrequencyCode = (dotStatUrl) => {
 
   if (R.length(frequencyMatches) >= 2) {
     return R.nth(1, frequencyMatches);
+  }
+
+  const freqDimension = R.prop('FREQ', availableMembersByDimension);
+  if (freqDimension && R.length(freqDimension) === 1) {
+    return R.head(freqDimension);
   }
 
   return frequencyTypes.yearly.dotStatId;
@@ -105,7 +110,10 @@ export const createDotStatUrl = (
           );
         }
 
-        const frequencyCode = detectFrequencyCode(url);
+        const frequencyCode = detectFrequencyCode(
+          url,
+          availableMembersByDimension,
+        );
 
         const frequency = R.find(
           R.propEq(frequencyCode, 'dotStatId'),
