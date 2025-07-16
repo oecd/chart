@@ -8,6 +8,10 @@ import ChartWithConfigNonFixedChartHeight from './ChartWithConfigNonFixedChartHe
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import { trackChartView } from '../../utils/trackingUtil';
 import { controlTypes, frequencyTypes } from '../../constants/chart';
+import {
+  maxDateAvailableVariable,
+  minDateAvailableVariable,
+} from '../../utils/configUtil';
 
 const ChartWithConfig = ({
   height = null,
@@ -136,11 +140,17 @@ const ChartWithConfig = ({
           let varHasChanged = false;
 
           if (ts.isRange) {
-            if (vars[ts.minVarName] < frequencyMinCode) {
+            if (
+              vars[ts.minVarName] !== `{${minDateAvailableVariable}}` &&
+              vars[ts.minVarName] < frequencyMinCode
+            ) {
               changeVar(ts.minVarName, frequencyMinCode);
               varHasChanged = true;
             }
-            if (vars[ts.maxVarName] > frequencyMaxCode) {
+            if (
+              vars[ts.maxVarName] !== `{${maxDateAvailableVariable}}` &&
+              vars[ts.maxVarName] > frequencyMaxCode
+            ) {
               changeVar(ts.maxVarName, frequencyMaxCode);
               varHasChanged = true;
             }
