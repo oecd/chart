@@ -45,7 +45,6 @@ const Toolbox = ({
   definition,
   note,
   source,
-  lang,
   displayNoteAsTooltip,
   noteShouldBeDisplayedInTooltip,
   sourceShouldBeDisplayedInTooltip,
@@ -65,7 +64,6 @@ const Toolbox = ({
           createFooter({
             source,
             note: displayNoteAsTooltip ? '' : note,
-            lang,
           }),
         ),
         R.assocPath(['subtitle', 'text'], parsedSubtitle),
@@ -92,7 +90,6 @@ const Toolbox = ({
     [
       chartType,
       displayNoteAsTooltip,
-      lang,
       note,
       onDownloadData,
       parsedSubtitle,

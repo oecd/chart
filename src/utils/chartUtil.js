@@ -389,7 +389,6 @@ const createOptionsForLineChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
-  isForExport = false,
 }) => {
   const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
 
@@ -448,7 +447,7 @@ const createOptionsForLineChart = ({
         : undefined,
       height,
       animation: false,
-      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacing : 0,
       events: {
         fullscreenClose,
       },
@@ -565,7 +564,6 @@ const createOptionsForBarChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
-  isForExport = false,
 }) => {
   const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
 
@@ -634,7 +632,7 @@ const createOptionsForBarChart = ({
         : undefined,
       height,
       animation: false,
-      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacing : 0,
       events: {
         fullscreenClose,
       },
@@ -731,7 +729,6 @@ const createOptionsForStackedChart = ({
   height,
   isSmall = false,
   stacking = stackingOptions.percent.value,
-  isForExport = false,
 }) => {
   const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
 
@@ -783,7 +780,7 @@ const createOptionsForStackedChart = ({
         : undefined,
       height,
       animation: false,
-      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacing : 0,
       events: {
         fullscreenClose,
       },
@@ -895,7 +892,6 @@ const createOptionsForScatterChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
-  isForExport = false,
 }) => {
   const symbolLayout = chartType === chartTypes.symbol;
 
@@ -1026,7 +1022,7 @@ const createOptionsForScatterChart = ({
         : undefined,
       height,
       animation: false,
-      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacing : 0,
       events: {
         fullscreenClose,
         render: chartRender,
@@ -1111,7 +1107,6 @@ const createOptionsForRadarChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
-  isForExport = false,
 }) => {
   const series = mapWithIndex((s, xIdx) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
@@ -1163,7 +1158,7 @@ const createOptionsForRadarChart = ({
       animation: false,
       margin: hideLegend ? 40 : undefined,
       marginBottom: !hideLegend && isSmall ? 5 : undefined,
-      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacing : 0,
       events: { fullscreenClose },
     },
 
@@ -1269,7 +1264,6 @@ const createOptionsForPieChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
-  isForExport = false,
 }) => {
   const series = R.map(
     (s) => ({
@@ -1301,7 +1295,7 @@ const createOptionsForPieChart = ({
       },
       height,
       animation: false,
-      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacing : 0,
       marginLeft: 10,
       marginRight: 10,
       events: { fullscreenClose },
@@ -1393,7 +1387,6 @@ export const createChartOptions = async ({
   csvExportcolumnHeaderFormatter,
   exportWidth = defaultExportSize.width,
   exportHeight = defaultExportSize.height,
-  isForExport,
   vars,
   lang,
   ...otherProps
@@ -1448,13 +1441,9 @@ export const createChartOptions = async ({
     formatters,
     decimalPoint,
     noThousandsSeparator,
-    isForExport,
   });
 
   return R.compose(
-    R.assoc('credits', {
-      enabled: false,
-    }),
     R.assoc('lang', {
       decimalPoint,
       thousandsSep: noThousandsSeparator ? '' : null,
@@ -1472,18 +1461,30 @@ export const createChartOptions = async ({
       sourceWidth: exportWidth,
       sourceHeight: exportHeight,
       filename: createExportFileName(),
-      ...(isForExport
-        ? {}
-        : {
-            csv: {
-              columnHeaderFormatter: csvExportcolumnHeaderFormatter,
-            },
-          }),
+      allowHTML: true,
+      csv: {
+        columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+      },
+    }),
+    R.assoc('credits', {
+      enabled: otherProps.isFullScreen,
+      text: lang === 'fr' ? '© OCDE' : '© OECD',
+      href: 'https://www.oecd.org',
+      position: {
+        align: 'left',
+        x: 20,
+        y: -20,
+      },
+      style: {
+        color: '#586179',
+        fontSize: '13px',
+        cursor: 'auto',
+      },
     }),
     R.assoc('caption', {
       text: otherProps.footer,
       align: 'left',
-      margin: 20,
+      margin: 25,
       useHTML: true,
       style: {
         color: '#586179',
@@ -1511,16 +1512,8 @@ export const createChartOptions = async ({
   )(options);
 };
 
-export const createFooter = ({ source, note, hideLogo = false, lang }) =>
+export const createFooter = ({ source, note }) =>
   R.compose(
-    R.when(
-      () => !hideLogo,
-      R.concat(
-        R.__,
-        // TODO: use prod URL once deployed
-        `<img src="https://lab.oecdch.art/chart-oecd-logo-${lang === 'fr' ? 'fr' : 'en'}.svg" width="94" height="23" style="margin-top: 3px">`,
-      ),
-    ),
     R.replace(/<p>/g, '<p style="margin: 0px 0px 5px 0px">'),
     (html) =>
       truncatise(html, {

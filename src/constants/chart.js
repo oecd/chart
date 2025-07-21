@@ -135,7 +135,8 @@ export const errorMessages = {
 export const minChartWidthForControlsDisplayOnRightSide = 850;
 export const minChartHeightForControlsDisplayBelow = 280;
 
-export const chartSpacing = 20;
+export const chartSpacing = [20, 20, 40, 20];
+export const chartSpacingNoCredit = 20;
 
 export const baselineColor = '#48A7FF';
 

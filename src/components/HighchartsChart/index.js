@@ -888,7 +888,6 @@ const HighchartsChart = ({
             ? createFooter({
                 source: parsedSource,
                 note: parsedNote,
-                lang,
               })
             : '',
           colorPalette,

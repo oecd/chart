@@ -399,7 +399,6 @@ export const createOptionsForMapChart = async ({
   isFullScreen = false,
   height,
   isSmall = false,
-  isForExport = false,
   mapType = mapTypes.normal.value,
   mapColorValueSteps = [],
   mapAutoShade = true,
@@ -539,7 +538,7 @@ export const createOptionsForMapChart = async ({
       },
       height,
       animation: false,
-      spacing: isFullScreen || isForExport ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacing : 0,
       events: { fullscreenClose },
     },
 
