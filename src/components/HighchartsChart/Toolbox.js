@@ -279,7 +279,6 @@ Toolbox.propTypes = {
   definition: PropTypes.string,
   note: PropTypes.string,
   source: PropTypes.string,
-  lang: PropTypes.string.isRequired,
   displayNoteAsTooltip: PropTypes.bool.isRequired,
   noteShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   sourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
