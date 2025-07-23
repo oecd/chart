@@ -88,9 +88,21 @@ export const createDotStatUrl = (
   getDotStatAvailabilityFunc,
 ) =>
   R.compose(
-    async (url) => fixDotStatUrl(await url),
-    R.when(doesUrlContainMinOrMaxDateAvailableVariable, async (url) => {
+    async (urlDataPromise) => {
+      const { url, minAvailableDate, maxAvailableDate } = await urlDataPromise;
+
+      return {
+        url: fixDotStatUrl(url),
+        minAvailableDate,
+        maxAvailableDate,
+      };
+    },
+    async (url) => {
       try {
+        if (!doesUrlContainMinOrMaxDateAvailableVariable(url)) {
+          return { url };
+        }
+
         const availabilityUrl = getAvailabilityUrlFromDotStatUrl(url);
 
         const availableMembersByDimension = getDotStatAvailabilityFunc
@@ -131,22 +143,26 @@ export const createDotStatUrl = (
           ),
         );
 
-        return R.compose(
-          R.replace(
-            new RegExp(`{${maxDateAvailableVariable}}`, 'gi'),
-            maxDateCodeFromAvailability,
-          ),
-          R.replace(
-            new RegExp(`{${minDateAvailableVariable}}`, 'gi'),
-            minDateCodeFromAvailability,
-          ),
-        )(url);
+        return {
+          url: R.compose(
+            R.replace(
+              new RegExp(`{${maxDateAvailableVariable}}`, 'gi'),
+              maxDateCodeFromAvailability,
+            ),
+            R.replace(
+              new RegExp(`{${minDateAvailableVariable}}`, 'gi'),
+              minDateCodeFromAvailability,
+            ),
+          )(url),
+          minAvailableDate: minDateCodeFromAvailability,
+          maxAvailableDate: maxDateCodeFromAvailability,
+        };
       } catch (e) {
         throw new Error(
           `Could not get {min_date} or {max_date}: ${e.message}.`,
         );
       }
-    }),
+    },
     R.reduce((acc, varName) => {
       const varValue = R.propOr('', varName, vars);
 

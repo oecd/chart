@@ -9,10 +9,6 @@ import {
   frequencies as dateUtilFrequencies,
 } from '../../../utils/dateUtil';
 import { isNilOrEmpty } from '../../../utils/ramdaUtil';
-import {
-  maxDateAvailableVariable,
-  minDateAvailableVariable,
-} from '../../../utils/configUtil';
 
 const getFrequency = (dotStatId, frequencies) => {
   if (!dotStatId) {
@@ -238,10 +234,7 @@ const ControlTimeSlider = ({
           newFrequency.maxCode,
         );
 
-    if (
-      newMinCode !== vars[minVarName] &&
-      vars[minVarName] !== `{${minDateAvailableVariable}}`
-    ) {
+    if (newMinCode !== vars[minVarName]) {
       changeVar(minVarName, newMinCode);
     }
 
@@ -258,10 +251,7 @@ const ControlTimeSlider = ({
         newFrequency.maxCode,
       );
 
-      if (
-        newMaxCode !== vars[maxVarName] &&
-        vars[maxVarName] !== `{${maxDateAvailableVariable}}`
-      ) {
+      if (newMaxCode !== vars[maxVarName]) {
         changeVar(maxVarName, newMaxCode);
       }
 

@@ -174,7 +174,8 @@ const HighchartsChart = ({
   useEffect(() => {
     const getDotStatUrl = async () => {
       try {
-        setFinalDotStatUrl(await createDotStatUrl(dotStatUrl, vars));
+        const { url } = await createDotStatUrl(dotStatUrl, vars);
+        setFinalDotStatUrl(url);
       } catch (e) {
         if (debug) {
           sendDebugInfo({
