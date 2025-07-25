@@ -11,8 +11,8 @@ import {
 import { tryCastAllToDatesAndDetectFormat } from './chartUtil';
 import {
   codeOrLabelEquals,
-  possibleVariables,
   isCastableToNumber,
+  isEqualToAnyVar,
 } from './configUtil';
 import { createCodeLabelMap } from './generalUtil';
 
@@ -584,131 +584,75 @@ export const addCodeLabelMapping = (data) =>
 
 const filterCSV = (vars) => (data) => {
   const headerRow = R.head(data);
-  const firstVarColumnIndex = R.findIndex(
-    R.includes(
-      R.__,
-      R.map((v) => `{${v}}`, possibleVariables),
-    ),
+
+  const variableColumnIndexesAndNamesPairs = reduceWithIndex(
+    (acc, value, i) => {
+      if (isEqualToAnyVar(value)) {
+        return R.append([i, R.replace(/{|}/g, '', R.toLower(value))], acc);
+      }
+
+      return acc;
+    },
+    [],
     headerRow,
   );
 
-  if (firstVarColumnIndex === -1) {
+  if (R.isEmpty(variableColumnIndexesAndNamesPairs)) {
     return { data };
   }
 
-  const firstVarName = R.nth(firstVarColumnIndex, headerRow);
-  const firstVarValue = R.compose(
-    R.when(() => firstVarColumnIndex === 0, R.split('|')),
-    R.toUpper,
-    R.prop(R.replace(/{|}/g, '', firstVarName)),
-  )(vars);
-
-  const secondVarColumnIndex =
-    firstVarColumnIndex +
-    1 +
-    R.findIndex(
-      R.includes(
-        R.__,
-        R.map((v) => `{${v}}`, possibleVariables),
-      ),
-      R.drop(firstVarColumnIndex + 1, headerRow),
-    );
-
-  const secondVarName =
-    secondVarColumnIndex > firstVarColumnIndex
-      ? R.nth(secondVarColumnIndex, headerRow)
-      : null;
-  const secondVarValue = secondVarName
-    ? R.compose(R.toUpper, R.prop(R.replace(/{|}/g, '', secondVarName)))(vars)
-    : null;
-
-  return {
-    data: R.compose(
-      (dataRows) => {
-        if (!secondVarName) {
-          const finalDataRows =
-            firstVarColumnIndex === 0
-              ? dataRows
-              : R.map(R.remove(firstVarColumnIndex, 1), dataRows);
-          return R.prepend(
-            firstVarColumnIndex === 0
-              ? R.head(data)
-              : R.compose(R.remove(firstVarColumnIndex, 1), R.head)(data),
-            finalDataRows,
-          );
-        }
-
-        if (firstVarColumnIndex === 0) {
-          const finalDataRows = R.map(
-            R.remove(secondVarColumnIndex, 1),
-            dataRows,
-          );
-
-          return R.prepend(
-            R.compose(R.remove(secondVarColumnIndex, 1), R.head)(data),
-            finalDataRows,
-          );
-        }
-
-        const finalDataRows = R.map(
+  const filteredRows = R.filter(
+    R.allPass(
+      R.map(
+        ([i, varName]) =>
           R.compose(
-            R.remove(secondVarColumnIndex - 1, 1),
-            R.remove(firstVarColumnIndex, 1),
+            R.ifElse(
+              () => i === 0,
+              R.includes(R.__, R.split('|', R.toUpper(R.prop(varName, vars)))),
+              R.equals(R.toUpper(R.prop(varName, vars))),
+            ),
+            R.toUpper,
+            (v) => `${v}`,
+            R.nth(i),
           ),
-          dataRows,
-        );
+        variableColumnIndexesAndNamesPairs,
+      ),
+    ),
+    R.tail(data),
+  );
 
-        return R.prepend(
-          R.compose(
-            R.remove(secondVarColumnIndex - 1, 1),
-            R.remove(firstVarColumnIndex, 1),
-            R.head,
-          )(data),
-          finalDataRows,
-        );
-      },
-      R.filter((row) => {
-        const firstVarColumnValue = R.toUpper(
-          `${R.nth(firstVarColumnIndex, row)}`,
-        );
+  const variableColumnIndexes = R.map(
+    R.head,
+    variableColumnIndexesAndNamesPairs,
+  );
 
-        const firstVarValueMatches =
-          firstVarColumnIndex === 0
-            ? R.includes(firstVarColumnValue, firstVarValue)
-            : R.equals(firstVarColumnValue, firstVarValue);
+  const varsThatCauseNewPreParsedDataFetch = R.pick(
+    R.map(R.nth(1), variableColumnIndexesAndNamesPairs),
+    vars,
+  );
 
-        if (!secondVarName) {
-          return firstVarValueMatches;
-        }
+  if (
+    R.length(variableColumnIndexes) === 1 &&
+    R.head(variableColumnIndexes) === 0
+  ) {
+    return {
+      data: R.prepend(headerRow, filteredRows),
+      varsThatCauseNewPreParsedDataFetch,
+    };
+  }
 
-        const secondVarColumnValue = R.toUpper(
-          `${R.nth(secondVarColumnIndex, row)}`,
-        );
+  const finalData = R.map(
+    reduceWithIndex(
+      (acc, value, i) =>
+        i === 0 || !R.includes(i, variableColumnIndexes)
+          ? R.append(value, acc)
+          : acc,
+      [],
+    ),
+    R.prepend(headerRow, filteredRows),
+  );
 
-        const secondVarValueMatches = R.equals(
-          secondVarColumnValue,
-          secondVarValue,
-        );
-
-        return firstVarValueMatches && secondVarValueMatches;
-      }),
-    )(R.tail(data)),
-    varsThatCauseNewPreParsedDataFetch: secondVarName
-      ? {
-          [R.replace(/{|}/g, '', R.nth(firstVarColumnIndex, headerRow))]:
-            firstVarColumnIndex === 0
-              ? R.join('|', firstVarValue)
-              : firstVarValue,
-          [R.replace(/{|}/g, '', R.nth(secondVarColumnIndex, headerRow))]:
-            secondVarValue,
-        }
-      : {
-          [R.replace(/{|}/g, '', R.nth(firstVarColumnIndex, headerRow))]:
-            firstVarColumnIndex === 0
-              ? R.join('|', firstVarValue)
-              : firstVarValue,
-        },
-  };
+  return { data: finalData, varsThatCauseNewPreParsedDataFetch };
 };
 
 const transformCategoriesLabel =

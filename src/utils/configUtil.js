@@ -70,3 +70,10 @@ export const getFinalPalette = (
 
   return colorPalette;
 };
+
+const possibleVariablesRegExp = new RegExp(
+  `^{${R.join('|', possibleVariables)}}$`,
+  'i',
+);
+
+export const isEqualToAnyVar = R.test(possibleVariablesRegExp);
