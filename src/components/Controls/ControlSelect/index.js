@@ -10,7 +10,7 @@ import {
   controlTypes,
   selectControlSortByOptions,
 } from '../../../constants/chart';
-import { parseCSVWithoutCleanUp } from '../../../utils/csvUtil';
+import { parseCSV } from '../../../utils/csvUtil';
 import { possibleVariables } from '../../../utils/configUtil';
 import {
   MultiValueContainer,
@@ -56,17 +56,14 @@ const ControlSelect = ({
         R.map((o) => {
           const codeThatCanContainVars =
             type === controlTypes.selectChart.value
-              ? R.join('|', R.head(parseCSVWithoutCleanUp(R.prop('value', o))))
+              ? R.join('|', R.head(parseCSV(R.prop('value', o))))
               : R.prop('value', o);
 
           const codeLabelMappingThatCanContainVars =
             type === controlTypes.selectChart.value
               ? R.compose(
                   R.fromPairs,
-                  R.map(([c, l]) => [
-                    R.join('|', R.head(parseCSVWithoutCleanUp(c))),
-                    l,
-                  ]),
+                  R.map(([c, l]) => [R.join('|', R.head(parseCSV(c))), l]),
                   R.toPairs,
                 )(codeLabelMapping)
               : codeLabelMapping;

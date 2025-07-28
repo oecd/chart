@@ -13,7 +13,7 @@ import * as R from 'ramda';
 
 import ControlFallback from './ControlFallback';
 import { controlTypes } from '../constants/chart';
-import { parseCSV, parseCSVWithoutCleanUp } from '../utils/csvUtil';
+import { parseCSV } from '../utils/csvUtil';
 import { createCodeLabelMap } from '../utils/generalUtil';
 import { isNilOrEmpty, reduceWithIndex } from '../utils/ramdaUtil';
 import { possibleVariables } from '../utils/configUtil';
@@ -31,7 +31,7 @@ const controlByType = {
 const getControlForType = R.prop(R.__, controlByType);
 
 const calcVarsForSelectChartOptionValue = (value) => {
-  const [chartId, ...vars] = R.unnest(parseCSVWithoutCleanUp(value));
+  const [chartId, ...vars] = R.unnest(parseCSV(value));
 
   return R.compose(
     reduceWithIndex(
@@ -98,7 +98,7 @@ const StandaloneControlWithConfig = ({
         }
 
         return [R.join('|', R.init(item)), R.last(item)];
-      }, parseCSVWithoutCleanUp(codeLabelMapping));
+      }, parseCSV(codeLabelMapping));
 
       return createCodeLabelMap(codeLabelWithCodeThatCanContainVars);
     }

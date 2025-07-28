@@ -38,26 +38,7 @@ const parseRawCSV = (csvString, options = {}) =>
 
 export const serializeCSV = (data, options) => Papa.unparse(data, options);
 
-const cleanupCSV = (data) => {
-  if (isNilOrEmpty(data)) {
-    return [];
-  }
-
-  const numberOfColumn = R.length(R.reject(R.isNil, R.head(data)));
-
-  return R.map((row) => {
-    if (R.length(row) === numberOfColumn) {
-      return row;
-    }
-    if (R.length(row) > numberOfColumn) {
-      return R.take(numberOfColumn, row);
-    }
-    return R.concat(
-      row,
-      R.times(R.always(null), numberOfColumn - R.length(row)),
-    );
-  }, data);
-};
+const cleanupCSV = R.when(isNilOrEmpty, R.always([]));
 
 export const parseCSV = (csvString, options = {}) =>
   R.compose(cleanupCSV, R.prop('data'), (s) => parseRawCSV(s, options))(
@@ -68,11 +49,6 @@ export const parseCSVAndIncludeParsingMetadata = (csvString, options = {}) =>
   R.compose(R.modify('data', cleanupCSV), (s) => parseRawCSV(s, options))(
     csvString ?? '',
   );
-
-export const parseCSVWithoutCleanUp = (csvString, options = {}) =>
-  R.compose(R.when(isNilOrEmpty, R.always([])), R.prop('data'), (s) =>
-    parseRawCSV(s, options),
-  )(csvString ?? '');
 
 export const parseData = ({ data, parsingHelperData, ...rest }) => {
   if (isNilOrEmpty(data)) {
@@ -741,15 +717,11 @@ const transformValuesAndExtractMetadata = ({ data, ...rest }) => {
   const newData = R.map((row) => {
     const metadata1 =
       matedata1ColumnIndex !== -1
-        ? R.head(
-            parseCSVWithoutCleanUp(R.nth(matedata1ColumnIndex, R.tail(row))),
-          ) || []
+        ? R.head(parseCSV(R.nth(matedata1ColumnIndex, R.tail(row)))) || []
         : [];
     const metadata2 =
       matedata2ColumnIndex !== -1
-        ? R.head(
-            parseCSVWithoutCleanUp(R.nth(matedata2ColumnIndex, R.tail(row))),
-          ) || []
+        ? R.head(parseCSV(R.nth(matedata2ColumnIndex, R.tail(row)))) || []
         : [];
 
     return R.prepend(
