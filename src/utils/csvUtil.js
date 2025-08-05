@@ -361,7 +361,8 @@ export const sortCSV =
       const selector =
         finalSortBy === sortByOptions.categoriesLabel.value
           ? (code) => R.path(['xDimensionLabelByCode', code], parsingHelperData)
-          : R.identity;
+          : (l) => `${l}`;
+
       return {
         data: R.prepend(
           R.head(data),
