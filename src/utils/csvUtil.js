@@ -38,7 +38,23 @@ const parseRawCSV = (csvString, options = {}) =>
 
 export const serializeCSV = (data, options) => Papa.unparse(data, options);
 
-const cleanupCSV = R.when(isNilOrEmpty, R.always([]));
+const cleanupCSV = R.compose(
+  (csv) => {
+    const largestRowSize = Math.max(...R.map(R.length, csv));
+
+    return R.map((row) => {
+      const rowSize = R.length(row);
+
+      return rowSize === largestRowSize
+        ? row
+        : R.concat(
+            row,
+            R.times(() => null, largestRowSize - rowSize),
+          );
+    }, csv);
+  },
+  R.when(isNilOrEmpty, R.always([])),
+);
 
 export const parseCSV = (csvString, options = {}) =>
   R.compose(cleanupCSV, R.prop('data'), (s) => parseRawCSV(s, options))(
