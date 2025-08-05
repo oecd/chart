@@ -308,7 +308,7 @@ export const sortParsedDataOnYAxis =
   };
 
 export const sortCSV =
-  (sortBy, sortOrder, sortSeries) =>
+  (sortBy, sortOrder, sortSeries, lang) =>
   ({
     data,
     parsingHelperData,
@@ -316,6 +316,14 @@ export const sortCSV =
     areCategoriesNumbers,
     ...rest
   }) => {
+    const orderFuncForText =
+      !sortOrder ||
+      sortOrder === sortOrderOptions.asc.value ||
+      areCategoriesDates ||
+      areCategoriesNumbers
+        ? R.ascendNatural
+        : R.descendNatural;
+
     const orderFunc =
       !sortOrder ||
       sortOrder === sortOrderOptions.asc.value ||
@@ -333,6 +341,7 @@ export const sortCSV =
       finalSortBy === sortByOptions.categoriesLabel.value ||
       finalSortBy === sortByOptions.categoriesCode.value
     ) {
+      const finalLang = isNilOrEmpty(lang) || lang === 'default' ? 'en' : lang;
       const selector =
         finalSortBy === sortByOptions.categoriesLabel.value
           ? (code) => R.path(['xDimensionLabelByCode', code], parsingHelperData)
@@ -340,7 +349,10 @@ export const sortCSV =
       return {
         data: R.prepend(
           R.head(data),
-          R.sort(orderFunc(R.compose(selector, R.head)), R.tail(data)),
+          R.sort(
+            orderFuncForText(finalLang, R.compose(selector, R.head)),
+            R.tail(data),
+          ),
         ),
         parsingHelperData,
         areCategoriesDates,
@@ -786,7 +798,7 @@ export const createDataFromCSV = ({
     ),
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
-    sortCSV(sortBy, sortOrder, sortSeries),
+    sortCSV(sortBy, sortOrder, sortSeries, lang),
     handleAreCategoriesNumbers(chartType, forceXAxisToBeTreatedAsCategories),
     handleAreCategoriesDates(
       dataSourceType,

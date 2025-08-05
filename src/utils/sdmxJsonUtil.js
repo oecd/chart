@@ -630,7 +630,7 @@ export const createDataFromSdmxJson = ({
     addCodeLabelMapping,
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
-    sortCSV(sortBy, sortOrder, sortSeries),
+    sortCSV(sortBy, sortOrder, sortSeries, lang),
     handleAreCategoriesNumbers(chartType, forceXAxisToBeTreatedAsCategories),
     handleAreCategoriesDates(
       dataSourceType,

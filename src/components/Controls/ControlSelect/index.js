@@ -43,15 +43,17 @@ const ControlSelect = ({
   sortBy,
   disabled = false,
   isDisplayedOnRightSide = false,
+  lang,
 }) => {
   const selectInstanceId = useId();
+  const finalLang = isNilOrEmpty(lang) || lang === 'default' ? 'en' : lang;
 
   const finalOptions = useMemo(
     () =>
       R.compose(
         R.when(
           () => sortBy === selectControlSortByOptions.label.value,
-          R.sortBy(R.prop('label')),
+          R.sort(R.ascendNatural(finalLang, R.prop('label'))),
         ),
         R.map((o) => {
           const codeThatCanContainVars =
@@ -81,7 +83,7 @@ const ControlSelect = ({
           )(o);
         }),
       )(R.reject(R.compose(isNilOrEmpty, R.prop('value')), options || [])),
-    [options, codeLabelMapping, type, sortBy],
+    [options, codeLabelMapping, type, sortBy, finalLang],
   );
 
   const finalLabel = useMemo(() => {
@@ -154,18 +156,18 @@ const ControlSelect = ({
         '|',
         R.replace(/\+/g, '|', vars[varName] ?? ''),
       );
-      return R.reduce(
-        (acc, item) => {
+
+      return R.compose(
+        R.sort(R.ascendNatural(finalLang, R.prop('label'))),
+        R.reduce((acc, item) => {
           const option = R.find(
             R.compose(R.equals(R.toUpper(item)), R.toUpper, R.prop('value')),
             finalOptions,
           );
 
           return option ? R.append(option, acc) : acc;
-        },
-        [],
-        optionsFromVar,
-      );
+        }, []),
+      )(optionsFromVar);
     }
 
     if (!R.has(varName, vars)) {
@@ -187,7 +189,7 @@ const ControlSelect = ({
       R.compose(R.equals(optionValue), R.toUpper, R.prop('value')),
       finalOptions,
     );
-  }, [vars, varName, finalOptions, multiple, type]);
+  }, [vars, varName, finalOptions, multiple, type, finalLang]);
 
   const starSelectedOptionChanged = useCallback(
     (value) => {
@@ -315,6 +317,7 @@ ControlSelect.propTypes = {
   sortBy: PropTypes.string,
   disabled: PropTypes.bool.isRequired,
   isDisplayedOnRightSide: PropTypes.bool,
+  lang: PropTypes.string,
 };
 
 export default ControlSelect;
