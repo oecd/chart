@@ -32,8 +32,12 @@ export const roundNumber = (number, maxNumberOfDecimal) =>
 
 export const codeOrLabelEquals = (obj) =>
   R.compose(
-    R.either(R.equals(R.toUpper(obj.code)), R.equals(R.toUpper(obj.label))),
+    R.either(
+      R.equals(R.toUpper(`${obj.code}`)),
+      R.equals(R.toUpper(`${obj.label}`)),
+    ),
     R.toUpper,
+    (v) => `${v}`,
   );
 
 export const getFinalPalette = (
