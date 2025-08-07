@@ -9,8 +9,8 @@ import {
   sortParsedDataOnYAxis,
   createCodeLabelMapping,
   addCodeLabelMapping,
-  handleAreCategoriesDates,
-  handleAreCategoriesNumbers,
+  handleAreCategoriesAndSeriesDates,
+  handleAreCategoriesAndSeriesNumbers,
 } from './csvUtil';
 import { isNilOrEmpty } from './ramdaUtil';
 import {
@@ -20,6 +20,7 @@ import {
 } from './configUtil';
 import { fetchJson } from './fetchUtil';
 import { frequencies } from './dateUtil';
+import { tryCastAllToDatesAndDetectFormat } from './chartUtil';
 
 const dotStatTimeout = 15000;
 
@@ -348,32 +349,6 @@ export const getXAndYDimension = (
   return [R.head(finalDimensions), R.nth(1, finalDimensions)];
 };
 
-const matchMonth = R.match(/(\d{4})-(\d{2})/);
-
-export const tweakDimensionLabels = R.map((dimension) => {
-  if (isTimeDimension(dimension)) {
-    const membersAreMonths = !R.isEmpty(
-      matchMonth(R.head(dimension.values).id),
-    );
-
-    if (membersAreMonths) {
-      return R.evolve(
-        {
-          values: R.map((month) => {
-            // eslint-disable-next-line no-unused-vars
-            const [_, y, m] = matchMonth(month.id);
-            return { id: month.id, name: `${m}-${y}` };
-          }),
-        },
-        dimension,
-      );
-    }
-
-    return dimension;
-  }
-  return dimension;
-});
-
 export const parseSdmxJson =
   ({
     chartType,
@@ -406,18 +381,28 @@ export const parseSdmxJson =
       R.filter(R.compose(R.gt(R.__, 1), R.length, R.prop('values'))),
     )(dimensions);
 
-    const [xDimension, yDimension] = tweakDimensionLabels(
-      getXAndYDimension(dimensions, dimensionsWithMoreThanOneMember, {
+    const [xDimension, yDimension] = getXAndYDimension(
+      dimensions,
+      dimensionsWithMoreThanOneMember,
+      {
         chartType,
         mapCountryDimension,
         dotStatUrlHasLastNObservationsEqOne,
         dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
         dotStatXAxisDimension,
         dotStatYAxisDimension,
-      }),
+      },
     );
 
     const timeDimension = R.find(isTimeDimension, dimensions);
+
+    const { isSuccessful, dateFormat } = timeDimension
+      ? tryCastAllToDatesAndDetectFormat(
+          R.map(R.prop('id'), timeDimension.values),
+        )
+      : { isSuccessful: false };
+
+    const frequency = isSuccessful ? R.prop(dateFormat, frequencies) : null;
 
     const otherDimensions = R.reject(
       R.compose(R.includes(R.__, [xDimension.id, yDimension.id]), R.prop('id')),
@@ -509,7 +494,16 @@ export const parseSdmxJson =
               10,
             );
             const timeCode = getTimeDimensionMemberCodeByIndex(time);
-            return R.assoc('metadata', { timeCode }, v);
+            const timeLabel = R.ifElse(
+              () => frequency,
+              () => {
+                const date = frequency.tryParse(timeCode);
+                return frequency.formatToLabel(date, lang);
+              },
+              () => timeCode,
+            )();
+
+            return R.assoc('metadata', { timeCode, timeLabel }, v);
           },
         )({ value });
 
@@ -575,9 +569,26 @@ export const parseSdmxJson =
             R.map(R.tail),
           )(series);
           const orderedTimeCodes = R.sortBy(R.identity, timeCodes);
+
+          const latestYMin = R.head(orderedTimeCodes);
+          const latestYMax = R.last(orderedTimeCodes);
+
+          if (frequency) {
+            return {
+              latestYMin: frequency.formatToLabel(
+                frequency.tryParse(latestYMin),
+                lang,
+              ),
+              latestYMax: frequency.formatToLabel(
+                frequency.tryParse(latestYMax),
+                lang,
+              ),
+            };
+          }
+
           return {
-            latestYMin: R.head(orderedTimeCodes),
-            latestYMax: R.last(orderedTimeCodes),
+            latestYMin,
+            latestYMax,
           };
         })()
       : {};
@@ -631,9 +642,11 @@ export const createDataFromSdmxJson = ({
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
     sortCSV(sortBy, sortOrder, sortSeries, lang),
-    handleAreCategoriesNumbers(chartType, forceXAxisToBeTreatedAsCategories),
-    handleAreCategoriesDates(
-      dataSourceType,
+    handleAreCategoriesAndSeriesNumbers(
+      chartType,
+      forceXAxisToBeTreatedAsCategories,
+    ),
+    handleAreCategoriesAndSeriesDates(
       chartType,
       forceXAxisToBeTreatedAsCategories,
     ),

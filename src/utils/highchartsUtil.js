@@ -10,7 +10,10 @@ import { isCastableToNumber, roundNumber } from './configUtil';
 import { isNilOrEmpty } from './ramdaUtil';
 import { frequencies } from './dateUtil';
 
-const numberFormat = (number, decimals, decimalPoint, thousandsSep) => {
+export const thousandsSeparator = ' ';
+export const numericSymbols = ['k', 'M', 'G', 'T', 'P', 'E'];
+
+const numberFormat = (number, decimals, decimalPoint) => {
   if (!isCastableToNumber(number)) {
     return number;
   }
@@ -19,27 +22,56 @@ const numberFormat = (number, decimals, decimalPoint, thousandsSep) => {
     Number(decimals) < 0 ||
     Number(decimals) > 100
   ) {
-    return Highcharts.numberFormat(number, -1, decimalPoint, thousandsSep);
+    return Highcharts.numberFormat(
+      number,
+      -1,
+      decimalPoint,
+      thousandsSeparator,
+    );
   }
 
   return Highcharts.numberFormat(
     number,
     roundNumber(number, decimals) === roundNumber(number, 0) ? 0 : decimals,
     decimalPoint,
-    thousandsSep,
+    thousandsSeparator,
   );
+};
+
+const numberFormatAbbreviatedForm = (number, decimals, decimalPoint) => {
+  const comparisonNumbers = R.times(
+    (multiplier) => 1000 ** (multiplier + 1),
+    R.length(numericSymbols),
+  );
+
+  const comparisonNumbersTrimmed = R.dropLastWhile(
+    (n) => number < n,
+    comparisonNumbers,
+  );
+
+  if (R.isEmpty(comparisonNumbersTrimmed)) {
+    return numberFormat(number, decimals, decimalPoint);
+  }
+
+  const relevantIndex = R.length(comparisonNumbersTrimmed) - 1;
+
+  const newNumber = number / R.nth(relevantIndex, comparisonNumbers);
+
+  return `${numberFormat(newNumber, decimals, decimalPoint)}${R.nth(relevantIndex, numericSymbols)}`;
 };
 
 export const createFormatters = ({
   chartType,
   mapColorValueSteps,
   maxNumberOfDecimals,
-  noThousandsSeparator,
-  codeLabelMapping,
   decimalPoint,
   areCategoriesNumbers,
   areCategoriesDates,
   categoriesDateFomat,
+  areSeriesNumbers,
+  areSeriesDates,
+  seriesDateFomat,
+  forceXAxisToBeTreatedAsCategories,
   lang,
   isCustomTooltipDefined,
 }) => {
@@ -59,24 +91,111 @@ export const createFormatters = ({
         this.point.value || this.point.z || this.point.y,
         isMaxNumberOrDecimalCastableToNumber ? maxNumberOfDecimals : -1,
         finalDecimalPoint,
-        noThousandsSeparator ? '' : null,
       );
     },
   };
 
-  const frequency = areCategoriesDates
+  const categoriesFrequency = areCategoriesDates
     ? R.prop(categoriesDateFomat, frequencies)
     : null;
 
-  const xAxisLabels =
-    frequency &&
-    !R.includes(chartType, chartTypesForWhichXAxisIsAlwaysTreatedAsCategories)
-      ? {
-          formatter: function formatXAxis() {
-            return frequency.formatToLabel(this.value, lang);
-          },
-        }
-      : {};
+  const seriesFrequency = areSeriesDates
+    ? R.prop(seriesDateFomat, frequencies)
+    : null;
+
+  const xAxisLabels = R.cond([
+    [
+      () => chartType === chartTypes.pie && areCategoriesNumbers,
+      () => ({
+        formatter: function formatXAxis() {
+          return numberFormat(
+            this.name,
+            maxNumberOfDecimals,
+            finalDecimalPoint,
+          );
+        },
+      }),
+    ],
+    [
+      () => chartType === chartTypes.pie && areCategoriesDates,
+      () => ({
+        formatter: function formatXAxis() {
+          const date = categoriesFrequency.tryParse(this.name);
+          return categoriesFrequency.formatToLabel(date, lang);
+        },
+      }),
+    ],
+    [
+      () => categoriesFrequency,
+      () => ({
+        formatter: function formatXAxis() {
+          const date =
+            forceXAxisToBeTreatedAsCategories ||
+            R.includes(
+              chartType,
+              chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
+            )
+              ? categoriesFrequency.tryParse(this.value)
+              : this.value;
+          return categoriesFrequency.formatToLabel(date, lang);
+        },
+      }),
+    ],
+    [
+      () => areCategoriesNumbers,
+      () => ({
+        formatter: function formatXAxis() {
+          return numberFormatAbbreviatedForm(
+            this.value,
+            maxNumberOfDecimals,
+            finalDecimalPoint,
+          );
+        },
+      }),
+    ],
+    [R.T, () => ({})],
+  ])();
+
+  const seriesLabels = R.cond([
+    [
+      () =>
+        chartType === chartTypes.pie ? categoriesFrequency : seriesFrequency,
+      () => ({
+        labelFormatter: function formatSeries() {
+          const frequency =
+            chartType === chartTypes.pie
+              ? categoriesFrequency
+              : seriesFrequency;
+          const date = frequency.tryParse(this.name);
+          return frequency.formatToLabel(date, lang);
+        },
+      }),
+    ],
+    [
+      () =>
+        chartType === chartTypes.pie ? areCategoriesNumbers : areSeriesNumbers,
+      () => ({
+        labelFormatter: function formatSeries() {
+          return numberFormatAbbreviatedForm(
+            this.name,
+            maxNumberOfDecimals,
+            finalDecimalPoint,
+          );
+        },
+      }),
+    ],
+    [R.T, () => ({})],
+  ])();
+
+  const yAxisLabels = {
+    formatter: function formatYAxis() {
+      return numberFormatAbbreviatedForm(
+        this.value,
+        maxNumberOfDecimals,
+        finalDecimalPoint,
+      );
+    },
+  };
 
   const tooltip = isCustomTooltipDefined
     ? {}
@@ -85,10 +204,7 @@ export const createFormatters = ({
           const fullFormat = `${tooltipInfo.options.headerFormat}${tooltipInfo.options.pointFormat}`;
 
           const value = this.point.y ?? this.point.value ?? this.point.z;
-          const timeCode = this.point.__metadata?.timeCode;
-          const timeLabel = timeCode
-            ? R.prop(timeCode, codeLabelMapping)
-            : null;
+          const timeLabel = this.point.__metadata?.timeLabel;
 
           const newValue = stepsHaveLabels
             ? R.nth(
@@ -98,19 +214,35 @@ export const createFormatters = ({
                   mapColorValueSteps,
                 ) || [],
               ) || value
-            : numberFormat(
-                value,
-                maxNumberOfDecimals,
-                finalDecimalPoint,
-                noThousandsSeparator ? '' : null,
-              );
+            : numberFormat(value, maxNumberOfDecimals, finalDecimalPoint);
 
           const seriesName =
             chartType === chartTypes.map ? this.point.name : this.series.name;
 
+          const formattedSeriesName = R.cond([
+            [
+              () => seriesFrequency && chartType !== chartTypes.map,
+              () => {
+                const date = seriesFrequency.tryParse(seriesName);
+                return seriesFrequency.formatToLabel(date, lang);
+              },
+            ],
+            [
+              () => areSeriesNumbers && chartType !== chartTypes.map,
+              () =>
+                numberFormat(
+                  seriesName,
+                  maxNumberOfDecimals,
+                  finalDecimalPoint,
+                ),
+            ],
+            [R.T, () => seriesName],
+          ])();
+
           return R.compose(
             R.compose(
-              (content) => R.replace('{series.name}', seriesName, content),
+              (content) =>
+                R.replace('{series.name}', formattedSeriesName, content),
               (content) => {
                 const key = R.cond([
                   [() => chartType === chartTypes.map, () => this.series.name],
@@ -118,41 +250,44 @@ export const createFormatters = ({
                   [R.T, () => this.point.category ?? this.series.name],
                 ])();
 
+                const frequency =
+                  chartType === chartTypes.map
+                    ? seriesFrequency
+                    : categoriesFrequency;
+
                 const timeLabelSuffix = R.cond([
                   [() => isNilOrEmpty(timeLabel), () => ''],
                   [() => R.isEmpty(key), () => timeLabel],
                   [R.T, () => ` - ${timeLabel}`],
                 ])();
 
-                if (
-                  R.includes(
-                    chartType,
-                    chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
-                  )
-                ) {
-                  return R.replace(
-                    /{.*point.key}/,
-                    `${key}${timeLabelSuffix}`,
-                    content,
-                  );
-                }
-
                 if (!R.isNil(frequency)) {
+                  const date =
+                    forceXAxisToBeTreatedAsCategories ||
+                    R.includes(
+                      chartType,
+                      chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
+                    )
+                      ? frequency.tryParse(key)
+                      : key;
+
                   return R.replace(
                     /{.*point.key}/,
-                    frequency.formatToLabel(key, lang),
+                    frequency.formatToLabel(date, lang),
                     content,
                   );
                 }
 
-                if (areCategoriesNumbers) {
+                if (
+                  areCategoriesNumbers ||
+                  (chartType === chartTypes.map && areSeriesNumbers)
+                ) {
                   return R.replace(
                     /{.*point.key}/,
                     `${numberFormat(
                       key,
                       maxNumberOfDecimals,
                       finalDecimalPoint,
-                      noThousandsSeparator ? '' : null,
                     )}${timeLabelSuffix}`,
                     content,
                   );
@@ -171,5 +306,5 @@ export const createFormatters = ({
         },
       };
 
-  return { dataLabels, tooltip, xAxisLabels };
+  return { dataLabels, tooltip, xAxisLabels, yAxisLabels, seriesLabels };
 };

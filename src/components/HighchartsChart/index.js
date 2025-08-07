@@ -132,7 +132,6 @@ const HighchartsChart = ({
   sortSeries = '',
   yAxisOrderOverride = '',
   maxNumberOfDecimals = '',
-  noThousandsSeparator = false,
   customTooltip = '',
   mapCountryDimension = '',
   displayNoteAsTooltip = false,
@@ -661,6 +660,7 @@ const HighchartsChart = ({
           latestMin: parsedData?.latestYMin,
           latestMax: parsedData?.latestYMax,
           mapping: parsedData?.codeLabelMapping,
+          lang,
         });
     return R.either(R.equals('<p></p>'), isNilOrEmpty)(parsed) ? null : parsed;
   }, [
@@ -670,6 +670,7 @@ const HighchartsChart = ({
     parsedData?.latestYMin,
     parsedData?.latestYMax,
     parsedData?.codeLabelMapping,
+    lang,
   ]);
 
   const parsedSource = useMemo(() => {
@@ -681,6 +682,7 @@ const HighchartsChart = ({
           latestMin: parsedData?.latestYMin,
           latestMax: parsedData?.latestYMax,
           mapping: parsedData?.codeLabelMapping,
+          lang,
         });
 
     return R.either(R.equals('<p></p>'), isNilOrEmpty)(parsed) ? null : parsed;
@@ -691,6 +693,7 @@ const HighchartsChart = ({
     parsedData?.latestYMin,
     parsedData?.latestYMax,
     parsedData?.codeLabelMapping,
+    lang,
   ]);
 
   const parsedDefinition = useMemo(() => {
@@ -701,6 +704,7 @@ const HighchartsChart = ({
         latestMin: parsedData?.latestYMin,
         latestMax: parsedData?.latestYMax,
         mapping: parsedData?.codeLabelMapping,
+        lang,
       });
 
     return R.either(R.equals('<p></p>'), isNilOrEmpty)(parsed) ? null : parsed;
@@ -710,6 +714,7 @@ const HighchartsChart = ({
     parsedData?.latestYMin,
     parsedData?.latestYMax,
     parsedData?.codeLabelMapping,
+    lang,
   ]);
 
   const headerRef = useRef(null);
@@ -726,6 +731,7 @@ const HighchartsChart = ({
             latestMax: parsedData?.latestYMax,
             mapping: parsedData?.codeLabelMapping,
             replaceMissingVarByBlank: true,
+            lang,
           }),
     [
       title,
@@ -734,6 +740,7 @@ const HighchartsChart = ({
       parsedData?.latestYMax,
       parsedData?.codeLabelMapping,
       hideTitle,
+      lang,
     ],
   );
 
@@ -748,6 +755,7 @@ const HighchartsChart = ({
             latestMax: parsedData?.latestYMax,
             mapping: parsedData?.codeLabelMapping,
             replaceMissingVarByBlank: true,
+            lang,
           }),
     [
       subtitle,
@@ -756,6 +764,7 @@ const HighchartsChart = ({
       parsedData?.latestYMax,
       parsedData?.codeLabelMapping,
       hideSubtitle,
+      lang,
     ],
   );
 
@@ -905,7 +914,6 @@ const HighchartsChart = ({
           mapColorValueSteps,
           stacking,
           maxNumberOfDecimals,
-          noThousandsSeparator,
           decimalPoint,
           customTooltip: finalCustomTooltip,
           height: isFullScreen ? screenHeight : chartHeight,
@@ -917,6 +925,8 @@ const HighchartsChart = ({
           tooltipOutside,
           csvExportcolumnHeaderFormatter: csvExportColumnHeaderFormatter,
           isFullScreen,
+          forceXAxisToBeTreatedAsCategories,
+          lang,
         });
 
         setMergedOptions(
@@ -950,7 +960,6 @@ const HighchartsChart = ({
     mapColorValueSteps,
     stacking,
     maxNumberOfDecimals,
-    noThousandsSeparator,
     finalCustomTooltip,
     paletteStartingColor,
     paletteStartingColorOverride,
@@ -966,6 +975,7 @@ const HighchartsChart = ({
     parsedSource,
     parsedNote,
     lang,
+    forceXAxisToBeTreatedAsCategories,
   ]);
 
   return (
@@ -1115,7 +1125,6 @@ HighchartsChart.propTypes = {
   sortSeries: PropTypes.string,
   yAxisOrderOverride: PropTypes.string,
   maxNumberOfDecimals: PropTypes.string,
-  noThousandsSeparator: PropTypes.bool,
   customTooltip: PropTypes.string,
   mapCountryDimension: PropTypes.string,
   displayNoteAsTooltip: PropTypes.bool,

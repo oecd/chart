@@ -492,7 +492,7 @@ export const createOptionsForMapChart = async ({
             }
           : {}),
 
-        showInLegend: true,
+        showInLegend: false,
 
         data: reduceWithIndex(
           (acc, d, xIdx) => {

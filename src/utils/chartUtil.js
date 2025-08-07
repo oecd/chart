@@ -15,12 +15,17 @@ import {
   baselineColorShades,
   chartSpacing,
   chartTypes,
+  chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   defaultExportSize,
   frequencyTypes,
   stackingOptions,
 } from '../constants/chart';
 import { frequencies } from './dateUtil';
-import { createFormatters } from './highchartsUtil';
+import {
+  createFormatters,
+  numericSymbols,
+  thousandsSeparator,
+} from './highchartsUtil';
 import {
   createExportFileName,
   createShadesFromColor,
@@ -38,8 +43,8 @@ export const makeColorReadableOnBackgroundColor = (color, backgroundColor) =>
     R.times(R.identity, 3),
   ).toHexString();
 
-const createDatapoint = (d, categoriesAreDatesOrNumber) =>
-  categoriesAreDatesOrNumber
+const createDatapoint = (d, categoriesAreDatesOrNumberForDataParsing) =>
+  categoriesAreDatesOrNumberForDataParsing
     ? {
         x: d.metadata.parsedX,
         y: d.value,
@@ -52,18 +57,14 @@ const createDatapoint = (d, categoriesAreDatesOrNumber) =>
         custom: d.custom,
       };
 
-const areCategoriesDatesOrNumber = (data) =>
-  data.areCategoriesDates || data.areCategoriesNumbers;
-
-export const createStackedDatapoints = (
+export const createStackedDatapoints = ({
   data,
   colorPalette,
   highlightColors,
   highlight,
   baseline,
-) => {
-  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
-
+  categoriesAreDatesOrNumberForDataParsing,
+}) => {
   const baselineColors = R.find(
     (shade) => R.length(shade) <= R.length(data.series),
     baselineColorShades,
@@ -122,7 +123,10 @@ export const createStackedDatapoints = (
           [R.T, R.always(null)],
         ])();
 
-        const dataPoint = createDatapoint(d, categoriesAreDatesOrNumber);
+        const dataPoint = createDatapoint(
+          d,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
 
         return color
           ? { name: category.label, ...dataPoint, color }
@@ -239,9 +243,18 @@ export const tryCastAllToDatesAndDetectFormat = (values) => {
     frequencyTypes.quinquennial.value,
     frequencies,
   );
+
+  const isAnyYearGreaterThanLikelyRealYear = R.any(
+    (d) => d.getFullYear() > 2500,
+  );
+
   if (quinquennialFrequency.tryParse(firstValue)) {
     const dates = R.map(quinquennialFrequency.tryParse, values);
     if (R.length(dates) > 2 && !R.any(R.equals(false), dates)) {
+      if (isAnyYearGreaterThanLikelyRealYear(dates)) {
+        return { isSuccessful: false, dates: null, dateFormat: null };
+      }
+
       return {
         isSuccessful: true,
         dates: R.map((d) => d.getTime(), dates),
@@ -254,6 +267,10 @@ export const tryCastAllToDatesAndDetectFormat = (values) => {
   if (yearlyFrequency.tryParse(firstValue)) {
     const dates = R.map(yearlyFrequency.tryParse, values);
     if (!R.any(R.equals(false), dates)) {
+      if (isAnyYearGreaterThanLikelyRealYear(dates)) {
+        return { isSuccessful: false, dates: null, dateFormat: null };
+      }
+
       return {
         isSuccessful: true,
         dates: R.map((d) => d.getTime(), dates),
@@ -307,6 +324,7 @@ export const replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax = ({
   latestMax,
   mapping,
   replaceMissingVarByBlank = false,
+  lang,
 }) =>
   R.compose(
     R.replace(
@@ -323,7 +341,17 @@ export const replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax = ({
           R.when(R.isEmpty, () => (replaceMissingVarByBlank ? '&nbsp;' : '')),
           R.join(', '),
           R.reject(isNilOrEmpty),
-          R.map(R.prop(R.__, mapping)),
+          R.map((code) => {
+            const { isSuccessful, dateFormat } =
+              tryCastAllToDatesAndDetectFormat([code]);
+            if (isSuccessful) {
+              const frequency = R.prop(dateFormat, frequencies);
+              const date = frequency.tryParse(code);
+              return frequency.formatToLabel(date, lang);
+            }
+
+            return R.prop(code, mapping);
+          }),
           R.split('|'),
           R.toUpper,
           R.prop(varName),
@@ -389,9 +417,8 @@ const createOptionsForLineChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
+  categoriesAreDatesOrNumberForDataParsing,
 }) => {
-  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
-
   const series = mapWithIndex((s, yIdx) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
       s,
@@ -407,7 +434,10 @@ const createOptionsForLineChart = ({
     return {
       name: s.label,
       data: R.map((d) => {
-        const dataPoint = createDatapoint(d, categoriesAreDatesOrNumber);
+        const dataPoint = createDatapoint(
+          d,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
 
         return dataPoint;
       }, s.data),
@@ -456,7 +486,7 @@ const createOptionsForLineChart = ({
     colors: [R.head(colorPalette)],
 
     xAxis: {
-      categories: categoriesAreDatesOrNumber
+      categories: categoriesAreDatesOrNumberForDataParsing
         ? null
         : R.map(R.prop('label'), data.categories),
       ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
@@ -467,8 +497,8 @@ const createOptionsForLineChart = ({
       },
       gridLineColor: '#c2cbd6',
       lineColor: 'transparent',
-      left: categoriesAreDatesOrNumber ? '10%' : '5%',
-      width: categoriesAreDatesOrNumber ? '85%' : '95%',
+      left: categoriesAreDatesOrNumberForDataParsing ? '10%' : '5%',
+      width: categoriesAreDatesOrNumberForDataParsing ? '85%' : '95%',
       tickWidth: 0,
     },
 
@@ -481,6 +511,7 @@ const createOptionsForLineChart = ({
       lineColor: '#c2cbd6',
       labels: {
         style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels,
         align: 'left',
         x: 0,
@@ -490,6 +521,7 @@ const createOptionsForLineChart = ({
 
     legend: {
       enabled: !hideLegend,
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: {
         fontWeight: 'normal',
@@ -564,9 +596,8 @@ const createOptionsForBarChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
+  categoriesAreDatesOrNumberForDataParsing,
 }) => {
-  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
-
   const series = mapWithIndex((s, xIdx) => {
     const seriesColor =
       getBaselineOrHighlightColor(s, highlight, baseline, highlightColors) ||
@@ -584,7 +615,10 @@ const createOptionsForBarChart = ({
           highlightColors,
         );
 
-        const dataPoint = createDatapoint(d, categoriesAreDatesOrNumber);
+        const dataPoint = createDatapoint(
+          d,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
 
         return baselineOrHighlightColor
           ? {
@@ -603,12 +637,12 @@ const createOptionsForBarChart = ({
 
   const calcXAxisLayout = () => {
     if (horizontal) {
-      return categoriesAreDatesOrNumber
+      return categoriesAreDatesOrNumberForDataParsing
         ? { top: '7.5%', height: '88.9%' }
         : { top: '8%', height: '88%' };
     }
 
-    return categoriesAreDatesOrNumber
+    return categoriesAreDatesOrNumberForDataParsing
       ? { left: '8%', width: '89%' }
       : { left: '9%', width: '87%' };
   };
@@ -641,7 +675,7 @@ const createOptionsForBarChart = ({
     colors: colorPalette,
 
     xAxis: {
-      categories: categoriesAreDatesOrNumber
+      categories: categoriesAreDatesOrNumberForDataParsing
         ? null
         : R.map(R.prop('label'), data.categories),
       ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
@@ -666,6 +700,7 @@ const createOptionsForBarChart = ({
       lineColor: '#c2cbd6',
       labels: {
         style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
 
@@ -677,6 +712,7 @@ const createOptionsForBarChart = ({
 
     legend: {
       enabled: !hideLegend,
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: {
         fontWeight: 'normal',
@@ -729,16 +765,16 @@ const createOptionsForStackedChart = ({
   height,
   isSmall = false,
   stacking = stackingOptions.percent.value,
+  categoriesAreDatesOrNumberForDataParsing,
 }) => {
-  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
-
-  const series = createStackedDatapoints(
+  const series = createStackedDatapoints({
     data,
     colorPalette,
     highlightColors,
     highlight,
     baseline,
-  );
+    categoriesAreDatesOrNumberForDataParsing,
+  });
 
   const horizontal = chartType === chartTypes.stackedRow;
   const area = chartType === chartTypes.stackedArea;
@@ -751,7 +787,7 @@ const createOptionsForStackedChart = ({
 
   const calcXAxisLayout = () => {
     if (area) {
-      return categoriesAreDatesOrNumber
+      return categoriesAreDatesOrNumberForDataParsing
         ? { left: '10%', width: '85%' }
         : { left: '5%', width: '95%' };
     }
@@ -790,7 +826,7 @@ const createOptionsForStackedChart = ({
 
     xAxis: {
       categories:
-        area && categoriesAreDatesOrNumber
+        area && categoriesAreDatesOrNumberForDataParsing
           ? null
           : R.map(R.prop('label'), data.categories),
       ...(data.areCategoriesDates
@@ -820,6 +856,7 @@ const createOptionsForStackedChart = ({
       lineColor: '#c2cbd6',
       labels: {
         style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
         align: 'left',
@@ -831,6 +868,7 @@ const createOptionsForStackedChart = ({
 
     legend: {
       enabled: !hideLegend,
+      ...R.prop('seriesLabels', formatters),
       reversed: false,
       itemDistance: 10,
       itemStyle: {
@@ -892,12 +930,11 @@ const createOptionsForScatterChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
+  categoriesAreDatesOrNumberForDataParsing,
 }) => {
   const symbolLayout = chartType === chartTypes.symbol;
 
   const firstPaletteColor = R.head(colorPalette);
-
-  const categoriesAreDatesOrNumber = areCategoriesDatesOrNumber(data);
 
   const series = mapWithIndex((s, yIdx) => {
     const symbol = getListItemAtTurningIndex(yIdx, symbols);
@@ -925,7 +962,10 @@ const createOptionsForScatterChart = ({
           highlightColors,
         );
 
-        const dataPoint = createDatapoint(d, categoriesAreDatesOrNumber);
+        const dataPoint = createDatapoint(
+          d,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
 
         return baselineOrHighlightColor
           ? {
@@ -1032,7 +1072,7 @@ const createOptionsForScatterChart = ({
     colors: colorPalette,
 
     xAxis: {
-      categories: categoriesAreDatesOrNumber
+      categories: categoriesAreDatesOrNumberForDataParsing
         ? null
         : R.map(R.prop('label'), data.categories),
       ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
@@ -1043,8 +1083,8 @@ const createOptionsForScatterChart = ({
       },
       gridLineColor: '#c2cbd6',
       lineColor: 'transparent',
-      left: categoriesAreDatesOrNumber ? '10%' : '5%',
-      width: categoriesAreDatesOrNumber ? '85%' : '95%',
+      left: categoriesAreDatesOrNumberForDataParsing ? '10%' : '5%',
+      width: categoriesAreDatesOrNumberForDataParsing ? '85%' : '95%',
       tickWidth: 0,
     },
 
@@ -1056,6 +1096,7 @@ const createOptionsForScatterChart = ({
       lineColor: '#c2cbd6',
       labels: {
         style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels,
         align: 'left',
         x: 0,
@@ -1065,6 +1106,7 @@ const createOptionsForScatterChart = ({
 
     legend: {
       enabled: !hideLegend,
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: {
         fontWeight: 'normal',
@@ -1107,6 +1149,7 @@ const createOptionsForRadarChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
+  categoriesAreDatesOrNumberForDataParsing,
 }) => {
   const series = mapWithIndex((s, xIdx) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
@@ -1122,7 +1165,10 @@ const createOptionsForRadarChart = ({
 
     return {
       name: s.label,
-      data: R.map((d) => createDatapoint(d), s.data),
+      data: R.map(
+        (d) => createDatapoint(d, categoriesAreDatesOrNumberForDataParsing),
+        s.data,
+      ),
       type: 'line',
       lineWidth: 2.5,
       marker: {
@@ -1174,6 +1220,7 @@ const createOptionsForRadarChart = ({
       categories: R.map(R.prop('label'), data.categories),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        ...R.prop('xAxisLabels', formatters),
         enabled: !hideXAxisLabels,
       },
       gridLineColor: '#c2cbd6',
@@ -1188,12 +1235,14 @@ const createOptionsForRadarChart = ({
       lineColor: '#c2cbd6',
       labels: {
         style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels,
       },
     },
 
     legend: {
       enabled: !hideLegend,
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: {
         fontWeight: 'normal',
@@ -1254,6 +1303,7 @@ const createOptionsForRadarChart = ({
 
 const createOptionsForPieChart = ({
   data,
+  formatters = {},
   colorPalette,
   highlight = null,
   baseline = null,
@@ -1264,6 +1314,7 @@ const createOptionsForPieChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
+  categoriesAreDatesOrNumberForDataParsing,
 }) => {
   const series = R.map(
     (s) => ({
@@ -1279,7 +1330,10 @@ const createOptionsForPieChart = ({
             highlightColors,
           ) || getListItemAtTurningIndex(xIdx, colorPalette);
 
-        const dataPoint = createDatapoint(d);
+        const dataPoint = createDatapoint(
+          d,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
 
         return { name: category.label, ...dataPoint, color };
       }, s.data),
@@ -1302,6 +1356,7 @@ const createOptionsForPieChart = ({
     },
 
     legend: {
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: {
         fontWeight: 'normal',
@@ -1325,6 +1380,7 @@ const createOptionsForPieChart = ({
       pie: {
         dataLabels: {
           enabled: !hideXAxisLabels,
+          ...R.prop('xAxisLabels', formatters),
           style: {
             fontSize: isSmall ? '13px' : '16px',
             color: '#586179',
@@ -1380,7 +1436,6 @@ export const createChartOptions = async ({
   paletteStartingColorOverride = null,
   mapColorValueSteps,
   maxNumberOfDecimals,
-  noThousandsSeparator,
   decimalPoint,
   customTooltip,
   tooltipOutside,
@@ -1389,6 +1444,7 @@ export const createChartOptions = async ({
   exportHeight = defaultExportSize.height,
   vars,
   lang,
+  forceXAxisToBeTreatedAsCategories,
   ...otherProps
 }) => {
   const createOptionsForChartType = await getCreateOptionsFuncForChartType(
@@ -1421,15 +1477,26 @@ export const createChartOptions = async ({
     chartType: otherProps.chartType,
     mapColorValueSteps,
     maxNumberOfDecimals,
-    noThousandsSeparator,
-    codeLabelMapping: otherProps.data.codeLabelMapping,
     decimalPoint,
     areCategoriesNumbers: otherProps.data.areCategoriesNumbers,
     areCategoriesDates: otherProps.data.areCategoriesDates,
     categoriesDateFomat: otherProps.data.categoriesDateFomat,
+    areSeriesNumbers: otherProps.data.areSeriesNumbers,
+    areSeriesDates: otherProps.data.areSeriesDates,
+    seriesDateFomat: otherProps.data.seriesDateFomat,
+    forceXAxisToBeTreatedAsCategories,
     lang,
     isCustomTooltipDefined: !isNilOrEmpty(customTooltip),
   });
+
+  const categoriesAreDatesOrNumberForDataParsing =
+    (otherProps.data.areCategoriesDates ||
+      otherProps.data.areCategoriesNumbers) &&
+    !forceXAxisToBeTreatedAsCategories &&
+    !R.includes(
+      otherProps.chartType,
+      chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
+    );
 
   const options = await createOptionsForChartType({
     ...otherProps,
@@ -1440,13 +1507,14 @@ export const createChartOptions = async ({
     maxNumberOfDecimals,
     formatters,
     decimalPoint,
-    noThousandsSeparator,
+    categoriesAreDatesOrNumberForDataParsing,
   });
 
   return R.compose(
     R.assoc('lang', {
       decimalPoint,
-      thousandsSep: noThousandsSeparator ? '' : null,
+      thousandsSep: thousandsSeparator,
+      numericSymbols,
     }),
     R.assoc('tooltip', {
       ...R.prop('tooltip', formatters),
