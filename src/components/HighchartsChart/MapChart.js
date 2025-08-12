@@ -99,7 +99,7 @@ const MapChart = forwardRef(({ options, isFullScreen = false }, ref) => {
       constructorType="mapChart"
       highcharts={Highcharts}
       options={options}
-      immutable={R.isNil(optionalDottedMapLines) && !isFullScreen}
+      immutable={!isFullScreen}
       updateArgs={[true, true, false]}
     />
   );

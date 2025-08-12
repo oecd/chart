@@ -430,9 +430,11 @@ export const createOptionsForMapChart = async ({
     );
   };
 
+  const finalMapColorValueSteps = mapAutoShade ? [] : mapColorValueSteps;
+
   const stepsHaveLabels =
-    !isNilOrEmpty(mapColorValueSteps) &&
-    R.all(R.compose(R.equals(2), R.length), mapColorValueSteps);
+    !isNilOrEmpty(finalMapColorValueSteps) &&
+    R.all(R.compose(R.equals(2), R.length), finalMapColorValueSteps);
 
   const finalMap = overrideCountriesLabel(data.codeLabelMapping);
 
@@ -447,9 +449,9 @@ export const createOptionsForMapChart = async ({
     (cp) =>
       R.equals(1, R.length(cp)) &&
       !mapAutoShade &&
-      !isNilOrEmpty(mapColorValueSteps),
+      !isNilOrEmpty(finalMapColorValueSteps),
     (cp) => {
-      const nbShadesToCreate = R.min(6, R.length(mapColorValueSteps) + 1);
+      const nbShadesToCreate = R.min(6, R.length(finalMapColorValueSteps) + 1);
       return R.compose(
         R.reverse,
         R.take(nbShadesToCreate),
@@ -563,12 +565,12 @@ export const createOptionsForMapChart = async ({
         ]),
       ],
       [
-        R.always(!isNilOrEmpty(mapColorValueSteps)),
+        R.always(!isNilOrEmpty(finalMapColorValueSteps) && !mapAutoShade),
         R.always([
           {
             dataClassColor: 'category',
             dataClasses: createMapDataClasses(
-              mapColorValueSteps,
+              finalMapColorValueSteps,
               stepsHaveLabels,
             ),
           },
