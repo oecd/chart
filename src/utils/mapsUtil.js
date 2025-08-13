@@ -406,8 +406,8 @@ export const createOptionsForMapChart = async ({
 }) => {
   const createMapDatapoint = (d) =>
     mapType === mapTypes.normal.value
-      ? { value: d.value, __metadata: d.metadata }
-      : { z: d.value, __metadata: d.metadata };
+      ? { value: d.value, __metadata: d.metadata, custom: d.custom }
+      : { z: d.value, __metadata: d.metadata, custom: d.custom };
 
   const overrideCountriesLabel = (codeLabelMapping) => {
     if (isNilOrEmpty(codeLabelMapping)) {
