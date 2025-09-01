@@ -76,8 +76,15 @@ export const getFinalPalette = (
 };
 
 const possibleVariablesRegExp = new RegExp(
-  `^{${R.join('|', possibleVariables)}}$`,
+  `^{(${R.join('|', possibleVariables)})}$`,
   'i',
 );
 
 export const isEqualToAnyVar = R.test(possibleVariablesRegExp);
+
+const possibleVariablesRangeRegExp = new RegExp(
+  `^\\[{(${R.join('|', possibleVariables)})}-{(${R.join('|', possibleVariables)})}\\]$`,
+  'i',
+);
+
+export const isEqualToAnyVarRange = R.test(possibleVariablesRangeRegExp);

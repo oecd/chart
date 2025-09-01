@@ -12,10 +12,12 @@ import {
   codeOrLabelEquals,
   isCastableToNumber,
   isEqualToAnyVar,
+  isEqualToAnyVarRange,
 } from './configUtil';
 import { createCodeLabelMap } from './generalUtil';
 
 import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
+import { frequencies } from './dateUtil';
 
 export const emptyData = {
   categories: [],
@@ -618,10 +620,107 @@ export const addCodeLabelMapping = (data) =>
 const filterCSV = (vars) => (data) => {
   const headerRow = R.head(data);
 
-  const variableColumnIndexesAndNamesPairs = reduceWithIndex(
+  const variableColumnIndexesAndFilterDataPairs = reduceWithIndex(
     (acc, value, i) => {
+      if (isEqualToAnyVarRange(value) && i === 0) {
+        const rangeVarNames = R.compose(
+          R.split('}-{'),
+          R.replace('}]', ''),
+          R.replace('[{', ''),
+          R.head,
+        )(headerRow);
+
+        const firstColumnData = R.compose(R.map(R.head), R.tail)(data);
+
+        const { isSuccessful, dateFormat } =
+          tryCastAllToDatesAndDetectFormat(firstColumnData);
+
+        if (isSuccessful) {
+          const frequency = R.prop(dateFormat, frequencies);
+
+          const minVarValue = R.toUpper(
+            R.prop(
+              R.replace(/{|}/g, '', R.toLower(R.head(rangeVarNames))),
+              vars,
+            ),
+          );
+          const maxVarValue = R.toUpper(
+            R.prop(
+              R.replace(/{|}/g, '', R.toLower(R.nth(1, rangeVarNames))),
+              vars,
+            ),
+          );
+
+          return R.append(
+            [
+              i,
+              {
+                isRange: true,
+                frequency,
+                minVarName: R.head(rangeVarNames),
+                minVarValue,
+                minVarValueParsed: frequency.tryParse(minVarValue),
+                maxVarName: R.nth(1, rangeVarNames),
+                maxVarValue,
+                maxVarValueParsed: frequency.tryParse(maxVarValue),
+                columnDataIsCompatible: true,
+              },
+            ],
+            acc,
+          );
+        }
+
+        if (R.all(isCastableToNumber, firstColumnData)) {
+          const minVarValue = R.toUpper(
+            R.prop(
+              R.replace(/{|}/g, '', R.toLower(R.head(rangeVarNames))),
+              vars,
+            ),
+          );
+          const maxVarValue = R.toUpper(
+            R.prop(
+              R.replace(/{|}/g, '', R.toLower(R.nth(1, rangeVarNames))),
+              vars,
+            ),
+          );
+
+          return R.append(
+            [
+              i,
+              {
+                isRange: true,
+                minVarName: R.head(rangeVarNames),
+                minVarValue,
+                minVarValueParsed: Number(minVarValue),
+                maxVarName: R.nth(1, rangeVarNames),
+                maxVarValue,
+                maxVarValueParsed: Number(maxVarValue),
+                columnDataIsCompatible: true,
+              },
+            ],
+            acc,
+          );
+        }
+
+        return R.append(
+          [i, { isRange: true, columnDataIsCompatible: false }],
+          acc,
+        );
+      }
+
       if (isEqualToAnyVar(value)) {
-        return R.append([i, R.replace(/{|}/g, '', R.toLower(value))], acc);
+        return R.append(
+          [
+            i,
+            {
+              varName: R.replace(/{|}/g, '', R.toLower(value)),
+              varValue: R.toUpper(
+                R.prop(R.replace(/{|}/g, '', R.toLower(value)), vars),
+              ),
+            },
+          ],
+          acc,
+        );
       }
 
       return acc;
@@ -630,25 +729,45 @@ const filterCSV = (vars) => (data) => {
     headerRow,
   );
 
-  if (R.isEmpty(variableColumnIndexesAndNamesPairs)) {
+  if (R.isEmpty(variableColumnIndexesAndFilterDataPairs)) {
     return { data };
   }
 
   const filteredRows = R.filter(
     R.allPass(
       R.map(
-        ([i, varName]) =>
+        ([i, filterData]) =>
           R.compose(
-            R.ifElse(
-              () => i === 0,
-              R.includes(R.__, R.split('|', R.toUpper(R.prop(varName, vars)))),
-              R.equals(R.toUpper(R.prop(varName, vars))),
-            ),
+            (columnValue) => {
+              if (filterData.isRange && !filterData.columnDataIsCompatible) {
+                return false;
+              }
+
+              if (filterData.isRange) {
+                const columnValueParsed = R.has('frequency', filterData)
+                  ? filterData.frequency.tryParse(columnValue)
+                  : Number(columnValue);
+                return (
+                  columnValueParsed >= filterData.minVarValueParsed &&
+                  columnValueParsed <= filterData.maxVarValueParsed
+                );
+              }
+
+              if (i === 0) {
+                return R.includes(
+                  columnValue,
+                  R.split('|', filterData.varValue),
+                );
+              }
+
+              return columnValue === filterData.varValue;
+            },
+
             R.toUpper,
             (v) => `${v}`,
             R.nth(i),
           ),
-        variableColumnIndexesAndNamesPairs,
+        variableColumnIndexesAndFilterDataPairs,
       ),
     ),
     R.tail(data),
@@ -656,11 +775,29 @@ const filterCSV = (vars) => (data) => {
 
   const variableColumnIndexes = R.map(
     R.head,
-    variableColumnIndexesAndNamesPairs,
+    variableColumnIndexesAndFilterDataPairs,
   );
 
   const varsThatCauseNewPreParsedDataFetch = R.pick(
-    R.map(R.nth(1), variableColumnIndexesAndNamesPairs),
+    R.unnest(
+      R.map(
+        R.compose(
+          (filterData) =>
+            filterData.isRange
+              ? [filterData.minVarName, filterData.maxVarName]
+              : filterData.varName,
+          R.nth(1),
+        ),
+        R.reject(
+          R.compose(
+            (filterData) =>
+              filterData.isRange && !filterData.columnDataIsCompatible,
+            R.nth(1),
+          ),
+          variableColumnIndexesAndFilterDataPairs,
+        ),
+      ),
+    ),
     vars,
   );
 
