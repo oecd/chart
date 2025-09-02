@@ -779,6 +779,11 @@ const HighchartsChart = ({
 
   const isFontLoaded = useIsFontLoaded();
 
+  const [
+    allHeightCalculationsHaveBeenDone,
+    setAllHeightCalculationsHaveBeenDone,
+  ] = useState(false);
+
   useEffect(() => {
     const isThereEnoughSpaceForFooter =
       displayNoteAsTooltip && displaySourceAsTooltip
@@ -799,6 +804,8 @@ const HighchartsChart = ({
             footerRef.current.clientHeight
         : height - headerRef.current.clientHeight,
     );
+
+    setAllHeightCalculationsHaveBeenDone(true);
   }, [
     width,
     height,
@@ -815,7 +822,7 @@ const HighchartsChart = ({
   const numberOfDataPoint =
     R.length(parsedData?.categories || []) * R.length(parsedData?.series || []);
 
-  const [mergedOptions, setMergedOptions] = useState({});
+  const [mergedOptions, setMergedOptions] = useState(null);
 
   const chartCanBedisplayed =
     !isFetching &&
@@ -823,7 +830,7 @@ const HighchartsChart = ({
     R.isNil(errorMessage) &&
     !R.isNil(parsedData) &&
     numberOfDataPoint <= maxSupprortedNumberOfDataPoint &&
-    !R.isEmpty(mergedOptions);
+    allHeightCalculationsHaveBeenDone;
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [screenHeight, setScreenHeight] = useState(0);
@@ -884,9 +891,7 @@ const HighchartsChart = ({
   );
 
   useEffect(() => {
-    if (!parsedData) {
-      setMergedOptions({});
-    } else {
+    if (chartCanBedisplayed) {
       const getOptions = async () => {
         const defaultOptions = await createChartOptions({
           chartType,
@@ -976,6 +981,7 @@ const HighchartsChart = ({
     parsedNote,
     lang,
     forceXAxisToBeTreatedAsCategories,
+    chartCanBedisplayed,
   ]);
 
   return (
@@ -1026,7 +1032,7 @@ const HighchartsChart = ({
         )}
       </div>
 
-      {!chartCanBedisplayed && (
+      {(!chartCanBedisplayed || !mergedOptions) && (
         <CenteredContainer height={chartHeight}>
           {isFetching && <Spinner />}
           {!R.isNil(errorMessage) && errorMessage}
@@ -1034,7 +1040,7 @@ const HighchartsChart = ({
         </CenteredContainer>
       )}
 
-      {!R.isNil(footerHeight) && chartHeight && chartCanBedisplayed && (
+      {chartCanBedisplayed && mergedOptions && (
         <Suspense
           fallback={
             <CenteredContainer height={chartHeight}>
