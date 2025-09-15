@@ -387,7 +387,7 @@ const createMapDataClasses = (steps, stepsHaveLabels) => {
   );
 };
 
-export const createOptionsForMapChart = async ({
+export const createOptionsForMapChart = ({
   data,
   formatters = {},
   colorPalette,

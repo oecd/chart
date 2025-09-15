@@ -694,7 +694,7 @@ const createOptionsForBarChart = ({
 
     yAxis: {
       title: {
-        enabled: false,
+        text: '',
       },
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
@@ -1395,189 +1395,187 @@ const createOptionsForPieChart = ({
   };
 };
 
-const getCreateOptionsFuncForChartType = async (chartType) => {
+const createChartOptionsFunc =
+  (createOptionsFuncForChartType) =>
+  ({
+    highlight,
+    baseline,
+    colorPalette,
+    smallerColorPalettes = [],
+    paletteStartingColor = null,
+    paletteStartingColorOverride = null,
+    mapColorValueSteps,
+    maxNumberOfDecimals,
+    decimalPoint,
+    customTooltip,
+    tooltipOutside,
+    csvExportcolumnHeaderFormatter,
+    exportWidth = defaultExportSize.width,
+    exportHeight = defaultExportSize.height,
+    vars,
+    lang,
+    forceXAxisToBeTreatedAsCategories,
+    ...otherProps
+  }) => {
+    const finalColorPalette = getFinalPalette(
+      colorPalette,
+      smallerColorPalettes,
+      R.length(
+        otherProps.chartType === chartTypes.pie
+          ? otherProps.data.categories
+          : otherProps.data.series || [],
+      ),
+      paletteStartingColor,
+      paletteStartingColorOverride,
+    );
+
+    const parsedHighlight = R.compose(
+      R.reject(R.isEmpty),
+      R.split('|'),
+    )(replaceVarsNameByVarsValue(highlight, vars));
+
+    const parsedBaseline = R.compose(
+      R.reject(R.isEmpty),
+      R.split('|'),
+    )(replaceVarsNameByVarsValue(baseline, vars));
+
+    const formatters = createFormatters({
+      chartType: otherProps.chartType,
+      mapColorValueSteps,
+      maxNumberOfDecimals,
+      decimalPoint,
+      areCategoriesNumbers: otherProps.data.areCategoriesNumbers,
+      areCategoriesDates: otherProps.data.areCategoriesDates,
+      categoriesDateFomat: otherProps.data.categoriesDateFomat,
+      areSeriesNumbers: otherProps.data.areSeriesNumbers,
+      areSeriesDates: otherProps.data.areSeriesDates,
+      seriesDateFomat: otherProps.data.seriesDateFomat,
+      forceXAxisToBeTreatedAsCategories,
+      lang,
+      isCustomTooltipDefined: !isNilOrEmpty(customTooltip),
+    });
+
+    const categoriesAreDatesOrNumberForDataParsing =
+      (otherProps.data.areCategoriesDates ||
+        otherProps.data.areCategoriesNumbers) &&
+      !forceXAxisToBeTreatedAsCategories &&
+      !R.includes(
+        otherProps.chartType,
+        chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
+      );
+
+    const options = createOptionsFuncForChartType({
+      ...otherProps,
+      colorPalette: finalColorPalette,
+      highlight: parsedHighlight,
+      baseline: parsedBaseline,
+      mapColorValueSteps,
+      maxNumberOfDecimals,
+      formatters,
+      decimalPoint,
+      categoriesAreDatesOrNumberForDataParsing,
+    });
+
+    return R.compose(
+      R.assoc('lang', {
+        decimalPoint,
+        thousandsSep: thousandsSeparator,
+        numericSymbols,
+      }),
+      R.assoc('tooltip', {
+        ...R.prop('tooltip', formatters),
+        ...(isNilOrEmpty(customTooltip) ? {} : { format: customTooltip }),
+        outside: tooltipOutside,
+        style: {
+          zIndex: 702,
+        },
+      }),
+      R.assoc('exporting', {
+        enabled: false,
+        sourceWidth: exportWidth,
+        sourceHeight: exportHeight,
+        filename: createExportFileName(),
+        allowHTML: true,
+        csv: {
+          columnHeaderFormatter: csvExportcolumnHeaderFormatter,
+        },
+      }),
+      R.assoc('credits', {
+        enabled: otherProps.isFullScreen,
+        text: lang === 'fr' ? '© OCDE' : '© OECD',
+        href: 'https://www.oecd.org',
+        position: {
+          align: 'left',
+          x: 20,
+          y: -20,
+        },
+        style: {
+          color: '#586179',
+          fontSize: '13px',
+          cursor: 'auto',
+        },
+      }),
+      R.assoc('caption', {
+        text: otherProps.footer,
+        align: 'left',
+        margin: 25,
+        useHTML: true,
+        style: {
+          color: '#586179',
+          fontSize: '13px',
+        },
+      }),
+      R.assoc('subtitle', {
+        text: otherProps.subtitle,
+        align: 'left',
+        style: {
+          color: '#586179',
+          fontSize: '17px',
+        },
+      }),
+      R.assoc('title', {
+        text: otherProps.title,
+        align: 'left',
+        margin: 20,
+        style: {
+          color: '#101d40',
+          fontWeight: 'bold',
+          fontSize: '18px',
+        },
+      }),
+    )(options);
+  };
+
+export const getCreateOptionsFuncForChartType = async (chartType) => {
   switch (chartType) {
     case chartTypes.line:
-      return createOptionsForLineChart;
+      return createChartOptionsFunc(createOptionsForLineChart);
 
     case chartTypes.bar:
     case chartTypes.row:
-      return createOptionsForBarChart;
+      return createChartOptionsFunc(createOptionsForBarChart);
 
     case chartTypes.stackedBar:
     case chartTypes.stackedRow:
     case chartTypes.stackedArea:
-      return createOptionsForStackedChart;
+      return createChartOptionsFunc(createOptionsForStackedChart);
 
     case chartTypes.map:
-      return (await mapsUtil).createOptionsForMapChart;
+      return createChartOptionsFunc((await mapsUtil).createOptionsForMapChart);
 
     case chartTypes.symbol:
     case chartTypes.scatter:
-      return createOptionsForScatterChart;
+      return createChartOptionsFunc(createOptionsForScatterChart);
 
     case chartTypes.radar:
-      return createOptionsForRadarChart;
+      return createChartOptionsFunc(createOptionsForRadarChart);
 
     case chartTypes.pie:
-      return createOptionsForPieChart;
+      return createChartOptionsFunc(createOptionsForPieChart);
 
     default:
       return () => ({});
   }
-};
-
-export const createChartOptions = async ({
-  highlight,
-  baseline,
-  colorPalette,
-  smallerColorPalettes = [],
-  paletteStartingColor = null,
-  paletteStartingColorOverride = null,
-  mapColorValueSteps,
-  maxNumberOfDecimals,
-  decimalPoint,
-  customTooltip,
-  tooltipOutside,
-  csvExportcolumnHeaderFormatter,
-  exportWidth = defaultExportSize.width,
-  exportHeight = defaultExportSize.height,
-  vars,
-  lang,
-  forceXAxisToBeTreatedAsCategories,
-  ...otherProps
-}) => {
-  const createOptionsForChartType = await getCreateOptionsFuncForChartType(
-    otherProps.chartType,
-  );
-
-  const finalColorPalette = getFinalPalette(
-    colorPalette,
-    smallerColorPalettes,
-    R.length(
-      otherProps.chartType === chartTypes.pie
-        ? otherProps.data.categories
-        : otherProps.data.series || [],
-    ),
-    paletteStartingColor,
-    paletteStartingColorOverride,
-  );
-
-  const parsedHighlight = R.compose(
-    R.reject(R.isEmpty),
-    R.split('|'),
-  )(replaceVarsNameByVarsValue(highlight, vars));
-
-  const parsedBaseline = R.compose(
-    R.reject(R.isEmpty),
-    R.split('|'),
-  )(replaceVarsNameByVarsValue(baseline, vars));
-
-  const formatters = createFormatters({
-    chartType: otherProps.chartType,
-    mapColorValueSteps,
-    maxNumberOfDecimals,
-    decimalPoint,
-    areCategoriesNumbers: otherProps.data.areCategoriesNumbers,
-    areCategoriesDates: otherProps.data.areCategoriesDates,
-    categoriesDateFomat: otherProps.data.categoriesDateFomat,
-    areSeriesNumbers: otherProps.data.areSeriesNumbers,
-    areSeriesDates: otherProps.data.areSeriesDates,
-    seriesDateFomat: otherProps.data.seriesDateFomat,
-    forceXAxisToBeTreatedAsCategories,
-    lang,
-    isCustomTooltipDefined: !isNilOrEmpty(customTooltip),
-  });
-
-  const categoriesAreDatesOrNumberForDataParsing =
-    (otherProps.data.areCategoriesDates ||
-      otherProps.data.areCategoriesNumbers) &&
-    !forceXAxisToBeTreatedAsCategories &&
-    !R.includes(
-      otherProps.chartType,
-      chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
-    );
-
-  const options = await createOptionsForChartType({
-    ...otherProps,
-    colorPalette: finalColorPalette,
-    highlight: parsedHighlight,
-    baseline: parsedBaseline,
-    mapColorValueSteps,
-    maxNumberOfDecimals,
-    formatters,
-    decimalPoint,
-    categoriesAreDatesOrNumberForDataParsing,
-  });
-
-  return R.compose(
-    R.assoc('lang', {
-      decimalPoint,
-      thousandsSep: thousandsSeparator,
-      numericSymbols,
-    }),
-    R.assoc('tooltip', {
-      ...R.prop('tooltip', formatters),
-      ...(isNilOrEmpty(customTooltip) ? {} : { format: customTooltip }),
-      outside: tooltipOutside,
-      style: {
-        zIndex: 702,
-      },
-    }),
-    R.assoc('exporting', {
-      enabled: false,
-      sourceWidth: exportWidth,
-      sourceHeight: exportHeight,
-      filename: createExportFileName(),
-      allowHTML: true,
-      csv: {
-        columnHeaderFormatter: csvExportcolumnHeaderFormatter,
-      },
-    }),
-    R.assoc('credits', {
-      enabled: otherProps.isFullScreen,
-      text: lang === 'fr' ? '© OCDE' : '© OECD',
-      href: 'https://www.oecd.org',
-      position: {
-        align: 'left',
-        x: 20,
-        y: -20,
-      },
-      style: {
-        color: '#586179',
-        fontSize: '13px',
-        cursor: 'auto',
-      },
-    }),
-    R.assoc('caption', {
-      text: otherProps.footer,
-      align: 'left',
-      margin: 25,
-      useHTML: true,
-      style: {
-        color: '#586179',
-        fontSize: '13px',
-      },
-    }),
-    R.assoc('subtitle', {
-      text: otherProps.subtitle,
-      align: 'left',
-      style: {
-        color: '#586179',
-        fontSize: '17px',
-      },
-    }),
-    R.assoc('title', {
-      text: otherProps.title,
-      align: 'left',
-      margin: 20,
-      style: {
-        color: '#101d40',
-        fontWeight: 'bold',
-        fontSize: '18px',
-      },
-    }),
-  )(options);
 };
 
 export const createFooter = ({ source, note }) =>
