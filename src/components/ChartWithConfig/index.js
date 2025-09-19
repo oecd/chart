@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading  */
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';

@@ -1,3 +1,4 @@
+/*global fetch*/
 import * as R from 'ramda';
 
 const handleResponse = async (response) => {
@@ -7,7 +8,7 @@ const handleResponse = async (response) => {
   let errorResponse = null;
   try {
     errorResponse = await response.json();
-  } catch (e) {
+  } catch {
     throw new Error(response.statusText);
   }
   if (R.has('error', errorResponse)) {

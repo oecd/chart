@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-props-no-spreading, react/no-this-in-sfc  */
+/*global document, CustomEvent, URL, window*/
 import React, {
   useState,
   useRef,
@@ -199,7 +199,7 @@ const HighchartsChart = ({
           vars,
           lang,
         });
-      } catch (e) {
+      } catch {
         return emptyData;
       }
     }
@@ -295,7 +295,7 @@ const HighchartsChart = ({
 
             setParsedData(R.prop('preParsedData', newPreParsedData));
             setIsFetching(false);
-          } catch (e) {
+          } catch {
             setErrorMessage(errorMessages.generic);
             setIsFetching(false);
           }
@@ -530,7 +530,7 @@ const HighchartsChart = ({
           );
           setParsedData(R.prop('preParsedData', newPreParsedData));
           setIsFetching(false);
-        } catch (e) {
+        } catch {
           setIsFetching(false);
           setErrorMessage(errorMessages.generic);
           setParsedData(null);
@@ -593,7 +593,7 @@ const HighchartsChart = ({
           dotStatYAxisDimension,
         }),
       );
-    } catch (e) {
+    } catch {
       setErrorMessage(errorMessages.generic);
       setParsedData(emptyData);
     }
@@ -647,7 +647,7 @@ const HighchartsChart = ({
 
         setErrorMessage(null);
         setNoDataMessage(null);
-      } catch (e) {
+      } catch {
         setErrorMessage(errorMessages.generic);
         setParsedData(emptyData);
       }

@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading  */
 import React, { useCallback, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Slider from 'rc-slider';

@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading  */
 import React, { useMemo, lazy, Suspense, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';

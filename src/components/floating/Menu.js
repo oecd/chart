@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable react/display-name */
 import React, {
   useRef,
   createContext,

@@ -1,3 +1,4 @@
+/*global window, customElements*/
 import React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import reactToWebComponent from 'react-to-webcomponent';

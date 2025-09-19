@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading  */
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';

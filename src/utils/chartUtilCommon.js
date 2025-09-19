@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise, no-nested-ternary */
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import { codeOrLabelEquals } from './configUtil';

@@ -1,4 +1,4 @@
-/* eslint-disable react/no-this-in-sfc  */
+/* eslint-disable react/display-name */
 import React, {
   useMemo,
   forwardRef,

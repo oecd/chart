@@ -1,3 +1,4 @@
+/*global process*/
 import React from 'react';
 
 export const chartTypes = {

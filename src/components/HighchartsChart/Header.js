@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-props-no-spreading, , jsx-a11y/control-has-associated-label */
+/*global window*/
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';

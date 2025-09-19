@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-props-no-spreading */
+/*global document, CustomEvent*/
 import React, {
   useMemo,
   useCallback,

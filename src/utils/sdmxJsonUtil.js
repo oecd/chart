@@ -1,3 +1,4 @@
+/*global URL, fetch, AbortSignal*/
 import { parse } from 'date-fns';
 import * as R from 'ramda';
 
@@ -202,7 +203,7 @@ export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
         // so that it will be detected as an "empty" message by the parser
         return { data: { dataSets: [{}] }, meta: { schema: '' } };
       }
-    } catch (e) {
+    } catch {
       throw new Error(
         R.isEmpty(response.statusText) ? response.status : response.statusText,
       );

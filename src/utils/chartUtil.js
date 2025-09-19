@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise, no-nested-ternary */
 import { TinyColor, isReadable } from '@ctrl/tinycolor';
 import truncatise from 'truncatise';
 import * as R from 'ramda';
