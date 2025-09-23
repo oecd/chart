@@ -39,6 +39,9 @@ const numberFormat = (number, decimals, decimalPoint) => {
 };
 
 const numberFormatAbbreviatedForm = (number, decimals, decimalPoint) => {
+  if (!isCastableToNumber(number)) {
+    return number;
+  }
   const comparisonNumbers = R.times(
     (multiplier) => 1000 ** (multiplier + 1),
     R.length(numericSymbols),
