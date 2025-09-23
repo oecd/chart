@@ -43,7 +43,7 @@ export const makeColorReadableOnBackgroundColor = (color, backgroundColor) =>
   ).toHexString();
 
 const createDatapoint = (d, categoriesAreDatesOrNumberForDataParsing) =>
-  categoriesAreDatesOrNumberForDataParsing
+  categoriesAreDatesOrNumberForDataParsing && d.metadata
     ? {
         x: d.metadata.parsedX,
         y: d.value,

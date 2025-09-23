@@ -5,6 +5,7 @@ import {
   chartTypes,
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   decimalPointTypes,
+  frequencyTypes,
 } from '../constants/chart';
 import { isCastableToNumber, roundNumber } from './configUtil';
 import { isNilOrEmpty } from './ramdaUtil';
@@ -98,13 +99,15 @@ export const createFormatters = ({
     },
   };
 
-  const categoriesFrequency = areCategoriesDates
-    ? R.prop(categoriesDateFomat, frequencies)
-    : null;
+  const categoriesFrequency =
+    areCategoriesDates && categoriesDateFomat !== frequencyTypes.yearly.value
+      ? R.prop(categoriesDateFomat, frequencies)
+      : null;
 
-  const seriesFrequency = areSeriesDates
-    ? R.prop(seriesDateFomat, frequencies)
-    : null;
+  const seriesFrequency =
+    areSeriesDates && seriesDateFomat !== frequencyTypes.yearly.value
+      ? R.prop(seriesDateFomat, frequencies)
+      : null;
 
   const xAxisLabels = R.cond([
     [
@@ -124,7 +127,9 @@ export const createFormatters = ({
       () => ({
         formatter: function formatXAxis() {
           const date = categoriesFrequency.tryParse(this.name);
-          return categoriesFrequency.formatToLabel(date, lang);
+          return date
+            ? categoriesFrequency.formatToLabel(date, lang)
+            : this.name;
         },
       }),
     ],
@@ -140,7 +145,10 @@ export const createFormatters = ({
             )
               ? categoriesFrequency.tryParse(this.value)
               : this.value;
-          return categoriesFrequency.formatToLabel(date, lang);
+
+          return date
+            ? categoriesFrequency.formatToLabel(date, lang)
+            : this.value;
         },
       }),
     ],
@@ -170,7 +178,7 @@ export const createFormatters = ({
               ? categoriesFrequency
               : seriesFrequency;
           const date = frequency.tryParse(this.name);
-          return frequency.formatToLabel(date, lang);
+          return date ? frequency.formatToLabel(date, lang) : this.name;
         },
       }),
     ],
@@ -227,7 +235,9 @@ export const createFormatters = ({
               () => seriesFrequency && chartType !== chartTypes.map,
               () => {
                 const date = seriesFrequency.tryParse(seriesName);
-                return seriesFrequency.formatToLabel(date, lang);
+                return date
+                  ? seriesFrequency.formatToLabel(date, lang)
+                  : seriesName;
               },
             ],
             [
