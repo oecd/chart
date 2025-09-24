@@ -5,7 +5,6 @@ import {
   chartTypes,
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   decimalPointTypes,
-  frequencyTypes,
 } from '../constants/chart';
 import { isCastableToNumber, roundNumber } from './configUtil';
 import { isNilOrEmpty } from './ramdaUtil';
@@ -99,15 +98,13 @@ export const createFormatters = ({
     },
   };
 
-  const categoriesFrequency =
-    areCategoriesDates && categoriesDateFomat !== frequencyTypes.yearly.value
-      ? R.prop(categoriesDateFomat, frequencies)
-      : null;
+  const categoriesFrequency = areCategoriesDates
+    ? R.prop(categoriesDateFomat, frequencies)
+    : null;
 
-  const seriesFrequency =
-    areSeriesDates && seriesDateFomat !== frequencyTypes.yearly.value
-      ? R.prop(seriesDateFomat, frequencies)
-      : null;
+  const seriesFrequency = areSeriesDates
+    ? R.prop(seriesDateFomat, frequencies)
+    : null;
 
   const xAxisLabels = R.cond([
     [
@@ -286,7 +283,7 @@ export const createFormatters = ({
 
                   return R.replace(
                     /{.*point.key}/,
-                    frequency.formatToLabel(date, lang),
+                    date ? frequency.formatToLabel(date, lang) : key,
                     content,
                   );
                 }
