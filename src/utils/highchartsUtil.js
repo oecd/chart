@@ -1,4 +1,5 @@
 import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
+import { UTCDate } from '@date-fns/utc';
 import * as R from 'ramda';
 
 import {
@@ -126,7 +127,7 @@ export const createFormatters = ({
           const date = categoriesFrequency.tryParse(this.name);
           return date
             ? categoriesFrequency.formatToLabel(date, lang)
-            : this.name;
+            : new UTCDate(this.name);
         },
       }),
     ],
@@ -141,7 +142,7 @@ export const createFormatters = ({
               chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
             )
               ? categoriesFrequency.tryParse(this.value)
-              : this.value;
+              : new UTCDate(this.value);
 
           return date
             ? categoriesFrequency.formatToLabel(date, lang)
@@ -279,7 +280,7 @@ export const createFormatters = ({
                       chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
                     )
                       ? frequency.tryParse(key)
-                      : key;
+                      : new UTCDate(key);
 
                   return R.replace(
                     /{.*point.key}/,

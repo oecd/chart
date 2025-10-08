@@ -249,7 +249,7 @@ export const tryCastAllToDatesAndDetectFormat = (values) => {
 
   if (quinquennialFrequency.tryParse(firstValue)) {
     const dates = R.map(quinquennialFrequency.tryParse, values);
-    if (R.length(dates) > 2 && !R.any(R.equals(false), dates)) {
+    if (R.length(dates) > 1 && !R.any(R.equals(false), dates)) {
       if (isAnyYearGreaterThanLikelyRealYear(dates)) {
         return { isSuccessful: false, dates: null, dateFormat: null };
       }

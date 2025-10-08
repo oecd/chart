@@ -1,5 +1,6 @@
 /*global URL, fetch, AbortSignal*/
 import { parse } from 'date-fns';
+import { UTCDate } from '@date-fns/utc';
 import * as R from 'ramda';
 
 import { chartTypes, frequencyTypes } from '../constants/chart';
@@ -136,12 +137,16 @@ export const createDotStatUrl = (
 
         const minDateCodeFromAvailability = frequency.formatToCode(
           frequency.getStartPeriod(
-            parse(timeRange.startPeriod, "yyyy-MM-dd'T'HH:mm:ss", new Date()),
+            parse(
+              timeRange.startPeriod,
+              "yyyy-MM-dd'T'HH:mm:ss",
+              new UTCDate(),
+            ),
           ),
         );
         const maxDateCodeFromAvailability = frequency.formatToCode(
           frequency.getEndPeriod(
-            parse(timeRange.endPeriod, "yyyy-MM-dd'T'HH:mm:ss", new Date()),
+            parse(timeRange.endPeriod, "yyyy-MM-dd'T'HH:mm:ss", new UTCDate()),
           ),
         );
 

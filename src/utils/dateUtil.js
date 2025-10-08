@@ -15,6 +15,7 @@ import {
   startOfMonth,
   endOfMonth,
 } from 'date-fns';
+import { UTCDate, utc } from '@date-fns/utc';
 import * as R from 'ramda';
 
 import { frequencyTypes } from '../constants/chart';
@@ -25,7 +26,10 @@ const differenceInQinquennials = (maxDate, minDate) =>
 const addQinquennials = (date, amount) => addYears(date, amount * 5);
 
 const tryParseWithFormat = (string, dateFormat) => {
-  const date = parse(`${string}`, dateFormat, new Date());
+  const date = parse(`${string}`, dateFormat, new UTCDate(), {
+    in: utc,
+  });
+
   if (isValid(date)) {
     return date;
   }
