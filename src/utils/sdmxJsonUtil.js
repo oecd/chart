@@ -367,6 +367,7 @@ export const parseSdmxJson =
     dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
     dotStatXAxisDimension,
     dotStatYAxisDimension,
+    controlConnectedDotStatDimensionIds,
   }) =>
   (sdmxJson) => {
     const observations = R.path(
@@ -530,10 +531,44 @@ export const parseSdmxJson =
       ),
     )(series);
 
+    const structureDimensions = dotStatStructure?.dimensions || [];
+
+    const finalControlConnectedDotStatDimensionIds = R.without(
+      [xDimension.id, yDimension.id],
+      controlConnectedDotStatDimensionIds || [],
+    );
+
+    // order matters because several dimensions can have the same code members
+    // createCodeLabelMapping merges all dimensions so the last ones win
+    const orderedDimensionsForMapping = [
+      ...R.reject(
+        R.compose(
+          R.includes(
+            R.__,
+            R.concat(
+              [xDimension.id, yDimension.id],
+              finalControlConnectedDotStatDimensionIds || [],
+            ),
+          ),
+          R.prop('id'),
+        ),
+        structureDimensions,
+      ),
+      ...R.filter(
+        R.compose(
+          R.includes(R.__, finalControlConnectedDotStatDimensionIds || []),
+          R.prop('id'),
+        ),
+        structureDimensions,
+      ),
+      R.find(R.propEq(yDimension.id, 'id'), structureDimensions),
+      R.find(R.propEq(xDimension.id, 'id'), structureDimensions),
+    ];
+
     const codeLabelMapping = createCodeLabelMapping({
       csvCodeLabelMappingProjectLevel,
       codeLabelMappingChartLevel: dotStatCodeLabelMapping,
-      dotStatStructure,
+      dotStatDimensions: orderedDimensionsForMapping,
       lang,
     });
 
@@ -638,6 +673,7 @@ export const createDataFromSdmxJson = ({
   dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
   dotStatXAxisDimension,
   dotStatYAxisDimension,
+  controlConnectedDotStatDimensionIds,
 }) => {
   if (!sdmxJson) {
     return null;
@@ -674,6 +710,7 @@ export const createDataFromSdmxJson = ({
       dimensionCodeUsedWhenOnlyOneDimensionHasMoreThanOneMember,
       dotStatXAxisDimension,
       dotStatYAxisDimension,
+      controlConnectedDotStatDimensionIds,
     }),
   )(sdmxJson);
 };

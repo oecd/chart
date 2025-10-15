@@ -88,3 +88,10 @@ const possibleVariablesRangeRegExp = new RegExp(
 );
 
 export const isEqualToAnyVarRange = R.test(possibleVariablesRangeRegExp);
+
+export const getConnectedControlsDotStatDimensionIds = (controls) =>
+  R.compose(
+    R.uniq,
+    R.map(R.prop('connectedDotStatDimension')),
+    R.filter(R.has('connectedDotStatDimension')),
+  )(controls || []);

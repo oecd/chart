@@ -110,6 +110,7 @@ const HighchartsChart = ({
   definition = null,
   note = null,
   source = null,
+  controlConnectedDotStatDimensionIds,
   setControls,
   getControlsWithAvailability,
   highlight = '',
@@ -556,7 +557,7 @@ const HighchartsChart = ({
         const codeLabelMapping = createCodeLabelMapping({
           csvCodeLabelMappingProjectLevel,
           codeLabelMappingChartLevel: dotStatCodeLabelMapping,
-          dotStatStructure,
+          dotStatDimensions: dotStatStructure?.dimensions,
           lang: dotStatLang,
         });
 
@@ -591,6 +592,7 @@ const HighchartsChart = ({
           forceXAxisToBeTreatedAsCategories,
           dotStatXAxisDimension,
           dotStatYAxisDimension,
+          controlConnectedDotStatDimensionIds,
         }),
       );
     } catch {
@@ -608,6 +610,7 @@ const HighchartsChart = ({
     dotStatUrlHasLastNObservationsEqOne,
     dotStatXAxisDimension,
     dotStatYAxisDimension,
+    controlConnectedDotStatDimensionIds,
     forceXAxisToBeTreatedAsCategories,
     mapCountryDimension,
     pivotData,
@@ -1175,6 +1178,7 @@ HighchartsChart.propTypes = {
   definition: PropTypes.string,
   note: PropTypes.string,
   source: PropTypes.string,
+  controlConnectedDotStatDimensionIds: PropTypes.array,
   setControls: PropTypes.func.isRequired,
   getControlsWithAvailability: PropTypes.func.isRequired,
   highlight: PropTypes.string,

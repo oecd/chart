@@ -204,14 +204,14 @@ export const pivotCSV =
 export const createCodeLabelMapping = ({
   csvCodeLabelMappingProjectLevel,
   codeLabelMappingChartLevel,
-  dotStatStructure,
+  dotStatDimensions,
   lang,
   vars,
 }) => {
   if (
     isNilOrEmpty(csvCodeLabelMappingProjectLevel) &&
     isNilOrEmpty(codeLabelMappingChartLevel) &&
-    isNilOrEmpty(dotStatStructure?.dimensions) &&
+    isNilOrEmpty(dotStatDimensions) &&
     isNilOrEmpty(vars)
   ) {
     return {};
@@ -232,7 +232,7 @@ export const createCodeLabelMapping = ({
       ),
     ),
     R.reject(R.has('timeRange')),
-  )(dotStatStructure?.dimensions || []);
+  )(dotStatDimensions || []);
 
   const mappingVars = R.compose(
     createCodeLabelMap,

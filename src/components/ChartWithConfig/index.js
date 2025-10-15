@@ -7,6 +7,7 @@ import ChartWithConfigNonFixedChartHeight from './ChartWithConfigNonFixedChartHe
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import { trackChartView } from '../../utils/trackingUtil';
 import { controlTypes, frequencyTypes } from '../../constants/chart';
+import { getConnectedControlsDotStatDimensionIds } from '../../utils/configUtil';
 
 const ChartWithConfig = ({
   height = null,
@@ -93,9 +94,16 @@ const ChartWithConfig = ({
   }, []);
 
   const [stateControls, setStateControls] = useState(controls);
+  const [
+    controlConnectedDotStatDimensionIds,
+    setControlConnectedDotStatDimensionIds,
+  ] = useState(() => getConnectedControlsDotStatDimensionIds(controls));
 
   useEffect(() => {
     setStateControls(controls);
+    setControlConnectedDotStatDimensionIds(
+      getConnectedControlsDotStatDimensionIds(controls),
+    );
   }, [controls]);
 
   const onGotNewControls = useCallback(
@@ -204,6 +212,7 @@ const ChartWithConfig = ({
       vars={vars}
       changeVar={changeVar}
       controls={stateControls}
+      controlConnectedDotStatDimensionIds={controlConnectedDotStatDimensionIds}
       hideControls={hideControls}
       setControls={onGotNewControls}
       getControlsWithAvailability={getControlsWithAvailability}
