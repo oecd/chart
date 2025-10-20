@@ -950,6 +950,8 @@ const HighchartsChart = ({
         setParsedData({
           ...emptyData,
           codeLabelMapping: parsedData.codeLabelMapping,
+          varsThatCauseNewPreParsedDataFetch:
+            parsedData.varsThatCauseNewPreParsedDataFetch,
         });
 
         return;
