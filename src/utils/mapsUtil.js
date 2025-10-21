@@ -636,6 +636,11 @@ export const createOptionsForMapChart = ({
         !mapAutoShade
           ? 12
           : undefined,
+      symbolHeight:
+        R.includes(mapType, [mapTypes.point.value, mapTypes.bubble.value]) &&
+        !mapAutoShade
+          ? 12
+          : undefined,
     },
 
     plotOptions: {
