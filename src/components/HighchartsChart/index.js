@@ -46,6 +46,7 @@ import {
   deepMergeUserOptionsWithDefaultOptions,
   createFooter,
   getCreateOptionsFuncForChartType,
+  isParsedDataEmpty,
 } from '../../utils/chartUtil';
 import CenteredContainer from '../CenteredContainer';
 import { fetchJson } from '../../utils/fetchUtil';
@@ -954,6 +955,11 @@ const HighchartsChart = ({
             parsedData.varsThatCauseNewPreParsedDataFetch,
         });
 
+        return;
+      }
+
+      if (isParsedDataEmpty(parsedData)) {
+        setNoDataMessage(errorMessages.noData);
         return;
       }
 

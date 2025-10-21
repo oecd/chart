@@ -1591,3 +1591,5 @@ export const createFooter = ({ source, note }) =>
     R.join(''),
     R.reject(isNilOrEmpty),
   )([source, note]);
+
+export const isParsedDataEmpty = R.compose(R.isEmpty, R.prop('categories'));
