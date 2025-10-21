@@ -39,7 +39,7 @@ const numberFormat = (number, decimals, decimalPoint) => {
   );
 };
 
-const numberFormatAbbreviatedForm = (number, decimals, decimalPoint) => {
+export const numberFormatAbbreviatedForm = (number, decimals, decimalPoint) => {
   if (!isCastableToNumber(number)) {
     return number;
   }

@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import { chartSpacing, mapTypes } from '../constants/chart';
+import { chartSpacing, decimalPointTypes, mapTypes } from '../constants/chart';
 
 import map from './world-highres-custom-topo.json';
 import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
@@ -10,6 +10,8 @@ import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
 } from './chartUtilCommon';
+import { isCastableToNumber } from './configUtil';
+import { numberFormatAbbreviatedForm } from './highchartsUtil';
 
 const dottedBorderNames = {
   ETH_SOM: 'ETH_SOM',
@@ -346,7 +348,12 @@ const getDottedMapLines = (countrycodes, mapType) => {
       };
 };
 
-const createMapDataClasses = (steps, stepsHaveLabels) => {
+const createMapDataClasses = (
+  steps,
+  stepsHaveLabels,
+  maxNumberOfDecimals,
+  decimalPoint,
+) => {
   const stepsLength = R.length(steps);
 
   if (stepsLength === 0) {
@@ -369,21 +376,42 @@ const createMapDataClasses = (steps, stepsHaveLabels) => {
     }, steps);
   }
 
+  const finalMaxNumberOfDecimals = isCastableToNumber(maxNumberOfDecimals)
+    ? maxNumberOfDecimals
+    : -1;
+  const finalDecimalPoint = decimalPoint || decimalPointTypes.point.value;
+  const finalSteps = R.map(
+    R.compose(
+      (n) => [
+        n,
+        numberFormatAbbreviatedForm(
+          n,
+          finalMaxNumberOfDecimals,
+          finalDecimalPoint,
+        ),
+      ],
+      R.head,
+    ),
+  )(steps);
+
   return R.prepend(
-    { to: R.head(R.head(steps)), name: `< ${R.head(R.head(steps))}` },
+    {
+      to: R.head(R.head(finalSteps)),
+      name: `< ${R.nth(1, R.head(finalSteps))}`,
+    },
     mapWithIndex((s, idx) => {
       if (idx === stepsLength - 1) {
         return {
-          from: R.head(R.nth(idx, steps)),
-          name: `> ${R.head(R.nth(idx, steps))}`,
+          from: R.head(R.nth(idx, finalSteps)),
+          name: `> ${R.nth(1, R.nth(idx, finalSteps))}`,
         };
       }
       return {
-        from: R.head(R.nth(idx, steps)),
-        to: R.head(R.nth(idx + 1, steps)),
-        name: `${R.head(R.nth(idx, steps))} - ${R.head(R.nth(idx + 1, steps))}`,
+        from: R.head(R.nth(idx, finalSteps)),
+        to: R.head(R.nth(idx + 1, finalSteps)),
+        name: `${R.nth(1, R.nth(idx, finalSteps))} - ${R.nth(1, R.nth(idx + 1, finalSteps))}`,
       };
-    }, steps),
+    }, finalSteps),
   );
 };
 
@@ -403,6 +431,8 @@ export const createOptionsForMapChart = ({
   mapColorValueSteps = [],
   mapAutoShade = true,
   mapDisplayCountriesName = false,
+  maxNumberOfDecimals,
+  decimalPoint,
 }) => {
   const createMapDatapoint = (d) =>
     mapType === mapTypes.normal.value
@@ -572,6 +602,8 @@ export const createOptionsForMapChart = ({
             dataClasses: createMapDataClasses(
               finalMapColorValueSteps,
               stepsHaveLabels,
+              maxNumberOfDecimals,
+              decimalPoint,
             ),
           },
         ]),
