@@ -1,6 +1,6 @@
 {
   "name": "@oecd-pac/chart",
-  "version": "3.2.5",
+  "version": "3.2.51",
   "description": "OECD chart lib",
   "type": "module",
   "module": "dist/esm/index.js",
