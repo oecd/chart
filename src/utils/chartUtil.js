@@ -328,16 +328,16 @@ export const replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax = ({
   R.compose(
     R.replace(
       new RegExp(`{${latestMaxVariable}}`, 'gi'),
-      latestMax || (replaceMissingVarByBlank ? '&nbsp;' : ''),
+      latestMax || (replaceMissingVarByBlank ? ' ' : ''),
     ),
     R.replace(
       new RegExp(`{${latestMinVariable}}`, 'gi'),
-      latestMin || (replaceMissingVarByBlank ? '&nbsp;' : ''),
+      latestMin || (replaceMissingVarByBlank ? ' ' : ''),
     ),
     R.reduce(
       (acc, varName) => {
         const labels = R.compose(
-          R.when(R.isEmpty, () => (replaceMissingVarByBlank ? '&nbsp;' : '')),
+          R.when(R.isEmpty, () => (replaceMissingVarByBlank ? ' ' : '')),
           R.join(', '),
           R.reject(isNilOrEmpty),
           R.map((code) => {
