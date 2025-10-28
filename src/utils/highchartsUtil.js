@@ -2,17 +2,18 @@ import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
 import { UTCDate } from '@date-fns/utc';
 import * as R from 'ramda';
 
-import {
-  chartTypes,
-  chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
-  decimalPointTypes,
-} from '../constants/chart';
+import { chartTypes, decimalPointTypes } from '../constants/chart';
 import { isCastableToNumber, roundNumber } from './configUtil';
 import { isNilOrEmpty } from './ramdaUtil';
 import { frequencies } from './dateUtil';
 
 export const thousandsSeparator = ' ';
 export const numericSymbols = ['k', 'M', 'G', 'T', 'P', 'E'];
+
+const getNumbericFormat = (valueField, maxNumberOrDecimal) =>
+  `{#if (ge ${valueField} 1000)}{rtz ((shorten ${valueField}):,.1f)}{ns ${valueField}}` +
+  `{else}{#if (le ${valueField} -1000)}{rtz ((shorten ${valueField}):,.1f)}{ns ${valueField}}` +
+  `{else}{rtz ((rtz ${valueField}):,.${maxNumberOrDecimal}f)}{/if}{/if}`;
 
 const numberFormat = (number, decimals, decimalPoint) => {
   if (!isCastableToNumber(number)) {
@@ -75,12 +76,12 @@ export const createFormatters = ({
   areSeriesNumbers,
   areSeriesDates,
   seriesDateFomat,
-  forceXAxisToBeTreatedAsCategories,
   lang,
   isCustomTooltipDefined,
 }) => {
-  const isMaxNumberOrDecimalCastableToNumber =
-    isCastableToNumber(maxNumberOfDecimals);
+  const finalMaxNumberOrDecimal = isCastableToNumber(maxNumberOfDecimals)
+    ? maxNumberOfDecimals
+    : -1;
 
   const finalDecimalPoint = decimalPoint || decimalPointTypes.point.value;
 
@@ -90,13 +91,13 @@ export const createFormatters = ({
     R.all(R.compose(R.equals(2), R.length), mapColorValueSteps);
 
   const dataLabels = {
-    formatter: function formatPoint() {
-      return numberFormat(
-        this.point.value || this.point.z || this.point.y,
-        isMaxNumberOrDecimalCastableToNumber ? maxNumberOfDecimals : -1,
-        finalDecimalPoint,
-      );
-    },
+    format:
+      '{#if (ne null point.y)}' +
+      `{rtz (point.y:,.${finalMaxNumberOrDecimal}f)}` +
+      '{else}' +
+      `{#if (ne null point.value)}{rtz (point.value:,.${finalMaxNumberOrDecimal}f)}` +
+      `{else}{rtz (point.z:,.${finalMaxNumberOrDecimal}f)}` +
+      '{/if}{/if}',
   };
 
   const categoriesFrequency = areCategoriesDates
@@ -111,55 +112,25 @@ export const createFormatters = ({
     [
       () => chartType === chartTypes.pie && areCategoriesNumbers,
       () => ({
-        formatter: function formatXAxis() {
-          return numberFormat(
-            this.name,
-            maxNumberOfDecimals,
-            finalDecimalPoint,
-          );
-        },
+        format: getNumbericFormat('name', finalMaxNumberOrDecimal),
       }),
     ],
     [
       () => chartType === chartTypes.pie && areCategoriesDates,
       () => ({
-        formatter: function formatXAxis() {
-          const date = categoriesFrequency.tryParse(this.name);
-          return date
-            ? categoriesFrequency.formatToLabel(date, lang)
-            : new UTCDate(this.name);
-        },
+        format: categoriesFrequency.getHighchartsFormat('name', lang),
       }),
     ],
     [
       () => categoriesFrequency,
       () => ({
-        formatter: function formatXAxis() {
-          const date =
-            forceXAxisToBeTreatedAsCategories ||
-            R.includes(
-              chartType,
-              chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
-            )
-              ? categoriesFrequency.tryParse(this.value)
-              : new UTCDate(this.value);
-
-          return date
-            ? categoriesFrequency.formatToLabel(date, lang)
-            : this.value;
-        },
+        format: categoriesFrequency.getHighchartsFormat('value', lang),
       }),
     ],
     [
       () => areCategoriesNumbers,
       () => ({
-        formatter: function formatXAxis() {
-          return numberFormatAbbreviatedForm(
-            this.value,
-            maxNumberOfDecimals,
-            finalDecimalPoint,
-          );
-        },
+        format: getNumbericFormat('value', finalMaxNumberOrDecimal),
       }),
     ],
     [R.T, () => ({})],
@@ -170,40 +141,24 @@ export const createFormatters = ({
       () =>
         chartType === chartTypes.pie ? categoriesFrequency : seriesFrequency,
       () => ({
-        labelFormatter: function formatSeries() {
-          const frequency =
-            chartType === chartTypes.pie
-              ? categoriesFrequency
-              : seriesFrequency;
-          const date = frequency.tryParse(this.name);
-          return date ? frequency.formatToLabel(date, lang) : this.name;
-        },
+        labelFormat: (chartType === chartTypes.pie
+          ? categoriesFrequency
+          : seriesFrequency
+        ).getHighchartsFormat('name', lang),
       }),
     ],
     [
       () =>
         chartType === chartTypes.pie ? areCategoriesNumbers : areSeriesNumbers,
       () => ({
-        labelFormatter: function formatSeries() {
-          return numberFormatAbbreviatedForm(
-            this.name,
-            maxNumberOfDecimals,
-            finalDecimalPoint,
-          );
-        },
+        labelFormat: getNumbericFormat('name', finalMaxNumberOrDecimal),
       }),
     ],
     [R.T, () => ({})],
   ])();
 
   const yAxisLabels = {
-    formatter: function formatYAxis() {
-      return numberFormatAbbreviatedForm(
-        this.value,
-        maxNumberOfDecimals,
-        finalDecimalPoint,
-      );
-    },
+    format: getNumbericFormat('value', finalMaxNumberOrDecimal),
   };
 
   const tooltip = isCustomTooltipDefined
@@ -223,7 +178,7 @@ export const createFormatters = ({
                   mapColorValueSteps,
                 ) || [],
               ) || value
-            : numberFormat(value, maxNumberOfDecimals, finalDecimalPoint);
+            : numberFormat(value, finalMaxNumberOrDecimal, finalDecimalPoint);
 
           const seriesName =
             chartType === chartTypes.map ? this.point.name : this.series.name;
@@ -232,7 +187,7 @@ export const createFormatters = ({
             [
               () => seriesFrequency && chartType !== chartTypes.map,
               () => {
-                const date = seriesFrequency.tryParse(seriesName);
+                const date = new UTCDate(seriesName);
                 return date
                   ? seriesFrequency.formatToLabel(date, lang)
                   : seriesName;
@@ -243,7 +198,7 @@ export const createFormatters = ({
               () =>
                 numberFormat(
                   seriesName,
-                  maxNumberOfDecimals,
+                  finalMaxNumberOrDecimal,
                   finalDecimalPoint,
                 ),
             ],
@@ -273,14 +228,7 @@ export const createFormatters = ({
                 ])();
 
                 if (!R.isNil(frequency)) {
-                  const date =
-                    forceXAxisToBeTreatedAsCategories ||
-                    R.includes(
-                      chartType,
-                      chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
-                    )
-                      ? frequency.tryParse(key)
-                      : new UTCDate(key);
+                  const date = new UTCDate(key);
 
                   return R.replace(
                     /{.*point.key}/,
@@ -297,7 +245,7 @@ export const createFormatters = ({
                     /{.*point.key}/,
                     `${numberFormat(
                       key,
-                      maxNumberOfDecimals,
+                      finalMaxNumberOrDecimal,
                       finalDecimalPoint,
                     )}${timeLabelSuffix}`,
                     content,

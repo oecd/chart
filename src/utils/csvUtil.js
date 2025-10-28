@@ -289,7 +289,6 @@ const addParsingHelperData =
 
     return {
       data,
-      rawCodeLabelMapping: codeLabelMapping,
       parsingHelperData: {
         xDimensionLabelByCode,
         yDimensionLabelByCode,
@@ -468,17 +467,35 @@ export const sortCSV =
 
 export const handleAreCategoriesAndSeriesDates =
   (chartType, forceXAxisToBeTreatedAsCategories) => (data) => {
-    const categoriesCodes = R.compose(
+    const categoriesLabels = R.compose(
+      R.map(
+        R.propOr(
+          R.identity,
+          R.__,
+          data.parsingHelperData.xDimensionLabelByCode,
+        ),
+      ),
       R.map(R.head),
       R.tail,
       R.prop('data'),
     )(data);
 
-    const seriesCodes = R.compose(R.tail, R.head, R.prop('data'))(data);
+    const seriesLabels = R.compose(
+      R.map(
+        R.propOr(
+          R.identity,
+          R.__,
+          data.parsingHelperData.yDimensionLabelByCode,
+        ),
+      ),
+      R.tail,
+      R.head,
+      R.prop('data'),
+    )(data);
     const {
       isSuccessful: isSuccessfulForSeries,
       dateFormat: dateFormatForSeries,
-    } = tryCastAllToDatesAndDetectFormat(seriesCodes);
+    } = tryCastAllToDatesAndDetectFormat(seriesLabels);
 
     const seriesInfo = isSuccessfulForSeries
       ? { areSeriesDates: true, seriesDateFomat: dateFormatForSeries }
@@ -488,7 +505,7 @@ export const handleAreCategoriesAndSeriesDates =
       isSuccessful: isSuccessfulForCategories,
       dates: categoriesCodesAsDates,
       dateFormat: dateFormatForCategories,
-    } = tryCastAllToDatesAndDetectFormat(categoriesCodes);
+    } = tryCastAllToDatesAndDetectFormat(categoriesLabels);
 
     if (isSuccessfulForCategories) {
       if (
@@ -544,21 +561,39 @@ export const handleAreCategoriesAndSeriesNumbers =
       return { ...data, areCategoriesNumbers: false, areSeriesNumbers: false };
     }
 
-    const seriesCodes = R.compose(R.tail, R.head, R.prop('data'))(data);
-    const areSeriesNumbers = R.all(isCastableToNumber, seriesCodes);
+    const seriesLabels = R.compose(
+      R.map(
+        R.propOr(
+          R.identity,
+          R.__,
+          data.parsingHelperData.yDimensionLabelByCode,
+        ),
+      ),
+      R.tail,
+      R.head,
+      R.prop('data'),
+    )(data);
+    const areSeriesNumbers = R.all(isCastableToNumber, seriesLabels);
 
     if (data.areCategoriesDates) {
       return { ...data, areCategoriesNumbers: false, areSeriesNumbers };
     }
 
-    const categoriesCodes = R.compose(
+    const categoriesLabels = R.compose(
+      R.map(
+        R.propOr(
+          R.identity,
+          R.__,
+          data.parsingHelperData.xDimensionLabelByCode,
+        ),
+      ),
       R.map(R.head),
       R.tail,
       R.prop('data'),
     )(data);
 
-    if (R.all(isCastableToNumber, categoriesCodes)) {
-      const categoriesCodesAsNumbers = R.map(Number, categoriesCodes);
+    if (R.all(isCastableToNumber, categoriesLabels)) {
+      const categoriesCodesAsNumbers = R.map(Number, categoriesLabels);
 
       if (
         forceXAxisToBeTreatedAsCategories ||
@@ -914,7 +949,6 @@ export const createDataFromCSV = ({
 
   return R.compose(
     addCodeLabelMapping,
-    R.dissoc('rawCodeLabelMapping'),
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
     sortCSV(sortBy, sortOrder, sortSeries, lang),

@@ -63,6 +63,7 @@ export const createStackedDatapoints = ({
   highlight,
   baseline,
   categoriesAreDatesOrNumberForDataParsing,
+  seriesFrequency,
 }) => {
   const baselineColors = R.find(
     (shade) => R.length(shade) <= R.length(data.series),
@@ -73,7 +74,9 @@ export const createStackedDatapoints = ({
     const seriesColor = getListItemAtTurningIndex(yIdx, colorPalette);
 
     return {
-      name: s.label,
+      name: data.areSeriesDates
+        ? seriesFrequency.tryParse(s.label).getTime()
+        : s.label,
       color: seriesColor,
       marker: {
         enabled: false,
@@ -243,14 +246,14 @@ export const tryCastAllToDatesAndDetectFormat = (values) => {
     frequencies,
   );
 
-  const isAnyYearGreaterThanLikelyRealYear = R.any(
-    (d) => d.getFullYear() > 2500,
+  const isAnyYearSmallerOrGreaterThanLikelyRealYear = R.any(
+    (d) => d.getFullYear() < 1500 || d.getFullYear() > 2500,
   );
 
   if (quinquennialFrequency.tryParse(firstValue)) {
     const dates = R.map(quinquennialFrequency.tryParse, values);
     if (R.length(dates) > 1 && !R.any(R.equals(false), dates)) {
-      if (isAnyYearGreaterThanLikelyRealYear(dates)) {
+      if (isAnyYearSmallerOrGreaterThanLikelyRealYear(dates)) {
         return { isSuccessful: false, dates: null, dateFormat: null };
       }
 
@@ -266,7 +269,7 @@ export const tryCastAllToDatesAndDetectFormat = (values) => {
   if (yearlyFrequency.tryParse(firstValue)) {
     const dates = R.map(yearlyFrequency.tryParse, values);
     if (!R.any(R.equals(false), dates)) {
-      if (isAnyYearGreaterThanLikelyRealYear(dates)) {
+      if (isAnyYearSmallerOrGreaterThanLikelyRealYear(dates)) {
         return { isSuccessful: false, dates: null, dateFormat: null };
       }
 
@@ -417,6 +420,8 @@ const createOptionsForLineChart = ({
   height,
   isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
+  categoriesFrequency,
+  seriesFrequency,
 }) => {
   const series = mapWithIndex((s, yIdx) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
@@ -431,7 +436,9 @@ const createOptionsForLineChart = ({
     const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
 
     return {
-      name: s.label,
+      name: data.areSeriesDates
+        ? seriesFrequency.tryParse(s.label).getTime()
+        : s.label,
       data: R.map((d) => {
         const dataPoint = createDatapoint(
           d,
@@ -487,7 +494,16 @@ const createOptionsForLineChart = ({
     xAxis: {
       categories: categoriesAreDatesOrNumberForDataParsing
         ? null
-        : R.map(R.prop('label'), data.categories),
+        : R.map(
+            R.compose(
+              R.when(
+                () => data.areCategoriesDates,
+                (v) => categoriesFrequency.tryParse(v).getTime(),
+              ),
+              R.prop('label'),
+            ),
+            data.categories,
+          ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
@@ -596,6 +612,8 @@ const createOptionsForBarChart = ({
   height,
   isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
+  categoriesFrequency,
+  seriesFrequency,
 }) => {
   const series = mapWithIndex((s, xIdx) => {
     const seriesColor =
@@ -603,7 +621,9 @@ const createOptionsForBarChart = ({
       getListItemAtTurningIndex(xIdx, colorPalette);
 
     return {
-      name: s.label,
+      name: data.areSeriesDates
+        ? seriesFrequency.tryParse(s.label).getTime()
+        : s.label,
       data: mapWithIndex((d, dIdx) => {
         const category = R.nth(dIdx, data.categories);
 
@@ -676,7 +696,16 @@ const createOptionsForBarChart = ({
     xAxis: {
       categories: categoriesAreDatesOrNumberForDataParsing
         ? null
-        : R.map(R.prop('label'), data.categories),
+        : R.map(
+            R.compose(
+              R.when(
+                () => data.areCategoriesDates,
+                (v) => categoriesFrequency.tryParse(v).getTime(),
+              ),
+              R.prop('label'),
+            ),
+            data.categories,
+          ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
@@ -765,6 +794,8 @@ const createOptionsForStackedChart = ({
   isSmall = false,
   stacking = stackingOptions.percent.value,
   categoriesAreDatesOrNumberForDataParsing,
+  categoriesFrequency,
+  seriesFrequency,
 }) => {
   const series = createStackedDatapoints({
     data,
@@ -773,6 +804,7 @@ const createOptionsForStackedChart = ({
     highlight,
     baseline,
     categoriesAreDatesOrNumberForDataParsing,
+    seriesFrequency,
   });
 
   const horizontal = chartType === chartTypes.stackedRow;
@@ -827,7 +859,16 @@ const createOptionsForStackedChart = ({
       categories:
         area && categoriesAreDatesOrNumberForDataParsing
           ? null
-          : R.map(R.prop('label'), data.categories),
+          : R.map(
+              R.compose(
+                R.when(
+                  () => data.areCategoriesDates,
+                  (v) => categoriesFrequency.tryParse(v).getTime(),
+                ),
+                R.prop('label'),
+              ),
+              data.categories,
+            ),
       ...(data.areCategoriesDates
         ? {
             type: 'datetime',
@@ -930,6 +971,8 @@ const createOptionsForScatterChart = ({
   height,
   isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
+  categoriesFrequency,
+  seriesFrequency,
 }) => {
   const symbolLayout = chartType === chartTypes.symbol;
 
@@ -950,7 +993,9 @@ const createOptionsForScatterChart = ({
       getListItemAtTurningIndex(yIdx, colorPalette);
 
     return {
-      name: s.label,
+      name: data.areSeriesDates
+        ? seriesFrequency.tryParse(s.label).getTime()
+        : s.label,
       data: mapWithIndex((d, xIdx) => {
         const category = R.nth(xIdx, data.categories);
 
@@ -1073,7 +1118,16 @@ const createOptionsForScatterChart = ({
     xAxis: {
       categories: categoriesAreDatesOrNumberForDataParsing
         ? null
-        : R.map(R.prop('label'), data.categories),
+        : R.map(
+            R.compose(
+              R.when(
+                () => data.areCategoriesDates,
+                (v) => categoriesFrequency.tryParse(v).getTime(),
+              ),
+              R.prop('label'),
+            ),
+            data.categories,
+          ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
@@ -1149,6 +1203,8 @@ const createOptionsForRadarChart = ({
   height,
   isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
+  categoriesFrequency,
+  seriesFrequency,
 }) => {
   const series = mapWithIndex((s, xIdx) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
@@ -1163,7 +1219,9 @@ const createOptionsForRadarChart = ({
     const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
 
     return {
-      name: s.label,
+      name: data.areSeriesDates
+        ? seriesFrequency.tryParse(s.label).getTime()
+        : s.label,
       data: R.map(
         (d) => createDatapoint(d, categoriesAreDatesOrNumberForDataParsing),
         s.data,
@@ -1216,7 +1274,16 @@ const createOptionsForRadarChart = ({
     },
 
     xAxis: {
-      categories: R.map(R.prop('label'), data.categories),
+      categories: R.map(
+        R.compose(
+          R.when(
+            () => data.areCategoriesDates,
+            (v) => categoriesFrequency.tryParse(v).getTime(),
+          ),
+          R.prop('label'),
+        ),
+        data.categories,
+      ),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         ...R.prop('xAxisLabels', formatters),
@@ -1314,10 +1381,14 @@ const createOptionsForPieChart = ({
   height,
   isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
+  categoriesFrequency,
+  seriesFrequency,
 }) => {
   const series = R.map(
     (s) => ({
-      name: s.label,
+      name: data.areSeriesDates
+        ? seriesFrequency.tryParse(s.label).getTime()
+        : s.label,
       data: mapWithIndex((d, xIdx) => {
         const category = R.nth(xIdx, data.categories);
 
@@ -1334,7 +1405,13 @@ const createOptionsForPieChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        return { name: category.label, ...dataPoint, color };
+        return {
+          name: data.areCategoriesDates
+            ? categoriesFrequency.tryParse(category.label).getTime()
+            : category.label,
+          ...dataPoint,
+          color,
+        };
       }, s.data),
     }),
     R.isEmpty(data.series) ? [] : [R.head(data.series)],
@@ -1449,7 +1526,6 @@ const createChartOptionsFunc =
       areSeriesNumbers: otherProps.data.areSeriesNumbers,
       areSeriesDates: otherProps.data.areSeriesDates,
       seriesDateFomat: otherProps.data.seriesDateFomat,
-      forceXAxisToBeTreatedAsCategories,
       lang,
       isCustomTooltipDefined: !isNilOrEmpty(customTooltip),
     });
@@ -1463,6 +1539,14 @@ const createChartOptionsFunc =
         chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
       );
 
+    const categoriesFrequency = otherProps.data.areCategoriesDates
+      ? R.prop(otherProps.data.categoriesDateFomat, frequencies)
+      : null;
+
+    const seriesFrequency = otherProps.data.areSeriesDates
+      ? R.prop(otherProps.data.seriesDateFomat, frequencies)
+      : null;
+
     const options = createOptionsFuncForChartType({
       ...otherProps,
       colorPalette: finalColorPalette,
@@ -1473,6 +1557,8 @@ const createChartOptionsFunc =
       formatters,
       decimalPoint,
       categoriesAreDatesOrNumberForDataParsing,
+      categoriesFrequency,
+      seriesFrequency,
     });
 
     return R.compose(

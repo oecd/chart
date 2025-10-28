@@ -20,7 +20,7 @@ export const minDateAvailableVariable = 'min_date';
 export const maxDateAvailableVariable = 'max_date';
 
 export const isCastableToNumber = R.ifElse(
-  isNilOrEmpty,
+  (v) => R.isNil(v) || `${v}`.trim() === '',
   R.always(false),
   R.compose(R.complement(Number.isNaN), Number),
 );

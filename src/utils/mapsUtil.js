@@ -433,6 +433,7 @@ export const createOptionsForMapChart = ({
   mapDisplayCountriesName = false,
   maxNumberOfDecimals,
   decimalPoint,
+  seriesFrequency,
 }) => {
   const createMapDatapoint = (d) =>
     mapType === mapTypes.normal.value
@@ -513,7 +514,9 @@ export const createOptionsForMapChart = ({
     },
     ...mapWithIndex(
       (s, yIdx) => ({
-        name: s.label,
+        name: data.areSeriesDates
+          ? seriesFrequency.tryParse(s.label).getTime()
+          : s.label,
         type: mapType === mapTypes.normal.value ? 'map' : 'mapbubble',
         joinBy: ['iso-a3', 'code'],
         color: getListItemAtTurningIndex(yIdx, finalColorPalette),
