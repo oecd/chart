@@ -568,7 +568,10 @@ export const parseSdmxJson =
     const codeLabelMapping = createCodeLabelMapping({
       csvCodeLabelMappingProjectLevel,
       codeLabelMappingChartLevel: dotStatCodeLabelMapping,
-      dotStatDimensions: orderedDimensionsForMapping,
+      // orderedDimensionsForMapping can contain "null" dimensions !!
+      // sdmxJson.data.structure.dimensions.observation can contain less dimensions than
+      // dotStatStructure.dimensions
+      dotStatDimensions: R.reject(R.isNil, orderedDimensionsForMapping),
       lang,
     });
 
