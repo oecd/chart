@@ -10,18 +10,17 @@ import 'highcharts/es-modules/masters/modules/exporting.src';
 import 'highcharts/es-modules/masters/modules/export-data.src';
 import HighchartsReact from 'highcharts-react-official';
 
-const GenericChart = forwardRef(({ options, isFullScreen = false }, ref) => (
+const GenericChart = forwardRef(({ options }, ref) => (
   <HighchartsReact
     ref={ref}
     highcharts={Highcharts}
     options={options}
-    immutable={!isFullScreen}
+    immutable
   />
 ));
 
 GenericChart.propTypes = {
   options: PropTypes.object.isRequired,
-  isFullScreen: PropTypes.bool,
 };
 
 export default memo(GenericChart);

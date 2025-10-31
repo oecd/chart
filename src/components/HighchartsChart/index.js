@@ -1155,6 +1155,19 @@ const HighchartsChart = ({
     id,
   ]);
 
+  useEffect(() => {
+    const handleExitFullScreen = () => {
+      if (!document.fullscreen) {
+        setIsFullScreen(false);
+      }
+    };
+    document.addEventListener('fullscreenchange', handleExitFullScreen);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleExitFullScreen);
+    };
+  }, [isFullScreen]);
+
   return (
     <div>
       <div
@@ -1211,11 +1224,7 @@ const HighchartsChart = ({
             </CenteredContainer>
           }
         >
-          <ChartForType
-            ref={chartRef}
-            options={mergedOptions}
-            isFullScreen={isFullScreen}
-          />
+          <ChartForType ref={chartRef} options={mergedOptions} />
         </Suspense>
       ) : (
         <CenteredContainer height={chartHeight}>

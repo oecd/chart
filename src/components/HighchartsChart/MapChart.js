@@ -58,7 +58,7 @@ if (typeof Highcharts === 'object') {
   );
 }
 
-const MapChart = forwardRef(({ options, isFullScreen = false }, ref) => {
+const MapChart = forwardRef(({ options }, ref) => {
   const optionalDottedMapLines = useMemo(
     () =>
       R.compose(R.find(R.propEq('mapline', 'type')), R.prop('series'))(options),
@@ -99,7 +99,7 @@ const MapChart = forwardRef(({ options, isFullScreen = false }, ref) => {
       constructorType="mapChart"
       highcharts={Highcharts}
       options={options}
-      immutable={!isFullScreen}
+      immutable
       updateArgs={[true, true, false]}
     />
   );
@@ -107,7 +107,6 @@ const MapChart = forwardRef(({ options, isFullScreen = false }, ref) => {
 
 MapChart.propTypes = {
   options: PropTypes.object.isRequired,
-  isFullScreen: PropTypes.bool,
 };
 
 export default memo(MapChart);

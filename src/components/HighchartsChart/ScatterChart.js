@@ -31,18 +31,17 @@ if (typeof Highcharts === 'object') {
   }
 }
 
-const ScatterChart = forwardRef(({ options, isFullScreen = false }, ref) => (
+const ScatterChart = forwardRef(({ options }, ref) => (
   <HighchartsReact
     ref={ref}
     highcharts={Highcharts}
     options={options}
-    immutable={!isFullScreen}
+    immutable
   />
 ));
 
 ScatterChart.propTypes = {
   options: PropTypes.object.isRequired,
-  isFullScreen: PropTypes.bool,
 };
 
 export default memo(ScatterChart);
