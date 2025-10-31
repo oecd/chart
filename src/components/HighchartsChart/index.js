@@ -11,6 +11,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import striptags from 'striptags';
+import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
 import * as R from 'ramda';
 
 import {
@@ -56,6 +57,7 @@ import { trackChartError } from '../../utils/trackingUtil';
 import GenericChart from './GenericChart';
 import ScatterChart from './ScatterChart';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
+import { numericSymbols } from '../../utils/highchartsUtil';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -85,6 +87,100 @@ const sendDebugInfo = ({ type, data }) => {
     }),
   );
 };
+
+// !! all Highcharts extensions below are duplicated in a Chart.builder script
+// (public/export-server-init.js) that is consumed by the custom Highcharts export server.
+// any change made here must be reported in the duplicated code.
+if (typeof Highcharts === 'object') {
+  Highcharts.dateFormats = {
+    q: (timestamp) => {
+      const date = new Date(timestamp);
+      const quarter = Math.floor(date.getUTCMonth() / 3) + 1;
+      return quarter;
+    },
+  };
+
+  Highcharts.Templating.helpers.shorten = (value) => {
+    if (
+      value == null ||
+      `${value}`.trim() === '' ||
+      Number.isNaN(Number(value))
+    ) {
+      return value;
+    }
+
+    if (numericSymbols == null || numericSymbols.length === 0) {
+      return value;
+    }
+
+    const comparisonNumbers = numericSymbols.map((_, i) => 1000 ** (i + 1));
+
+    let i = comparisonNumbers.length - 1;
+    let relevantIndex = -1;
+
+    while (i >= 0 && relevantIndex === -1) {
+      if (Math.abs(value) >= comparisonNumbers[i]) {
+        relevantIndex = i;
+      }
+      i -= 1;
+    }
+
+    if (relevantIndex === -1) {
+      return value;
+    }
+
+    return value / comparisonNumbers[relevantIndex];
+  };
+
+  Highcharts.Templating.helpers.ns = (value) => {
+    if (
+      value == null ||
+      `${value}`.trim() === '' ||
+      Number.isNaN(Number(value))
+    ) {
+      return '';
+    }
+
+    if (numericSymbols == null || numericSymbols.length === 0) {
+      return '';
+    }
+
+    const comparisonNumbers = numericSymbols.map((_, i) => 1000 ** (i + 1));
+
+    let i = comparisonNumbers.length - 1;
+    let relevantIndex = -1;
+
+    while (i >= 0 && relevantIndex === -1) {
+      if (Math.abs(value) >= comparisonNumbers[i]) {
+        relevantIndex = i;
+      }
+      i -= 1;
+    }
+
+    if (relevantIndex === -1) {
+      return '';
+    }
+
+    return numericSymbols[relevantIndex];
+  };
+
+  Highcharts.Templating.helpers.rtz = (value) => {
+    if (
+      value == null ||
+      `${value}`.trim() === '' ||
+      Number.isNaN(Number(`${value}`.replace(',', '.')))
+    ) {
+      return value;
+    }
+
+    if (`${value}`.includes(',')) {
+      const n = parseFloat(`${value}`.replace(',', '.'));
+      return `${n}`.replace('.', ',');
+    }
+
+    return parseFloat(value);
+  };
+}
 
 const HighchartsChart = ({
   id = 'temp-id',
