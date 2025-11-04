@@ -36,6 +36,7 @@ const RootTrigger = () => {
 const Toolbox = ({
   chartRef,
   chartType,
+  inlineLabels,
   parsedTitle,
   parsedSubtitle,
   onDownloadData = null,
@@ -77,6 +78,7 @@ const Toolbox = ({
           format,
           fileName: createExportFileName(),
           chartType,
+          inlineLabels,
         });
 
         window.location.href = `${apiUrl}/api/public/export/${exportId}`;
@@ -90,6 +92,7 @@ const Toolbox = ({
     },
     [
       chartType,
+      inlineLabels,
       displayNoteAsTooltip,
       note,
       onDownloadData,
@@ -270,6 +273,7 @@ const Toolbox = ({
 Toolbox.propTypes = {
   chartRef: PropTypes.object.isRequired,
   chartType: PropTypes.string.isRequired,
+  inlineLabels: PropTypes.bool.isRequired,
   parsedTitle: PropTypes.string.isRequired,
   parsedSubtitle: PropTypes.string.isRequired,
   onDownloadData: PropTypes.func,

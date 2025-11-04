@@ -1192,6 +1192,7 @@ const HighchartsChart = ({
         ) && (
           <Header
             chartType={chartType}
+            inlineLabels={inlineLabels || false}
             title={parsedTitle}
             subtitle={parsedSubtitle}
             definition={parsedDefinition}

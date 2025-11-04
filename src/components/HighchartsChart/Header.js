@@ -7,6 +7,7 @@ import Toolbox from './Toolbox';
 
 const Header = ({
   chartType,
+  inlineLabels,
   title,
   subtitle,
   definition = null,
@@ -67,6 +68,7 @@ const Header = ({
           <Toolbox
             chartRef={chartRef}
             chartType={chartType}
+            inlineLabels={inlineLabels}
             parsedTitle={title}
             parsedSubtitle={subtitle}
             onDownloadData={onDownloadData}
@@ -96,6 +98,7 @@ const Header = ({
 
 Header.propTypes = {
   chartType: PropTypes.string.isRequired,
+  inlineLabels: PropTypes.bool.isRequired,
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string.isRequired,
   definition: PropTypes.string,
