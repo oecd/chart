@@ -248,6 +248,7 @@ const HighchartsChart = ({
   hideNote = false,
   hideSource = false,
   hideToolbox = false,
+  inlineLabels = false,
   tooltipContainerId,
   isSmall,
   optionsOverride = null,
@@ -1098,6 +1099,7 @@ const HighchartsChart = ({
         isFullScreen,
         forceXAxisToBeTreatedAsCategories,
         lang,
+        inlineLabels,
       });
 
       setMergedOptions(
@@ -1152,6 +1154,7 @@ const HighchartsChart = ({
     errorMessage,
     allHeightCalculationsHaveBeenDone,
     createOptionsFuncForChartType,
+    inlineLabels,
     id,
   ]);
 
@@ -1332,6 +1335,7 @@ HighchartsChart.propTypes = {
   hideNote: PropTypes.bool,
   hideSource: PropTypes.bool,
   hideToolbox: PropTypes.bool,
+  inlineLabels: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
   isSmall: PropTypes.bool.isRequired,
   debug: PropTypes.bool,

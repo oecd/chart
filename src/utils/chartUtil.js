@@ -422,6 +422,7 @@ const createOptionsForLineChart = ({
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
+  inlineLabels = false,
 }) => {
   const series = mapWithIndex((s, yIdx) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
@@ -435,17 +436,34 @@ const createOptionsForLineChart = ({
 
     const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
 
+    const seriesName = data.areSeriesDates
+      ? seriesFrequency.tryParse(s.label).getTime()
+      : s.label;
+
     return {
-      name: data.areSeriesDates
-        ? seriesFrequency.tryParse(s.label).getTime()
-        : s.label,
-      data: R.map((d) => {
+      name: seriesName,
+      data: mapWithIndex((d, i) => {
         const dataPoint = createDatapoint(
           d,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        return dataPoint;
+        const finalDataPoint =
+          inlineLabels && i === R.length(s.data) - 1
+            ? R.assoc(
+                'dataLabels',
+                {
+                  enabled: true,
+                  format: seriesName,
+                  style: !R.isNil(highlightOrBaselineColor)
+                    ? { fontWeight: 800 }
+                    : {},
+                },
+                dataPoint,
+              )
+            : dataPoint;
+
+        return finalDataPoint;
       }, s.data),
       type: 'spline',
       lineWidth: 2.5,
@@ -461,32 +479,69 @@ const createOptionsForLineChart = ({
       },
       color,
       dataLabels: {
-        style: {
-          color: dataLabelColor,
-          textShadow:
-            '0px -1px 3px white, 1px 0px 3px white, 0px 1px 3px white, -1px 0px 3px white, -1px -1px 3px white, 1px -1px 3px white, 1px 1px 3px white, -1px 1px 3px white',
-          textOutline: 'none',
-        },
+        style: inlineLabels
+          ? {}
+          : {
+              color: dataLabelColor,
+              textShadow:
+                '0px -1px 3px white, 1px 0px 3px white, 0px 1px 3px white, -1px 0px 3px white, -1px -1px 3px white, 1px -1px 3px white, 1px 1px 3px white, -1px 1px 3px white',
+              textOutline: 'none',
+            },
       },
       ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
       showInLegend: true,
     };
   }, data.series);
 
+  const legend = R.ifElse(
+    () => inlineLabels,
+    // legend is enabled but hidden so that Highcharts reserves the space needed for last data points data label (hack)
+    () => ({
+      enabled: true,
+      margin: isSmall ? -5 : -25,
+      symbolWidth: 0,
+      layout: 'vertical',
+      align: 'right',
+      verticalAlign: 'middle',
+      itemStyle: {
+        visibility: 'hidden',
+        fontSize: isSmall ? '13px' : '16px',
+        fontWeight: 400,
+      },
+    }),
+    () => ({
+      enabled: !hideLegend,
+      ...R.prop('seriesLabels', formatters),
+      itemDistance: 10,
+      itemStyle: {
+        fontWeight: 'normal',
+        color: '#586179',
+        fontSize: isSmall ? '13px' : '16px',
+      },
+      align: 'left',
+      symbolWidth: 18,
+      x: -7,
+      verticalAlign: 'top',
+      margin: isSmall ? 26 : 34,
+    }),
+  )();
+
   return {
     chart: {
       style: {
         fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
       },
-      marginTop: hideLegend
-        ? calcMarginTop(title, subtitle, isSmall)
-        : undefined,
+      marginTop:
+        hideLegend || inlineLabels
+          ? calcMarginTop(title, subtitle, isSmall)
+          : undefined,
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacing : 0,
       events: {
         fullscreenClose,
       },
+      className: inlineLabels ? 'cb-inline-labels' : undefined,
     },
 
     colors: [R.head(colorPalette)],
@@ -534,57 +589,64 @@ const createOptionsForLineChart = ({
       },
     },
 
-    legend: {
-      enabled: !hideLegend,
-      ...R.prop('seriesLabels', formatters),
-      itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
-      align: 'left',
-      symbolWidth: 18,
-      x: -7,
-      verticalAlign: 'top',
-      margin: isSmall ? 26 : 34,
-    },
+    legend,
 
     plotOptions: {
       series: {
         animation: false,
+        dataLabels: inlineLabels
+          ? {
+              enabled: false,
+              align: 'left',
+              verticalAlign: 'middle',
+              x: 10,
+              y: 1,
+              crop: false,
+              overflow: 'allow',
+              allowOverlap: true,
+              style: {
+                fontSize: isSmall ? '13px' : '16px',
+                fontWeight: 400,
+                color: '#101d40',
+              },
+            }
+          : {},
         events: {
-          mouseOver: (e) => {
-            e.target.data.forEach((p) => {
-              p.update(
-                {
-                  dataLabels: {
-                    enabled: true,
-                    ...R.prop('dataLabels', formatters),
-                  },
-                },
-                false,
-                false,
-                false,
-              );
-            });
-            e.target.chart.redraw();
-          },
-          mouseOut: (e) => {
-            e.target.data.forEach((p) => {
-              p.update(
-                {
-                  dataLabels: {
-                    enabled: false,
-                  },
-                },
-                false,
-                false,
-                false,
-              );
-            });
-            e.target.chart.redraw();
-          },
+          mouseOver: inlineLabels
+            ? null
+            : (e) => {
+                e.target.data.forEach((p) => {
+                  p.update(
+                    {
+                      dataLabels: {
+                        enabled: true,
+                        ...R.prop('dataLabels', formatters),
+                      },
+                    },
+                    false,
+                    false,
+                    false,
+                  );
+                });
+                e.target.chart.redraw();
+              },
+          mouseOut: inlineLabels
+            ? null
+            : (e) => {
+                e.target.data.forEach((p) => {
+                  p.update(
+                    {
+                      dataLabels: {
+                        enabled: false,
+                      },
+                    },
+                    false,
+                    false,
+                    false,
+                  );
+                });
+                e.target.chart.redraw();
+              },
         },
       },
     },
