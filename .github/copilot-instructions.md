@@ -10,9 +10,8 @@
 ## Build & Development
 
 - **Build:** `npm run build` (uses Rollup, see `rollup.config.js`).
-- **Dev server:** `npm run dev` (if defined; see package.json scripts).
 - **Lint:** `npm run lint` (ESLint, Prettier, Husky pre-commit hooks).
-- **No test scripts** are defined by default.
+- **Testing:** Jest with React Testing Library configured (`jest.config.js`, `src/setupTests.js`).
 - **Environment:** API endpoint set via `.env` (`API_URL`).
 
 ## Key Patterns & Conventions
@@ -25,6 +24,7 @@
 - Uses `highcharts`, `highcharts-react-official`, and other visualization dependencies.
 - Styling via `index.css` and component-level CSS.
 - Uses Babel for transpilation (see Rollup config for details).
+- Prefer destructuring for React props and state.
 
 ## Integration & Usage
 
@@ -37,8 +37,22 @@
 
 - Controls and chart sizing: see README for sizing strategies and how controls affect layout.
 - API URL is injected at build time via Rollup plugin and `.env`.
-- Peer dependencies: React 17+ required in host app.
-- No built-in test runner or test directory.
+- Peer dependencies: React 18+ required in host app.
+- Testing setup with Jest, React Testing Library, and comprehensive mocks for Highcharts and browser APIs.
+
+## Testing Framework
+
+- **Test Runner:** Jest with JSDOM environment for React component testing.
+- **Testing Library:** React Testing Library for component interaction testing.
+- **Test Scripts:**
+  - `npm test` - Run all tests
+  - `npm run test:watch` - Run tests in watch mode
+  - `npm run test:coverage` - Run tests with coverage report
+  - `npm run test:ci` - CI-friendly test command
+- **Test Structure:** Tests organized in `__tests__` directories alongside components and utilities.
+- **Mocking:** Highcharts, browser APIs (IntersectionObserver, ResizeObserver, matchMedia) pre-configured.
+- **Coverage:** 70% thresholds set for statements, branches, functions, and lines.
+- **Documentation:** See `TESTING.md` for comprehensive testing guidelines and examples.
 
 ## Examples
 
@@ -55,4 +69,4 @@
 
 ---
 
-For more, see `README.md`, `rollup.config.js`, and `src/components/Chart/Component.js`.
+For more, see `README.md`, `rollup.config.js`, `src/components/Chart/Component.js`, and `TESTING.md`.

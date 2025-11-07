@@ -9,6 +9,7 @@ const sizeMapping = {
 
 const Spinner = ({ size = 'medium' }) => (
   <div
+    data-testid="spinner"
     style={{
       borderRadius: '50%',
       width: sizeMapping[size].size,

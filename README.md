@@ -106,3 +106,27 @@ Once loaded, charts can be used as follow:
   <oecd-chart chart-id="xxxxxxx"></oecd-chart>
 </div>
 ```
+
+## Development
+
+### Building
+
+```shell
+npm run build
+```
+
+### Testing
+
+This project uses Jest with React Testing Library for testing. See [TESTING.md](./TESTING.md) for detailed testing documentation.
+
+```shell
+npm test                # Run tests
+npm run test:watch      # Run tests in watch mode
+npm run test:coverage   # Run tests with coverage report
+```
+
+### Linting
+
+```shell
+npm run lint
+```

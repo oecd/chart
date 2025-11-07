@@ -1,6 +1,7 @@
 node_modules
 dist
 dist-browser
+coverage
 .env
 .npmrc
 react-jsx-runtime.js
