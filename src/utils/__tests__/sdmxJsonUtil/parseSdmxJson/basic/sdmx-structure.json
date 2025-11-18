@@ -1,0 +1,968 @@
+{
+  "dimensions": [
+    {
+      "id": "REF_AREA",
+      "name": "Reference area",
+      "members": {
+        "AUS": { "labels": { "en": "Australia", "fr": "Australie" } },
+        "AUT": { "labels": { "en": "Austria", "fr": "Autriche" } },
+        "BEL": { "labels": { "en": "Belgium", "fr": "Belgique" } },
+        "CAN": { "labels": { "en": "Canada", "fr": "Canada" } },
+        "CHL": { "labels": { "en": "Chile", "fr": "Chili" } },
+        "COL": { "labels": { "en": "Colombia", "fr": "Colombie" } },
+        "CRI": { "labels": { "en": "Costa Rica", "fr": "Costa Rica" } },
+        "CZE": { "labels": { "en": "Czechia", "fr": "Tchéquie" } },
+        "DNK": { "labels": { "en": "Denmark", "fr": "Danemark" } },
+        "EST": { "labels": { "en": "Estonia", "fr": "Estonie" } },
+        "FIN": { "labels": { "en": "Finland", "fr": "Finlande" } },
+        "FRA": { "labels": { "en": "France", "fr": "France" } },
+        "DEU": { "labels": { "en": "Germany", "fr": "Allemagne" } },
+        "GRC": { "labels": { "en": "Greece", "fr": "Grèce" } },
+        "HUN": { "labels": { "en": "Hungary", "fr": "Hongrie" } },
+        "ISL": { "labels": { "en": "Iceland", "fr": "Islande" } },
+        "IRL": { "labels": { "en": "Ireland", "fr": "Irlande" } },
+        "ISR": { "labels": { "en": "Israel", "fr": "Israël" } },
+        "ITA": { "labels": { "en": "Italy", "fr": "Italie" } },
+        "JPN": { "labels": { "en": "Japan", "fr": "Japon" } },
+        "KOR": { "labels": { "en": "Korea", "fr": "Corée" } },
+        "LVA": { "labels": { "en": "Latvia", "fr": "Lettonie" } },
+        "LTU": { "labels": { "en": "Lithuania", "fr": "Lituanie" } },
+        "LUX": { "labels": { "en": "Luxembourg", "fr": "Luxembourg" } },
+        "MEX": { "labels": { "en": "Mexico", "fr": "Mexique" } },
+        "NLD": { "labels": { "en": "Netherlands", "fr": "Pays-Bas" } },
+        "NZL": { "labels": { "en": "New Zealand", "fr": "Nouvelle-Zélande" } },
+        "NOR": { "labels": { "en": "Norway", "fr": "Norvège" } },
+        "POL": { "labels": { "en": "Poland", "fr": "Pologne" } },
+        "PRT": { "labels": { "en": "Portugal", "fr": "Portugal" } },
+        "SVK": {
+          "labels": { "en": "Slovak Republic", "fr": "République slovaque" }
+        },
+        "SVN": { "labels": { "en": "Slovenia", "fr": "Slovénie" } },
+        "ESP": { "labels": { "en": "Spain", "fr": "Espagne" } },
+        "SWE": { "labels": { "en": "Sweden", "fr": "Suède" } },
+        "CHE": { "labels": { "en": "Switzerland", "fr": "Suisse" } },
+        "TUR": { "labels": { "en": "Türkiye", "fr": "Türkiye" } },
+        "GBR": { "labels": { "en": "United Kingdom", "fr": "Royaume-Uni" } },
+        "USA": { "labels": { "en": "United States", "fr": "États-Unis" } },
+        "EU27_2020": {
+          "labels": {
+            "en": "European Union (27 countries from 01/02/2020)",
+            "fr": "Union européenne (27 pays à partir du 01/02/2020)"
+          }
+        },
+        "OECD": { "labels": { "en": "OECD", "fr": "OCDE" } },
+        "OECDA": { "labels": { "en": "OECD America", "fr": "OCDE Amérique" } },
+        "OECDSO": {
+          "labels": { "en": "OECD Asia Oceania", "fr": "OCDE Asie Océanie" }
+        },
+        "OECDE": { "labels": { "en": "OECD Europe", "fr": "OCDE Europe" } },
+        "DZA": {
+          "labels": { "en": "Algeria", "fr": "Algérie" },
+          "parent": "WXOECD"
+        },
+        "ARG": {
+          "labels": { "en": "Argentina", "fr": "Argentine" },
+          "parent": "WXOECD"
+        },
+        "AZE": {
+          "labels": { "en": "Azerbaijan", "fr": "Azerbaïdjan" },
+          "parent": "WXOECD"
+        },
+        "BRB": {
+          "labels": { "en": "Barbados", "fr": "Barbade" },
+          "parent": "WXOECD"
+        },
+        "BLR": {
+          "labels": { "en": "Belarus", "fr": "Bélarus" },
+          "parent": "WXOECD"
+        },
+        "BTN": {
+          "labels": { "en": "Bhutan", "fr": "Bhoutan" },
+          "parent": "WXOECD"
+        },
+        "BRA": {
+          "labels": { "en": "Brazil", "fr": "Brésil" },
+          "parent": "WXOECD"
+        },
+        "BRN": {
+          "labels": { "en": "Brunei Darussalam", "fr": "Brunei Darussalam" },
+          "parent": "WXOECD"
+        },
+        "BGR": {
+          "labels": { "en": "Bulgaria", "fr": "Bulgarie" },
+          "parent": "WXOECD"
+        },
+        "CMR": {
+          "labels": { "en": "Cameroon", "fr": "Cameroun" },
+          "parent": "WXOECD"
+        },
+        "CHN": {
+          "labels": {
+            "en": "China (People’s Republic of)",
+            "fr": "Chine (République populaire de)"
+          },
+          "parent": "WXOECD"
+        },
+        "CIV": {
+          "labels": { "en": "Côte d’Ivoire", "fr": "Côte d’Ivoire" },
+          "parent": "WXOECD"
+        },
+        "HRV": {
+          "labels": { "en": "Croatia", "fr": "Croatie" },
+          "parent": "WXOECD"
+        },
+        "CUB": { "labels": { "en": "Cuba", "fr": "Cuba" }, "parent": "WXOECD" },
+        "CYP": {
+          "labels": { "en": "Cyprus", "fr": "Chypre" },
+          "parent": "WXOECD"
+        },
+        "EGY": {
+          "labels": { "en": "Egypt", "fr": "Égypte" },
+          "parent": "WXOECD"
+        },
+        "GEO": {
+          "labels": { "en": "Georgia", "fr": "Géorgie" },
+          "parent": "WXOECD"
+        },
+        "GHA": {
+          "labels": { "en": "Ghana", "fr": "Ghana" },
+          "parent": "WXOECD"
+        },
+        "GTM": {
+          "labels": { "en": "Guatemala", "fr": "Guatemala" },
+          "parent": "WXOECD"
+        },
+        "GNB": {
+          "labels": { "en": "Guinea-Bissau", "fr": "Guinée-Bissau" },
+          "parent": "WXOECD"
+        },
+        "GUY": {
+          "labels": { "en": "Guyana", "fr": "Guyana" },
+          "parent": "WXOECD"
+        },
+        "VAT": {
+          "labels": { "en": "Holy See", "fr": "Saint-Siège" },
+          "parent": "WXOECD"
+        },
+        "IND": {
+          "labels": { "en": "India", "fr": "Inde" },
+          "parent": "WXOECD"
+        },
+        "IDN": {
+          "labels": { "en": "Indonesia", "fr": "Indonésie" },
+          "parent": "WXOECD"
+        },
+        "IRN": { "labels": { "en": "Iran", "fr": "Iran" }, "parent": "WXOECD" },
+        "IRQ": { "labels": { "en": "Iraq", "fr": "Iraq" }, "parent": "WXOECD" },
+        "KAZ": {
+          "labels": { "en": "Kazakhstan", "fr": "Kazakhstan" },
+          "parent": "WXOECD"
+        },
+        "KEN": {
+          "labels": { "en": "Kenya", "fr": "Kenya" },
+          "parent": "WXOECD"
+        },
+        "LBN": {
+          "labels": { "en": "Lebanon", "fr": "Liban" },
+          "parent": "WXOECD"
+        },
+        "LIE": {
+          "labels": { "en": "Liechtenstein", "fr": "Liechtenstein" },
+          "parent": "WXOECD"
+        },
+        "MYS": {
+          "labels": { "en": "Malaysia", "fr": "Malaisie" },
+          "parent": "WXOECD"
+        },
+        "MDV": {
+          "labels": { "en": "Maldives", "fr": "Maldives" },
+          "parent": "WXOECD"
+        },
+        "MLT": {
+          "labels": { "en": "Malta", "fr": "Malte" },
+          "parent": "WXOECD"
+        },
+        "MUS": {
+          "labels": { "en": "Mauritius", "fr": "Maurice" },
+          "parent": "WXOECD"
+        },
+        "MDA": {
+          "labels": { "en": "Moldova", "fr": "Moldova" },
+          "parent": "WXOECD"
+        },
+        "MCO": {
+          "labels": { "en": "Monaco", "fr": "Monaco" },
+          "parent": "WXOECD"
+        },
+        "MAR": {
+          "labels": { "en": "Morocco", "fr": "Maroc" },
+          "parent": "WXOECD"
+        },
+        "NAM": {
+          "labels": { "en": "Namibia", "fr": "Namibie" },
+          "parent": "WXOECD"
+        },
+        "NPL": {
+          "labels": { "en": "Nepal", "fr": "Népal" },
+          "parent": "WXOECD"
+        },
+        "NGA": {
+          "labels": { "en": "Nigeria", "fr": "Nigéria" },
+          "parent": "WXOECD"
+        },
+        "PAN": {
+          "labels": { "en": "Panama", "fr": "Panama" },
+          "parent": "WXOECD"
+        },
+        "PER": {
+          "labels": { "en": "Peru", "fr": "Pérou" },
+          "parent": "WXOECD"
+        },
+        "PHL": {
+          "labels": { "en": "Philippines", "fr": "Philippines" },
+          "parent": "WXOECD"
+        },
+        "ROU": {
+          "labels": { "en": "Romania", "fr": "Roumanie" },
+          "parent": "WXOECD"
+        },
+        "RUS": {
+          "labels": { "en": "Russia", "fr": "Russie" },
+          "parent": "WXOECD"
+        },
+        "RWA": {
+          "labels": { "en": "Rwanda", "fr": "Rwanda" },
+          "parent": "WXOECD"
+        },
+        "SAU": {
+          "labels": { "en": "Saudi Arabia", "fr": "Arabie saoudite" },
+          "parent": "WXOECD"
+        },
+        "SRB": {
+          "labels": { "en": "Serbia", "fr": "Serbie" },
+          "parent": "WXOECD"
+        },
+        "SGP": {
+          "labels": { "en": "Singapore", "fr": "Singapour" },
+          "parent": "WXOECD"
+        },
+        "SLB": {
+          "labels": { "en": "Solomon Islands", "fr": "Îles Salomon" },
+          "parent": "WXOECD"
+        },
+        "ZAF": {
+          "labels": { "en": "South Africa", "fr": "Afrique du Sud" },
+          "parent": "WXOECD"
+        },
+        "LKA": {
+          "labels": { "en": "Sri Lanka", "fr": "Sri Lanka" },
+          "parent": "WXOECD"
+        },
+        "THA": {
+          "labels": { "en": "Thailand", "fr": "Thaïlande" },
+          "parent": "WXOECD"
+        },
+        "UKR": {
+          "labels": { "en": "Ukraine", "fr": "Ukraine" },
+          "parent": "WXOECD"
+        },
+        "URY": {
+          "labels": { "en": "Uruguay", "fr": "Uruguay" },
+          "parent": "WXOECD"
+        },
+        "UZB": {
+          "labels": { "en": "Uzbekistan", "fr": "Ouzbékistan" },
+          "parent": "WXOECD"
+        },
+        "VEN": {
+          "labels": { "en": "Venezuela", "fr": "Venezuela" },
+          "parent": "WXOECD"
+        },
+        "ZWE": {
+          "labels": { "en": "Zimbabwe", "fr": "Zimbabwe" },
+          "parent": "WXOECD"
+        },
+        "WXOECD": {
+          "labels": { "en": "Non-OECD economies", "fr": "Non-OCDE économies" },
+          "noData": true
+        }
+      },
+      "position": null
+    },
+    {
+      "id": "FREQ",
+      "name": "Frequency of observation",
+      "members": { "A": { "labels": { "en": "Annual", "fr": "Annuelle" } } },
+      "position": null
+    },
+    {
+      "id": "POLLUTANT",
+      "name": "Pollutant",
+      "members": {
+        "GHG": { "labels": { "en": "Greenhouse gases" } },
+        "CO2": { "labels": { "en": "Carbon dioxide" } },
+        "HFC_PFC_NSP": {
+          "labels": {
+            "en": "Unspecified mix of HFCs and PFCs (hydrofluorocarbones and perfluorocarbones)"
+          }
+        },
+        "HFC": { "labels": { "en": "Hydrofluorocarbons" } },
+        "CH4": { "labels": { "en": "Methane" } },
+        "NF3": { "labels": { "en": "Nitrogen trifluoride" } },
+        "N2O": { "labels": { "en": "Nitrous oxide" } },
+        "PFC": { "labels": { "en": "Perfluorocarbons" } },
+        "SF6": { "labels": { "en": "Sulphur hexafluoride" } }
+      },
+      "position": null
+    },
+    {
+      "id": "MEASURE",
+      "name": "Measure",
+      "members": {
+        "1": {
+          "labels": { "en": "1. Energy", "fr": "1. Energie" },
+          "parent": "_T"
+        },
+        "2": {
+          "labels": {
+            "en": "2. Industrial processes and product use",
+            "fr": "2. Procédés industriels et utilisation de produit"
+          },
+          "parent": "_T"
+        },
+        "3": {
+          "labels": { "en": "3. Agriculture", "fr": "3. Agriculture" },
+          "parent": "_T"
+        },
+        "5": {
+          "labels": { "en": "5. Waste", "fr": "5. Déchets" },
+          "parent": "_T"
+        },
+        "6": {
+          "labels": { "en": "6. Other", "fr": "6. Autres" },
+          "parent": "_T"
+        },
+        "_T": {
+          "labels": {
+            "en": "Total emissions excluding LULUCF",
+            "fr": "Emissions totales exluant l'UTCF"
+          }
+        },
+        "1A": {
+          "labels": {
+            "en": "1.A. Fuel Combustion Activities",
+            "fr": "1.A. Activités de combustion de combustibles"
+          },
+          "parent": "1"
+        },
+        "1A1": {
+          "labels": {
+            "en": "1.A.1. Energy Industries",
+            "fr": "1.A.1. Industries de l'énergie"
+          },
+          "parent": "1A"
+        },
+        "1A1a": {
+          "labels": {
+            "en": "1.A.1.a. Public Electricity and Heat Production",
+            "fr": "1.A.1.a. Production publique d'électricité et de chaleur"
+          },
+          "parent": "1A1"
+        },
+        "1A1b": {
+          "labels": {
+            "en": "1.A.1.b. Petroleum Refining",
+            "fr": "1.A.1.b. Raffinage du pétrole"
+          },
+          "parent": "1A1"
+        },
+        "1A1c": {
+          "labels": {
+            "en": "1.A.1.c. Manufacture of Solid Fuels and Other Energy Ind.",
+            "fr": "1.A.1.c. Fabrication de combustibles solides et autres ind. Éner."
+          },
+          "parent": "1A1"
+        },
+        "1A1cii": {
+          "labels": {
+            "en": "1.A.1.c.ii Oil and Gas Extraction",
+            "fr": "1.A.1.c.ii Extraction de pétrole et de gaz"
+          },
+          "parent": "1A1c"
+        },
+        "1A2": {
+          "labels": {
+            "en": "1.A.2. Manufacturing industries and construction",
+            "fr": "1.A.2. Industries manufacturières et construction"
+          },
+          "parent": "1A"
+        },
+        "1A2a": {
+          "labels": {
+            "en": "1.A.2.a. Iron and Steel",
+            "fr": "1.A.2.a. Fer et acier"
+          },
+          "parent": "1A2"
+        },
+        "1A2b": {
+          "labels": {
+            "en": "1.A.2.b. Non-Ferrous Metals",
+            "fr": "1.A.2.b. Métaux non ferreux"
+          },
+          "parent": "1A2"
+        },
+        "1A2c": {
+          "labels": {
+            "en": "1.A.2.c. Chemicals",
+            "fr": "1.A.2.c. Produits chimiques"
+          },
+          "parent": "1A2"
+        },
+        "1A2d": {
+          "labels": {
+            "en": "1.A.2.d. Pulp, Paper, and Print",
+            "fr": "1.A.2.d. Pâte à papier, papier et imprimerie"
+          },
+          "parent": "1A2"
+        },
+        "1A2e": {
+          "labels": {
+            "en": "1.A.2.e. Food Processing, Beverages, and Tobacco",
+            "fr": "1.A.2.e. Transformation des aliments, boissons et tabac"
+          },
+          "parent": "1A2"
+        },
+        "1A2f": {
+          "labels": {
+            "en": "1.A.2.f. Non-metallic minerals",
+            "fr": "1.A.2.f. Minéraux non métalliques"
+          },
+          "parent": "1A2"
+        },
+        "1A2g": {
+          "labels": { "en": "1.A.2.g Other", "fr": "1.A.2.g Autres" },
+          "parent": "1A2"
+        },
+        "1A2gi": {
+          "labels": {
+            "en": "1.A.2.g.i. Manufacturing of Machinery",
+            "fr": "1.A.2.g.i. Fabrication de machines"
+          },
+          "parent": "1A2g"
+        },
+        "1A2gii": {
+          "labels": {
+            "en": "1.A.2.g.ii. Manufacturing of Transport Equipment",
+            "fr": "1.A.2.g.ii. Fabrication d'équipements de transport"
+          },
+          "parent": "1A2g"
+        },
+        "1A2giii": {
+          "labels": {
+            "en": "1.A.2.g.iii. Mining (Excluding Fuels) and Quarrying",
+            "fr": "1.A.2.g.iii. Exploitation minière (sauf combustibles) et carrières"
+          },
+          "parent": "1A2g"
+        },
+        "1A2giv": {
+          "labels": {
+            "en": "1.A.2.g.iv. Wood and Wood Products",
+            "fr": "1.A.2.g.iv. Bois et produits du bois"
+          },
+          "parent": "1A2g"
+        },
+        "1A2gv": {
+          "labels": {
+            "en": "1.A.2.g.v. Construction",
+            "fr": "1.A.2.g.v. Construction"
+          },
+          "parent": "1A2g"
+        },
+        "1A2gvi": {
+          "labels": {
+            "en": "1.A.2.g.vi. Textile and Leather",
+            "fr": "1.A.2.g.vi. Textile et cuir"
+          },
+          "parent": "1A2g"
+        },
+        "1A2gvii": {
+          "labels": {
+            "en": "1.A.2.g.vii. Off-road Vehicles and Other Machinery",
+            "fr": "1.A.2.g.vii. Véhicules tout-terrain et autres machines"
+          },
+          "parent": "1A2g"
+        },
+        "1A2gviii": {
+          "labels": {
+            "en": "1.A.2.g.viii. Other",
+            "fr": "1.A.2.g.viii. Autres"
+          },
+          "parent": "1A2g"
+        },
+        "1A3": {
+          "labels": { "en": "1.A.3. Transport", "fr": "1.A.3. Transport" },
+          "parent": "1A"
+        },
+        "1A3a": {
+          "labels": {
+            "en": "1.A.3.a. Domestic Aviation",
+            "fr": "1.A.3.a. Aviation intérieure"
+          },
+          "parent": "1A3"
+        },
+        "1A3b": {
+          "labels": {
+            "en": "1.A.3.b. Road Transport",
+            "fr": "1.A.3.b. Transport routier"
+          },
+          "parent": "1A3"
+        },
+        "1A3bi": {
+          "labels": { "en": "1.A.3.b.i Cars", "fr": "1.A.3.b.i Voitures" },
+          "parent": "1A3b"
+        },
+        "1A3bii": {
+          "labels": {
+            "en": "1.A.3.b.ii Light Duty Trucks",
+            "fr": "1.A.3.b.ii Camions légers"
+          },
+          "parent": "1A3b"
+        },
+        "1A3biii": {
+          "labels": {
+            "en": "1.A.3.b.iii Heavy Duty Trucks and Buses",
+            "fr": "1.A.3.b.iii Camions lourds et autobus"
+          },
+          "parent": "1A3b"
+        },
+        "1A3biv": {
+          "labels": {
+            "en": "1.A.3.b.iv Motorcycles",
+            "fr": "1.A.3.b.iv Motocyclettes"
+          },
+          "parent": "1A3b"
+        },
+        "1A3c": {
+          "labels": {
+            "en": "1.A.3.c. Railways",
+            "fr": "1.A.3.c. Chemins de fer"
+          },
+          "parent": "1A3"
+        },
+        "1A3d": {
+          "labels": {
+            "en": "1.A.3.d. Domestic Navigation",
+            "fr": "1.A.3.d. Navigation intérieure"
+          },
+          "parent": "1A3"
+        },
+        "1A3e": {
+          "labels": {
+            "en": "1.A.3.e. Other Transportation",
+            "fr": "1.A.3.e. Autres transports"
+          },
+          "parent": "1A3"
+        },
+        "1A4": {
+          "labels": {
+            "en": "1.A.4. Residential and other sectors",
+            "fr": "1.A.4. Résidentiel et autres secteurs"
+          },
+          "parent": "1A"
+        },
+        "1A4a": {
+          "labels": {
+            "en": "1.A.4.a. Commercial and Institutional",
+            "fr": "1.A.4.a. Commerce et institutions"
+          },
+          "parent": "1A4"
+        },
+        "1A4ai": {
+          "labels": {
+            "en": "1.A.4.a.i Stationary Combustion",
+            "fr": "1.A.4.a.i Combustion stationnaire"
+          },
+          "parent": "1A4a"
+        },
+        "1A4b": {
+          "labels": {
+            "en": "1.A.4.b. Residential",
+            "fr": "1.A.4.b. Résidentiel"
+          },
+          "parent": "1A4"
+        },
+        "1A4bi": {
+          "labels": {
+            "en": "1.A.4.b.i Stationary Combustion",
+            "fr": "1.A.4.b.i Combustion stationnaire"
+          },
+          "parent": "1A4b"
+        },
+        "1A4c": {
+          "labels": {
+            "en": "1.A.4.c. Agriculture, Forestry, and Fishing",
+            "fr": "1.A.4.c. Agriculture, foresterie et pêche"
+          },
+          "parent": "1A4"
+        },
+        "1A4ci": {
+          "labels": {
+            "en": "1.A.4.c.i  Stationary",
+            "fr": "1.A.4.c.i Stationnaire"
+          },
+          "parent": "1A4c"
+        },
+        "1A4cii": {
+          "labels": {
+            "en": "1.A.4.c.ii  Off-road Vehicles and Other Machinery",
+            "fr": "1.A.4.c.ii Véhicules hors route et autres machines"
+          },
+          "parent": "1A4c"
+        },
+        "1A4ciii": {
+          "labels": { "en": "1.A.4.c.iii  Fishing", "fr": "1.A.4.c.iii Pêche" },
+          "parent": "1A4c"
+        },
+        "1A5": {
+          "labels": {
+            "en": "1.A.5. Energy - Other",
+            "fr": "1.A.5. Energie - Autre"
+          },
+          "parent": "1A"
+        },
+        "1A451B1C": {
+          "labels": {
+            "en": "1A4+1A5+1B+1C - Other energy sectors",
+            "fr": "1A4+1A5+1B+1C - Autres secteurs"
+          },
+          "parent": "1A"
+        },
+        "1B": {
+          "labels": {
+            "en": "1.B. Fugitive Emissions from Fuels",
+            "fr": "1.B. Emissions fugitives des combustibles"
+          },
+          "parent": "1"
+        },
+        "1B1": {
+          "labels": {
+            "en": "1.B.1. Solid Fuels",
+            "fr": "1.B.1. Combustibles solides"
+          },
+          "parent": "1B"
+        },
+        "1B2": {
+          "labels": {
+            "en": "1.B.2. Oil and Natural Gas",
+            "fr": "1.B.2. Pétrole et gaz naturel"
+          },
+          "parent": "1B"
+        },
+        "1C": {
+          "labels": {
+            "en": "1.C. CO2 from Transport and Storage",
+            "fr": "1.C. Transport et stockage du CO2"
+          },
+          "parent": "1"
+        },
+        "2A": {
+          "labels": {
+            "en": "2.A. Mineral Industry",
+            "fr": "2.A. Industrie minérale"
+          },
+          "parent": "2"
+        },
+        "3A": {
+          "labels": {
+            "en": "3.A. Enteric fermentation",
+            "fr": "3.A. Fermentation entérique"
+          },
+          "parent": "3"
+        },
+        "2A1": {
+          "labels": {
+            "en": "2.A.1. Cement Production",
+            "fr": "2.A.1. Production de ciment"
+          },
+          "parent": "2A"
+        },
+        "2A2": {
+          "labels": {
+            "en": "2.A.2. Lime Production",
+            "fr": "2.A.2. Production de chaux"
+          },
+          "parent": "2A"
+        },
+        "2A3": {
+          "labels": {
+            "en": "2.A.3. Glass Production",
+            "fr": "2.A.3. Production de verre"
+          },
+          "parent": "2A"
+        },
+        "2A4": {
+          "labels": {
+            "en": "2.A.4. Other Process Uses of Carbonates",
+            "fr": "2.A.4 Autres utilisations industrielles des carbonates"
+          },
+          "parent": "2A"
+        },
+        "2B": {
+          "labels": {
+            "en": "2.B. Chemical Industry",
+            "fr": "2.B. Industrie chimique"
+          },
+          "parent": "2"
+        },
+        "3B": {
+          "labels": {
+            "en": "3.B. Manure management",
+            "fr": "3.B. Gestion des effluents d'élevage"
+          },
+          "parent": "3"
+        },
+        "2B1": {
+          "labels": {
+            "en": "2.B.1. Ammonia Production",
+            "fr": "2.B.1. Production d'ammoniac"
+          },
+          "parent": "2B"
+        },
+        "2B2": {
+          "labels": {
+            "en": "2.B.2. Nitric Acid Production",
+            "fr": "2.B.2. Production d'acide nitrique"
+          },
+          "parent": "2B"
+        },
+        "2C": {
+          "labels": {
+            "en": "2.C. Metal Industry",
+            "fr": "2.C. Industrie métallurgique"
+          },
+          "parent": "2"
+        },
+        "3C": {
+          "labels": { "en": "3.C. Rice cultivation", "fr": "3.C. Riziculture" },
+          "parent": "3"
+        },
+        "2C1": {
+          "labels": {
+            "en": "2.C.1. Iron and Steel Production",
+            "fr": "2.C.1. Production de fer et d'acier"
+          },
+          "parent": "2C"
+        },
+        "2D": {
+          "labels": {
+            "en": "2.D. Non-Energy Products from Fuels and Solvent Use",
+            "fr": "2.D. Produits non énergétiques provenant de l'utilisation de carburants et de solvants"
+          },
+          "parent": "2"
+        },
+        "3D": {
+          "labels": {
+            "en": "3.D. Agricultural soil",
+            "fr": "3.D. Sols agricoles"
+          },
+          "parent": "3"
+        },
+        "2E": {
+          "labels": {
+            "en": "2.E. Electronics Industry",
+            "fr": "2.E. Industrie électronique"
+          },
+          "parent": "2"
+        },
+        "3E": {
+          "labels": {
+            "en": "3.E. Prescribed burning of savannas",
+            "fr": "3.E. Brûlage prescrit des savanes"
+          },
+          "parent": "3"
+        },
+        "2F": {
+          "labels": {
+            "en": "2.F. Product Uses as Substitutes for Ozone-Depleting Substances",
+            "fr": "2.F. Utilisations de produits comme substituts aux substances appauvrissant la couche d'ozone"
+          },
+          "parent": "2"
+        },
+        "3F": {
+          "labels": {
+            "en": "3.F. Field burning of agricultural residues",
+            "fr": "3.F. Combustion des résidus agricoles"
+          },
+          "parent": "3"
+        },
+        "2G": {
+          "labels": {
+            "en": "2.G. Other Product Manufacture and Use",
+            "fr": "2.G. Fabrication et utilisation d'autres produits"
+          },
+          "parent": "2"
+        },
+        "3G": {
+          "labels": { "en": "3.G. Liming", "fr": "3.G. Chaulage" },
+          "parent": "3"
+        },
+        "2H": {
+          "labels": { "en": "2.H. Other", "fr": "2.H.1. Autres" },
+          "parent": "2"
+        },
+        "3H": {
+          "labels": {
+            "en": "3.H. Urea application",
+            "fr": "3.H. Application d'urée"
+          },
+          "parent": "3"
+        },
+        "2H1": {
+          "labels": {
+            "en": "2.H.1. Pulp and Paper",
+            "fr": "2.H.1. Pâtes et papiers"
+          },
+          "parent": "2H"
+        },
+        "2H2": {
+          "labels": {
+            "en": "2.H.2. Food and Beverages Industry",
+            "fr": "2.H. Industrie alimentaire et des boissons"
+          },
+          "parent": "2H"
+        },
+        "3I": {
+          "labels": {
+            "en": "3.I. Other carbon-containing fertilizers",
+            "fr": "3.I. Autres engrais carbonés"
+          },
+          "parent": "3"
+        },
+        "3J": {
+          "labels": { "en": "3.J. Others", "fr": "3.J. Autres" },
+          "parent": "3"
+        },
+        "5A": {
+          "labels": {
+            "en": "5.A. Solid Waste Disposal",
+            "fr": "5.A. Élimination des déchets solides"
+          },
+          "parent": "5"
+        },
+        "5B": {
+          "labels": {
+            "en": "5.B. Biological Treatment of Solid Waste",
+            "fr": "5.B. Traitement biologique des déchets solides"
+          },
+          "parent": "5"
+        },
+        "5C": {
+          "labels": {
+            "en": "5.C. Incineration and Open Burning of Waste",
+            "fr": "5.C. Incinération et combustion à l'air libre des déchets"
+          },
+          "parent": "5"
+        },
+        "5D": {
+          "labels": {
+            "en": "5.D. Wastewater Treatment and Discharge",
+            "fr": "5.D. Traitement et rejet des eaux usées"
+          },
+          "parent": "5"
+        },
+        "LULUCF": {
+          "labels": {
+            "en": "4.Land use, land-use change and forestry (LULUCF)",
+            "fr": "4.Utilisation des terres, leur changement et la forêt  (UTCF)"
+          }
+        },
+        "4A": {
+          "labels": { "en": "4.A. Forest land", "fr": "4.A. Surfaces boisées" },
+          "parent": "LULUCF"
+        },
+        "4B": {
+          "labels": { "en": "4.B. Cropland", "fr": "4.B. Terres labourables" },
+          "parent": "LULUCF"
+        },
+        "4C": {
+          "labels": {
+            "en": "4.C. Grassland",
+            "fr": "4.C. Superficies en herbe"
+          },
+          "parent": "LULUCF"
+        },
+        "4D": {
+          "labels": { "en": "4.D. Wetlands", "fr": "4.D. Zones humides" },
+          "parent": "LULUCF"
+        },
+        "4E": {
+          "labels": { "en": "4.E. Settlements", "fr": "4.E. Etablissements" },
+          "parent": "LULUCF"
+        },
+        "4F": {
+          "labels": { "en": "4.F. Other land", "fr": "4.F. Autres terres" },
+          "parent": "LULUCF"
+        },
+        "4G": {
+          "labels": {
+            "en": "4.G. Harvest wood products",
+            "fr": "4.G. Produits ligneux récoltés"
+          },
+          "parent": "LULUCF"
+        },
+        "4H": {
+          "labels": { "en": "4.H. Other", "fr": "4.H. Autres" },
+          "parent": "LULUCF"
+        },
+        "T_LULU": {
+          "labels": {
+            "en": "Total emissions including LULUCF",
+            "fr": "Emissions totales incluant l'UTCF"
+          }
+        }
+      },
+      "position": null
+    },
+    {
+      "id": "UNIT_MEASURE",
+      "name": "Unit of measure",
+      "members": {
+        "KG_CO2E_PS": {
+          "labels": {
+            "en": "Kilogrammes of CO2-equivalent per person",
+            "fr": "Kilogrammes d'équivalent CO2 par personne"
+          }
+        },
+        "KG_CO2E_10P3USD": {
+          "labels": {
+            "en": "Kilogrammes of CO2-equivalent per 1 000 US dollars",
+            "fr": "Kilogrammes d'équivalent CO2 par 1 000 des É-U"
+          }
+        },
+        "T_CO2E": {
+          "labels": {
+            "en": "Tonnes of CO2-equivalent",
+            "fr": "Tonnes d'équivalent CO2"
+          }
+        },
+        "PT_EM_GHG": {
+          "labels": {
+            "en": "Percentage of greenhouse gas emissions",
+            "fr": "Pourcentage des émissions de gaz à effet de serre"
+          }
+        },
+        "IX": { "labels": { "en": "Index", "fr": "Indice" } }
+      },
+      "position": null
+    },
+    {
+      "id": "TIME_PERIOD",
+      "timeRange": {
+        "startPeriod": { "period": "1985-01-01T00:00:00", "isInclusive": true },
+        "endPeriod": { "period": "2023-12-31T00:00:00", "isInclusive": true }
+      },
+      "name": "Time period"
+    }
+  ],
+  "dotStatFetchDuration": 0
+}
