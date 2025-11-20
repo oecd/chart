@@ -255,7 +255,8 @@ export const createCodeLabelMapping = ({
   )(mappingChartLevel);
 };
 
-const addParsingHelperData =
+// exported only for unit tests
+export const addParsingHelperData =
   (csvCodeLabelMappingProjectLevel, csvCodeLabelMapping, vars) =>
   ({ data, ...rest }) => {
     const codeLabelMapping = createCodeLabelMapping({
@@ -468,12 +469,8 @@ export const sortCSV =
 export const handleAreCategoriesAndSeriesDates =
   (chartType, forceXAxisToBeTreatedAsCategories) => (data) => {
     const categoriesLabels = R.compose(
-      R.map(
-        R.propOr(
-          R.identity,
-          R.__,
-          data.parsingHelperData.xDimensionLabelByCode,
-        ),
+      R.map((c) =>
+        R.propOr(c, c, data.parsingHelperData.xDimensionLabelByCode),
       ),
       R.map(R.head),
       R.tail,
@@ -481,12 +478,8 @@ export const handleAreCategoriesAndSeriesDates =
     )(data);
 
     const seriesLabels = R.compose(
-      R.map(
-        R.propOr(
-          R.identity,
-          R.__,
-          data.parsingHelperData.yDimensionLabelByCode,
-        ),
+      R.map((s) =>
+        R.propOr(s, s, data.parsingHelperData.yDimensionLabelByCode),
       ),
       R.tail,
       R.head,
@@ -562,12 +555,8 @@ export const handleAreCategoriesAndSeriesNumbers =
     }
 
     const seriesLabels = R.compose(
-      R.map(
-        R.propOr(
-          R.identity,
-          R.__,
-          data.parsingHelperData.yDimensionLabelByCode,
-        ),
+      R.map((s) =>
+        R.propOr(s, s, data.parsingHelperData.yDimensionLabelByCode),
       ),
       R.tail,
       R.head,
@@ -580,12 +569,8 @@ export const handleAreCategoriesAndSeriesNumbers =
     }
 
     const categoriesLabels = R.compose(
-      R.map(
-        R.propOr(
-          R.identity,
-          R.__,
-          data.parsingHelperData.xDimensionLabelByCode,
-        ),
+      R.map((c) =>
+        R.propOr(c, c, data.parsingHelperData.xDimensionLabelByCode),
       ),
       R.map(R.head),
       R.tail,
@@ -652,7 +637,8 @@ export const addCodeLabelMapping = (data) =>
     data,
   );
 
-const filterCSV = (vars) => (data) => {
+// exported only for unit tests
+export const filterCSV = (vars) => (data) => {
   const headerRow = R.head(data);
 
   const variableColumnIndexesAndFilterDataPairs = reduceWithIndex(
@@ -860,7 +846,8 @@ const filterCSV = (vars) => (data) => {
   return { data: finalData, varsThatCauseNewPreParsedDataFetch };
 };
 
-const transformValuesAndExtractMetadata = ({ data, ...rest }) => {
+// exported only for unit tests
+export const transformValuesAndExtractMetadata = ({ data, ...rest }) => {
   const headerRow = R.head(data);
 
   const matedata1ColumnIndex = R.findIndex(
