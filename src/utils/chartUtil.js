@@ -314,7 +314,11 @@ export const tryCastAllToDatesAndDetectFormat = (values) => {
 export const replaceVarsNameByVarsValue = (string, vars) =>
   R.reduce(
     (acc, varName) =>
-      R.replace(new RegExp(`{${varName}}`, 'gi'), R.prop(varName, vars), acc),
+      R.replace(
+        new RegExp(`{${varName}}`, 'gi'),
+        R.propOr('', varName, vars),
+        acc,
+      ),
     string ?? '',
     possibleVariables,
   );
@@ -344,19 +348,20 @@ export const replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax = ({
           R.join(', '),
           R.reject(isNilOrEmpty),
           R.map((code) => {
+            const label = R.propOr(code, code, mapping);
             const { isSuccessful, dateFormat } =
-              tryCastAllToDatesAndDetectFormat([code]);
+              tryCastAllToDatesAndDetectFormat([label]);
             if (isSuccessful) {
               const frequency = R.prop(dateFormat, frequencies);
-              const date = frequency.tryParse(code);
+              const date = frequency.tryParse(label);
               return frequency.formatToLabel(date, lang);
             }
 
-            return R.prop(code, mapping);
+            return R.propOr('', code, mapping);
           }),
           R.split('|'),
           R.toUpper,
-          R.prop(varName),
+          R.propOr('', varName),
         )(vars);
 
         return R.replace(new RegExp(`{${varName}}`, 'gi'), labels, acc);

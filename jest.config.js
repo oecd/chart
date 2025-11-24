@@ -34,6 +34,8 @@ export default {
     '!src/index-util.js',
     '!src/react-jsx-runtime.js',
     '!src/**/*.json',
+    '!src/utils/trackingUtil.js',
+    '!src/utils/reactSelectUtil.js',
   ],
 
   // Coverage thresholds
