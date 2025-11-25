@@ -47,6 +47,15 @@ jest.mock('highcharts', () => ({
   setOptions: jest.fn(),
 }));
 
+jest.mock('highcharts/es-modules/masters/highcharts.src', () => ({
+  __esModule: true,
+  default: {
+    chart: jest.fn(),
+    map: jest.fn(),
+    setOptions: jest.fn(),
+  },
+}));
+
 jest.mock('highcharts-react-official', () => ({
   __esModule: true,
   default: jest.fn(() => null),

@@ -1,0 +1,438 @@
+{
+  "meta": {
+    "schema": "https://raw.githubusercontent.com/sdmx-twg/sdmx-json/master/data-message/tools/schemas/1.0/sdmx-json-data-schema.json",
+    "id": "IREF011050",
+    "prepared": "2025-11-07T14:05:49Z",
+    "test": false,
+    "contentLanguages": ["en", "en-US"],
+    "sender": {
+      "id": "Disseminate_Final_DMZ",
+      "name": "unknown",
+      "names": { "en-US": "unknown" }
+    }
+  },
+  "data": {
+    "dataSets": [
+      {
+        "action": "Information",
+        "links": [
+          {
+            "urn": "urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=OECD.ENV.EPI:DSD_AIR_GHG(1.0)",
+            "rel": "DataStructure"
+          }
+        ],
+        "annotations": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+        "observations": {
+          "0:0:0:0:0:0": [1709909.7257916, 0, 0, null, null, 0, null],
+          "1:0:0:0:0:0": [499345.85944137, 0, 0, null, null, 0, null],
+          "2:0:1:0:0:0": [169284.44104062, 0, 0, null, null, 0, null],
+          "3:0:2:0:0:0": [444942.92053508, 0, 0, null, null, 0, null],
+          "4:0:2:0:0:0": [747052.68302528, 0, 0, null, null, 0, null],
+          "1:0:3:0:0:0": [147880.41110542, 0, 0, null, null, 0, null],
+          "0:0:2:0:0:0": [2061245.5949007, 0, 0, null, null, 0, null],
+          "1:0:2:0:0:0": [1160952.7455324, 0, 0, null, null, 0, null],
+          "2:0:0:0:0:0": [527285.00217865, 0, 0, null, null, 0, null],
+          "5:0:0:0:0:0": [349048.34316779, 0, 0, null, null, 0, null],
+          "5:0:1:0:0:0": [47975.607549603, 0, 0, null, null, 0, null],
+          "3:0:1:0:0:0": [65701.170136246, 0, 0, null, null, 0, null],
+          "4:0:1:0:0:0": [132690.8336369, 0, 0, null, null, 0, null],
+          "0:0:1:0:0:0": [258632.54203569, 0, 0, null, null, 0, null],
+          "1:0:1:0:0:0": [506335.23976696, 0, 0, null, null, 0, null],
+          "2:0:3:0:0:0": [38466.320644507, 0, 0, null, null, 0, null],
+          "5:0:3:0:0:0": [17418.713328404, 0, 0, null, null, 0, null],
+          "3:0:3:0:0:0": [30736.398317189, 0, 0, null, null, 0, null],
+          "4:0:3:0:0:0": [26913.962328981, 0, 0, null, null, 0, null],
+          "0:0:3:0:0:0": [57343.35985996, 0, 0, null, null, 0, null],
+          "6:0:2:0:0:0": [327577.41721, 0, 0, null, null, 0, null],
+          "6:0:0:0:0:0": [268520.5939755, 0, 0, null, null, 0, null],
+          "6:0:1:0:0:0": [41308.33099116, 0, 0, null, null, 0, null],
+          "6:0:3:0:0:0": [11615.501549907, 0, 0, null, null, 0, null],
+          "2:0:2:0:0:0": [756812.84307542, 0, 0, null, null, 0, null],
+          "5:0:2:0:0:0": [428292.25030636, 0, 0, null, null, 0, null],
+          "3:0:0:0:0:0": [332385.11992807, 0, 0, null, null, 0, null],
+          "4:0:0:0:0:0": [575090.77546574, 0, 0, null, null, 0, null]
+        }
+      }
+    ],
+    "structure": {
+      "name": "Air emissions - Greenhouse gas emissions Inventories",
+      "names": { "en": "Air emissions - Greenhouse gas emissions Inventories" },
+      "description": "<p style='margin:0cm;text-align:left;font-size:15px;font-family:\"Times New Roman\",serif;background:white;'><span style='font-family:\"Arial\",sans-serif;color:#182026;'>This dataset presents trends in man-made emissions of major greenhouse gases and emissions by gas.&nbsp;</span><span style='font-family:\"Arial\",sans-serif;color:#182026;'>Data refer to total emissions of CO<sub>2&nbsp;</sub>(emissions from energy use and industrial processes, e.g. cement production), CH<sub>4</sub>(methane emissions from solid waste, livestock, mining of hard coal and lignite, rice paddies, agriculture and leaks from natural gas pipelines), nitrous oxide (N<sub>2</sub>O), hydrofluorocarbons (HFCs), perfluorocarbons (PFCs), sulphur hexafluoride (SF<sub>6</sub>) and nitrogen trifluoride (NF<sub>3</sub>). Data exclude indirect CO<sub>2</sub>. For UNCCCC Annex I countries, data follow the IPCC 2006 guidelines. Territories&apos; coverage are as those defined in the Kyoto Protocol.&nbsp;</span></p>\n<p style='margin:0cm;text-align:left;font-size:15px;font-family:\"Times New Roman\",serif;background:white;'><br></p>\n<p style='margin:0cm;text-align:left;font-size:15px;font-family:\"Times New Roman\",serif;background:white;'><strong><span style='font-family:\"Arial\",sans-serif;color:black;'>Data source(s)</span></strong><span style='font-family:\"Arial\",sans-serif;color:black;'>:</span><span style='font-family:\"Arial\",sans-serif;color:black;'>&nbsp;</span><span style=\"color:black;\"><a href=\"https://unfccc.int/ghg-inventories-annex-i-parties/2025\"><span style='font-family:\"Arial\",sans-serif;'>National Inventory Submissions 2025</span></a></span><span style='font-family:\"Arial\",sans-serif;color:#182026;'>&nbsp;to the United Nations Framework Convention on Climate Change (UNFCCC, CRT tables), available <a href=\"https://unfccc.int/reports?f%5B0%5D=document_type%3A4593\" style=\"color:#182026; text-decoration:underline;\">here</a>.</span></p>\n<p style='margin:0cm;text-align:left;font-size:15px;font-family:\"Times New Roman\",serif;background:white;'><br></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><strong><span style='font-family:\"Arial\",sans-serif;'>Contact</span></strong><span style='font-family:\"Arial\",sans-serif;'>:&nbsp;</span><a href=\"mailto:ENV.Stat@oecd.org\"><span style='font-family:\"Arial\",sans-serif;'>ENV.Stat@oecd.org</span></a><span style='font-family:\"Arial\",sans-serif;'>&nbsp;</span></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><span style='font-family:\"Arial\",sans-serif;'>&nbsp;</span></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><strong><span style='font-family:\"Arial\",sans-serif;'>Dataset release date</span></strong><span style='font-family:\"Arial\",sans-serif;'>: September 2025</span></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><span style='font-family:\"Arial\",sans-serif;'>&nbsp;</span></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><a href=\"https://stats.oecd.org/wbos/fileview2.aspx?IDFile=367d71d9-dbb1-4a47-b9ae-fe0c9edc2a10\"><span style='font-family:\"Arial\",sans-serif;'>Database documentation</span></a></p>",
+      "descriptions": {
+        "en": "<p style='margin:0cm;text-align:left;font-size:15px;font-family:\"Times New Roman\",serif;background:white;'><span style='font-family:\"Arial\",sans-serif;color:#182026;'>This dataset presents trends in man-made emissions of major greenhouse gases and emissions by gas.&nbsp;</span><span style='font-family:\"Arial\",sans-serif;color:#182026;'>Data refer to total emissions of CO<sub>2&nbsp;</sub>(emissions from energy use and industrial processes, e.g. cement production), CH<sub>4</sub>(methane emissions from solid waste, livestock, mining of hard coal and lignite, rice paddies, agriculture and leaks from natural gas pipelines), nitrous oxide (N<sub>2</sub>O), hydrofluorocarbons (HFCs), perfluorocarbons (PFCs), sulphur hexafluoride (SF<sub>6</sub>) and nitrogen trifluoride (NF<sub>3</sub>). Data exclude indirect CO<sub>2</sub>. For UNCCCC Annex I countries, data follow the IPCC 2006 guidelines. Territories&apos; coverage are as those defined in the Kyoto Protocol.&nbsp;</span></p>\n<p style='margin:0cm;text-align:left;font-size:15px;font-family:\"Times New Roman\",serif;background:white;'><br></p>\n<p style='margin:0cm;text-align:left;font-size:15px;font-family:\"Times New Roman\",serif;background:white;'><strong><span style='font-family:\"Arial\",sans-serif;color:black;'>Data source(s)</span></strong><span style='font-family:\"Arial\",sans-serif;color:black;'>:</span><span style='font-family:\"Arial\",sans-serif;color:black;'>&nbsp;</span><span style=\"color:black;\"><a href=\"https://unfccc.int/ghg-inventories-annex-i-parties/2025\"><span style='font-family:\"Arial\",sans-serif;'>National Inventory Submissions 2025</span></a></span><span style='font-family:\"Arial\",sans-serif;color:#182026;'>&nbsp;to the United Nations Framework Convention on Climate Change (UNFCCC, CRT tables), available <a href=\"https://unfccc.int/reports?f%5B0%5D=document_type%3A4593\" style=\"color:#182026; text-decoration:underline;\">here</a>.</span></p>\n<p style='margin:0cm;text-align:left;font-size:15px;font-family:\"Times New Roman\",serif;background:white;'><br></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><strong><span style='font-family:\"Arial\",sans-serif;'>Contact</span></strong><span style='font-family:\"Arial\",sans-serif;'>:&nbsp;</span><a href=\"mailto:ENV.Stat@oecd.org\"><span style='font-family:\"Arial\",sans-serif;'>ENV.Stat@oecd.org</span></a><span style='font-family:\"Arial\",sans-serif;'>&nbsp;</span></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><span style='font-family:\"Arial\",sans-serif;'>&nbsp;</span></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><strong><span style='font-family:\"Arial\",sans-serif;'>Dataset release date</span></strong><span style='font-family:\"Arial\",sans-serif;'>: September 2025</span></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><span style='font-family:\"Arial\",sans-serif;'>&nbsp;</span></p>\n<p style='margin:0cm;text-align:justify;font-size:15px;font-family:\"Times New Roman\",serif;'><a href=\"https://stats.oecd.org/wbos/fileview2.aspx?IDFile=367d71d9-dbb1-4a47-b9ae-fe0c9edc2a10\"><span style='font-family:\"Arial\",sans-serif;'>Database documentation</span></a></p>"
+      },
+      "dimensions": {
+        "dataset": [],
+        "series": [],
+        "observation": [
+          {
+            "id": "REF_AREA",
+            "name": "Reference area",
+            "names": { "en": "Reference area" },
+            "keyPosition": 0,
+            "roles": ["REF_AREA"],
+            "values": [
+              {
+                "id": "RUS",
+                "order": 266,
+                "name": "Russia",
+                "names": { "en": "Russia" },
+                "parent": "WXOECD",
+                "annotations": [9]
+              },
+              {
+                "id": "BRA",
+                "order": 140,
+                "name": "Brazil",
+                "names": { "en": "Brazil" },
+                "parent": "WXOECD",
+                "annotations": [10]
+              },
+              {
+                "id": "MEX",
+                "order": 24,
+                "name": "Mexico",
+                "names": { "en": "Mexico" },
+                "annotations": [11]
+              },
+              {
+                "id": "FRA",
+                "order": 11,
+                "name": "France",
+                "names": { "en": "France" },
+                "annotations": [12]
+              },
+              {
+                "id": "CAN",
+                "order": 3,
+                "name": "Canada",
+                "names": { "en": "Canada" },
+                "annotations": [13]
+              },
+              {
+                "id": "ITA",
+                "order": 18,
+                "name": "Italy",
+                "names": { "en": "Italy" },
+                "annotations": [14]
+              },
+              {
+                "id": "ESP",
+                "order": 32,
+                "name": "Spain",
+                "names": { "en": "Spain" },
+                "annotations": [15]
+              }
+            ]
+          },
+          {
+            "id": "FREQ",
+            "name": "Frequency of observation",
+            "names": { "en": "Frequency of observation" },
+            "keyPosition": 1,
+            "roles": ["FREQ"],
+            "values": [
+              {
+                "id": "A",
+                "order": 0,
+                "name": "Annual",
+                "names": { "en": "Annual" }
+              }
+            ]
+          },
+          {
+            "id": "POLLUTANT",
+            "name": "Pollutant",
+            "names": { "en": "Pollutant" },
+            "keyPosition": 2,
+            "roles": ["POLLUTANT"],
+            "values": [
+              {
+                "id": "CO2",
+                "order": 5,
+                "name": "Carbon dioxide",
+                "names": { "en": "Carbon dioxide" },
+                "annotations": [16]
+              },
+              {
+                "id": "CH4",
+                "order": 14,
+                "name": "Methane",
+                "names": { "en": "Methane" },
+                "annotations": [17]
+              },
+              {
+                "id": "GHG",
+                "order": 0,
+                "name": "Greenhouse gases",
+                "names": { "en": "Greenhouse gases" },
+                "annotations": [18]
+              },
+              {
+                "id": "N2O",
+                "order": 19,
+                "name": "Nitrous oxide",
+                "names": { "en": "Nitrous oxide" },
+                "annotations": [19]
+              }
+            ]
+          },
+          {
+            "id": "MEASURE",
+            "name": "Measure",
+            "names": { "en": "Measure" },
+            "keyPosition": 3,
+            "roles": ["MEASURE"],
+            "values": [
+              {
+                "id": "_T",
+                "order": 0,
+                "name": "Total emissions excluding LULUCF",
+                "names": { "en": "Total emissions excluding LULUCF" },
+                "annotations": [20]
+              }
+            ]
+          },
+          {
+            "id": "UNIT_MEASURE",
+            "name": "Unit of measure",
+            "names": { "en": "Unit of measure" },
+            "keyPosition": 4,
+            "roles": ["UNIT_MEASURE"],
+            "values": [
+              {
+                "id": "T_CO2E",
+                "order": 497,
+                "name": "Tonnes of CO2-equivalent",
+                "names": { "en": "Tonnes of CO2-equivalent" },
+                "annotations": [21]
+              }
+            ]
+          },
+          {
+            "id": "TIME_PERIOD",
+            "name": "Time period",
+            "names": { "en": "Time period" },
+            "keyPosition": 5,
+            "roles": ["TIME_PERIOD"],
+            "values": [
+              {
+                "start": "2018-01-01T00:00:00",
+                "end": "2018-12-31T23:59:59",
+                "id": "2018",
+                "name": "2018",
+                "names": { "en-US": "2018" }
+              }
+            ]
+          }
+        ]
+      },
+      "attributes": {
+        "dataSet": [],
+        "series": [],
+        "observation": [
+          {
+            "id": "OBS_STATUS",
+            "name": "Observation status",
+            "names": { "en": "Observation status" },
+            "roles": ["OBS_STATUS"],
+            "relationship": { "primaryMeasure": "OBS_VALUE" },
+            "values": [
+              {
+                "id": "A",
+                "order": 0,
+                "name": "Normal value",
+                "names": { "en": "Normal value" }
+              }
+            ]
+          },
+          {
+            "id": "UNIT_MULT",
+            "name": "Unit multiplier",
+            "names": { "en": "Unit multiplier" },
+            "roles": ["UNIT_MULT"],
+            "relationship": { "dimensions": ["UNIT_MEASURE"] },
+            "values": [
+              {
+                "id": "3",
+                "order": 3,
+                "name": "Thousands",
+                "names": { "en": "Thousands" }
+              }
+            ]
+          },
+          {
+            "id": "PRICE_BASE",
+            "name": "Price base",
+            "names": { "en": "Price base" },
+            "roles": ["PRICE_BASE"],
+            "relationship": { "dimensions": ["UNIT_MEASURE"] },
+            "values": []
+          },
+          {
+            "id": "BASE_PER",
+            "name": "Base period",
+            "names": { "en": "Base period" },
+            "roles": ["BASE_PER"],
+            "relationship": { "dimensions": ["UNIT_MEASURE"] },
+            "values": []
+          },
+          {
+            "id": "DECIMALS",
+            "name": "Decimals",
+            "names": { "en": "Decimals" },
+            "roles": ["DECIMALS"],
+            "relationship": {
+              "dimensions": [
+                "REF_AREA",
+                "FREQ",
+                "POLLUTANT",
+                "MEASURE",
+                "UNIT_MEASURE"
+              ]
+            },
+            "values": [
+              { "id": "2", "order": 2, "name": "Two", "names": { "en": "Two" } }
+            ]
+          },
+          {
+            "id": "CONVERSION_TYPE",
+            "name": "Conversion type",
+            "names": { "en": "Conversion type" },
+            "roles": ["CONVERSION_TYPE"],
+            "relationship": {
+              "dimensions": [
+                "REF_AREA",
+                "FREQ",
+                "POLLUTANT",
+                "MEASURE",
+                "UNIT_MEASURE"
+              ]
+            },
+            "values": []
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "type": "NonProductionDataflow",
+          "text": "true",
+          "texts": { "en": "true" }
+        },
+        {
+          "id": "@SDMX",
+          "title": "REF_AREA,UNIT_MEASURE,BASE_PER",
+          "type": "LAYOUT_ROW"
+        },
+        { "id": "@SDMX", "title": "TIME_PERIOD", "type": "LAYOUT_COLUMN" },
+        {
+          "id": "@SDMX",
+          "title": "POLLUTANT,MEASURE",
+          "type": "LAYOUT_ROW_SECTION"
+        },
+        {
+          "id": "@SDMX",
+          "title": "OBS_STATUS=A,FREQ=A,UNIT_MULT=0,BASE_PER=_Z,PRICE_BASE=_Z,REF_AREA=WXOECD",
+          "type": "NOT_DISPLAYED"
+        },
+        {
+          "id": "@SDMX",
+          "title": "TIME_PERIOD_START=2014,POLLUTANT=GHG,MEASURE=_T,UNIT_MEASURE=KG_CO2E_PS",
+          "type": "DEFAULT"
+        },
+        {
+          "title": "UNIT_MEASURE,UNIT_MULT,PRICE_BASE,BASE_PER",
+          "type": "UNIT_MEASURE_CONCEPTS"
+        },
+        {
+          "id": "@SDMX",
+          "title": "POLLUTANT:OECD.ENV.EPI:HCL_POLLUTANT(1.0).H",
+          "type": "HIER_CONTEXT"
+        },
+        {
+          "title": "urn:sdmx:org.sdmx.infomodel.metadatastructure.MetadataStructure=OECD:MSD_REF_METADATA(1.0)",
+          "type": "METADATA"
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "2670",
+          "texts": { "en": "2670" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "1410",
+          "texts": { "en": "1410" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "250",
+          "texts": { "en": "250" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "120",
+          "texts": { "en": "120" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "40",
+          "texts": { "en": "40" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "190",
+          "texts": { "en": "190" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "330",
+          "texts": { "en": "330" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "20",
+          "texts": { "en": "20" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "40",
+          "texts": { "en": "40" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "10",
+          "texts": { "en": "10" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "50",
+          "texts": { "en": "50" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "10",
+          "texts": { "en": "10" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "4980",
+          "texts": { "en": "4980" }
+        }
+      ]
+    }
+  },
+  "errors": []
+}

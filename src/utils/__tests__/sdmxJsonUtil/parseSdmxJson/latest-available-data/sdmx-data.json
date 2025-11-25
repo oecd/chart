@@ -1,0 +1,558 @@
+{
+  "meta": {
+    "schema": "https://raw.githubusercontent.com/sdmx-twg/sdmx-json/master/data-message/tools/schemas/1.0/sdmx-json-data-schema.json",
+    "id": "IREF010298",
+    "prepared": "2025-11-18T13:23:28Z",
+    "test": false,
+    "contentLanguages": ["en", "en-US"],
+    "sender": {
+      "id": "Disseminate_Final_DMZ",
+      "name": "unknown",
+      "names": { "en-US": "unknown" }
+    }
+  },
+  "data": {
+    "dataSets": [
+      {
+        "action": "Information",
+        "links": [
+          {
+            "urn": "urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=OECD.SDD.NAD:DSD_NAMAIN10(1.0)",
+            "rel": "DataStructure"
+          }
+        ],
+        "annotations": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+        "observations": {
+          "0:0:0:0:0:0:0:0:0:0:0:0:0": [43434.539255, null, 0, 0, 0, 0, 0],
+          "0:1:0:0:0:0:0:0:0:0:0:0:1": [14341.225149, null, 0, 0, 1, 0, 0],
+          "0:2:0:0:0:0:0:0:0:0:0:0:2": [12410.169563, null, 0, 0, 1, 0, 0]
+        }
+      }
+    ],
+    "structure": {
+      "name": "Annual GDP and consumption per capita, US $, volume, constant PPPs, reference year 2015",
+      "names": {
+        "en": "Annual GDP and consumption per capita, US $, volume, constant PPPs, reference year 2015"
+      },
+      "description": "This table shows Gross Domestic Product (GDP) per capita (or per person), household final consumption expenditure per capita and actual individual consumption per capita. Final consumption expenditure is the expenditure of resident households on consumption goods or services, while individual consumption is the sum of household consumption plus the individual (not collective) consumption of the non-profit institutions serving households (NPISH) and General Government sectors. The indicators are in volume terms and are converted to US dollars using constant Purchasing Power Parities (PPPs).\n<br><br> When using the filters, please note that GDP is selected by default in the ‘Transaction’ filter but you can select the consumption measures using the ‘Transaction’ filter. The ‘Institutional sector’ filter shows that GDP and actual individual consumption relate to the total economy, while household final consumption expenditure relates to households. <br><br> The table shows OECD countries and selected economies, as well as the OECD total, OECD Europe, European Union and euro area . These can be selected using the ‘Reference area’ filter.  <br><br>   These indicators were presented in the previous dissemination system in the SNA_TABLE1 dataset. \n<br> See ANA Changes for information on changes in methodology:  <a href=\"https://stats.oecd.org/wbos/fileview2.aspx?IDFile=e81c82e7-ad8b-4ab9-8b4c-8c3e1e104c9b\">ANA Changes</a> <br>\nExplore also the GDP and non-financial accounts webpage: <a href=\"https://www.oecd.org/en/data/datasets/gdp-and-non-financial-accounts.html\">GDP and non-financial accounts webpage</a><br>OECD statistics contact: <a href=\"mailto:STAT.Contact@oecd.org\">STAT.Contact@oecd.org</a>",
+      "descriptions": {
+        "en": "This table shows Gross Domestic Product (GDP) per capita (or per person), household final consumption expenditure per capita and actual individual consumption per capita. Final consumption expenditure is the expenditure of resident households on consumption goods or services, while individual consumption is the sum of household consumption plus the individual (not collective) consumption of the non-profit institutions serving households (NPISH) and General Government sectors. The indicators are in volume terms and are converted to US dollars using constant Purchasing Power Parities (PPPs).\n<br><br> When using the filters, please note that GDP is selected by default in the ‘Transaction’ filter but you can select the consumption measures using the ‘Transaction’ filter. The ‘Institutional sector’ filter shows that GDP and actual individual consumption relate to the total economy, while household final consumption expenditure relates to households. <br><br> The table shows OECD countries and selected economies, as well as the OECD total, OECD Europe, European Union and euro area . These can be selected using the ‘Reference area’ filter.  <br><br>   These indicators were presented in the previous dissemination system in the SNA_TABLE1 dataset. \n<br> See ANA Changes for information on changes in methodology:  <a href=\"https://stats.oecd.org/wbos/fileview2.aspx?IDFile=e81c82e7-ad8b-4ab9-8b4c-8c3e1e104c9b\">ANA Changes</a> <br>\nExplore also the GDP and non-financial accounts webpage: <a href=\"https://www.oecd.org/en/data/datasets/gdp-and-non-financial-accounts.html\">GDP and non-financial accounts webpage</a><br>OECD statistics contact: <a href=\"mailto:STAT.Contact@oecd.org\">STAT.Contact@oecd.org</a>"
+      },
+      "dimensions": {
+        "dataset": [],
+        "series": [],
+        "observation": [
+          {
+            "id": "FREQ",
+            "name": "Frequency of observation",
+            "names": { "en": "Frequency of observation" },
+            "keyPosition": 0,
+            "roles": ["FREQ"],
+            "values": [
+              {
+                "id": "A",
+                "order": 0,
+                "name": "Annual",
+                "names": { "en": "Annual" }
+              }
+            ]
+          },
+          {
+            "id": "REF_AREA",
+            "name": "Reference area",
+            "names": { "en": "Reference area" },
+            "keyPosition": 1,
+            "roles": ["REF_AREA"],
+            "values": [
+              {
+                "id": "JPN",
+                "order": 19,
+                "name": "Japan",
+                "names": { "en": "Japan" },
+                "annotations": [9]
+              },
+              {
+                "id": "BRA",
+                "order": 140,
+                "name": "Brazil",
+                "names": { "en": "Brazil" },
+                "parent": "WXOECD",
+                "annotations": [10]
+              },
+              {
+                "id": "IDN",
+                "order": 201,
+                "name": "Indonesia",
+                "names": { "en": "Indonesia" },
+                "parent": "WXOECD",
+                "annotations": [11]
+              }
+            ]
+          },
+          {
+            "id": "SECTOR",
+            "name": "Institutional sector",
+            "names": { "en": "Institutional sector" },
+            "keyPosition": 2,
+            "roles": ["SECTOR"],
+            "values": [
+              {
+                "id": "S1",
+                "order": 1,
+                "name": "Total economy",
+                "names": { "en": "Total economy" },
+                "annotations": [12, 13]
+              }
+            ]
+          },
+          {
+            "id": "COUNTERPART_SECTOR",
+            "name": "Counterpart institutional sector",
+            "names": { "en": "Counterpart institutional sector" },
+            "keyPosition": 3,
+            "roles": ["COUNTERPART_SECTOR"],
+            "values": [
+              {
+                "id": "S1",
+                "order": 1,
+                "name": "Total economy",
+                "names": { "en": "Total economy" },
+                "annotations": [12, 13]
+              }
+            ]
+          },
+          {
+            "id": "TRANSACTION",
+            "name": "Transaction",
+            "names": { "en": "Transaction" },
+            "keyPosition": 4,
+            "roles": ["TRANSACTION"],
+            "values": [
+              {
+                "id": "B1GQ_POP",
+                "order": 274,
+                "name": "Gross domestic product, per capita",
+                "names": { "en": "Gross domestic product, per capita" },
+                "annotations": [14]
+              }
+            ]
+          },
+          {
+            "id": "INSTR_ASSET",
+            "name": "Financial instruments and non-financial assets",
+            "names": { "en": "Financial instruments and non-financial assets" },
+            "keyPosition": 5,
+            "roles": ["INSTR_ASSET"],
+            "values": [
+              {
+                "id": "_Z",
+                "order": 0,
+                "name": "Not applicable",
+                "names": { "en": "Not applicable" },
+                "annotations": [15]
+              }
+            ]
+          },
+          {
+            "id": "ACTIVITY",
+            "name": "Economic activity",
+            "names": { "en": "Economic activity" },
+            "keyPosition": 6,
+            "roles": ["ACTIVITY"],
+            "values": [
+              {
+                "id": "_Z",
+                "order": 957,
+                "name": "Not applicable",
+                "names": { "en": "Not applicable" },
+                "annotations": [16]
+              }
+            ]
+          },
+          {
+            "id": "EXPENDITURE",
+            "name": "Expenditure",
+            "names": { "en": "Expenditure" },
+            "keyPosition": 7,
+            "roles": ["EXPENDITURE"],
+            "values": [
+              {
+                "id": "_Z",
+                "order": 1,
+                "name": "Not applicable",
+                "names": { "en": "Not applicable" },
+                "annotations": [17]
+              }
+            ]
+          },
+          {
+            "id": "UNIT_MEASURE",
+            "name": "Unit of measure",
+            "names": { "en": "Unit of measure" },
+            "keyPosition": 8,
+            "roles": ["UNIT_MEASURE"],
+            "values": [
+              {
+                "id": "USD_PPP_PS",
+                "order": 287,
+                "name": "US dollars per person, PPP converted",
+                "names": { "en": "US dollars per person, PPP converted" },
+                "annotations": [18]
+              }
+            ]
+          },
+          {
+            "id": "PRICE_BASE",
+            "name": "Price base",
+            "names": { "en": "Price base" },
+            "keyPosition": 9,
+            "roles": ["PRICE_BASE"],
+            "values": [
+              {
+                "id": "LR",
+                "order": 3,
+                "name": "Chain linked volume (rebased)",
+                "names": { "en": "Chain linked volume (rebased)" },
+                "annotations": [19]
+              }
+            ]
+          },
+          {
+            "id": "TRANSFORMATION",
+            "name": "Transformation",
+            "names": { "en": "Transformation" },
+            "keyPosition": 10,
+            "roles": ["TRANSFORMATION"],
+            "values": [
+              {
+                "id": "N",
+                "order": 50,
+                "name": "Non transformed data",
+                "names": { "en": "Non transformed data" },
+                "annotations": [20]
+              }
+            ]
+          },
+          {
+            "id": "TABLE_IDENTIFIER",
+            "name": "Table identifier",
+            "names": { "en": "Table identifier" },
+            "keyPosition": 11,
+            "roles": ["TABLE_IDENTIFIER"],
+            "values": [
+              {
+                "id": "T0102",
+                "order": 8,
+                "name": "Table 0102 - GDP identity from the expenditure side",
+                "names": {
+                  "en": "Table 0102 - GDP identity from the expenditure side"
+                }
+              }
+            ]
+          },
+          {
+            "id": "TIME_PERIOD",
+            "name": "Time period",
+            "names": { "en": "Time period" },
+            "keyPosition": 12,
+            "roles": ["TIME_PERIOD"],
+            "values": [
+              {
+                "start": "2023-01-01T00:00:00",
+                "end": "2023-12-31T23:59:59",
+                "id": "2023",
+                "name": "2023",
+                "names": { "en-US": "2023" }
+              },
+              {
+                "start": "2021-01-01T00:00:00",
+                "end": "2021-12-31T23:59:59",
+                "id": "2021",
+                "name": "2021",
+                "names": { "en-US": "2021" }
+              },
+              {
+                "start": "2022-01-01T00:00:00",
+                "end": "2022-12-31T23:59:59",
+                "id": "2022",
+                "name": "2022",
+                "names": { "en-US": "2022" }
+              }
+            ]
+          }
+        ]
+      },
+      "attributes": {
+        "dataSet": [],
+        "series": [],
+        "observation": [
+          {
+            "id": "REF_YEAR_PRICE",
+            "name": "Price reference year",
+            "names": { "en": "Price reference year" },
+            "roles": ["REF_YEAR_PRICE"],
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "SECTOR",
+                "COUNTERPART_SECTOR",
+                "TRANSACTION",
+                "INSTR_ASSET",
+                "ACTIVITY",
+                "EXPENDITURE",
+                "UNIT_MEASURE",
+                "PRICE_BASE",
+                "TRANSFORMATION",
+                "TABLE_IDENTIFIER"
+              ]
+            },
+            "values": []
+          },
+          {
+            "id": "CONF_STATUS",
+            "name": "Confidentiality status",
+            "names": { "en": "Confidentiality status" },
+            "roles": ["CONF_STATUS"],
+            "relationship": { "primaryMeasure": "OBS_VALUE" },
+            "values": [
+              {
+                "id": "F",
+                "order": 0,
+                "name": "Free (free for publication)",
+                "names": { "en": "Free (free for publication)" }
+              }
+            ]
+          },
+          {
+            "id": "DECIMALS",
+            "name": "Decimals",
+            "names": { "en": "Decimals" },
+            "roles": ["DECIMALS"],
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "SECTOR",
+                "COUNTERPART_SECTOR",
+                "TRANSACTION",
+                "INSTR_ASSET",
+                "ACTIVITY",
+                "EXPENDITURE",
+                "UNIT_MEASURE",
+                "PRICE_BASE",
+                "TRANSFORMATION",
+                "TABLE_IDENTIFIER"
+              ]
+            },
+            "values": [
+              { "id": "1", "order": 1, "name": "One", "names": { "en": "One" } }
+            ]
+          },
+          {
+            "id": "OBS_STATUS",
+            "name": "Observation status",
+            "names": { "en": "Observation status" },
+            "roles": ["OBS_STATUS"],
+            "relationship": { "primaryMeasure": "OBS_VALUE" },
+            "values": [
+              {
+                "id": "E",
+                "order": 3,
+                "name": "Estimated value",
+                "names": { "en": "Estimated value" }
+              },
+              {
+                "id": "A",
+                "order": 0,
+                "name": "Normal value",
+                "names": { "en": "Normal value" }
+              }
+            ]
+          },
+          {
+            "id": "UNIT_MULT",
+            "name": "Unit multiplier",
+            "names": { "en": "Unit multiplier" },
+            "roles": ["UNIT_MULT"],
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "SECTOR",
+                "COUNTERPART_SECTOR",
+                "TRANSACTION",
+                "INSTR_ASSET",
+                "ACTIVITY",
+                "EXPENDITURE",
+                "UNIT_MEASURE",
+                "PRICE_BASE",
+                "TRANSFORMATION",
+                "TABLE_IDENTIFIER"
+              ]
+            },
+            "values": [
+              {
+                "id": "0",
+                "order": 0,
+                "name": "Units",
+                "names": { "en": "Units" }
+              }
+            ]
+          },
+          {
+            "id": "CURRENCY",
+            "name": "Currency",
+            "names": { "en": "Currency" },
+            "roles": ["CURRENCY"],
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "SECTOR",
+                "COUNTERPART_SECTOR",
+                "TRANSACTION",
+                "INSTR_ASSET",
+                "ACTIVITY",
+                "EXPENDITURE",
+                "UNIT_MEASURE",
+                "PRICE_BASE",
+                "TRANSFORMATION",
+                "TABLE_IDENTIFIER"
+              ]
+            },
+            "values": [
+              {
+                "id": "_Z",
+                "order": 236,
+                "name": "Not applicable",
+                "names": { "en": "Not applicable" },
+                "annotations": [21]
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "type": "NonProductionDataflow",
+          "text": "true",
+          "texts": { "en": "true" }
+        },
+        {
+          "id": "@SDMX",
+          "title": "REF_AREA,COMBINED_UNIT_MEASURE",
+          "type": "LAYOUT_ROW"
+        },
+        { "id": "@SDMX", "title": "TIME_PERIOD", "type": "LAYOUT_COLUMN" },
+        {
+          "id": "@SDMX",
+          "title": "FREQ,OBS_STATUS=A,CONF_STATUS=F,TABLE_IDENTIFIER,ACTIVITY,PRICE_BASE,REF_YEAR_PRICE,CURRENCY,TRANSFORMATION,EXPENDITURE",
+          "type": "NOT_DISPLAYED"
+        },
+        {
+          "id": "@SDMX",
+          "title": "TRANSACTION=B1GQ_POP,REF_AREA=AUS+AUT+BEL+CAN+CHL+COL+CRI+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LTU+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA,FREQ=A,LASTNPERIODS=10",
+          "type": "DEFAULT"
+        },
+        {
+          "id": "@SDMX",
+          "title": "SECTOR:OECD.SDD.NAD:HCL_SECTOR(1.0).H",
+          "type": "HIER_CONTEXT"
+        },
+        {
+          "title": "COMBINED_UNIT_MEASURE:UNIT_MEASURE,UNIT_MULT",
+          "type": "COMBINED_CONCEPTS",
+          "text": "COMBINED_UNIT_MEASURE:Combined unit of measure",
+          "texts": { "en": "COMBINED_UNIT_MEASURE:Combined unit of measure" }
+        },
+        {
+          "title": "V2/structure/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1,DSD_NAMAIN10@DF_TABLE1_EXPENDITURE,DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HVPVOB,DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HCPC,DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_VPVOB,DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_CPC,DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_GROWTH,DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_GFCF_ASSET,DSD_NAMAIN10@DF_TABLE1_OUTPUT,DSD_NAMAIN10@DF_TABLE1_INCOME,DSD_NAMAIN10@DF_TABLE1_MULT_INDICES,DSD_NAMAIN10@DF_TABLE4,DSD_NAMAIN10@DF_TABLE3_POP_EMPNC/latest",
+          "type": "RELATED_DATA"
+        },
+        {
+          "title": "urn:sdmx:org.sdmx.infomodel.metadatastructure.MetadataStructure=OECD:MSD_REF_METADATA(1.0)",
+          "type": "METADATA"
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "200",
+          "texts": { "en": "200" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "1410",
+          "texts": { "en": "1410" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "2020",
+          "texts": { "en": "2020" }
+        },
+        {
+          "id": "SDMX",
+          "title": "S1=S11+S12+S13+S14+S15+S1N",
+          "type": "COMP_RULE"
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "10",
+          "texts": { "en": "10" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "2660",
+          "texts": { "en": "2660" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "10000",
+          "texts": { "en": "10000" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "9580",
+          "texts": { "en": "9580" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "5000",
+          "texts": { "en": "5000" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "2880",
+          "texts": { "en": "2880" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "20",
+          "texts": { "en": "20" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "510",
+          "texts": { "en": "510" }
+        },
+        {
+          "id": "@SDMX",
+          "type": "ORDER",
+          "text": "2370",
+          "texts": { "en": "2370" }
+        }
+      ]
+    }
+  },
+  "errors": []
+}

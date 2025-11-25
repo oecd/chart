@@ -1,0 +1,245 @@
+{
+  "dimensions": [
+    {
+      "id": "FREQ",
+      "name": "Frequency of observation",
+      "members": { "A": { "labels": { "en": "Annual", "fr": "Annuelle" } } }
+    },
+    {
+      "id": "REF_AREA",
+      "name": "Reference area",
+      "members": {
+        "AUS": { "labels": { "en": "Australia", "fr": "Australie" } },
+        "AUT": { "labels": { "en": "Austria", "fr": "Autriche" } },
+        "BEL": { "labels": { "en": "Belgium", "fr": "Belgique" } },
+        "CAN": { "labels": { "en": "Canada", "fr": "Canada" } },
+        "CHL": { "labels": { "en": "Chile", "fr": "Chili" } },
+        "COL": { "labels": { "en": "Colombia", "fr": "Colombie" } },
+        "CRI": { "labels": { "en": "Costa Rica", "fr": "Costa Rica" } },
+        "CZE": { "labels": { "en": "Czechia", "fr": "Tchéquie" } },
+        "DNK": { "labels": { "en": "Denmark", "fr": "Danemark" } },
+        "EST": { "labels": { "en": "Estonia", "fr": "Estonie" } },
+        "FIN": { "labels": { "en": "Finland", "fr": "Finlande" } },
+        "FRA": { "labels": { "en": "France", "fr": "France" } },
+        "DEU": { "labels": { "en": "Germany", "fr": "Allemagne" } },
+        "GRC": { "labels": { "en": "Greece", "fr": "Grèce" } },
+        "HUN": { "labels": { "en": "Hungary", "fr": "Hongrie" } },
+        "ISL": { "labels": { "en": "Iceland", "fr": "Islande" } },
+        "IRL": { "labels": { "en": "Ireland", "fr": "Irlande" } },
+        "ISR": { "labels": { "en": "Israel", "fr": "Israël" } },
+        "ITA": { "labels": { "en": "Italy", "fr": "Italie" } },
+        "JPN": { "labels": { "en": "Japan", "fr": "Japon" } },
+        "KOR": { "labels": { "en": "Korea", "fr": "Corée" } },
+        "LVA": { "labels": { "en": "Latvia", "fr": "Lettonie" } },
+        "LTU": { "labels": { "en": "Lithuania", "fr": "Lituanie" } },
+        "LUX": { "labels": { "en": "Luxembourg", "fr": "Luxembourg" } },
+        "MEX": { "labels": { "en": "Mexico", "fr": "Mexique" } },
+        "NLD": { "labels": { "en": "Netherlands", "fr": "Pays-Bas" } },
+        "NZL": { "labels": { "en": "New Zealand", "fr": "Nouvelle-Zélande" } },
+        "NOR": { "labels": { "en": "Norway", "fr": "Norvège" } },
+        "POL": { "labels": { "en": "Poland", "fr": "Pologne" } },
+        "PRT": { "labels": { "en": "Portugal", "fr": "Portugal" } },
+        "SVK": {
+          "labels": { "en": "Slovak Republic", "fr": "République slovaque" }
+        },
+        "SVN": { "labels": { "en": "Slovenia", "fr": "Slovénie" } },
+        "ESP": { "labels": { "en": "Spain", "fr": "Espagne" } },
+        "SWE": { "labels": { "en": "Sweden", "fr": "Suède" } },
+        "CHE": { "labels": { "en": "Switzerland", "fr": "Suisse" } },
+        "TUR": { "labels": { "en": "Türkiye", "fr": "Türkiye" } },
+        "GBR": { "labels": { "en": "United Kingdom", "fr": "Royaume-Uni" } },
+        "USA": { "labels": { "en": "United States", "fr": "États-Unis" } },
+        "EA20": {
+          "labels": {
+            "en": "Euro area (20 countries)",
+            "fr": "Zone euro (20 pays)"
+          }
+        },
+        "EU15": {
+          "labels": {
+            "en": "European Union (15 countries)",
+            "fr": "Union européenne (15 pays)"
+          }
+        },
+        "EU27_2020": {
+          "labels": {
+            "en": "European Union (27 countries from 01/02/2020)",
+            "fr": "Union européenne (27 pays à partir du 01/02/2020)"
+          }
+        },
+        "OECD": { "labels": { "en": "OECD", "fr": "OCDE" } },
+        "OECD26": {
+          "labels": { "en": "OECD (26 countries)", "fr": "OCDE (26 pays)" }
+        },
+        "OECDE": { "labels": { "en": "OECD Europe", "fr": "OCDE Europe" } },
+        "ALB": {
+          "labels": { "en": "Albania", "fr": "Albanie" },
+          "parent": "WXOECD"
+        },
+        "ARG": {
+          "labels": { "en": "Argentina", "fr": "Argentine" },
+          "parent": "WXOECD"
+        },
+        "BRA": {
+          "labels": { "en": "Brazil", "fr": "Brésil" },
+          "parent": "WXOECD"
+        },
+        "BGR": {
+          "labels": { "en": "Bulgaria", "fr": "Bulgarie" },
+          "parent": "WXOECD"
+        },
+        "CPV": {
+          "labels": { "en": "Cabo Verde", "fr": "Cabo Verde" },
+          "parent": "WXOECD"
+        },
+        "CMR": {
+          "labels": { "en": "Cameroon", "fr": "Cameroun" },
+          "parent": "WXOECD"
+        },
+        "CHN": {
+          "labels": {
+            "en": "China (People’s Republic of)",
+            "fr": "Chine (République populaire de)"
+          },
+          "parent": "WXOECD"
+        },
+        "HRV": {
+          "labels": { "en": "Croatia", "fr": "Croatie" },
+          "parent": "WXOECD"
+        },
+        "CYP": {
+          "labels": { "en": "Cyprus", "fr": "Chypre" },
+          "parent": "WXOECD"
+        },
+        "GEO": {
+          "labels": { "en": "Georgia", "fr": "Géorgie" },
+          "parent": "WXOECD"
+        },
+        "HKG": {
+          "labels": { "en": "Hong Kong (China)", "fr": "Hong Kong (Chine)" },
+          "parent": "WXOECD"
+        },
+        "IND": {
+          "labels": { "en": "India", "fr": "Inde" },
+          "parent": "WXOECD"
+        },
+        "IDN": {
+          "labels": { "en": "Indonesia", "fr": "Indonésie" },
+          "parent": "WXOECD"
+        },
+        "MDG": {
+          "labels": { "en": "Madagascar", "fr": "Madagascar" },
+          "parent": "WXOECD"
+        },
+        "MLT": {
+          "labels": { "en": "Malta", "fr": "Malte" },
+          "parent": "WXOECD"
+        },
+        "MAR": {
+          "labels": { "en": "Morocco", "fr": "Maroc" },
+          "parent": "WXOECD"
+        },
+        "MKD": {
+          "labels": { "en": "North Macedonia", "fr": "Macédoine du Nord" },
+          "parent": "WXOECD"
+        },
+        "ROU": {
+          "labels": { "en": "Romania", "fr": "Roumanie" },
+          "parent": "WXOECD"
+        },
+        "RUS": {
+          "labels": { "en": "Russia", "fr": "Russie" },
+          "parent": "WXOECD"
+        },
+        "SAU": {
+          "labels": { "en": "Saudi Arabia", "fr": "Arabie saoudite" },
+          "parent": "WXOECD"
+        },
+        "SEN": {
+          "labels": { "en": "Senegal", "fr": "Sénégal" },
+          "parent": "WXOECD"
+        },
+        "SRB": {
+          "labels": { "en": "Serbia", "fr": "Serbie" },
+          "parent": "WXOECD"
+        },
+        "SGP": {
+          "labels": { "en": "Singapore", "fr": "Singapour" },
+          "parent": "WXOECD"
+        },
+        "ZAF": {
+          "labels": { "en": "South Africa", "fr": "Afrique du Sud" },
+          "parent": "WXOECD"
+        },
+        "ZMB": {
+          "labels": { "en": "Zambia", "fr": "Zambie" },
+          "parent": "WXOECD"
+        },
+        "WXOECD": {
+          "labels": { "en": "Non-OECD economies", "fr": "Non-OCDE économies" },
+          "noData": true
+        }
+      }
+    },
+    {
+      "id": "SECTOR",
+      "name": "Institutional sector",
+      "members": {
+        "S1": { "labels": { "en": "Total economy", "fr": "Economie totale" } },
+        "S14": {
+          "labels": { "en": "Households", "fr": "Ménages" },
+          "parent": "S1M"
+        },
+        "S1M": {
+          "labels": {
+            "en": "Households and non-profit institutions serving households (NPISH)",
+            "fr": "Les Ménages et ISBLSM"
+          },
+          "parent": "S1",
+          "noData": true
+        }
+      }
+    },
+    {
+      "id": "TRANSACTION",
+      "name": "Transaction",
+      "members": {
+        "B1GQ_POP": {
+          "labels": {
+            "en": "Gross domestic product, per capita",
+            "fr": "Produit intérieur brut, par tête"
+          }
+        },
+        "P3_POP": {
+          "labels": {
+            "en": "Final consumption expenditure, per capita",
+            "fr": "Dépenses de consommation finale, par tête"
+          }
+        },
+        "P41_POP": {
+          "labels": {
+            "en": "Actual individual consumption, per capita",
+            "fr": "Consommation individuelle effective, par tête"
+          }
+        }
+      }
+    },
+    {
+      "id": "EXPENDITURE",
+      "name": "Expenditure",
+      "members": {
+        "_T": { "labels": { "en": "Total", "fr": "Total" } },
+        "_Z": { "labels": { "en": "Not applicable", "fr": "Non-applicable" } }
+      }
+    },
+    {
+      "id": "TIME_PERIOD",
+      "timeRange": {
+        "startPeriod": { "period": "1950-01-01T00:00:00", "isInclusive": true },
+        "endPeriod": { "period": "2023-12-31T00:00:00", "isInclusive": true }
+      },
+      "name": "Time period"
+    }
+  ],
+  "dotStatFetchDuration": 0
+}
