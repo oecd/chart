@@ -419,8 +419,8 @@ export const createOptionsForMapChart = ({
   data,
   formatters = {},
   colorPalette,
-  highlight = null,
-  baseline = null,
+  highlight = [],
+  baseline = [],
   highlightColors,
   hideLegend = false,
   fullscreenClose = null,
@@ -446,7 +446,7 @@ export const createOptionsForMapChart = ({
     }
 
     return R.modifyPath(
-      ['objects', 'default', 'geometries'],
+      ['objects', 'world-highres-custom', 'geometries'],
       R.map((c) => {
         const code = R.path(['properties', 'iso-a3'], c);
         const label = R.prop(code, codeLabelMapping);
@@ -469,11 +469,17 @@ export const createOptionsForMapChart = ({
 
   const finalMap = overrideCountriesLabel(data.codeLabelMapping);
 
+  const geometries = R.pathOr(
+    [],
+    ['objects', 'world-highres-custom', 'geometries'],
+    finalMap,
+  );
+
   const getLabelFromMap = (code) =>
     R.pathOr(
       code,
       ['properties', 'name'],
-      R.find(R.pathEq(code, ['properties', 'iso-a3']), finalMap.features || []),
+      R.find(R.pathEq(code, ['properties', 'iso-a3']), geometries),
     );
 
   const finalColorPalette = R.when(
