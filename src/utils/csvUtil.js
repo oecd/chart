@@ -747,7 +747,7 @@ export const extractMinAvgMaxAndFilterOnFirstColumn =
             R.compose(
               R.when(
                 () => !calcAvgValue && !isNilOrEmpty(referenceValueCode),
-                R.append(R.toUpper(referenceValueCode)),
+                R.append(R.toUpper(referenceValueCode || '')),
               ),
               R.map(R.toUpper, [minCode, maxCode, avgCode]),
             ),
