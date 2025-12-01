@@ -9,6 +9,7 @@ import {
 } from '../constants/chart';
 import { tryCastAllToDatesAndDetectFormat } from './chartUtil';
 import {
+  avgCode,
   codeOrLabelEquals,
   isCastableToNumber,
   isEqualToAnyVar,
@@ -74,7 +75,7 @@ export const parseData = ({ data, parsingHelperData, ...rest }) => {
   const categories = R.map(
     (c) => ({
       code: `${c}`,
-      label: R.path(['xDimensionLabelByCode', c], parsingHelperData),
+      label: R.pathOr(`${c}`, ['xDimensionLabelByCode', c], parsingHelperData),
     }),
     R.map(R.head, R.tail(data)),
   );
@@ -84,7 +85,8 @@ export const parseData = ({ data, parsingHelperData, ...rest }) => {
       const serieData = R.map(R.nth(idx + 1), R.tail(data));
       return {
         code: `${seriesCode}`,
-        label: R.path(
+        label: R.pathOr(
+          `${seriesCode}`,
           ['yDimensionLabelByCode', `${seriesCode}`],
           parsingHelperData,
         ),
@@ -120,6 +122,13 @@ const shouldPivot = (
     return false;
   }
 
+  if (
+    chartType === chartTypes.symbolMinMax &&
+    dataSourceType === dataSourceTypes.csv.value
+  ) {
+    return true;
+  }
+
   if (!R.isNil(dotStatXAxisDimension) && !R.isNil(dotStatYAxisDimension)) {
     return false;
   }
@@ -151,6 +160,35 @@ const shouldPivot = (
   return pivotData;
 };
 
+export const forcePivotCSV = ({ data, ...rest }) => {
+  const header = R.map(R.head, data);
+
+  const rows = mapWithIndex(
+    (category, i) => R.prepend(category, R.map(R.nth(i + 1), R.tail(data))),
+    R.tail(R.head(data)),
+  );
+
+  const newData = R.prepend(header, rows);
+
+  // parsingHelperData will be defined only if datasource is .Stat
+  if (R.has('parsingHelperData', rest)) {
+    const parsingHelperData = {
+      xDimensionLabelByCode: rest.parsingHelperData.yDimensionLabelByCode,
+      yDimensionLabelByCode: rest.parsingHelperData.xDimensionLabelByCode,
+      otherDimensionsLabelByCode:
+        rest.parsingHelperData.otherDimensionsLabelByCode,
+    };
+
+    return {
+      data: newData,
+      parsingHelperData,
+      ...R.omit(['parsingHelperData'], rest),
+    };
+  }
+
+  return { data: newData, ...rest };
+};
+
 export const pivotCSV =
   (
     chartType,
@@ -170,32 +208,7 @@ export const pivotCSV =
         dotStatYAxisDimension,
       )
     ) {
-      const header = R.map(R.head, data);
-
-      const rows = mapWithIndex(
-        (category, i) => R.prepend(category, R.map(R.nth(i + 1), R.tail(data))),
-        R.tail(R.head(data)),
-      );
-
-      const newData = R.prepend(header, rows);
-
-      // parsingHelperData will be defined only if datasource is .Stat
-      if (R.has('parsingHelperData', rest)) {
-        const parsingHelperData = {
-          xDimensionLabelByCode: rest.parsingHelperData.yDimensionLabelByCode,
-          yDimensionLabelByCode: rest.parsingHelperData.xDimensionLabelByCode,
-          otherDimensionsLabelByCode:
-            rest.parsingHelperData.otherDimensionsLabelByCode,
-        };
-
-        return {
-          data: newData,
-          parsingHelperData,
-          ...R.omit(['parsingHelperData'], rest),
-        };
-      }
-
-      return { data: newData, ...rest };
+      return forcePivotCSV({ data, ...rest });
     }
 
     return { data, ...rest };
@@ -637,217 +650,405 @@ export const addCodeLabelMapping = (data) =>
     data,
   );
 
+export const keepOnly2FirstColumns = R.map(R.take(2));
+
+export const extractMinAvgMaxAndFilterOnFirstColumn =
+  ({
+    firstColumnFilter = null,
+    calcAvgValue = false,
+    referenceValueCode = null,
+  }) =>
+  (data) => {
+    if (R.length(data) < 2) {
+      return data;
+    }
+
+    const headerRow = R.head(data);
+    const rows = R.tail(data);
+    const allValues = R.reject(
+      R.isNil,
+      R.map(R.compose(R.prop('value'), R.nth(1)), rows),
+    );
+
+    if (R.isEmpty(allValues)) {
+      return data;
+    }
+
+    const minValue = Math.min(...allValues);
+    const maxValue = Math.max(...allValues);
+    const avgValue = calcAvgValue
+      ? R.compose(R.divide(R.__, R.length(allValues)), R.sum)(allValues)
+      : null;
+
+    const minRow = R.compose(
+      R.assocPath([1, 'custom', 'isMin'], true),
+      R.find(R.compose(R.equals(minValue), R.prop('value'), R.nth(1))),
+    )(rows);
+
+    const maxRow = R.compose(
+      R.assocPath([1, 'custom', 'isMax'], true),
+      R.find(R.compose(R.equals(maxValue), R.prop('value'), R.nth(1))),
+    )(rows);
+
+    const avgRow = R.cond([
+      [
+        () => calcAvgValue,
+        () => [avgCode, { value: avgValue, custom: { isAvg: true } }],
+      ],
+      [
+        () => !isNilOrEmpty(referenceValueCode),
+        () => {
+          if (
+            R.includes(R.toUpper(referenceValueCode), [
+              R.toUpper(R.head(minRow || [''])),
+              R.toUpper(R.head(maxRow || [''])),
+            ])
+          ) {
+            return null;
+          }
+
+          const referenceValueRow = R.find(
+            R.compose(
+              R.equals(R.toUpper(referenceValueCode)),
+              R.toUpper,
+              R.head,
+            ),
+            rows,
+          );
+
+          return referenceValueRow
+            ? R.assocPath([1, 'custom', 'isAvg'], true, referenceValueRow)
+            : null;
+        },
+      ],
+      [R.T, R.always(null)],
+    ])();
+
+    const defaultData = R.reject(R.isNil, [headerRow, minRow, avgRow, maxRow]);
+
+    if (isNilOrEmpty(firstColumnFilter)) {
+      return defaultData;
+    }
+
+    const minCode = R.head(minRow);
+    const maxCode = R.head(maxRow);
+    const filteredRowsToAdd = R.compose(
+      R.filter(
+        R.compose(
+          R.includes(R.__, R.split('|', R.nth(1, firstColumnFilter).varValue)),
+          R.toUpper,
+          R.head,
+        ),
+      ),
+      R.reject(
+        R.compose(
+          R.includes(
+            R.__,
+            R.compose(
+              R.when(
+                () => !calcAvgValue && !isNilOrEmpty(referenceValueCode),
+                R.append(R.toUpper(referenceValueCode)),
+              ),
+              R.map(R.toUpper, [minCode, maxCode, avgCode]),
+            ),
+          ),
+          R.toUpper,
+          R.head,
+        ),
+      ),
+    )(rows);
+
+    return R.reject(R.isNil, [
+      headerRow,
+      minRow,
+      avgRow,
+      maxRow,
+      ...filteredRowsToAdd,
+    ]);
+  };
+
 // exported only for unit tests
-export const filterCSV = (vars) => (data) => {
+export const filterCSV =
+  ({ vars, chartType, calcAvgValue, referenceValueCode }) =>
+  (data) => {
+    const headerRow = R.head(data);
+
+    const variableColumnIndexesAndFilterDataPairs = reduceWithIndex(
+      (acc, value, i) => {
+        if (
+          isEqualToAnyVarRange(value) &&
+          i === 0 &&
+          !R.includes(chartType, [chartTypes.map, chartTypes.symbolMinMax])
+        ) {
+          const rangeVarNames = R.compose(
+            R.split('}-{'),
+            R.replace('}]', ''),
+            R.replace('[{', ''),
+            R.head,
+          )(headerRow);
+
+          const firstColumnData = R.compose(R.map(R.head), R.tail)(data);
+
+          const { isSuccessful, dateFormat } =
+            tryCastAllToDatesAndDetectFormat(firstColumnData);
+
+          if (isSuccessful) {
+            const frequency = R.prop(dateFormat, frequencies);
+
+            const minVarValue = R.toUpper(
+              R.prop(
+                R.replace(/{|}/g, '', R.toLower(R.head(rangeVarNames))),
+                vars,
+              ),
+            );
+            const maxVarValue = R.toUpper(
+              R.prop(
+                R.replace(/{|}/g, '', R.toLower(R.nth(1, rangeVarNames))),
+                vars,
+              ),
+            );
+
+            return R.append(
+              [
+                i,
+                {
+                  isRange: true,
+                  frequency,
+                  minVarName: R.head(rangeVarNames),
+                  minVarValue,
+                  minVarValueParsed: frequency.tryParse(minVarValue),
+                  maxVarName: R.nth(1, rangeVarNames),
+                  maxVarValue,
+                  maxVarValueParsed: frequency.tryParse(maxVarValue),
+                  columnDataIsCompatible: true,
+                },
+              ],
+              acc,
+            );
+          }
+
+          if (R.all(isCastableToNumber, firstColumnData)) {
+            const minVarValue = R.toUpper(
+              R.prop(
+                R.replace(/{|}/g, '', R.toLower(R.head(rangeVarNames))),
+                vars,
+              ),
+            );
+            const maxVarValue = R.toUpper(
+              R.prop(
+                R.replace(/{|}/g, '', R.toLower(R.nth(1, rangeVarNames))),
+                vars,
+              ),
+            );
+
+            return R.append(
+              [
+                i,
+                {
+                  isRange: true,
+                  minVarName: R.head(rangeVarNames),
+                  minVarValue,
+                  minVarValueParsed: Number(minVarValue),
+                  maxVarName: R.nth(1, rangeVarNames),
+                  maxVarValue,
+                  maxVarValueParsed: Number(maxVarValue),
+                  columnDataIsCompatible: true,
+                },
+              ],
+              acc,
+            );
+          }
+
+          return R.append(
+            [i, { isRange: true, columnDataIsCompatible: false }],
+            acc,
+          );
+        }
+
+        if (isEqualToAnyVar(value)) {
+          return R.append(
+            [
+              i,
+              {
+                varName: R.replace(/{|}/g, '', R.toLower(value)),
+                varValue: R.toUpper(
+                  R.prop(R.replace(/{|}/g, '', R.toLower(value)), vars),
+                ),
+              },
+            ],
+            acc,
+          );
+        }
+
+        return acc;
+      },
+      [],
+      headerRow,
+    );
+
+    if (R.isEmpty(variableColumnIndexesAndFilterDataPairs)) {
+      if (chartType === chartTypes.symbolMinMax) {
+        return {
+          data: R.compose(
+            extractMinAvgMaxAndFilterOnFirstColumn({
+              calcAvgValue,
+              referenceValueCode,
+            }),
+            keepOnly2FirstColumns,
+          )(data),
+        };
+      }
+      return { data };
+    }
+
+    const filteredRows = R.compose(
+      R.filter(
+        R.allPass(
+          R.map(
+            ([i, filterData]) =>
+              R.compose(
+                (columnValue) => {
+                  if (
+                    filterData.isRange &&
+                    !filterData.columnDataIsCompatible
+                  ) {
+                    return false;
+                  }
+
+                  if (filterData.isRange) {
+                    const columnValueParsed = R.has('frequency', filterData)
+                      ? filterData.frequency.tryParse(columnValue)
+                      : Number(columnValue);
+                    return (
+                      columnValueParsed >= filterData.minVarValueParsed &&
+                      columnValueParsed <= filterData.maxVarValueParsed
+                    );
+                  }
+
+                  if (i === 0 && chartType === chartTypes.symbolMinMax) {
+                    return true;
+                  }
+
+                  if (i === 0) {
+                    return R.includes(
+                      columnValue,
+                      R.split('|', filterData.varValue),
+                    );
+                  }
+
+                  return columnValue === filterData.varValue;
+                },
+                R.toUpper,
+                (v) => (i === 0 ? `${v}` : `${v.value}`),
+                R.nth(i),
+              ),
+            variableColumnIndexesAndFilterDataPairs,
+          ),
+        ),
+      ),
+    )(R.tail(data));
+
+    const variableColumnIndexes = R.map(
+      R.head,
+      variableColumnIndexesAndFilterDataPairs,
+    );
+
+    const varsThatCauseNewPreParsedDataFetch = R.pick(
+      R.unnest(
+        R.map(
+          R.compose(
+            (filterData) =>
+              filterData.isRange
+                ? [filterData.minVarName, filterData.maxVarName]
+                : filterData.varName,
+            R.nth(1),
+          ),
+          R.reject(
+            R.compose(
+              (filterData) =>
+                filterData.isRange && !filterData.columnDataIsCompatible,
+              R.nth(1),
+            ),
+            variableColumnIndexesAndFilterDataPairs,
+          ),
+        ),
+      ),
+      vars,
+    );
+
+    if (
+      R.length(variableColumnIndexes) === 1 &&
+      R.head(variableColumnIndexes) === 0
+    ) {
+      return {
+        data: R.compose(
+          R.when(
+            () => chartType === chartTypes.symbolMinMax,
+            R.compose(
+              extractMinAvgMaxAndFilterOnFirstColumn({
+                firstColumnFilter: R.head(
+                  variableColumnIndexesAndFilterDataPairs,
+                ),
+                calcAvgValue,
+                referenceValueCode,
+              }),
+              keepOnly2FirstColumns,
+            ),
+          ),
+          R.prepend(headerRow),
+        )(filteredRows),
+        varsThatCauseNewPreParsedDataFetch,
+      };
+    }
+
+    const finalData = R.compose(
+      R.when(
+        () => chartType === chartTypes.symbolMinMax,
+        R.compose(
+          extractMinAvgMaxAndFilterOnFirstColumn({
+            firstColumnFilter: R.find(
+              R.compose(R.equals(0), R.head),
+              variableColumnIndexesAndFilterDataPairs,
+            ),
+            calcAvgValue,
+            referenceValueCode,
+          }),
+          keepOnly2FirstColumns,
+        ),
+      ),
+      R.map(
+        reduceWithIndex(
+          (acc, value, i) =>
+            i === 0 || !R.includes(i, variableColumnIndexes)
+              ? R.append(value, acc)
+              : acc,
+          [],
+        ),
+      ),
+      R.prepend(headerRow),
+    )(filteredRows);
+
+    return { data: finalData, varsThatCauseNewPreParsedDataFetch };
+  };
+
+// exported only for unit tests
+export const transformValues = (data) => {
   const headerRow = R.head(data);
 
-  const variableColumnIndexesAndFilterDataPairs = reduceWithIndex(
-    (acc, value, i) => {
-      if (isEqualToAnyVarRange(value) && i === 0) {
-        const rangeVarNames = R.compose(
-          R.split('}-{'),
-          R.replace('}]', ''),
-          R.replace('[{', ''),
-          R.head,
-        )(headerRow);
-
-        const firstColumnData = R.compose(R.map(R.head), R.tail)(data);
-
-        const { isSuccessful, dateFormat } =
-          tryCastAllToDatesAndDetectFormat(firstColumnData);
-
-        if (isSuccessful) {
-          const frequency = R.prop(dateFormat, frequencies);
-
-          const minVarValue = R.toUpper(
-            R.prop(
-              R.replace(/{|}/g, '', R.toLower(R.head(rangeVarNames))),
-              vars,
-            ),
-          );
-          const maxVarValue = R.toUpper(
-            R.prop(
-              R.replace(/{|}/g, '', R.toLower(R.nth(1, rangeVarNames))),
-              vars,
-            ),
-          );
-
-          return R.append(
-            [
-              i,
-              {
-                isRange: true,
-                frequency,
-                minVarName: R.head(rangeVarNames),
-                minVarValue,
-                minVarValueParsed: frequency.tryParse(minVarValue),
-                maxVarName: R.nth(1, rangeVarNames),
-                maxVarValue,
-                maxVarValueParsed: frequency.tryParse(maxVarValue),
-                columnDataIsCompatible: true,
-              },
-            ],
-            acc,
-          );
-        }
-
-        if (R.all(isCastableToNumber, firstColumnData)) {
-          const minVarValue = R.toUpper(
-            R.prop(
-              R.replace(/{|}/g, '', R.toLower(R.head(rangeVarNames))),
-              vars,
-            ),
-          );
-          const maxVarValue = R.toUpper(
-            R.prop(
-              R.replace(/{|}/g, '', R.toLower(R.nth(1, rangeVarNames))),
-              vars,
-            ),
-          );
-
-          return R.append(
-            [
-              i,
-              {
-                isRange: true,
-                minVarName: R.head(rangeVarNames),
-                minVarValue,
-                minVarValueParsed: Number(minVarValue),
-                maxVarName: R.nth(1, rangeVarNames),
-                maxVarValue,
-                maxVarValueParsed: Number(maxVarValue),
-                columnDataIsCompatible: true,
-              },
-            ],
-            acc,
-          );
-        }
-
-        return R.append(
-          [i, { isRange: true, columnDataIsCompatible: false }],
-          acc,
-        );
-      }
-
-      if (isEqualToAnyVar(value)) {
-        return R.append(
-          [
-            i,
-            {
-              varName: R.replace(/{|}/g, '', R.toLower(value)),
-              varValue: R.toUpper(
-                R.prop(R.replace(/{|}/g, '', R.toLower(value)), vars),
-              ),
-            },
-          ],
-          acc,
-        );
-      }
-
-      return acc;
-    },
-    [],
-    headerRow,
-  );
-
-  if (R.isEmpty(variableColumnIndexesAndFilterDataPairs)) {
-    return { data };
-  }
-
-  const filteredRows = R.filter(
-    R.allPass(
-      R.map(
-        ([i, filterData]) =>
-          R.compose(
-            (columnValue) => {
-              if (filterData.isRange && !filterData.columnDataIsCompatible) {
-                return false;
-              }
-
-              if (filterData.isRange) {
-                const columnValueParsed = R.has('frequency', filterData)
-                  ? filterData.frequency.tryParse(columnValue)
-                  : Number(columnValue);
-                return (
-                  columnValueParsed >= filterData.minVarValueParsed &&
-                  columnValueParsed <= filterData.maxVarValueParsed
-                );
-              }
-
-              if (i === 0) {
-                return R.includes(
-                  columnValue,
-                  R.split('|', filterData.varValue),
-                );
-              }
-
-              return columnValue === filterData.varValue;
-            },
-
-            R.toUpper,
-            (v) => `${v}`,
-            R.nth(i),
-          ),
-        variableColumnIndexesAndFilterDataPairs,
+  const newData = R.map(
+    (row) =>
+      R.prepend(
+        R.head(row),
+        R.map((v) => ({ value: v }), R.tail(row)),
       ),
-    ),
     R.tail(data),
   );
 
-  const variableColumnIndexes = R.map(
-    R.head,
-    variableColumnIndexesAndFilterDataPairs,
-  );
-
-  const varsThatCauseNewPreParsedDataFetch = R.pick(
-    R.unnest(
-      R.map(
-        R.compose(
-          (filterData) =>
-            filterData.isRange
-              ? [filterData.minVarName, filterData.maxVarName]
-              : filterData.varName,
-          R.nth(1),
-        ),
-        R.reject(
-          R.compose(
-            (filterData) =>
-              filterData.isRange && !filterData.columnDataIsCompatible,
-            R.nth(1),
-          ),
-          variableColumnIndexesAndFilterDataPairs,
-        ),
-      ),
-    ),
-    vars,
-  );
-
-  if (
-    R.length(variableColumnIndexes) === 1 &&
-    R.head(variableColumnIndexes) === 0
-  ) {
-    return {
-      data: R.prepend(headerRow, filteredRows),
-      varsThatCauseNewPreParsedDataFetch,
-    };
-  }
-
-  const finalData = R.map(
-    reduceWithIndex(
-      (acc, value, i) =>
-        i === 0 || !R.includes(i, variableColumnIndexes)
-          ? R.append(value, acc)
-          : acc,
-      [],
-    ),
-    R.prepend(headerRow, filteredRows),
-  );
-
-  return { data: finalData, varsThatCauseNewPreParsedDataFetch };
+  return R.prepend(headerRow, newData);
 };
 
 // exported only for unit tests
-export const transformValuesAndExtractMetadata = ({ data, ...rest }) => {
+export const extractMetadata = ({ data, ...rest }) => {
   const headerRow = R.head(data);
 
   const matedata1ColumnIndex = R.findIndex(
@@ -860,26 +1061,26 @@ export const transformValuesAndExtractMetadata = ({ data, ...rest }) => {
   );
 
   if (matedata1ColumnIndex === -1 && matedata2ColumnIndex === -1) {
-    const newData = R.map(
-      (row) =>
-        R.prepend(
-          R.head(row),
-          R.map((v) => ({ value: v }), R.tail(row)),
-        ),
-      R.tail(data),
-    );
-
-    return { data: R.prepend(headerRow, newData), ...rest };
+    return { data: data, ...rest };
   }
+
+  const getMetadataValue = (row, matedataColumnIndex) =>
+    R.compose(
+      R.head,
+      parseCSV,
+      R.prop('value'),
+      R.nth(matedataColumnIndex),
+      R.tail,
+    )(row);
 
   const newData = R.map((row) => {
     const metadata1 =
       matedata1ColumnIndex !== -1
-        ? R.head(parseCSV(R.nth(matedata1ColumnIndex, R.tail(row)))) || []
+        ? getMetadataValue(row, matedata1ColumnIndex) || []
         : [];
     const metadata2 =
       matedata2ColumnIndex !== -1
-        ? R.head(parseCSV(R.nth(matedata2ColumnIndex, R.tail(row)))) || []
+        ? getMetadataValue(row, matedata2ColumnIndex) || []
         : [];
 
     return R.prepend(
@@ -889,9 +1090,9 @@ export const transformValuesAndExtractMetadata = ({ data, ...rest }) => {
           i === matedata1ColumnIndex || i === matedata2ColumnIndex
             ? acc
             : R.append(
-                {
-                  value: v,
-                  custom: {
+                R.assoc(
+                  'custom',
+                  {
                     metadata1:
                       R.length(metadata1) === 1
                         ? R.head(metadata1)
@@ -901,7 +1102,8 @@ export const transformValuesAndExtractMetadata = ({ data, ...rest }) => {
                         ? R.head(metadata2)
                         : R.nth(i, metadata2),
                   },
-                },
+                  v,
+                ),
                 acc,
               ),
         [],
@@ -927,6 +1129,8 @@ export const createDataFromCSV = ({
   sortSeries,
   yAxisOrderOverride,
   forceXAxisToBeTreatedAsCategories,
+  calcAvgValue,
+  referenceValueCode,
   vars,
   lang,
 }) => {
@@ -938,7 +1142,10 @@ export const createDataFromCSV = ({
     addCodeLabelMapping,
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
-    sortCSV(sortBy, sortOrder, sortSeries, lang),
+    R.when(
+      () => chartType !== chartTypes.symbolMinMax,
+      sortCSV(sortBy, sortOrder, sortSeries, lang),
+    ),
     handleAreCategoriesAndSeriesNumbers(
       chartType,
       forceXAxisToBeTreatedAsCategories,
@@ -947,14 +1154,15 @@ export const createDataFromCSV = ({
       chartType,
       forceXAxisToBeTreatedAsCategories,
     ),
-    transformValuesAndExtractMetadata,
+    extractMetadata,
     addParsingHelperData(
       csvCodeLabelMappingProjectLevel,
       csvCodeLabelMapping,
       vars,
     ),
     pivotCSV(chartType, dataSourceType, pivotData),
-    filterCSV(vars),
+    filterCSV({ vars, chartType, calcAvgValue, referenceValueCode }),
+    transformValues,
     parseCSV,
   )(staticCsvData);
 };

@@ -16,7 +16,8 @@ import {
   pivotCSV,
   addParsingHelperData,
   createCodeLabelMapping,
-  transformValuesAndExtractMetadata,
+  transformValues,
+  extractMetadata,
   handleAreCategoriesAndSeriesDates,
   handleAreCategoriesAndSeriesNumbers,
   sortCSV,
@@ -24,6 +25,7 @@ import {
   sortParsedDataOnYAxis,
   addCodeLabelMapping,
 } from '../csvUtil';
+import { avgCode } from '../configUtil';
 
 describe('csvUtil', () => {
   describe('parseCSV', () => {
@@ -74,201 +76,307 @@ MEX
 
   describe('filterCSV', () => {
     test('full dataset should be retured when no filter columns are defined', () => {
-      const parsedCsvData = [
+      const data = [
         ['Category', 'CO2', 'CH4'],
-        ['BRA', 1, 2],
-        ['MEX', 2, 3],
-        ['FRA', 4, 5],
+        ['BRA', { value: 1 }, { value: 2 }],
+        ['MEX', { value: 2 }, { value: 3 }],
+        ['FRA', { value: 4 }, { value: 5 }],
       ];
 
       const vars = { var1: 'FRA' };
-      const filterFunction = filterCSV(vars);
+      const filterFunction = filterCSV({ vars });
 
-      expect(filterFunction(parsedCsvData)).toEqual({
-        data: parsedCsvData,
+      expect(filterFunction(data)).toEqual({
+        data: data,
       });
     });
 
     test('filtering on first column should allow multi selection and keep first column', () => {
-      const parsedCsvData = [
+      const data = [
         ['{var1}', 'CO2', 'CH4'],
-        ['BRA', 1, 2],
-        ['MEX', 3, 4],
-        ['FRA', 5, 6],
+        ['BRA', { value: 1 }, { value: 2 }],
+        ['MEX', { value: 2 }, { value: 3 }],
+        ['FRA', { value: 4 }, { value: 5 }],
       ];
 
       const varsWithOnValue = { var1: 'BRA' };
-      const filterFunctionWithOneValue = filterCSV(varsWithOnValue);
+      const filterFunctionWithOneValue = filterCSV({ vars: varsWithOnValue });
 
-      expect(filterFunctionWithOneValue(parsedCsvData)).toEqual({
+      expect(filterFunctionWithOneValue(data)).toEqual({
         data: [
           ['{var1}', 'CO2', 'CH4'],
-          ['BRA', 1, 2],
+          ['BRA', { value: 1 }, { value: 2 }],
         ],
         varsThatCauseNewPreParsedDataFetch: varsWithOnValue,
       });
 
       const varsWithSeveralValues = { var1: 'BRA|MEX' };
-      const filterFunctionWithSeveralValues = filterCSV(varsWithSeveralValues);
+      const filterFunctionWithSeveralValues = filterCSV({
+        vars: varsWithSeveralValues,
+      });
 
-      expect(filterFunctionWithSeveralValues(parsedCsvData)).toEqual({
+      expect(filterFunctionWithSeveralValues(data)).toEqual({
         data: [
           ['{var1}', 'CO2', 'CH4'],
-          ['BRA', 1, 2],
-          ['MEX', 3, 4],
+          ['BRA', { value: 1 }, { value: 2 }],
+          ['MEX', { value: 2 }, { value: 3 }],
         ],
         varsThatCauseNewPreParsedDataFetch: varsWithSeveralValues,
       });
     });
 
     test('filtering on any other column(s) (but not first one) should allow single selection and not keep the column(s)', () => {
-      const parsedCsvData = [
+      const data = [
         ['Category', 'CO2', 'CH4', '{var1}', '{var10}'],
-        ['BRA', 1, 2, 'A1', 'A2'],
-        ['BRA', 2, 3, 'B1', 'B2'],
-        ['BRA', 4, 5, 'C1', 'C2'],
-        ['MEX', 6, 7, 'A1', 'A2'],
-        ['MEX', 8, 9, 'B1', 'B2'],
-        ['MEX', 10, 11, 'C1', 'C2'],
-        ['FRA', 12, 13, 'A1', 'A2'],
-        ['FRA', 14, 15, 'B1', 'B2'],
-        ['FRA', 16, 17, 'C1', 'C2'],
+        ['BRA', { value: 1 }, { value: 2 }, { value: 'A1' }, { value: 'A2' }],
+        ['BRA', { value: 2 }, { value: 3 }, { value: 'B1' }, { value: 'B2' }],
+        ['BRA', { value: 4 }, { value: 5 }, { value: 'C1' }, { value: 'C2' }],
+        ['MEX', { value: 6 }, { value: 7 }, { value: 'A1' }, { value: 'A2' }],
+        ['MEX', { value: 8 }, { value: 9 }, { value: 'B1' }, { value: 'B2' }],
+        ['MEX', { value: 10 }, { value: 11 }, { value: 'C1' }, { value: 'C2' }],
+        ['FRA', { value: 12 }, { value: 13 }, { value: 'A1' }, { value: 'A2' }],
+        ['FRA', { value: 14 }, { value: 15 }, { value: 'B1' }, { value: 'B2' }],
+        ['FRA', { value: 16 }, { value: 17 }, { value: 'C1' }, { value: 'C2' }],
       ];
 
       const vars = { var1: 'B1', var10: 'B2' };
 
-      const filterFunctionWithOneValue = filterCSV(vars);
+      const filterFunctionWithOneValue = filterCSV({ vars });
 
-      expect(filterFunctionWithOneValue(parsedCsvData)).toEqual({
+      expect(filterFunctionWithOneValue(data)).toEqual({
         data: [
           ['Category', 'CO2', 'CH4'],
-          ['BRA', 2, 3],
-          ['MEX', 8, 9],
-          ['FRA', 14, 15],
+          ['BRA', { value: 2 }, { value: 3 }],
+          ['MEX', { value: 8 }, { value: 9 }],
+          ['FRA', { value: 14 }, { value: 15 }],
         ],
         varsThatCauseNewPreParsedDataFetch: vars,
       });
     });
 
     test('filtering on first column should allow range selection for month dates and keep first column', () => {
-      const parsedCsvData = [
+      const data = [
         ['[{var2}-{var4}]', 'CO2', 'CH4'],
-        ['2010-06', 1, 2],
-        ['2015-05', 2, 3],
-        ['2000-01', 4, 5],
+        ['2010-06', { value: 1 }, { value: 2 }],
+        ['2015-05', { value: 2 }, { value: 3 }],
+        ['2000-01', { value: 4 }, { value: 5 }],
       ];
 
       const vars = { var2: '2000-01', var4: '2010-06' };
-      const filterFunction = filterCSV(vars);
+      const filterFunction = filterCSV({ vars });
 
-      expect(filterFunction(parsedCsvData)).toEqual({
+      expect(filterFunction(data)).toEqual({
         data: [
           ['[{var2}-{var4}]', 'CO2', 'CH4'],
-          ['2010-06', 1, 2],
-          ['2000-01', 4, 5],
+          ['2010-06', { value: 1 }, { value: 2 }],
+          ['2000-01', { value: 4 }, { value: 5 }],
         ],
         varsThatCauseNewPreParsedDataFetch: vars,
       });
     });
 
     test('filtering on first column should allow range selection for quarter dates and keep first column', () => {
-      const parsedCsvData = [
+      const data = [
         ['[{var2}-{var4}]', 'CO2', 'CH4'],
-        ['2010-Q2', 1, 2],
-        ['2015-Q3', 2, 3],
-        ['2000-Q1', 4, 5],
+        ['2010-Q2', { value: 1 }, { value: 2 }],
+        ['2015-Q3', { value: 2 }, { value: 3 }],
+        ['2000-Q1', { value: 4 }, { value: 5 }],
       ];
 
       const vars = { var2: '2000-Q1', var4: '2010-Q2' };
-      const filterFunction = filterCSV(vars);
+      const filterFunction = filterCSV({ vars });
 
-      expect(filterFunction(parsedCsvData)).toEqual({
+      expect(filterFunction(data)).toEqual({
         data: [
           ['[{var2}-{var4}]', 'CO2', 'CH4'],
-          ['2010-Q2', 1, 2],
-          ['2000-Q1', 4, 5],
+          ['2010-Q2', { value: 1 }, { value: 2 }],
+          ['2000-Q1', { value: 4 }, { value: 5 }],
         ],
         varsThatCauseNewPreParsedDataFetch: vars,
       });
     });
 
     test('filtering on first column should allow range selection for year dates and keep first column', () => {
-      const parsedCsvData = [
+      const data = [
         ['[{var2}-{var4}]', 'CO2', 'CH4'],
-        ['2009', 1, 2],
-        ['2015', 2, 3],
-        ['2000', 4, 5],
+        ['2009', { value: 1 }, { value: 2 }],
+        ['2015', { value: 2 }, { value: 3 }],
+        ['2000', { value: 4 }, { value: 5 }],
       ];
 
       const vars = { var2: '2000', var4: '2010' };
-      const filterFunction = filterCSV(vars);
+      const filterFunction = filterCSV({ vars });
 
-      expect(filterFunction(parsedCsvData)).toEqual({
+      expect(filterFunction(data)).toEqual({
         data: [
           ['[{var2}-{var4}]', 'CO2', 'CH4'],
-          ['2009', 1, 2],
-          ['2000', 4, 5],
+          ['2009', { value: 1 }, { value: 2 }],
+          ['2000', { value: 4 }, { value: 5 }],
         ],
         varsThatCauseNewPreParsedDataFetch: vars,
       });
     });
 
     test('filtering on first column should allow range selection for quinquennial dates and keep first column', () => {
-      const parsedCsvData = [
+      const data = [
         ['[{var2}-{var4}]', 'CO2', 'CH4'],
-        ['2010', 1, 2],
-        ['2015', 2, 3],
-        ['2000', 4, 5],
+        ['2010', { value: 1 }, { value: 2 }],
+        ['2015', { value: 2 }, { value: 3 }],
+        ['2000', { value: 4 }, { value: 5 }],
       ];
 
       const vars = { var2: '2000', var4: '2010' };
-      const filterFunction = filterCSV(vars);
+      const filterFunction = filterCSV({ vars });
 
-      expect(filterFunction(parsedCsvData)).toEqual({
+      expect(filterFunction(data)).toEqual({
         data: [
           ['[{var2}-{var4}]', 'CO2', 'CH4'],
-          ['2010', 1, 2],
-          ['2000', 4, 5],
+          ['2010', { value: 1 }, { value: 2 }],
+          ['2000', { value: 4 }, { value: 5 }],
         ],
         varsThatCauseNewPreParsedDataFetch: vars,
       });
     });
 
     test('filtering on first column should not work for incompatible types and keep first column', () => {
-      const parsedCsvData = [
+      const data = [
         ['[{var2}-{var4}]', 'CO2', 'CH4'],
-        ['AAA', 1, 2],
-        ['BBB', 2, 3],
-        ['CCC', 4, 5],
+        ['AAA', [{ value: 1 }], { value: 2 }],
+        ['BBB', { value: 2 }, { value: 3 }],
+        ['CCC', { value: 4 }, { value: 5 }],
       ];
 
       const vars = { var2: 'AAA', var4: 'CCC' };
-      const filterFunction = filterCSV(vars);
+      const filterFunction = filterCSV({ vars });
 
-      expect(filterFunction(parsedCsvData)).toEqual({
+      expect(filterFunction(data)).toEqual({
         data: [['[{var2}-{var4}]', 'CO2', 'CH4']],
         varsThatCauseNewPreParsedDataFetch: {},
       });
     });
 
     test('filtering on first column should allow range selection for numerics and keep first column', () => {
-      const parsedCsvData = [
+      const data = [
         ['[{var2}-{var4}]', 'CO2', 'CH4'],
-        ['300', 1, 2],
-        ['2000', 2, 3],
-        ['200', 4, 5],
+        ['300', { value: 1 }, { value: 2 }],
+        ['2000', { value: 2 }, { value: 3 }],
+        ['200', { value: 4 }, { value: 5 }],
       ];
 
       const vars = { var2: '150', var4: '300' };
-      const filterFunction = filterCSV(vars);
+      const filterFunction = filterCSV({ vars });
 
-      expect(filterFunction(parsedCsvData)).toEqual({
+      expect(filterFunction(data)).toEqual({
         data: [
           ['[{var2}-{var4}]', 'CO2', 'CH4'],
-          ['300', 1, 2],
-          ['200', 4, 5],
+          ['300', { value: 1 }, { value: 2 }],
+          ['200', { value: 4 }, { value: 5 }],
         ],
         varsThatCauseNewPreParsedDataFetch: vars,
+      });
+    });
+
+    const minMaxData = [
+      ['Categories', 'CO2', 'IGNORED_SERIES'],
+      ['ITA', { value: 4 }, { value: 40 }],
+      ['FRA', { value: 1 }, { value: 10 }],
+      ['BRA', { value: 2 }, { value: 20 }],
+      ['USA', { value: 5 }, { value: 50 }],
+      ['MEX', { value: 3 }, { value: 30 }],
+    ];
+
+    test('filtering (SymbolMinMax) should return min and max', () => {
+      const varsToAddRows = {};
+      const filterFunction = filterCSV({
+        vars: varsToAddRows,
+        chartType: chartTypes.symbolMinMax,
+        calcAvgValue: false,
+      });
+
+      expect(filterFunction(minMaxData)).toEqual({
+        data: [
+          ['Categories', 'CO2'],
+          ['FRA', { value: 1, custom: { isMin: true } }],
+          ['USA', { value: 5, custom: { isMax: true } }],
+        ],
+      });
+    });
+
+    test('filtering (SymbolMinMax) should return min, max and avg', () => {
+      const varsToAddRows = {};
+      const filterFunction = filterCSV({
+        vars: varsToAddRows,
+        chartType: chartTypes.symbolMinMax,
+        calcAvgValue: true,
+      });
+
+      expect(filterFunction(minMaxData)).toEqual({
+        data: [
+          ['Categories', 'CO2'],
+          ['FRA', { value: 1, custom: { isMin: true } }],
+          [avgCode, { value: 3, custom: { isAvg: true } }],
+          ['USA', { value: 5, custom: { isMax: true } }],
+        ],
+      });
+    });
+
+    test('filtering (SymbolMinMax) should return min, max, avg and additional rows', () => {
+      const minMaxDataWithVar = R.assocPath([0, 0], '{var1}', minMaxData);
+
+      const varsToAddRows = { var1: 'BRA|ITA' };
+      const filterFunction = filterCSV({
+        vars: varsToAddRows,
+        chartType: chartTypes.symbolMinMax,
+        calcAvgValue: true,
+      });
+
+      expect(filterFunction(minMaxDataWithVar)).toEqual({
+        data: [
+          ['{var1}', 'CO2'],
+          ['FRA', { value: 1, custom: { isMin: true } }],
+          [avgCode, { value: 3, custom: { isAvg: true } }],
+          ['USA', { value: 5, custom: { isMax: true } }],
+          ['ITA', { value: 4 }],
+          ['BRA', { value: 2 }],
+        ],
+        varsThatCauseNewPreParsedDataFetch: varsToAddRows,
+      });
+    });
+
+    test('filtering (SymbolMinMax) should return min, max and specified reference value as avg', () => {
+      const varsToAddRows = {};
+      const filterFunction = filterCSV({
+        vars: varsToAddRows,
+        chartType: chartTypes.symbolMinMax,
+        calcAvgValue: false,
+        referenceValueCode: 'MEX',
+      });
+
+      expect(filterFunction(minMaxData)).toEqual({
+        data: [
+          ['Categories', 'CO2'],
+          ['FRA', { value: 1, custom: { isMin: true } }],
+          ['MEX', { value: 3, custom: { isAvg: true } }],
+          ['USA', { value: 5, custom: { isMax: true } }],
+        ],
+      });
+    });
+
+    test('filtering (SymbolMinMax) should return min, max but not specified reference value as avg (since equals to max)', () => {
+      const varsToAddRows = {};
+      const filterFunction = filterCSV({
+        vars: varsToAddRows,
+        chartType: chartTypes.symbolMinMax,
+        calcAvgValue: false,
+        referenceValueCode: 'USA',
+      });
+
+      expect(filterFunction(minMaxData)).toEqual({
+        data: [
+          ['Categories', 'CO2'],
+          ['FRA', { value: 1, custom: { isMin: true } }],
+          ['USA', { value: 5, custom: { isMax: true } }],
+        ],
       });
     });
   });
@@ -277,17 +385,17 @@ MEX
     const data = {
       data: [
         ['Category', 'CO2', 'CH4'],
-        ['BRA', 1, 2],
-        ['MEX', 3, 4],
-        ['FRA', 5, 6],
+        ['BRA', { value: 1 }, { value: 2 }],
+        ['MEX', { value: 3 }, { value: 4 }],
+        ['FRA', { value: 5 }, { value: 6 }],
       ],
     };
 
     const pivotedData = {
       data: [
         ['Category', 'BRA', 'MEX', 'FRA'],
-        ['CO2', 1, 3, 5],
-        ['CH4', 2, 4, 6],
+        ['CO2', { value: 1 }, { value: 3 }, { value: 5 }],
+        ['CH4', { value: 2 }, { value: 4 }, { value: 6 }],
       ],
     };
 
@@ -396,9 +504,9 @@ MEX
       const data = {
         data: [
           ['Category', 'CO2', 'CH4'],
-          ['BRA', 1, 2],
-          ['MEX', 3, 4],
-          ['FRA', 5, 6],
+          ['BRA', { value: 1 }, { value: 2 }],
+          ['MEX', { value: 3 }, { value: 4 }],
+          ['FRA', { value: 5 }, { value: 6 }],
         ],
       };
 
@@ -432,9 +540,9 @@ MEX
       const data = {
         data: [
           ['Category', 'CO2', 'CH4'],
-          ['BRA', 1, 2],
-          ['MEX', 3, 4],
-          ['FRA', 5, 6],
+          ['BRA', { value: 1 }, { value: 2 }],
+          ['MEX', { value: 3 }, { value: 4 }],
+          ['FRA', { value: 5 }, { value: 6 }],
         ],
       };
 
@@ -580,38 +688,48 @@ VAR2,Variable 2 CL
     });
   });
 
-  describe('transformValuesAndExtractMetadata', () => {
+  describe('transformValues', () => {
     test('should transform values', () => {
-      const data = {
-        data: [
-          ['Category', 'CO2', 'CH4'],
-          ['BRA', 1, 2],
-          ['MEX', 3, 4],
-        ],
-      };
+      const data = [
+        ['Category', 'CO2', 'CH4'],
+        ['BRA', 1, 2],
+        ['MEX', 3, 4],
+      ];
 
-      const result = transformValuesAndExtractMetadata(data);
+      const result = transformValues(data);
 
-      expect(result).toEqual({
-        data: [
-          ['Category', 'CO2', 'CH4'],
-          ['BRA', { value: 1 }, { value: 2 }],
-          ['MEX', { value: 3 }, { value: 4 }],
-        ],
-      });
+      expect(result).toEqual([
+        ['Category', 'CO2', 'CH4'],
+        ['BRA', { value: 1 }, { value: 2 }],
+        ['MEX', { value: 3 }, { value: 4 }],
+      ]);
     });
+  });
 
+  describe('extractMetadata', () => {
     test('should extract meatadata', () => {
       const data = {
         data: [
           ['Category', 'CO2', 'CH4', '{metadata1}', '{metadata2}'],
-          ['BRA', 1, 2, 'BRA-CO2-en,BRA-CH4-en', 'BRA-CO2-fr,BRA-CH4-fr'],
-          ['MEX', 3, 4, 'MEX metadata en', 'MEX metadata fr'],
-          ['FRA', 5, 6, '', ''],
+          [
+            'BRA',
+            { value: 1 },
+            { value: 2 },
+            { value: 'BRA-CO2-en,BRA-CH4-en' },
+            { value: 'BRA-CO2-fr,BRA-CH4-fr' },
+          ],
+          [
+            'MEX',
+            { value: 3 },
+            { value: 4 },
+            { value: 'MEX metadata en' },
+            { value: 'MEX metadata fr' },
+          ],
+          ['FRA', { value: 5 }, { value: 6 }, { value: '' }, { value: '' }],
         ],
       };
 
-      const result = transformValuesAndExtractMetadata(data);
+      const result = extractMetadata(data);
 
       expect(result).toEqual({
         data: [

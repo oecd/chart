@@ -19,6 +19,8 @@ export const latestMaxVariable = 'latest_max';
 export const minDateAvailableVariable = 'min_date';
 export const maxDateAvailableVariable = 'max_date';
 
+export const avgCode = 'AVG_CODE';
+
 export const isCastableToNumber = R.ifElse(
   (v) => R.isNil(v) || `${v}`.trim() === '',
   R.always(false),

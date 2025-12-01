@@ -17,6 +17,7 @@ import {
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   defaultExportSize,
   frequencyTypes,
+  sortOrderOptions,
   stackingOptions,
 } from '../constants/chart';
 import { frequencies } from './dateUtil';
@@ -1040,13 +1041,33 @@ const createOptionsForScatterChart = ({
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
+  sortOrder,
 }) => {
   const symbolLayout = chartType === chartTypes.symbol;
+  const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
   const firstPaletteColor = R.head(colorPalette);
 
+  const getIsMinAvgOrMax =
+    chartType !== chartTypes.symbolMinMax
+      ? R.always(false)
+      : (s) => {
+          const firstDatumCustom = R.path(['data', 0, 'custom'], s);
+          return (
+            R.has('isMin', firstDatumCustom) ||
+            R.has('isMax', firstDatumCustom) ||
+            R.has('isAvg', firstDatumCustom)
+          );
+        };
+
   const series = mapWithIndex((s, yIdx) => {
-    const symbol = getListItemAtTurningIndex(yIdx, symbols);
+    const isMinAvgOrMax = getIsMinAvgOrMax(s);
+    const symbol = isMinAvgOrMax
+      ? R.head(symbols)
+      : getListItemAtTurningIndex(
+          yIdx,
+          isMinAvgOrMax ? R.tail(symbols) : symbols,
+        );
 
     const seriesBaselineOrHighlightColor = getBaselineOrHighlightColor(
       s,
@@ -1058,6 +1079,8 @@ const createOptionsForScatterChart = ({
     const seriesColor =
       seriesBaselineOrHighlightColor ||
       getListItemAtTurningIndex(yIdx, colorPalette);
+
+    const symbolRadius = symbolMinMaxLayout ? 9 : 6;
 
     return {
       name: data.areSeriesDates
@@ -1100,24 +1123,31 @@ const createOptionsForScatterChart = ({
         symbol,
         lineColor: symbol === 'cross' ? null : '#deeaf1',
         lineWidth: symbol === 'cross' ? 2 : 1,
-        radius: symbol === 'cross' ? 5 : 6,
+        radius: symbol === 'cross' ? symbolRadius - 1 : symbolRadius,
         fillColor: !symbolLayout
           ? addColorAlpha(seriesColor, -0.4)
           : seriesColor,
         states: {
           hover: {
             lineWidth: symbol === 'cross' ? 2 : 1,
-            radius: symbol === 'cross' ? 5 : 6,
+            radius: symbol === 'cross' ? symbolRadius - 1 : symbolRadius,
           },
         },
       },
+      ...(symbolMinMaxLayout
+        ? {
+            dataLabels: {
+              y: isMinAvgOrMax ? -20 : 45,
+            },
+          }
+        : {}),
     };
   }, data.series);
 
   let minMaxLines = [];
 
   const chartRender = ({ target: chart }) => {
-    if (symbolLayout) {
+    if (symbolLayout || symbolMinMaxLayout) {
       // remove previous lines (user can make series visible or not which requires to
       // redraw the lines)
       forEachWithIndex((l) => l?.destroy(), minMaxLines);
@@ -1151,7 +1181,11 @@ const createOptionsForScatterChart = ({
         const lineColor = chart.series[0].color || firstPaletteColor;
 
         return chart.renderer
-          .path(['M', ax, ay, 'L', bx, by])
+          .path(
+            symbolLayout
+              ? ['M', ax, ay, 'L', bx, by]
+              : ['M', ay, ax, 'L', by, bx],
+          )
           .attr({
             stroke: addColorAlpha(lineColor, -0.6),
             'stroke-width': 1,
@@ -1162,15 +1196,35 @@ const createOptionsForScatterChart = ({
     }
   };
 
+  const symbolMinMaxData = symbolMinMaxLayout
+    ? R.compose(
+        (allSeriesFirstDatum) => {
+          const min = R.find(
+            R.pathEq(true, ['custom', 'isMin']),
+            allSeriesFirstDatum,
+          )?.value;
+          const max = R.find(
+            R.pathEq(true, ['custom', 'isMax']),
+            allSeriesFirstDatum,
+          )?.value;
+          return { min, max };
+        },
+        R.reject(R.isNil),
+        R.map(R.path(['data', 0])),
+      )(data.series)
+    : null;
+
   return {
     chart: {
       type: 'scatter',
       style: {
         fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
       },
-      marginTop: hideLegend
-        ? calcMarginTop(title, subtitle, isSmall)
-        : undefined,
+      marginTop:
+        hideLegend && chartType !== chartTypes.symbolMinMax
+          ? calcMarginTop(title, subtitle, isSmall)
+          : undefined,
+      ...(symbolMinMaxLayout ? { marginLeft: 12, marginRight: 12 } : {}),
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacing : 0,
@@ -1178,6 +1232,7 @@ const createOptionsForScatterChart = ({
         fullscreenClose,
         render: chartRender,
       },
+      inverted: symbolMinMaxLayout,
     },
 
     colors: colorPalette,
@@ -1199,7 +1254,7 @@ const createOptionsForScatterChart = ({
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         ...R.prop('xAxisLabels', formatters),
-        ...(hideXAxisLabels ? { enabled: false } : {}),
+        ...(hideXAxisLabels || symbolMinMaxLayout ? { enabled: false } : {}),
       },
       gridLineColor: '#c2cbd6',
       lineColor: 'transparent',
@@ -1212,20 +1267,31 @@ const createOptionsForScatterChart = ({
       title: {
         enabled: false,
       },
+      gridLineWidth: symbolMinMaxLayout ? 0 : 1,
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
         style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
         ...R.prop('yAxisLabels', formatters),
-        enabled: !hideYAxisLabels,
+        enabled: !hideYAxisLabels && !symbolMinMaxLayout,
         align: 'left',
         x: 0,
         y: -4,
       },
+      reversed: symbolMinMaxLayout && sortOrder === sortOrderOptions.desc.value,
+      ...(symbolMinMaxData?.min && symbolMinMaxData?.max
+        ? {
+            tickPositions: [
+              symbolMinMaxData.min,
+              //avoids a bug in Hightcharts that do not always display the max value
+              symbolMinMaxData.max + symbolMinMaxData.max * 0.001,
+            ],
+          }
+        : {}),
     },
 
     legend: {
-      enabled: !hideLegend,
+      enabled: !hideLegend && !symbolMinMaxLayout,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: {
@@ -1246,6 +1312,7 @@ const createOptionsForScatterChart = ({
       series: {
         animation: false,
         dataLabels: {
+          ...(symbolMinMaxLayout ? { enabled: true, y: -20 } : {}),
           ...R.prop('dataLabels', formatters),
         },
       },
@@ -1717,6 +1784,7 @@ export const getCreateOptionsFuncForChartType = async (chartType) => {
 
     case chartTypes.symbol:
     case chartTypes.scatter:
+    case chartTypes.symbolMinMax:
       return createChartOptionsFunc(createOptionsForScatterChart);
 
     case chartTypes.radar:

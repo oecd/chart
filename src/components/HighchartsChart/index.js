@@ -73,6 +73,7 @@ const chartByType = {
   [chartTypes.stackedArea]: GenericChart,
   [chartTypes.map]: MapChart,
   [chartTypes.symbol]: ScatterChart,
+  [chartTypes.symbolMinMax]: ScatterChart,
   [chartTypes.scatter]: ScatterChart,
   [chartTypes.radar]: GenericChart,
   [chartTypes.pie]: GenericChart,
@@ -253,6 +254,9 @@ const HighchartsChart = ({
   isSmall,
   optionsOverride = null,
   debug = false,
+  varForDotStatSymbolMinMax = null,
+  calcAvgValue = null,
+  referenceValueCode = null,
 }) => {
   const ChartForType = getChartForType(chartType);
 
@@ -295,6 +299,8 @@ const HighchartsChart = ({
           sortSeries,
           yAxisOrderOverride,
           forceXAxisToBeTreatedAsCategories,
+          calcAvgValue,
+          referenceValueCode,
           vars,
           lang,
         });
@@ -691,6 +697,10 @@ const HighchartsChart = ({
           dotStatXAxisDimension,
           dotStatYAxisDimension,
           controlConnectedDotStatDimensionIds,
+          varForDotStatSymbolMinMax,
+          calcAvgValue,
+          referenceValueCode,
+          vars,
         }),
       );
     } catch {
@@ -718,6 +728,10 @@ const HighchartsChart = ({
     sortOrder,
     sortSeries,
     yAxisOrderOverride,
+    varForDotStatSymbolMinMax,
+    calcAvgValue,
+    referenceValueCode,
+    vars,
   ]);
 
   // parse CSV data
@@ -741,6 +755,8 @@ const HighchartsChart = ({
             sortSeries,
             yAxisOrderOverride,
             forceXAxisToBeTreatedAsCategories,
+            calcAvgValue,
+            referenceValueCode,
             vars,
             lang,
           }),
@@ -766,6 +782,8 @@ const HighchartsChart = ({
     sortOrder,
     sortSeries,
     staticCsvData,
+    calcAvgValue,
+    referenceValueCode,
     vars,
     yAxisOrderOverride,
   ]);
@@ -1100,6 +1118,7 @@ const HighchartsChart = ({
         forceXAxisToBeTreatedAsCategories,
         lang,
         inlineLabels,
+        sortOrder,
       });
 
       setMergedOptions(
@@ -1156,6 +1175,7 @@ const HighchartsChart = ({
     createOptionsFuncForChartType,
     inlineLabels,
     id,
+    sortOrder,
   ]);
 
   useEffect(() => {
@@ -1341,6 +1361,9 @@ HighchartsChart.propTypes = {
   isSmall: PropTypes.bool.isRequired,
   debug: PropTypes.bool,
   optionsOverride: PropTypes.object,
+  varForDotStatSymbolMinMax: PropTypes.string,
+  calcAvgValue: PropTypes.bool,
+  referenceValueCode: PropTypes.string,
 };
 
 export default memo(HighchartsChart);

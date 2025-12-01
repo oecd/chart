@@ -10,6 +10,7 @@ export const chartTypes = {
   stackedArea: 'StackedArea',
   map: 'Map',
   symbol: 'Symbol',
+  symbolMinMax: 'SymbolMinMax',
   scatter: 'Scatter',
   radar: 'Radar',
   pie: 'Pie',

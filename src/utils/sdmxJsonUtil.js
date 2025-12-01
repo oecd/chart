@@ -13,6 +13,9 @@ import {
   addCodeLabelMapping,
   handleAreCategoriesAndSeriesDates,
   handleAreCategoriesAndSeriesNumbers,
+  keepOnly2FirstColumns,
+  extractMinAvgMaxAndFilterOnFirstColumn,
+  forcePivotCSV,
 } from './csvUtil';
 import { isNilOrEmpty } from './ramdaUtil';
 import {
@@ -677,6 +680,10 @@ export const createDataFromSdmxJson = ({
   dotStatXAxisDimension,
   dotStatYAxisDimension,
   controlConnectedDotStatDimensionIds,
+  varForDotStatSymbolMinMax,
+  calcAvgValue,
+  referenceValueCode,
+  vars,
 }) => {
   if (!sdmxJson) {
     return null;
@@ -686,7 +693,10 @@ export const createDataFromSdmxJson = ({
     addCodeLabelMapping,
     sortParsedDataOnYAxis(yAxisOrderOverride),
     parseData,
-    sortCSV(sortBy, sortOrder, sortSeries, lang),
+    R.when(
+      () => chartType !== chartTypes.symbolMinMax,
+      sortCSV(sortBy, sortOrder, sortSeries, lang),
+    ),
     handleAreCategoriesAndSeriesNumbers(
       chartType,
       forceXAxisToBeTreatedAsCategories,
@@ -694,6 +704,34 @@ export const createDataFromSdmxJson = ({
     handleAreCategoriesAndSeriesDates(
       chartType,
       forceXAxisToBeTreatedAsCategories,
+    ),
+    R.when(
+      () => chartType === chartTypes.symbolMinMax,
+      R.compose(
+        forcePivotCSV,
+        R.evolve({
+          data: R.compose((d) => {
+            const varName = R.replace(
+              /{|}/g,
+              '',
+              varForDotStatSymbolMinMax || '',
+            );
+            return extractMinAvgMaxAndFilterOnFirstColumn({
+              firstColumnFilter: isNilOrEmpty(varForDotStatSymbolMinMax)
+                ? null
+                : [
+                    0,
+                    {
+                      varName,
+                      varValue: R.propOr('', varName, vars),
+                    },
+                  ],
+              calcAvgValue,
+              referenceValueCode,
+            })(d);
+          }, keepOnly2FirstColumns),
+        }),
+      ),
     ),
     pivotCSV(
       chartType,

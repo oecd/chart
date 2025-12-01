@@ -93,7 +93,7 @@ export const createFormatters = ({
   const dataLabels = {
     format:
       '{#if (ne null point.y)}' +
-      `{rtz (point.y:,.${finalMaxNumberOrDecimal}f)}` +
+      `${chartType === chartTypes.symbolMinMax ? '{series.name}: ' : ''}{rtz (point.y:,.${finalMaxNumberOrDecimal}f)}` +
       '{else}' +
       `{#if (ne null point.value)}{rtz (point.value:,.${finalMaxNumberOrDecimal}f)}` +
       `{else}{rtz (point.z:,.${finalMaxNumberOrDecimal}f)}` +
@@ -165,7 +165,10 @@ export const createFormatters = ({
     ? {}
     : {
         formatter: function format(tooltipInfo) {
-          const fullFormat = `${tooltipInfo.options.headerFormat}${tooltipInfo.options.pointFormat}`;
+          const fullFormat =
+            chartType === chartTypes.symbolMinMax
+              ? tooltipInfo.options.pointFormat
+              : `${tooltipInfo.options.headerFormat}${tooltipInfo.options.pointFormat}`;
 
           const value = this.point.y ?? this.point.value ?? this.point.z;
           const timeLabel = this.point.__metadata?.timeLabel;
