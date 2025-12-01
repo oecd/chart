@@ -1078,7 +1078,12 @@ const createOptionsForScatterChart = ({
 
     const seriesColor =
       seriesBaselineOrHighlightColor ||
-      getListItemAtTurningIndex(yIdx, colorPalette);
+      (isMinAvgOrMax
+        ? R.head(colorPalette)
+        : getListItemAtTurningIndex(
+            yIdx,
+            isMinAvgOrMax ? R.tail(colorPalette) : colorPalette,
+          ));
 
     const symbolRadius = symbolMinMaxLayout ? 9 : 6;
 
@@ -1125,7 +1130,7 @@ const createOptionsForScatterChart = ({
         lineWidth: symbol === 'cross' ? 2 : 1,
         radius: symbol === 'cross' ? symbolRadius - 1 : symbolRadius,
         fillColor: !symbolLayout
-          ? addColorAlpha(seriesColor, -0.4)
+          ? addColorAlpha(seriesColor, symbolMinMaxLayout ? -0.2 : -0.4)
           : seriesColor,
         states: {
           hover: {
@@ -1137,7 +1142,7 @@ const createOptionsForScatterChart = ({
       ...(symbolMinMaxLayout
         ? {
             dataLabels: {
-              y: isMinAvgOrMax ? -20 : 45,
+              y: isMinAvgOrMax ? 45 : -20,
             },
           }
         : {}),
@@ -1279,7 +1284,7 @@ const createOptionsForScatterChart = ({
         y: -4,
       },
       reversed: symbolMinMaxLayout && sortOrder === sortOrderOptions.desc.value,
-      ...(symbolMinMaxData?.min && symbolMinMaxData?.max
+      ...(!R.isNil(symbolMinMaxData?.min) && !R.isNil(symbolMinMaxData?.max)
         ? {
             tickPositions: [
               symbolMinMaxData.min,
@@ -1312,7 +1317,7 @@ const createOptionsForScatterChart = ({
       series: {
         animation: false,
         dataLabels: {
-          ...(symbolMinMaxLayout ? { enabled: true, y: -20 } : {}),
+          ...(symbolMinMaxLayout ? { enabled: true } : {}),
           ...R.prop('dataLabels', formatters),
         },
       },

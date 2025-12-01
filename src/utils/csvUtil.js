@@ -732,6 +732,7 @@ export const extractMinAvgMaxAndFilterOnFirstColumn =
 
     const minCode = R.head(minRow);
     const maxCode = R.head(maxRow);
+
     const filteredRowsToAdd = R.compose(
       R.filter(
         R.compose(
@@ -744,13 +745,10 @@ export const extractMinAvgMaxAndFilterOnFirstColumn =
         R.compose(
           R.includes(
             R.__,
-            R.compose(
-              R.when(
-                () => !calcAvgValue && !isNilOrEmpty(referenceValueCode),
-                R.append(R.toUpper(referenceValueCode || '')),
-              ),
-              R.map(R.toUpper, [minCode, maxCode, avgCode]),
-            ),
+            R.when(
+              () => !calcAvgValue && !isNilOrEmpty(referenceValueCode),
+              R.append(R.toUpper(referenceValueCode || '')),
+            )(R.map(R.toUpper, [minCode, maxCode, avgCode])),
           ),
           R.toUpper,
           R.head,

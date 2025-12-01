@@ -323,7 +323,7 @@ MEX
     test('filtering (SymbolMinMax) should return min, max, avg and additional rows', () => {
       const minMaxDataWithVar = R.assocPath([0, 0], '{var1}', minMaxData);
 
-      const varsToAddRows = { var1: 'BRA|ITA' };
+      const varsToAddRows = { var1: 'BRA|ITA|FRA|USA' };
       const filterFunction = filterCSV({
         vars: varsToAddRows,
         chartType: chartTypes.symbolMinMax,
