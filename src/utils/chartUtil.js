@@ -1289,7 +1289,7 @@ const createOptionsForScatterChart = ({
             tickPositions: [
               symbolMinMaxData.min,
               //avoids a bug in Hightcharts that do not always display the max value
-              symbolMinMaxData.max + symbolMinMaxData.max * 0.001,
+              symbolMinMaxData.max + Math.abs(symbolMinMaxData.max * 0.001),
             ],
           }
         : {}),
