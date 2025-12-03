@@ -71,7 +71,7 @@ const Chart = ({
     return (
       <ChartErrorBoundary
         fallback={
-          <CenteredContainer>{errorMessages.generic}</CenteredContainer>
+          <CenteredContainer>{errorMessages.generic.label}</CenteredContainer>
         }
       >
         <Component
@@ -91,7 +91,9 @@ const Chart = ({
 
   return (
     <ChartErrorBoundary
-      fallback={<CenteredContainer>{errorMessages.generic}</CenteredContainer>}
+      fallback={
+        <CenteredContainer>{errorMessages.generic.label}</CenteredContainer>
+      }
     >
       <LazyLoadComponent
         placeholder={

@@ -138,9 +138,11 @@ const Chart = ({ chartId, language, ...otherProps }) => {
           <Spinner />
         ) : (
           <div className="cb-container">
-            {R.has('error', chartConfigData.chartConfig)
-              ? chartConfigData.chartConfig.error
-              : errorMessages.generic}
+            {R.pathOr(
+              errorMessages.generic.label,
+              [chartConfigData.chartConfig?.error, 'label'],
+              errorMessages,
+            )}
           </div>
         )}
       </CenteredContainer>

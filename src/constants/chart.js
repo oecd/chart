@@ -119,19 +119,28 @@ export const debugInfoTypes = {
 export const maxSupprortedNumberOfDataPoint = 15000;
 
 export const errorMessages = {
-  generic: (
-    <div style={{ textAlign: 'center' }}>
-      An error occured.
-      <br />
-      Please refresh the page.
-    </div>
-  ),
-  noData: (
-    <div style={{ textAlign: 'center' }}>
-      No data available for the current selection.
-    </div>
-  ),
-  underEmbargo: <div style={{ textAlign: 'center' }}>Not yet available</div>,
+  generic: {
+    code: 'generic',
+    label: (
+      <div style={{ textAlign: 'center' }}>
+        An error occured.
+        <br />
+        Please refresh the page.
+      </div>
+    ),
+  },
+  noData: {
+    code: 'noData',
+    label: (
+      <div style={{ textAlign: 'center' }}>
+        No data available for the current selection.
+      </div>
+    ),
+  },
+  underEmbargo: {
+    code: 'underEmbargo',
+    label: <div style={{ textAlign: 'center' }}>Not yet available</div>,
+  },
 };
 
 export const minChartWidthForControlsDisplayOnRightSide = 850;
