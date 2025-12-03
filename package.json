@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "lint": "eslint src/**/*.js",
-    "prebuild": "rimraf ./dist && cp ./node_modules/react/cjs/react-jsx-runtime.production.min.js ./src/react-jsx-runtime.js",
+    "prebuild": "jest --ci --watchAll=false && rimraf ./dist && cp ./node_modules/react/cjs/react-jsx-runtime.production.min.js ./src/react-jsx-runtime.js",
     "build": "rollup -c",
     "test": "jest",
     "test:watch": "jest --watch",
