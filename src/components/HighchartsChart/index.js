@@ -540,6 +540,10 @@ const HighchartsChart = ({
     }
   }, [dataSourceType, debug, dotStatUrl, vars]);
 
+  const requiredVariablesNameInternal = useMemoForArrayOrObject(
+    requiredVariablesName,
+  );
+
   // fetch .Stat data from the SDMX-JSON API
   // (only useful when displayed in backoffice)
   useEffect(() => {
@@ -548,7 +552,10 @@ const HighchartsChart = ({
       !isNilOrEmpty(finalDotStatUrl) &&
       dataSourceType === dataSourceTypes.dotStat.value
     ) {
-      const anyRequiredVarIsEmpty = getAnyVarEmpty(requiredVariablesName, vars);
+      const anyRequiredVarIsEmpty = getAnyVarEmpty(
+        requiredVariablesNameInternal,
+        vars,
+      );
       if (anyRequiredVarIsEmpty) {
         setErrorMessage(errorMessages.noData.label);
         return;
@@ -653,7 +660,7 @@ const HighchartsChart = ({
     setControls,
     getControlsWithAvailability,
     vars,
-    requiredVariablesName,
+    requiredVariablesNameInternal,
   ]);
 
   // fetch .Stat snapshot data
