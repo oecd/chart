@@ -36,6 +36,25 @@ const tryParseWithFormat = (string, dateFormat) => {
   return false;
 };
 
+const freqenciesLabels = {
+  [frequencyTypes.monthly.value]: {
+    en: 'Monthly',
+    fr: 'Mensuelle',
+    es: 'Mensual',
+  },
+  [frequencyTypes.quarterly.value]: {
+    en: 'Quarterly',
+    fr: 'Trimestrielle',
+    es: 'Trimestral',
+  },
+  [frequencyTypes.yearly.value]: { en: 'Yearly', fr: 'Annuelle', es: 'Anual' },
+  [frequencyTypes.quinquennial.value]: {
+    en: 'Quinquennial',
+    fr: 'Quinquennal',
+    es: 'Quinquenal',
+  },
+};
+
 export const frequencies = {
   [frequencyTypes.monthly.value]: {
     tryParse: (string) =>
@@ -48,7 +67,12 @@ export const frequencies = {
     getEndPeriod: (date) => (isValid(date) ? endOfMonth(date) : ''),
     frequencyTypeCode: frequencyTypes.monthly.value,
     dotStatId: frequencyTypes.monthly.dotStatId,
-    getLabel: (lang) => (lang === 'fr' ? 'Mensuelle' : 'Monthly'),
+    getLabel: (lang) =>
+      R.pathOr(
+        R.path([frequencyTypes.monthly.value, 'en'], freqenciesLabels),
+        [frequencyTypes.monthly.value, lang],
+        freqenciesLabels,
+      ),
     getHighchartsFormat: (valueField) =>
       `{${valueField}:%m}-{${valueField}:%Y}`,
   },
@@ -66,7 +90,12 @@ export const frequencies = {
     getEndPeriod: (date) => (isValid(date) ? endOfQuarter(date) : ''),
     frequencyTypeCode: frequencyTypes.quarterly.value,
     dotStatId: frequencyTypes.quarterly.dotStatId,
-    getLabel: (lang) => (lang === 'fr' ? 'Trimestrielle' : 'Quarterly'),
+    getLabel: (lang) =>
+      R.pathOr(
+        R.path([frequencyTypes.quarterly.value, 'en'], freqenciesLabels),
+        [frequencyTypes.quarterly.value, lang],
+        freqenciesLabels,
+      ),
     getHighchartsFormat: (valueField, lang) =>
       lang === 'fr'
         ? `T{${valueField}:%q}-{${valueField}:%Y}`
@@ -83,7 +112,12 @@ export const frequencies = {
     getEndPeriod: (date) => (isValid(date) ? endOfYear(date) : ''),
     frequencyTypeCode: frequencyTypes.yearly.value,
     dotStatId: frequencyTypes.yearly.dotStatId,
-    getLabel: (lang) => (lang === 'fr' ? 'Annuelle' : 'Yearly'),
+    getLabel: (lang) =>
+      R.pathOr(
+        R.path([frequencyTypes.yearly.value, 'en'], freqenciesLabels),
+        [frequencyTypes.yearly.value, lang],
+        freqenciesLabels,
+      ),
     getHighchartsFormat: (valueField) => `{${valueField}:%Y}`,
   },
   [frequencyTypes.quinquennial.value]: {
@@ -118,7 +152,12 @@ export const frequencies = {
     },
     frequencyTypeCode: frequencyTypes.quinquennial.value,
     dotStatId: frequencyTypes.quinquennial.dotStatId,
-    getLabel: (lang) => (lang === 'fr' ? 'Quinquennal' : 'Quinquennial'),
+    getLabel: (lang) =>
+      R.pathOr(
+        R.path([frequencyTypes.quinquennial.value, 'en'], freqenciesLabels),
+        [frequencyTypes.quinquennial.value, lang],
+        freqenciesLabels,
+      ),
     getHighchartsFormat: (valueField) => `{${valueField}:%Y}`,
   },
 };
