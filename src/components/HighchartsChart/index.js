@@ -183,6 +183,9 @@ if (typeof Highcharts === 'object') {
   };
 }
 
+const getAnyVarEmpty = (varNames, vars) =>
+  R.compose(R.any(R.isEmpty), R.values, R.pick(R.__, vars))(varNames || []);
+
 const HighchartsChart = ({
   id = 'temp-id',
   dataSourceType = dataSourceTypes.csv.value,
@@ -243,6 +246,7 @@ const HighchartsChart = ({
   onDownloadData = null,
   onDataReady = null,
   vars,
+  requiredVariablesName = null,
   lang,
   hideTitle = false,
   hideSubtitle = false,
@@ -357,6 +361,29 @@ const HighchartsChart = ({
 
       const anyVarHasChanged = !R.isEmpty(varsThatHaveChanged);
 
+      const anyRequiredVarIsEmpty = anyVarHasChanged
+        ? getAnyVarEmpty(varsThatHaveChanged, vars)
+        : false;
+
+      if (anyRequiredVarIsEmpty) {
+        setErrorMessage(errorMessages.noData.label);
+
+        const newVarsThatCauseNewPreParsedDataFetch = R.compose(
+          R.fromPairs,
+          R.map((k) => [k, R.prop(k, vars)]),
+          R.keys,
+        )(varsThatCauseNewPreParsedDataFetch);
+
+        setParsedData(
+          R.assoc(
+            'varsThatCauseNewPreParsedDataFetch',
+            newVarsThatCauseNewPreParsedDataFetch,
+          ),
+        );
+
+        return;
+      }
+
       if (anyVarHasChanged || lang !== prevLang) {
         const varsParam = R.compose(
           R.join('/'),
@@ -406,6 +433,9 @@ const HighchartsChart = ({
           }
         };
         getNewPreParsedData();
+      } else {
+        // onDataReady will implicitly re-enable any controls that would be disabled
+        onDataReady?.(parsedData);
       }
     }
   }, [
@@ -418,6 +448,7 @@ const HighchartsChart = ({
     parsedData,
     dataSourceType,
     firstSnapshotHasBeenFetched,
+    onDataReady,
   ]);
 
   // onDataReady
@@ -517,6 +548,12 @@ const HighchartsChart = ({
       !isNilOrEmpty(finalDotStatUrl) &&
       dataSourceType === dataSourceTypes.dotStat.value
     ) {
+      const anyRequiredVarIsEmpty = getAnyVarEmpty(requiredVariablesName, vars);
+      if (anyRequiredVarIsEmpty) {
+        setErrorMessage(errorMessages.noData.label);
+        return;
+      }
+
       newControlWillCauseVarChange.current = false;
 
       setIsFetching(true);
@@ -616,6 +653,7 @@ const HighchartsChart = ({
     setControls,
     getControlsWithAvailability,
     vars,
+    requiredVariablesName,
   ]);
 
   // fetch .Stat snapshot data
@@ -1350,6 +1388,7 @@ HighchartsChart.propTypes = {
   onDownloadData: PropTypes.func,
   onDataReady: PropTypes.func,
   vars: PropTypes.object.isRequired,
+  requiredVariablesName: PropTypes.array,
   lang: PropTypes.string.isRequired,
   hideTitle: PropTypes.bool,
   hideSubtitle: PropTypes.bool,
