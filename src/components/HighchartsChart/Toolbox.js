@@ -57,8 +57,22 @@ const Toolbox = ({
   isSmall,
   exportDisabled = false,
 }) => {
+  const downloadCSV = useCallback(() => {
+    if (chartRef.current?.chart.downloadCSV) {
+      chartRef.current?.chart.downloadCSV();
+      if (onDownloadData) {
+        onDownloadData();
+      }
+    }
+  }, [chartRef, onDownloadData]);
+
   const exportImage = useCallback(
-    async (chartOptions, format) => {
+    async (format) => {
+      const chartOptions = chartRef.current?.chart.options;
+      if (!chartOptions) {
+        return;
+      }
+
       const options = R.compose(
         R.when((o) => !R.has('map', o.chart), R.omit(['colorAxis'])),
         R.assocPath(
@@ -99,6 +113,7 @@ const Toolbox = ({
       parsedSubtitle,
       parsedTitle,
       source,
+      chartRef,
     ],
   );
 
@@ -118,26 +133,20 @@ const Toolbox = ({
         },
       }),
     ),
+    // eslint-disable-next-line react-hooks/refs
   )([
     {
       label: 'CSV',
       content: <CsvIcon />,
       disabled: exportDisabled,
-      onSelect: () => {
-        if (chartRef.current?.chart.downloadCSV) {
-          chartRef.current?.chart.downloadCSV();
-          if (onDownloadData) {
-            onDownloadData();
-          }
-        }
-      },
+      onSelect: downloadCSV,
     },
     {
       label: 'PNG',
       content: <PngIcon />,
       disabled: exportDisabled,
       onSelect: async () => {
-        exportImage(chartRef.current?.chart.options, 'png');
+        exportImage('png');
       },
     },
     {
@@ -145,7 +154,7 @@ const Toolbox = ({
       content: <SvgIcon />,
       disabled: exportDisabled,
       onSelect: () => {
-        exportImage(chartRef.current?.chart.options, 'svg');
+        exportImage('svg');
       },
     },
   ]);

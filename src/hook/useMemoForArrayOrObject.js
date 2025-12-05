@@ -5,6 +5,7 @@ const useMemoForArrayOrObject = (value) => {
 
   useEffect(() => {
     if (JSON.stringify(value) !== JSON.stringify(valueInternal)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValueInternal(value);
     }
   }, [value, valueInternal]);

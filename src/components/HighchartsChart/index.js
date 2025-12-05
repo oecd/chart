@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 /*global document, CustomEvent, URL, window*/
 import React, {
   useState,
@@ -322,9 +323,10 @@ const HighchartsChart = ({
   const [footerHeight, setFooterHeight] = useState(null);
   const [chartHeight, setChartHeight] = useState(height);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [screenHeight, setScreenHeight] = useState(0);
 
-  useEffect(() => setPrevLang(lang), [lang]);
+  if (lang !== prevLang) {
+    setPrevLang(lang);
+  }
 
   // get pre-parsed data:
   // only fetch method used for public charts after vars change
@@ -366,6 +368,7 @@ const HighchartsChart = ({
         : false;
 
       if (anyRequiredVarIsEmpty) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setErrorMessage(errorMessages.noData.label);
 
         const newVarsThatCauseNewPreParsedDataFetch = R.compose(
@@ -462,6 +465,7 @@ const HighchartsChart = ({
     }
 
     if (isFetching) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setErrorMessage(null);
       if (debug) {
         sendDebugInfo({
@@ -557,6 +561,7 @@ const HighchartsChart = ({
         vars,
       );
       if (anyRequiredVarIsEmpty) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setErrorMessage(errorMessages.noData.label);
         return;
       }
@@ -701,6 +706,7 @@ const HighchartsChart = ({
 
     try {
       if (isSdmxJsonEmpty(sdmxJson)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setNoDataMessage(errorMessages.noData.label);
 
         const codeLabelMapping = createCodeLabelMapping({
@@ -787,6 +793,7 @@ const HighchartsChart = ({
       R.isNil(preParsedData)
     ) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setParsedData(
           createDataFromCSV({
             staticCsvData,
@@ -1007,9 +1014,7 @@ const HighchartsChart = ({
     !R.isNil(parsedData) &&
     allHeightCalculationsHaveBeenDone;
 
-  useEffect(() => {
-    setScreenHeight(window.screen.height);
-  }, []);
+  const screenHeight = useMemo(() => window.screen.height, []);
 
   const openChartFullScreen = () => {
     setIsFullScreen(true);
@@ -1025,6 +1030,7 @@ const HighchartsChart = ({
   const sourceShouldBeDisplayedInTooltip =
     !R.isNil(parsedSource) && (footerHeight === 0 || displaySourceAsTooltip);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const csvExportColumnHeaderFormatter = useMemo(() => {
     if (isNilOrEmpty(parsedTitle) && isNilOrEmpty(parsedSubtitle)) {
       return () => false;
@@ -1096,6 +1102,7 @@ const HighchartsChart = ({
       allHeightCalculationsHaveBeenDone
     ) {
       if (parsedData?.dotStatServerFetchFailed) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setErrorMessage(errorMessages.generic.label);
 
         trackChartError(

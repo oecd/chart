@@ -195,6 +195,7 @@ export const MenuComponent = forwardRef(
       <MenuContext.Provider value={contextValue}>
         <FloatingNode id={nodeId}>
           <button
+            // eslint-disable-next-line react-hooks/refs
             ref={useMergeRefs([refs.setReference, item.ref, forwardedRef])}
             tabIndex={tabIndex}
             type="button"
@@ -220,6 +221,7 @@ export const MenuComponent = forwardRef(
                   {...focusManagerProps}
                 >
                   <div
+                    // eslint-disable-next-line react-hooks/refs
                     ref={refs.setFloating}
                     style={{ outline: 0, ...floatingStyles }}
                     {...getFloatingProps()}

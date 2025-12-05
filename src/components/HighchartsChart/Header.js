@@ -1,5 +1,5 @@
 /*global window*/
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
@@ -32,10 +32,10 @@ const Header = ({
   isFontLoaded,
   chartRef,
 }) => {
-  const [isInIframe, setIsInIframe] = useState(false);
-  useEffect(() => {
-    setIsInIframe(window.location !== window.parent.location);
-  }, []);
+  const isInIframe = useMemo(
+    () => window.location !== window.parent.location,
+    [],
+  );
 
   return (
     <div style={{ display: 'flex', paddingBottom: isSmall ? '2px' : '5px' }}>
