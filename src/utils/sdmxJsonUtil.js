@@ -199,6 +199,7 @@ export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
   }
 
   if (response.status === 404) {
+    let rethrow404 = false;
     try {
       const responseText = await response.text();
       // handle the response that should be considered as empty
@@ -213,8 +214,20 @@ export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
         // send a fake .Stat v8 partial message
         // so that it will be detected as an "empty" message by the parser
         return { data: { dataSets: [{}] }, meta: { schema: '' } };
+      } else {
+        rethrow404 = true;
+        throw new Error(
+          isNilOrEmpty(responseText)
+            ? R.isEmpty(response.statusText)
+              ? response.status
+              : response.statusText
+            : responseText,
+        );
       }
-    } catch {
+    } catch (e) {
+      if (rethrow404) {
+        throw e;
+      }
       throw new Error(
         R.isEmpty(response.statusText) ? response.status : response.statusText,
       );
