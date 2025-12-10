@@ -195,6 +195,7 @@ const HighchartsChart = ({
   dotStatXAxisDimension,
   dotStatYAxisDimension,
   dotStatStructure,
+  dotStatToken = null,
   staticCsvData = '',
   forceXAxisToBeTreatedAsCategories = false,
   csvCodeLabelMappingProjectLevel = null,
@@ -408,6 +409,13 @@ const HighchartsChart = ({
           try {
             lastRequestedDataKey.current = configParams;
 
+            if (debug) {
+              sendDebugInfo({
+                type: debugInfoTypes.empty,
+                data: {},
+              });
+            }
+
             const newPreParsedData = await fetchJson(
               `${apiUrl}/api/public/chartConfig/${configParams}?preParsedDataOnly&lang=${R.toLower(
                 lang,
@@ -452,11 +460,16 @@ const HighchartsChart = ({
     dataSourceType,
     firstSnapshotHasBeenFetched,
     onDataReady,
+    debug,
   ]);
 
   // onDataReady
   useEffect(() => {
-    if (onDataReady && !isFetching) {
+    if (isFetching) {
+      return;
+    }
+
+    if (onDataReady) {
       onDataReady(parsedData);
     }
 
@@ -464,22 +477,10 @@ const HighchartsChart = ({
       return;
     }
 
-    if (isFetching) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setErrorMessage(null);
-      if (debug) {
-        sendDebugInfo({
-          type: debugInfoTypes.empty,
-          data: {},
-        });
-      }
-
-      return;
-    }
-
     const numberOfCategory = R.length(parsedData.categories);
     const numberOfSeries = R.length(parsedData.series);
     if (numberOfCategory * numberOfSeries > maxSupprortedNumberOfDataPoint) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setErrorMessage(errorMessages.generic.label);
       if (debug) {
         sendDebugInfo({
@@ -592,6 +593,9 @@ const HighchartsChart = ({
           const newSdmxJsonRequest = fetchDotStatData(
             finalDotStatUrl,
             dotStatLang,
+            dotStatToken
+              ? { headers: { Authorization: `Bearer ${dotStatToken}` } }
+              : {},
           );
 
           if (getControlsWithAvailability) {
@@ -658,6 +662,7 @@ const HighchartsChart = ({
     dataSourceType,
     finalDotStatUrl,
     dotStatLang,
+    dotStatToken,
     preParsedData,
     id,
     lang,
@@ -1350,6 +1355,7 @@ HighchartsChart.propTypes = {
   dotStatXAxisDimension: PropTypes.string,
   dotStatYAxisDimension: PropTypes.string,
   dotStatStructure: PropTypes.object,
+  dotStatToken: PropTypes.string,
   staticCsvData: PropTypes.string,
   forceXAxisToBeTreatedAsCategories: PropTypes.bool,
   csvCodeLabelMappingProjectLevel: PropTypes.string,

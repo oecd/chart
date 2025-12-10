@@ -186,9 +186,12 @@ export const createDotStatUrl = (
 
 export const fetchDotStatData = async (url, lang, fetchConfig = {}) => {
   const response = await fetch(fixDotStatUrl(url), {
-    headers: createDotStatHeaders(lang),
+    headers: {
+      ...createDotStatHeaders(lang),
+      ...(fetchConfig.headers ? fetchConfig.headers : {}),
+    },
     signal: AbortSignal.timeout(fetchConfig.timeout || dotStatTimeout),
-    ...R.dissoc('timeout', fetchConfig),
+    ...R.omit(['timeout', 'headers'], fetchConfig),
   });
 
   if (response.status >= 200 && response.status < 300) {
