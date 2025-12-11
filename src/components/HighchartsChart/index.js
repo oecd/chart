@@ -278,7 +278,6 @@ const HighchartsChart = ({
       !isNilOrEmpty(dotStatUrl),
   );
   const [errorMessage, setErrorMessage] = useState(null);
-  const [noDataMessage, setNoDataMessage] = useState(null);
   const [mergedOptions, setMergedOptions] = useState(null);
   const [finalDotStatUrl, setFinalDotStatUrl] = useState(null);
   const [
@@ -403,7 +402,6 @@ const HighchartsChart = ({
         setIsFetching(true);
         setMergedOptions(null);
         setErrorMessage(null);
-        setNoDataMessage(null);
 
         const getNewPreParsedData = async () => {
           try {
@@ -573,7 +571,6 @@ const HighchartsChart = ({
       setSdmxJson(null);
       setParsedData(null);
       setErrorMessage(null);
-      setNoDataMessage(null);
 
       const getDotStatData = async () => {
         try {
@@ -712,7 +709,7 @@ const HighchartsChart = ({
     try {
       if (isSdmxJsonEmpty(sdmxJson)) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setNoDataMessage(errorMessages.noData.label);
+        setErrorMessage(errorMessages.noData.label);
 
         const codeLabelMapping = createCodeLabelMapping({
           csvCodeLabelMappingProjectLevel,
@@ -730,7 +727,6 @@ const HighchartsChart = ({
       }
 
       setErrorMessage(null);
-      setNoDataMessage(null);
 
       setParsedData(
         createDataFromSdmxJson({
@@ -820,7 +816,6 @@ const HighchartsChart = ({
         );
 
         setErrorMessage(null);
-        setNoDataMessage(null);
       } catch {
         setErrorMessage(errorMessages.generic.label);
         setParsedData(emptyData);
@@ -1014,7 +1009,6 @@ const HighchartsChart = ({
 
   const chartCanBedisplayed =
     !isFetching &&
-    R.isNil(noDataMessage) &&
     R.isNil(errorMessage) &&
     !R.isNil(parsedData) &&
     allHeightCalculationsHaveBeenDone;
@@ -1100,7 +1094,6 @@ const HighchartsChart = ({
   useEffect(() => {
     if (
       !isFetching &&
-      R.isNil(noDataMessage) &&
       R.isNil(errorMessage) &&
       !R.isNil(createOptionsFuncForChartType) &&
       !R.isNil(parsedData) &&
@@ -1119,7 +1112,7 @@ const HighchartsChart = ({
       }
 
       if (parsedData?.dotStatResponseWasEmpty === true) {
-        setNoDataMessage(errorMessages.noData.label);
+        setErrorMessage(errorMessages.noData.label);
         setParsedData({
           ...emptyData,
           codeLabelMapping: parsedData.codeLabelMapping,
@@ -1131,7 +1124,7 @@ const HighchartsChart = ({
       }
 
       if (isParsedDataEmpty(parsedData)) {
-        setNoDataMessage(errorMessages.noData.label);
+        setErrorMessage(errorMessages.noData.label);
         return;
       }
 
@@ -1226,7 +1219,6 @@ const HighchartsChart = ({
     lang,
     forceXAxisToBeTreatedAsCategories,
     isFetching,
-    noDataMessage,
     errorMessage,
     allHeightCalculationsHaveBeenDone,
     createOptionsFuncForChartType,
@@ -1309,14 +1301,7 @@ const HighchartsChart = ({
         </Suspense>
       ) : (
         <CenteredContainer height={chartHeight}>
-          {!R.isNil(errorMessage) || !R.isNil(noDataMessage) ? (
-            <>
-              {!R.isNil(errorMessage) && errorMessage}
-              {!R.isNil(noDataMessage) && noDataMessage}
-            </>
-          ) : (
-            <Spinner />
-          )}
+          {!R.isNil(errorMessage) ? errorMessage : <Spinner />}
         </CenteredContainer>
       )}
 
