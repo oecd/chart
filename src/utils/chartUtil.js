@@ -572,6 +572,7 @@ const createOptionsForLineChart = ({
       ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        autoRotation: [-90, -45, 0],
         ...R.prop('xAxisLabels', formatters),
         ...(hideXAxisLabels ? { enabled: false } : {}),
       },
@@ -785,6 +786,7 @@ const createOptionsForBarChart = ({
       ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        autoRotation: [-90, -45, 0],
         ...R.prop('xAxisLabels', formatters),
         ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
           ? { enabled: false }
@@ -956,6 +958,7 @@ const createOptionsForStackedChart = ({
         : {}),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        autoRotation: [-90, -45, 0],
         ...R.prop('xAxisLabels', formatters),
         ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
           ? { enabled: false }
@@ -1274,6 +1277,7 @@ const createOptionsForScatterChart = ({
       ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        autoRotation: [-90, -45, 0],
         ...R.prop('xAxisLabels', formatters),
         ...(hideXAxisLabels || symbolMinMaxLayout ? { enabled: false } : {}),
       },
