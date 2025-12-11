@@ -429,6 +429,7 @@ const createOptionsForLineChart = ({
   categoriesFrequency,
   seriesFrequency,
   inlineLabels = false,
+  disableLegendInteraction = false,
 }) => {
   const series = mapWithIndex((s, yIdx) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
@@ -547,7 +548,10 @@ const createOptionsForLineChart = ({
       events: {
         fullscreenClose,
       },
-      className: inlineLabels ? 'cb-inline-labels' : undefined,
+      className:
+        inlineLabels || disableLegendInteraction
+          ? 'cb-disable-legend-pointer-events'
+          : undefined,
     },
 
     colors: [R.head(colorPalette)],
@@ -682,6 +686,7 @@ const createOptionsForBarChart = ({
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
+  disableLegendInteraction = false,
 }) => {
   const series = mapWithIndex((s, xIdx) => {
     const seriesColor =
@@ -757,6 +762,9 @@ const createOptionsForBarChart = ({
       events: {
         fullscreenClose,
       },
+      className: disableLegendInteraction
+        ? 'cb-disable-legend-pointer-events'
+        : undefined,
     },
 
     colors: colorPalette,
@@ -864,6 +872,7 @@ const createOptionsForStackedChart = ({
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
+  disableLegendInteraction = false,
 }) => {
   const series = createStackedDatapoints({
     data,
@@ -919,6 +928,9 @@ const createOptionsForStackedChart = ({
       events: {
         fullscreenClose,
       },
+      className: disableLegendInteraction
+        ? 'cb-disable-legend-pointer-events'
+        : undefined,
     },
 
     colors: colorPalette,
@@ -1042,6 +1054,7 @@ const createOptionsForScatterChart = ({
   categoriesFrequency,
   seriesFrequency,
   sortOrder,
+  disableLegendInteraction = false,
 }) => {
   const symbolLayout = chartType === chartTypes.symbol;
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
@@ -1238,6 +1251,9 @@ const createOptionsForScatterChart = ({
         render: chartRender,
       },
       inverted: symbolMinMaxLayout,
+      className: disableLegendInteraction
+        ? 'cb-disable-legend-pointer-events'
+        : undefined,
     },
 
     colors: colorPalette,
@@ -1344,6 +1360,7 @@ const createOptionsForRadarChart = ({
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
+  disableLegendInteraction = false,
 }) => {
   const series = mapWithIndex((s, xIdx) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
@@ -1402,6 +1419,9 @@ const createOptionsForRadarChart = ({
       marginBottom: !hideLegend && isSmall ? 5 : undefined,
       spacing: isFullScreen ? chartSpacing : 0,
       events: { fullscreenClose },
+      className: disableLegendInteraction
+        ? 'cb-disable-legend-pointer-events'
+        : undefined,
     },
 
     colors: colorPalette,
@@ -1522,6 +1542,7 @@ const createOptionsForPieChart = ({
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
+  disableLegendInteraction = false,
 }) => {
   const series = R.map(
     (s) => ({
@@ -1568,6 +1589,9 @@ const createOptionsForPieChart = ({
       marginLeft: 10,
       marginRight: 10,
       events: { fullscreenClose },
+      className: disableLegendInteraction
+        ? 'cb-disable-legend-pointer-events'
+        : undefined,
     },
 
     legend: {

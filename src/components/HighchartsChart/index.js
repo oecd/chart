@@ -256,6 +256,7 @@ const HighchartsChart = ({
   hideSource = false,
   hideToolbox = false,
   inlineLabels = false,
+  disableLegendInteraction = false,
   tooltipContainerId,
   isSmall,
   optionsOverride = null,
@@ -1168,6 +1169,7 @@ const HighchartsChart = ({
         forceXAxisToBeTreatedAsCategories,
         lang,
         inlineLabels,
+        disableLegendInteraction,
         sortOrder,
       });
 
@@ -1223,6 +1225,7 @@ const HighchartsChart = ({
     allHeightCalculationsHaveBeenDone,
     createOptionsFuncForChartType,
     inlineLabels,
+    disableLegendInteraction,
     id,
     sortOrder,
   ]);
@@ -1401,6 +1404,7 @@ HighchartsChart.propTypes = {
   hideSource: PropTypes.bool,
   hideToolbox: PropTypes.bool,
   inlineLabels: PropTypes.bool,
+  disableLegendInteraction: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
   isSmall: PropTypes.bool.isRequired,
   debug: PropTypes.bool,

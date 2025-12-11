@@ -319,7 +319,7 @@
   border: 1px solid #dee3e9;
 }
 
-.cb-inline-labels .highcharts-legend,
-.cb-inline-labels .highcharts-a11y-proxy-group-legend {
+.cb-disable-legend-pointer-events .highcharts-legend,
+.cb-disable-legend-pointer-events .highcharts-a11y-proxy-group-legend {
   pointer-events: none !important;
 }
