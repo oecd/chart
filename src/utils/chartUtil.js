@@ -27,11 +27,15 @@ import {
   thousandsSeparator,
 } from './highchartsUtil';
 import {
+  calcExistingFixedColorIndexBySeries,
   createExportFileName,
   createShadesFromColor,
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
+  getSeriesColor,
 } from './chartUtilCommon';
+import { parseCSV } from './csvUtil';
+import { createCodeLabelMap } from './generalUtil';
 
 const mapsUtil = import('./mapsUtil');
 
@@ -60,6 +64,7 @@ const createDatapoint = (d, categoriesAreDatesOrNumberForDataParsing) =>
 export const createStackedDatapoints = ({
   data,
   colorPalette,
+  fixedColorIndexBySeries,
   highlightColors,
   highlight,
   baseline,
@@ -72,7 +77,12 @@ export const createStackedDatapoints = ({
   );
 
   return mapWithIndex((s, yIdx) => {
-    const seriesColor = getListItemAtTurningIndex(yIdx, colorPalette);
+    const seriesColor = getSeriesColor({
+      colorPalette,
+      seriesIndex: yIdx,
+      seriesCode: s.code,
+      fixedColorIndexBySeries,
+    });
 
     return {
       name: data.areSeriesDates
@@ -415,6 +425,7 @@ const createOptionsForLineChart = ({
   title = '',
   subtitle = '',
   colorPalette,
+  fixedColorIndexBySeries = null,
   highlight = null,
   baseline = null,
   highlightColors,
@@ -438,8 +449,15 @@ const createOptionsForLineChart = ({
       baseline,
       highlightColors,
     );
+
     const color =
-      highlightOrBaselineColor || getListItemAtTurningIndex(yIdx, colorPalette);
+      highlightOrBaselineColor ||
+      getSeriesColor({
+        colorPalette,
+        seriesIndex: yIdx,
+        seriesCode: s.code,
+        fixedColorIndexBySeries,
+      });
 
     const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
 
@@ -673,6 +691,7 @@ const createOptionsForBarChart = ({
   title = '',
   subtitle = '',
   colorPalette,
+  fixedColorIndexBySeries = null,
   highlight = null,
   baseline = null,
   highlightColors,
@@ -692,7 +711,12 @@ const createOptionsForBarChart = ({
   const series = mapWithIndex((s, xIdx) => {
     const seriesColor =
       getBaselineOrHighlightColor(s, highlight, baseline, highlightColors) ||
-      getListItemAtTurningIndex(xIdx, colorPalette);
+      getSeriesColor({
+        colorPalette,
+        seriesIndex: xIdx,
+        seriesCode: s.code,
+        fixedColorIndexBySeries,
+      });
 
     return {
       name: data.areSeriesDates
@@ -860,6 +884,7 @@ const createOptionsForStackedChart = ({
   title = '',
   subtitle = '',
   colorPalette,
+  fixedColorIndexBySeries = null,
   highlight = null,
   baseline = null,
   highlightColors,
@@ -879,6 +904,7 @@ const createOptionsForStackedChart = ({
   const series = createStackedDatapoints({
     data,
     colorPalette,
+    fixedColorIndexBySeries,
     highlightColors,
     highlight,
     baseline,
@@ -1043,6 +1069,7 @@ const createOptionsForScatterChart = ({
   title = '',
   subtitle = '',
   colorPalette,
+  fixedColorIndexBySeries = null,
   highlight = null,
   baseline = null,
   highlightColors,
@@ -1092,14 +1119,27 @@ const createOptionsForScatterChart = ({
       highlightColors,
     );
 
-    const seriesColor =
-      seriesBaselineOrHighlightColor ||
-      (isMinAvgOrMax
+    const seriesColor = R.compose(() => {
+      if (seriesBaselineOrHighlightColor) {
+        return seriesBaselineOrHighlightColor;
+      }
+
+      if (!isNilOrEmpty(fixedColorIndexBySeries)) {
+        return getSeriesColor({
+          colorPalette,
+          seriesIndex: yIdx,
+          seriesCode: s.code,
+          fixedColorIndexBySeries,
+        });
+      }
+
+      return isMinAvgOrMax
         ? R.head(colorPalette)
         : getListItemAtTurningIndex(
             yIdx,
             isMinAvgOrMax ? R.tail(colorPalette) : colorPalette,
-          ));
+          );
+    })();
 
     const symbolRadius = symbolMinMaxLayout ? 9 : 6;
 
@@ -1351,6 +1391,7 @@ const createOptionsForRadarChart = ({
   data,
   formatters = {},
   colorPalette,
+  fixedColorIndexBySeries = null,
   highlight = null,
   baseline = null,
   highlightColors,
@@ -1374,8 +1415,13 @@ const createOptionsForRadarChart = ({
       highlightColors,
     );
     const color =
-      highlightOrBaselineColor || getListItemAtTurningIndex(xIdx, colorPalette);
-
+      highlightOrBaselineColor ||
+      getSeriesColor({
+        colorPalette,
+        seriesIndex: xIdx,
+        seriesCode: s.code,
+        fixedColorIndexBySeries,
+      });
     const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
 
     return {
@@ -1534,6 +1580,7 @@ const createOptionsForPieChart = ({
   data,
   formatters = {},
   colorPalette,
+  fixedColorIndexBySeries = null,
   highlight = null,
   baseline = null,
   highlightColors,
@@ -1562,7 +1609,13 @@ const createOptionsForPieChart = ({
             highlight,
             baseline,
             highlightColors,
-          ) || getListItemAtTurningIndex(xIdx, colorPalette);
+          ) ||
+          getSeriesColor({
+            colorPalette,
+            seriesIndex: xIdx,
+            seriesCode: category.code,
+            fixedColorIndexBySeries,
+          });
 
         const dataPoint = createDatapoint(
           d,
@@ -1645,6 +1698,7 @@ const createChartOptionsFunc =
     baseline,
     colorPalette,
     smallerColorPalettes = [],
+    fixedColorIndexBySeries = null,
     paletteStartingColor = null,
     paletteStartingColorOverride = null,
     mapColorValueSteps,
@@ -1660,17 +1714,41 @@ const createChartOptionsFunc =
     forceXAxisToBeTreatedAsCategories,
     ...otherProps
   }) => {
-    const finalColorPalette = getFinalPalette(
-      colorPalette,
-      smallerColorPalettes,
-      R.length(
-        otherProps.chartType === chartTypes.pie
-          ? otherProps.data.categories
-          : otherProps.data.series || [],
-      ),
-      paletteStartingColor,
-      paletteStartingColorOverride,
-    );
+    const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
+      ? {}
+      : R.compose(
+          calcExistingFixedColorIndexBySeries(
+            otherProps.chartType === chartTypes.pie
+              ? otherProps.data.categories
+              : otherProps.data.series,
+          ),
+          createCodeLabelMap,
+          R.map(R.adjust('1', Number.parseInt)),
+          R.filter((row) => {
+            const index = Number.parseInt(R.nth(1, row));
+
+            if (!Number.isInteger(index)) {
+              return false;
+            }
+
+            return index >= 1 && index <= R.length(colorPalette);
+          }),
+          parseCSV,
+        )(fixedColorIndexBySeries);
+
+    const finalColorPalette = R.isEmpty(parsedFixedColorIndexBySeries)
+      ? getFinalPalette(
+          colorPalette,
+          smallerColorPalettes,
+          R.length(
+            otherProps.chartType === chartTypes.pie
+              ? otherProps.data.categories
+              : otherProps.data.series || [],
+          ),
+          paletteStartingColor,
+          paletteStartingColorOverride,
+        )
+      : colorPalette;
 
     const parsedHighlight = R.compose(
       R.reject(R.isEmpty),
@@ -1717,6 +1795,7 @@ const createChartOptionsFunc =
     const options = createOptionsFuncForChartType({
       ...otherProps,
       colorPalette: finalColorPalette,
+      fixedColorIndexBySeries: parsedFixedColorIndexBySeries,
       highlight: parsedHighlight,
       baseline: parsedBaseline,
       mapColorValueSteps,
