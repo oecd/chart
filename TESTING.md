@@ -95,9 +95,4 @@ Common browser APIs are mocked in `src/setupTests.js`:
 
 ## ESLint Configuration
 
-Test files are configured to recognize Jest globals. Use these eslint comments in test files if needed:
-
-```javascript
-/* eslint-env jest */
-/* global jest, describe, test, beforeEach, expect */
-```
+Test files are configured to recognize Mocha and Jest globals.

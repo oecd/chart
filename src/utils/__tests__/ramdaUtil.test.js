@@ -1,8 +1,5 @@
 import { toggleArrayItem } from '../ramdaUtil';
 
-/* eslint-env jest */
-/* global describe, test, expect */
-
 describe('ramdaUtil', () => {
   describe('toggleArrayItem', () => {
     test('adds item to array if not present', () => {

@@ -1,6 +1,3 @@
-/* eslint-env jest */
-/* global describe, test, expect */
-
 import { parseSdmxJson } from '../../../../sdmxJsonUtil';
 import sdmxStructure from './sdmx-structure.json';
 import sdmxData from './sdmx-data.json';

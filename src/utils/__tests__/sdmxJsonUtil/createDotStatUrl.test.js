@@ -1,6 +1,3 @@
-/* eslint-env jest */
-/* global jest, describe, test, beforeEach, afterEach, expect */
-
 import { fetchJson } from '../../fetchUtil';
 import { createDotStatUrl } from '../../sdmxJsonUtil';
 

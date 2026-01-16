@@ -1,5 +1,4 @@
-/* eslint-env jest */
-/* global describe, test, expect, jest, beforeEach, afterEach, global, AbortSignal */
+/* global global, AbortSignal */
 
 import {
   getAvailabilityUrlFromDotStatUrl,

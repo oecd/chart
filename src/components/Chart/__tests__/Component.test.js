@@ -5,9 +5,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Chart from '../Component';
 
-/* eslint-env jest */
-/* global jest, describe, test, beforeEach, expect, require */
-
 // Mock the fetch utility
 jest.mock('../../../utils/fetchUtil', () => ({
   fetchJson: jest.fn(),

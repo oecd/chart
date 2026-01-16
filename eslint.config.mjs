@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
+import globals from 'globals';
 
 const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
@@ -29,6 +30,15 @@ const eslintConfig = [
       ],
     },
   }),
+  {
+    files: ['**/__tests__/**'],
+    languageOptions: {
+      globals: {
+        ...globals.mocha,
+        ...globals.jest,
+      },
+    },
+  },
 ];
 
 export default eslintConfig;

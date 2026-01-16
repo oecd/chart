@@ -1,6 +1,3 @@
-/* eslint-env jest */
-/* global describe, test, expect */
-
 import * as R from 'ramda';
 
 import { createOptionsForMapChart } from '../mapsUtil';

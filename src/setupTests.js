@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
 
-/* eslint-env jest */
 /* global global, window, jest */
 
 // Mock IntersectionObserver
