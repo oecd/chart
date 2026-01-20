@@ -69,20 +69,36 @@ export const getAvailabilityUrlFromDotStatUrl = R.compose(
 );
 
 const detectFrequencyCode = (dotStatUrl, availableMembersByDimension) => {
-  const frequencyMatches = R.compose(
-    (codes) => new RegExp(`[./](${codes})[./?]`, 'gi').exec(dotStatUrl),
-    R.join('|'),
+  const freqDimension =
+    R.prop('FREQ', availableMembersByDimension) ||
+    R.prop('FREQUENCY', availableMembersByDimension);
+
+  if (!freqDimension) {
+    return frequencyTypes.yearly.dotStatId;
+  }
+
+  const urlFreqMember = R.compose(
+    R.nth(freqDimension.index),
+    R.split('.'),
+    R.last,
+    R.split('/'),
+    R.prop('pathname'),
+  )(new URL(dotStatUrl));
+
+  const freqDotStatIds = R.compose(
     R.map(R.prop('dotStatId')),
     R.values,
   )(frequencyTypes);
 
-  if (R.length(frequencyMatches) >= 2) {
-    return R.nth(1, frequencyMatches);
+  if (
+    R.includes(urlFreqMember, freqDotStatIds) &&
+    R.includes(urlFreqMember, freqDimension.values)
+  ) {
+    return urlFreqMember;
   }
 
-  const freqDimension = R.prop('FREQ', availableMembersByDimension);
-  if (freqDimension && R.length(freqDimension) === 1) {
-    return R.head(freqDimension);
+  if (freqDimension && R.length(freqDimension.values) === 1) {
+    return R.head(freqDimension.values);
   }
 
   return frequencyTypes.yearly.dotStatId;

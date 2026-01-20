@@ -1,3 +1,5 @@
+import * as R from 'ramda';
+
 import { fetchJson } from '../../fetchUtil';
 import { createDotStatUrl } from '../../sdmxJsonUtil';
 
@@ -7,9 +9,14 @@ jest.mock('../../fetchUtil', () => ({
 }));
 
 const mockAvailabilityData = {
+  FREQ: {
+    values: ['A', 'M'],
+    index: 0,
+  },
   TIME_PERIOD: {
     startPeriod: '2020-01-01T00:00:00',
     endPeriod: '2023-12-31T23:59:59',
+    index: 1,
   },
 };
 
@@ -50,64 +57,64 @@ describe('createDotStatUrl', () => {
     });
 
     test('should replace multiple variables in URL', async () => {
-      const urlWithVars = 'https://example.com/{var1}/{var2}/data';
+      const urlWithVars = 'https://example.com/{var1}/{var2}';
       const vars = { var1: 'FRA', var2: 'GDP' };
 
       const result = await createDotStatUrl(urlWithVars, vars);
 
       expect(result.url).toEqual(
-        'https://example.com/FRA/GDP/data?dimensionAtObservation=AllDimensions',
+        'https://example.com/FRA/GDP?dimensionAtObservation=AllDimensions',
       );
     });
 
     test('should handle empty variables by replacing with empty string', async () => {
-      const urlWithVar = 'https://example.com/{var1}/data';
+      const urlWithVar = 'https://example.com/{var1}';
       const vars = {};
 
       const result = await createDotStatUrl(urlWithVar, vars);
 
       expect(result.url).toEqual(
-        'https://example.com//data?dimensionAtObservation=AllDimensions',
+        'https://example.com/?dimensionAtObservation=AllDimensions',
       );
     });
 
     test('should convert variable values to uppercase', async () => {
-      const urlWithVar = 'https://example.com/{var1}/data';
+      const urlWithVar = 'https://example.com/data/{var1}';
       const vars = { var1: 'fra' };
 
       const result = await createDotStatUrl(urlWithVar, vars);
 
       expect(result.url).toEqual(
-        'https://example.com/FRA/data?dimensionAtObservation=AllDimensions',
+        'https://example.com/data/FRA?dimensionAtObservation=AllDimensions',
       );
     });
 
     test('should replace pipe characters with plus signs in variables', async () => {
-      const urlWithVar = 'https://example.com/{var1}/data';
+      const urlWithVar = 'https://example.com/data/{var1}';
       const vars = { var1: 'FRA|DEU|ITA' };
 
       const result = await createDotStatUrl(urlWithVar, vars);
 
       expect(result.url).toEqual(
-        'https://example.com/FRA+DEU+ITA/data?dimensionAtObservation=AllDimensions',
+        'https://example.com/data/FRA+DEU+ITA?dimensionAtObservation=AllDimensions',
       );
     });
 
     test('should handle case-insensitive variable names', async () => {
-      const urlWithVar = 'https://example.com/{VAR1}/data';
+      const urlWithVar = 'https://example.com/data/{VAR1}';
       const vars = { var1: 'FRA' };
 
       const result = await createDotStatUrl(urlWithVar, vars);
 
       expect(result.url).toEqual(
-        'https://example.com/FRA/data?dimensionAtObservation=AllDimensions',
+        'https://example.com/data/FRA?dimensionAtObservation=AllDimensions',
       );
     });
   });
 
   describe('Date availability handling', () => {
     test('should fetch availability data when URL contains min_date variable', async () => {
-      const urlWithMinDate = 'https://example.com/data?startPeriod={min_date}';
+      const urlWithMinDate = 'https://example.com/data/?startPeriod={min_date}';
       const vars = {};
 
       const result = await createDotStatUrl(urlWithMinDate, vars);
@@ -115,12 +122,12 @@ describe('createDotStatUrl', () => {
       expect(fetchJson).toHaveBeenCalled();
       expect(result.minAvailableDate).toEqual('2020');
       expect(result.url).toEqual(
-        'https://example.com/data?startPeriod=2020&dimensionAtObservation=AllDimensions',
+        'https://example.com/data/?startPeriod=2020&dimensionAtObservation=AllDimensions',
       );
     });
 
     test('should fetch availability data when URL contains max_date variable', async () => {
-      const urlWithMaxDate = 'https://example.com/data?endPeriod={max_date}';
+      const urlWithMaxDate = 'https://example.com/data/?endPeriod={max_date}';
       const vars = {};
 
       const result = await createDotStatUrl(urlWithMaxDate, vars);
@@ -128,13 +135,13 @@ describe('createDotStatUrl', () => {
       expect(fetchJson).toHaveBeenCalled();
       expect(result.maxAvailableDate).toEqual('2023');
       expect(result.url).toEqual(
-        'https://example.com/data?endPeriod=2023&dimensionAtObservation=AllDimensions',
+        'https://example.com/data/?endPeriod=2023&dimensionAtObservation=AllDimensions',
       );
     });
 
     test('should handle both min_date and max_date variables', async () => {
       const urlWithMinAndMaxDates =
-        'https://example.com/data?startPeriod={min_date}&endPeriod={max_date}';
+        'https://example.com/data/?startPeriod={min_date}&endPeriod={max_date}';
       const vars = {};
 
       const result = await createDotStatUrl(urlWithMinAndMaxDates, vars);
@@ -143,7 +150,7 @@ describe('createDotStatUrl', () => {
       expect(result.minAvailableDate).toEqual('2020');
       expect(result.maxAvailableDate).toEqual('2023');
       expect(result.url).toEqual(
-        'https://example.com/data?startPeriod=2020&endPeriod=2023&dimensionAtObservation=AllDimensions',
+        'https://example.com/data/?startPeriod=2020&endPeriod=2023&dimensionAtObservation=AllDimensions',
       );
     });
 
@@ -164,10 +171,12 @@ describe('createDotStatUrl', () => {
 
     test('should detect frequency from FREQ dimension when not present in URL', async () => {
       const url =
-        'https://example.com/data?startPeriod={min_date}&endPeriod={max_date}';
+        'https://example.com/data/?startPeriod={min_date}&endPeriod={max_date}';
       const vars = {};
 
-      fetchJson.mockResolvedValue({ ...mockAvailabilityData, FREQ: ['Q'] });
+      fetchJson.mockResolvedValue(
+        R.assocPath(['FREQ', 'values'], ['Q'], mockAvailabilityData),
+      );
 
       const result = await createDotStatUrl(url, vars);
 
@@ -175,12 +184,29 @@ describe('createDotStatUrl', () => {
       expect(result.minAvailableDate).toEqual('2020-Q1');
       expect(result.maxAvailableDate).toEqual('2023-Q4');
       expect(result.url).toEqual(
-        'https://example.com/data?startPeriod=2020-Q1&endPeriod=2023-Q4&dimensionAtObservation=AllDimensions',
+        'https://example.com/data/?startPeriod=2020-Q1&endPeriod=2023-Q4&dimensionAtObservation=AllDimensions',
+      );
+    });
+
+    test('should fall back to year frequency when availability data does not contain FREQ dimension', async () => {
+      const url =
+        'https://example.com/data/Q?startPeriod={min_date}&endPeriod={max_date}';
+      const vars = {};
+
+      fetchJson.mockResolvedValue(R.dissoc('FREQ', mockAvailabilityData));
+
+      const result = await createDotStatUrl(url, vars);
+
+      expect(fetchJson).toHaveBeenCalled();
+      expect(result.minAvailableDate).toEqual('2020');
+      expect(result.maxAvailableDate).toEqual('2023');
+      expect(result.url).toEqual(
+        'https://example.com/data/Q?startPeriod=2020&endPeriod=2023&dimensionAtObservation=AllDimensions',
       );
     });
 
     test('should use custom getDotStatAvailabilityFunc when provided', async () => {
-      const urlWithMinDate = 'https://example.com/data?startPeriod={min_date}';
+      const urlWithMinDate = 'https://example.com/data/?startPeriod={min_date}';
       const vars = {};
       const customAvailabilityFunc = jest
         .fn()
@@ -200,7 +226,7 @@ describe('createDotStatUrl', () => {
 
   describe('Error handling', () => {
     test('should throw error when no time range found in availability response', async () => {
-      const urlWithMinDate = 'https://example.com/data?startPeriod={min_date}';
+      const urlWithMinDate = 'https://example.com/data/?startPeriod={min_date}';
       const vars = {};
 
       fetchJson.mockResolvedValue({
@@ -213,7 +239,7 @@ describe('createDotStatUrl', () => {
     });
 
     test('should throw error when availability fetch fails with descriptive message', async () => {
-      const urlWithMinDate = 'https://example.com/data?startPeriod={min_date}';
+      const urlWithMinDate = 'https://example.com/data/?startPeriod={min_date}';
       const vars = {};
 
       fetchJson.mockRejectedValue(new Error('Network error'));
