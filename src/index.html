@@ -45,7 +45,7 @@
         </h1>
 
         <div style="display: flex; justify-content: center; margin-top: 30px">
-          <button onclick="document.getElementById('my-dialog').showModal();">
+          <button onclick="document.getElementById('my-dialog').showModal()">
             Open dialog
           </button>
         </div>
@@ -137,14 +137,15 @@
       </div>
     </dialog>
 
-    <script
-      src="https://unpkg.com/react@18/umd/react.production.min.js"
-      crossorigin
-    ></script>
-    <script
-      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
-      crossorigin
-    ></script>
+    <script type="module">
+      import React from 'https://esm.sh/react@19';
+      import ReactDOM from 'https://esm.sh/react-dom@19';
+      import ReactDOMClient from 'https://esm.sh/react-dom@19/client';
+
+      window.React = React;
+      window.ReactDOM = ReactDOM;
+      window.ReactDOMClient = ReactDOMClient;
+    </script>
 
     <script>
       // override backend url

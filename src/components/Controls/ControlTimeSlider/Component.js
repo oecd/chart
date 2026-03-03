@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Slider from 'rc-slider';
 import * as R from 'ramda';

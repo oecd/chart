@@ -1,5 +1,5 @@
 /*global document, CustomEvent*/
-import React, {
+import {
   useMemo,
   useCallback,
   useEffect,

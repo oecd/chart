@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, {
+import {
   useMemo,
   forwardRef,
   memo,

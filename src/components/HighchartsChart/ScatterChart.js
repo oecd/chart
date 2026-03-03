@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { forwardRef, memo } from 'react';
+import { forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
 import 'highcharts/es-modules/masters/modules/accessibility.src';

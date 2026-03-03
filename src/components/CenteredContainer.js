@@ -1,10 +1,13 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 
-const CenteredContainer = ({ height = '100%', children = null }) => (
+const CenteredContainer = ({
+  minHeight = 'inherit',
+  height = '100%',
+  children = null,
+}) => (
   <div
     style={{
-      minHeight: 'inherit',
+      minHeight: minHeight || 'inherit',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -16,6 +19,7 @@ const CenteredContainer = ({ height = '100%', children = null }) => (
 );
 
 CenteredContainer.propTypes = {
+  minHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),

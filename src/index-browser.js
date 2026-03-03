@@ -1,25 +1,43 @@
-/*global window, customElements*/
-import React from 'react';
-import * as ReactDOM from 'react-dom/client';
-import reactToWebComponent from 'react-to-webcomponent';
+/*global customElements*/
+import * as R from 'ramda';
+import r2wc from '@r2wc/react-to-web-component';
 import 'rc-slider/assets/index.css';
 
-import * as jsxRuntime from './react-jsx-runtime';
 import './index.css';
-
 import Chart from './components/Chart';
 import StandaloneControl from './components/StandaloneControl';
+import { possibleVariables } from './utils/configUtil';
 
-window.jsxRuntime = jsxRuntime;
+const OecdChart = r2wc(Chart, {
+  props: {
+    chartId: 'string',
+    ...R.fromPairs(R.map((varName) => [varName, 'string'], possibleVariables)),
+    width: 'string',
+    height: 'number',
+    lazyLoad: 'boolean',
+    language: 'string',
+    displayActionButton: 'boolean',
+    actionButtonLabel: 'string',
+    hideTitle: 'boolean',
+    hideSubtitle: 'boolean',
+    hideNote: 'boolean',
+    hideSource: 'boolean',
+    hideToolbox: 'boolean',
+    tooltipContainerId: 'string',
+  },
+});
 
-customElements.define(
-  'oecd-chart',
-  reactToWebComponent(Chart, React, ReactDOM, { dashStyleAttributes: true }),
-);
+customElements.define('oecd-chart', OecdChart);
 
-customElements.define(
-  'oecd-control',
-  reactToWebComponent(StandaloneControl, React, ReactDOM, {
-    dashStyleAttributes: true,
-  }),
-);
+const OecdStandaloneControl = r2wc(StandaloneControl, {
+  props: {
+    controlId: 'string',
+    ...R.fromPairs(R.map((varName) => [varName, 'string'], possibleVariables)),
+    dataComponentId: 'string',
+    hideTitle: 'boolean',
+    initialValue: 'string',
+    language: 'string',
+  },
+});
+
+customElements.define('oecd-control', OecdStandaloneControl);

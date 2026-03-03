@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useRef,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
@@ -133,16 +127,16 @@ const Chart = ({ chartId, language, ...otherProps }) => {
     R.has('error', chartConfigData.chartConfig)
   ) {
     return (
-      <CenteredContainer>
+      <CenteredContainer minHeight={otherProps.height}>
         {chartConfigData.isLoading ? (
           <Spinner />
         ) : (
           <div className="cb-container">
             {R.pathOr(
-              errorMessages.generic.label,
-              [chartConfigData.chartConfig?.error, 'label'],
+              errorMessages.generic.getLabel,
+              [chartConfigData.chartConfig?.error, 'getLabel'],
               errorMessages,
-            )}
+            )()}
           </div>
         )}
       </CenteredContainer>

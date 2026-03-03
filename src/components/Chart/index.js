@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 import * as R from 'ramda';
@@ -71,7 +71,9 @@ const Chart = ({
     return (
       <ChartErrorBoundary
         fallback={
-          <CenteredContainer>{errorMessages.generic.label}</CenteredContainer>
+          <CenteredContainer>
+            {errorMessages.generic.getLabel()}
+          </CenteredContainer>
         }
       >
         <Component
@@ -92,7 +94,9 @@ const Chart = ({
   return (
     <ChartErrorBoundary
       fallback={
-        <CenteredContainer>{errorMessages.generic.label}</CenteredContainer>
+        <CenteredContainer>
+          {errorMessages.generic.getLabel()}
+        </CenteredContainer>
       }
     >
       <LazyLoadComponent

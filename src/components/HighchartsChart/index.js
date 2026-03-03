@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/static-components */
 /*global document, CustomEvent, URL, window*/
-import React, {
+import {
   useState,
   useRef,
   useEffect,
@@ -371,7 +371,7 @@ const HighchartsChart = ({
 
       if (anyRequiredVarIsEmpty) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setErrorMessage(errorMessages.noData.label);
+        setErrorMessage(errorMessages.noData.getLabel());
 
         const newVarsThatCauseNewPreParsedDataFetch = R.compose(
           R.fromPairs,
@@ -439,7 +439,7 @@ const HighchartsChart = ({
             setParsedData(R.prop('preParsedData', newPreParsedData));
             setIsFetching(false);
           } catch {
-            setErrorMessage(errorMessages.generic.label);
+            setErrorMessage(errorMessages.generic.getLabel());
             setIsFetching(false);
           }
         };
@@ -481,7 +481,7 @@ const HighchartsChart = ({
     const numberOfSeries = R.length(parsedData.series);
     if (numberOfCategory * numberOfSeries > maxSupprortedNumberOfDataPoint) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setErrorMessage(errorMessages.generic.label);
+      setErrorMessage(errorMessages.generic.getLabel());
       if (debug) {
         sendDebugInfo({
           type: debugInfoTypes.tooManyDataPoint,
@@ -563,7 +563,7 @@ const HighchartsChart = ({
       );
       if (anyRequiredVarIsEmpty) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setErrorMessage(errorMessages.noData.label);
+        setErrorMessage(errorMessages.noData.getLabel());
         return;
       }
 
@@ -644,7 +644,7 @@ const HighchartsChart = ({
             return;
           }
           setIsFetching(false);
-          setErrorMessage(errorMessages.generic.label);
+          setErrorMessage(errorMessages.generic.getLabel());
           setSdmxJson(null);
 
           if (debug) {
@@ -691,7 +691,7 @@ const HighchartsChart = ({
           setIsFetching(false);
         } catch {
           setIsFetching(false);
-          setErrorMessage(errorMessages.generic.label);
+          setErrorMessage(errorMessages.generic.getLabel());
           setParsedData(null);
         }
 
@@ -711,7 +711,7 @@ const HighchartsChart = ({
     try {
       if (isSdmxJsonEmpty(sdmxJson)) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setErrorMessage(errorMessages.noData.label);
+        setErrorMessage(errorMessages.noData.getLabel());
 
         const codeLabelMapping = createCodeLabelMapping({
           csvCodeLabelMappingProjectLevel,
@@ -758,7 +758,7 @@ const HighchartsChart = ({
         }),
       );
     } catch {
-      setErrorMessage(errorMessages.generic.label);
+      setErrorMessage(errorMessages.generic.getLabel());
       setParsedData(emptyData);
     }
   }, [
@@ -819,7 +819,7 @@ const HighchartsChart = ({
 
         setErrorMessage(null);
       } catch {
-        setErrorMessage(errorMessages.generic.label);
+        setErrorMessage(errorMessages.generic.getLabel());
         setParsedData(emptyData);
       }
     }
@@ -1103,7 +1103,7 @@ const HighchartsChart = ({
     ) {
       if (parsedData?.dotStatServerFetchFailed) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setErrorMessage(errorMessages.generic.label);
+        setErrorMessage(errorMessages.generic.getLabel());
 
         trackChartError(
           id,
@@ -1114,7 +1114,7 @@ const HighchartsChart = ({
       }
 
       if (parsedData?.dotStatResponseWasEmpty === true) {
-        setErrorMessage(errorMessages.noData.label);
+        setErrorMessage(errorMessages.noData.getLabel());
         setParsedData({
           ...emptyData,
           codeLabelMapping: parsedData.codeLabelMapping,
@@ -1126,7 +1126,7 @@ const HighchartsChart = ({
       }
 
       if (isParsedDataEmpty(parsedData)) {
-        setErrorMessage(errorMessages.noData.label);
+        setErrorMessage(errorMessages.noData.getLabel());
         return;
       }
 

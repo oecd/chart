@@ -1,6 +1,5 @@
 /* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
-import React from 'react';
 import { components } from 'react-select';
 import * as R from 'ramda';
 

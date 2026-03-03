@@ -4,4 +4,3 @@ dist-browser
 coverage
 .env
 .npmrc
-react-jsx-runtime.js

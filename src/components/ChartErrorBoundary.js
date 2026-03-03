@@ -1,7 +1,7 @@
-import React from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 
-export default class ChartErrorBoundary extends React.Component {
+export default class ChartErrorBoundary extends Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false };

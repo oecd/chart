@@ -9,7 +9,6 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.config({
-    ignorePatterns: ['src/react-jsx-runtime.js'],
     settings: {
       react: {
         version: 'detect',
@@ -28,6 +27,7 @@ const eslintConfig = [
           allow: ['error'],
         },
       ],
+      'react/react-in-jsx-scope': 'off',
     },
   }),
   {

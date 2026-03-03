@@ -11,7 +11,6 @@ npm install @oecd-pac/chart --save
 Then simply import and use the `Chart` component:
 
 ```jsx
-import React from 'react';
 import { Chart } from '@oecd-pac/chart';
 
 const App = () => (
@@ -95,9 +94,11 @@ The following props are supported:
 
 ## Web components
 
-Even though this is a React library, the charts can be used in pages / apps that are not React based. For this purpose "web components" are also exported. Note that React (18) and ReactDOM still have to be in scope.
+Even though this is a React library, the charts can be used in pages / apps that are not React based. For this purpose "web components" are also exported. Note that React, ReactDOM and ReactDOMClient still have to be in scope.
 
 The bundle can be found here: `node_modules\@oecd-pac\chart\dist\oecd-chart-latest.js`
+
+See `src/index.html` for more complete exemple.
 
 Once loaded, charts can be used as follow:
 

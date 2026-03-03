@@ -1,5 +1,4 @@
 /*global process*/
-import React from 'react';
 
 export const chartTypes = {
   line: 'Line',
@@ -118,28 +117,41 @@ export const debugInfoTypes = {
 
 export const maxSupprortedNumberOfDataPoint = 15000;
 
-export const errorMessages = {
-  generic: {
-    code: 'generic',
-    label: (
-      <div style={{ textAlign: 'center' }}>
+// eslint-disable-next-line react/prop-types
+const ErrorMessage = ({ message }) => (
+  <div style={{ textAlign: 'center' }}>{message}</div>
+);
+
+const GenericErrorMessage = () => (
+  <ErrorMessage
+    message={
+      <>
         An error occured.
         <br />
         Please refresh the page.
-      </div>
-    ),
+      </>
+    }
+  />
+);
+
+const NoDataErrorMessage = () => (
+  <ErrorMessage message="No data available for the current selection." />
+);
+
+const EmbargoErrorMessage = () => <ErrorMessage message="Not yet available." />;
+
+export const errorMessages = {
+  generic: {
+    code: 'generic',
+    getLabel: GenericErrorMessage,
   },
   noData: {
     code: 'noData',
-    label: (
-      <div style={{ textAlign: 'center' }}>
-        No data available for the current selection.
-      </div>
-    ),
+    getLabel: NoDataErrorMessage,
   },
   underEmbargo: {
     code: 'underEmbargo',
-    label: <div style={{ textAlign: 'center' }}>Not yet available</div>,
+    getLabel: EmbargoErrorMessage,
   },
 };
 

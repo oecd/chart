@@ -31,7 +31,6 @@ src/
 Use React Testing Library for component testing:
 
 ```javascript
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MyComponent from '../MyComponent';

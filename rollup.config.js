@@ -1,3 +1,4 @@
+/*global process*/
 import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
@@ -36,7 +37,10 @@ export default [
       external(),
       resolve(),
       babel({
-        presets: ['@babel/preset-env', '@babel/preset-react'],
+        presets: [
+          '@babel/preset-env',
+          ['@babel/preset-react', { runtime: 'automatic' }],
+        ],
         plugins: [['@babel/plugin-transform-runtime', { corejs: 3 }]],
         exclude: [/node_modules/],
         babelHelpers: 'runtime',
@@ -67,7 +71,10 @@ export default [
       external(),
       resolve(),
       babel({
-        presets: ['@babel/preset-env', '@babel/preset-react'],
+        presets: [
+          '@babel/preset-env',
+          ['@babel/preset-react', { runtime: 'automatic' }],
+        ],
         plugins: [['@babel/plugin-transform-runtime', { corejs: 3 }]],
         exclude: [/node_modules/],
         babelHelpers: 'runtime',
@@ -95,12 +102,11 @@ export default [
         'process.env.NEXT_PUBLIC_CHART_LIB_API_URL': JSON.stringify(apiUrl),
         preventAssignment: true,
       }),
-      external(),
       resolve(),
       babel({
         presets: [
           '@babel/preset-env',
-          ['@babel/preset-react', { runtime: 'classic' }],
+          ['@babel/preset-react', { runtime: 'automatic' }],
         ],
         exclude: [/node_modules/],
         babelHelpers: 'bundled',
@@ -109,9 +115,8 @@ export default [
       nodePolyfills(),
       externalGlobals({
         react: 'React',
-        'react-dom/client': 'ReactDOM',
         'react-dom': 'ReactDOM',
-        'react/jsx-runtime': 'jsxRuntime',
+        'react-dom/client': 'ReactDOMClient',
       }),
       json(),
       postcss(),

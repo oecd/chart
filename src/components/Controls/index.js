@@ -1,4 +1,4 @@
-import React, { useMemo, lazy, Suspense, useCallback } from 'react';
+import { useMemo, lazy, Suspense, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 

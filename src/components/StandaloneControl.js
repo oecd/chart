@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  useRef,
-  useMemo,
-} from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
