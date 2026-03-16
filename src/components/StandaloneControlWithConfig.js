@@ -142,6 +142,14 @@ const StandaloneControlWithConfig = ({
                   '',
               }
             : {}),
+          ...(R.length(otherProps.frequencies) > 1
+            ? {
+                [otherProps.frequencyVarName]:
+                  propsVars[otherProps.frequencyVarName] ||
+                  otherProps.frequencyVarDefaultValue ||
+                  '',
+              }
+            : {}),
         }),
       ],
       [R.T, R.always({})],
