@@ -402,7 +402,7 @@ const HighchartsChart = ({
         }`;
 
         setIsFetching(true);
-        setMergedOptions(null);
+        //setMergedOptions(null);
         setErrorMessage(null);
 
         const getNewPreParsedData = async () => {
@@ -570,8 +570,8 @@ const HighchartsChart = ({
       newControlWillCauseVarChange.current = false;
 
       setIsFetching(true);
-      setSdmxJson(null);
-      setParsedData(null);
+      //setSdmxJson(null);
+      //setParsedData(null);
       setErrorMessage(null);
 
       const getDotStatData = async () => {
@@ -959,14 +959,15 @@ const HighchartsChart = ({
     ],
   );
 
-  const doesTitleOrSubtitleContainVar = useMemo(
-    () => doesStringContainVar(title) || doesStringContainVar(subtitle),
-    [title, subtitle],
-  );
+  // const doesTitleOrSubtitleContainVar = useMemo(
+  //   () => doesStringContainVar(title) || doesStringContainVar(subtitle),
+  //   [title, subtitle],
+  // );
 
-  const canTitleAndSubtitleBeDisplayed = !(
-    doesTitleOrSubtitleContainVar && isFetching
-  );
+  // const canTitleAndSubtitleBeDisplayed = !(
+  //   doesTitleOrSubtitleContainVar && isFetching
+  // );
+  const canTitleAndSubtitleBeDisplayed = true;
 
   const isFontLoaded = useIsFontLoaded();
 
@@ -1009,8 +1010,11 @@ const HighchartsChart = ({
     displaySourceAsTooltip,
   ]);
 
+  //console.log(isFetching);
+  //console.log(mergedOptions);
+
   const chartCanBedisplayed =
-    !isFetching &&
+    //!isFetching &&
     R.isNil(errorMessage) &&
     !R.isNil(parsedData) &&
     allHeightCalculationsHaveBeenDone;
@@ -1182,7 +1186,7 @@ const HighchartsChart = ({
         ),
       );
     } else {
-      setMergedOptions(null);
+      //setMergedOptions(null);
     }
   }, [
     baseline,

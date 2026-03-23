@@ -782,7 +782,8 @@ const createOptionsForBarChart = ({
         ? calcMarginTopWithHorizontal(title, subtitle, horizontal, isSmall)
         : undefined,
       height,
-      animation: false,
+      //animation: false,
+      animation: true,
       spacing: isFullScreen ? chartSpacing : 0,
       events: {
         fullscreenClose,
@@ -860,7 +861,8 @@ const createOptionsForBarChart = ({
 
     plotOptions: {
       series: {
-        animation: false,
+        //animation: false,
+        animation: true,
         pointPadding: 0.1,
         groupPadding: 0.1,
         borderWidth: 0.3,

@@ -15,7 +15,7 @@ const GenericChart = forwardRef(({ options }, ref) => (
     ref={ref}
     highcharts={Highcharts}
     options={options}
-    immutable
+    //immutable
   />
 ));
 
