@@ -68,14 +68,18 @@ const MapChart = forwardRef(({ options }, ref) => {
   const zoomRef = useRef(null);
 
   const afterSetView = useCallback(function afterSetView() {
-    if (zoomRef.current !== this.chart?.mapView.zoom) {
+    if (!this.chart?.mapView) {
+      return;
+    }
+
+    if (zoomRef.current !== this.chart.mapView.zoom) {
       R.forEach(
         (s) => {
           s.update({});
         },
         R.filter(R.propEq('mapline', 'type'), this.chart.series),
       );
-      zoomRef.current = this.chart?.mapView.zoom;
+      zoomRef.current = this.chart.mapView.zoom;
     }
   }, []);
 
