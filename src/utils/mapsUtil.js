@@ -1,5 +1,10 @@
 import * as R from 'ramda';
-import { chartSpacing, decimalPointTypes, mapTypes } from '../constants/chart';
+import {
+  chartSpacing,
+  chartSpacingFullScreenAndExport,
+  decimalPointTypes,
+  mapTypes,
+} from '../constants/chart';
 
 import map from './world-highres-custom-topo.json';
 import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
@@ -579,7 +584,7 @@ export const createOptionsForMapChart = ({
       },
       height,
       animation: false,
-      spacing: isFullScreen ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: { fullscreenClose },
     },
 

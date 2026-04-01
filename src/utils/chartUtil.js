@@ -13,6 +13,7 @@ import { forEachWithIndex, isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import {
   baselineColorShades,
   chartSpacing,
+  chartSpacingFullScreenAndExport,
   chartTypes,
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   defaultExportSize,
@@ -562,7 +563,7 @@ const createOptionsForLineChart = ({
           : undefined,
       height,
       animation: false,
-      spacing: isFullScreen ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
       },
@@ -783,7 +784,7 @@ const createOptionsForBarChart = ({
         : undefined,
       height,
       animation: false,
-      spacing: isFullScreen ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
       },
@@ -952,7 +953,7 @@ const createOptionsForStackedChart = ({
         : undefined,
       height,
       animation: false,
-      spacing: isFullScreen ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
       },
@@ -1288,7 +1289,7 @@ const createOptionsForScatterChart = ({
       ...(symbolMinMaxLayout ? { marginLeft: 12, marginRight: 12 } : {}),
       height,
       animation: false,
-      spacing: isFullScreen ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
         render: chartRender,
@@ -1467,7 +1468,7 @@ const createOptionsForRadarChart = ({
       animation: false,
       margin: hideLegend ? 40 : undefined,
       marginBottom: !hideLegend && isSmall ? 5 : undefined,
-      spacing: isFullScreen ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: { fullscreenClose },
       className: disableLegendInteraction
         ? 'cb-disable-legend-pointer-events'
@@ -1642,7 +1643,7 @@ const createOptionsForPieChart = ({
       },
       height,
       animation: false,
-      spacing: isFullScreen ? chartSpacing : 0,
+      spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       marginLeft: 10,
       marginRight: 10,
       events: { fullscreenClose },
