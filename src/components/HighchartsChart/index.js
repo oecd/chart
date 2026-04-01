@@ -416,8 +416,13 @@ const HighchartsChart = ({
               });
             }
 
+            const urlPath =
+              debug && dataSourceType === dataSourceTypes.dotStatSnapshot.value
+                ? 'api/backend/chartConfig/asPublic'
+                : 'api/public/chartConfig';
+
             const newPreParsedData = await fetchJson(
-              `${apiUrl}/api/public/chartConfig/${configParams}?preParsedDataOnly&lang=${R.toLower(
+              `${apiUrl}/${urlPath}/${configParams}?preParsedDataOnly&lang=${R.toLower(
                 lang,
               )}`,
             );
@@ -683,7 +688,7 @@ const HighchartsChart = ({
       const getSnapshotData = async () => {
         try {
           const newPreParsedData = await fetchJson(
-            `${apiUrl}/api/public/chartConfig/${id}?preParsedDataOnly&lang=${R.toLower(
+            `${apiUrl}/api/backend/chartConfig/asPublic/${id}?preParsedDataOnly&lang=${R.toLower(
               lang,
             )}`,
           );
