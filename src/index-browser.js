@@ -8,6 +8,8 @@ import Chart from './components/Chart';
 import StandaloneControl from './components/StandaloneControl';
 import { possibleVariables } from './utils/configUtil';
 
+import { version } from '../package.json';
+
 const OecdChart = r2wc(Chart, {
   props: {
     chartId: 'string',
@@ -41,3 +43,5 @@ const OecdStandaloneControl = r2wc(StandaloneControl, {
 });
 
 customElements.define('oecd-control', OecdStandaloneControl);
+
+export const VERSION = '@oecd-pac/chart@' + version;
