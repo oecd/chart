@@ -25,6 +25,9 @@ const OecdChart = r2wc(Chart, {
     hideNote: 'boolean',
     hideSource: 'boolean',
     hideToolbox: 'boolean',
+    hideXAxisLabels: 'boolean',
+    hideYAxisLabels: 'boolean',
+    hideLegend: 'boolean',
     tooltipContainerId: 'string',
   },
 });

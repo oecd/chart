@@ -22,6 +22,9 @@ const Chart = ({
   hideNote = false,
   hideSource = false,
   hideToolbox = false,
+  hideXAxisLabels = false,
+  hideYAxisLabels = false,
+  hideLegend = false,
   ...otherProps
 }) => {
   const finalWidth = useMemo(
@@ -67,6 +70,21 @@ const Chart = ({
     [hideToolbox],
   );
 
+  const finalHideXAxisLabels = useMemo(
+    () => textPropIsEqualToTrue(hideXAxisLabels),
+    [hideXAxisLabels],
+  );
+
+  const finalHideYAxisLabels = useMemo(
+    () => textPropIsEqualToTrue(hideYAxisLabels),
+    [hideYAxisLabels],
+  );
+
+  const finalHideLegend = useMemo(
+    () => textPropIsEqualToTrue(hideLegend),
+    [hideLegend],
+  );
+
   if (lazyLoad === false || lazyLoad === 'false') {
     return (
       <ChartErrorBoundary
@@ -85,6 +103,9 @@ const Chart = ({
           hideNote={finalHideNote}
           hideSource={finalHideSource}
           hideToolbox={finalHideToolbox}
+          hideXAxisLabels={finalHideXAxisLabels}
+          hideYAxisLabels={finalHideYAxisLabels}
+          hideLegend={finalHideLegend}
           {...otherProps}
         />
       </ChartErrorBoundary>
@@ -117,6 +138,9 @@ const Chart = ({
           hideNote={finalHideNote}
           hideSource={finalHideSource}
           hideToolbox={finalHideToolbox}
+          hideXAxisLabels={finalHideXAxisLabels}
+          hideYAxisLabels={finalHideYAxisLabels}
+          hideLegend={finalHideLegend}
           {...otherProps}
         />
       </LazyLoadComponent>
@@ -140,6 +164,9 @@ Chart.propTypes = {
   hideNote: PropTypes.bool,
   hideSource: PropTypes.bool,
   hideToolbox: PropTypes.bool,
+  hideXAxisLabels: PropTypes.bool,
+  hideYAxisLabels: PropTypes.bool,
+  hideLegend: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
 };
 

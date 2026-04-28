@@ -552,6 +552,18 @@ const createOptionsForLineChart = ({
     }),
   )();
 
+  const calcXAxisLayout = () => {
+    if (hideYAxisLabels) {
+      return categoriesAreDatesOrNumberForDataParsing
+        ? { left: '5%', width: '90%' }
+        : { left: '3%', width: '98%' };
+    }
+
+    return categoriesAreDatesOrNumberForDataParsing
+      ? { left: '10%', width: '85%' }
+      : { left: '5%', width: '95%' };
+  };
+
   return {
     chart: {
       style: {
@@ -597,8 +609,7 @@ const createOptionsForLineChart = ({
       },
       gridLineColor: '#c2cbd6',
       lineColor: 'transparent',
-      left: categoriesAreDatesOrNumberForDataParsing ? '10%' : '5%',
-      width: categoriesAreDatesOrNumberForDataParsing ? '85%' : '95%',
+      ...calcXAxisLayout(),
       tickWidth: 0,
     },
 
@@ -755,9 +766,21 @@ const createOptionsForBarChart = ({
 
   const calcXAxisLayout = () => {
     if (horizontal) {
+      if (hideXAxisLabels) {
+        return categoriesAreDatesOrNumberForDataParsing
+          ? { top: '5.5%', height: '91%' }
+          : { top: '6%', height: '90%' };
+      }
+
       return categoriesAreDatesOrNumberForDataParsing
         ? { top: '7.5%', height: '88.9%' }
         : { top: '8%', height: '88%' };
+    }
+
+    if (hideYAxisLabels) {
+      return categoriesAreDatesOrNumberForDataParsing
+        ? { left: '6%', width: '91%' }
+        : { left: '7%', width: '89%' };
     }
 
     return categoriesAreDatesOrNumberForDataParsing
@@ -924,13 +947,25 @@ const createOptionsForStackedChart = ({
 
   const calcXAxisLayout = () => {
     if (area) {
+      if (hideYAxisLabels) {
+        return categoriesAreDatesOrNumberForDataParsing
+          ? { left: '5%', width: '90%' }
+          : { left: '2%', width: '98%' };
+      }
+
       return categoriesAreDatesOrNumberForDataParsing
         ? { left: '10%', width: '85%' }
         : { left: '5%', width: '95%' };
     }
 
-    return horizontal
-      ? { top: '8%', height: '88%' }
+    if (horizontal) {
+      return hideXAxisLabels
+        ? { top: '5%', height: '91%' }
+        : { top: '8%', height: '88%' };
+    }
+
+    return hideYAxisLabels
+      ? { left: '6%', width: '90%' }
       : { left: '9%', width: '87%' };
   };
 
@@ -1276,6 +1311,18 @@ const createOptionsForScatterChart = ({
       )(data.series)
     : null;
 
+  const calcXAxisLayout = () => {
+    if (hideYAxisLabels) {
+      return categoriesAreDatesOrNumberForDataParsing
+        ? { left: '5%', width: '90%' }
+        : { left: '3%', width: '97%' };
+    }
+
+    return categoriesAreDatesOrNumberForDataParsing
+      ? { left: '10%', width: '85%' }
+      : { left: '5%', width: '95%' };
+  };
+
   return {
     chart: {
       type: 'scatter',
@@ -1324,8 +1371,7 @@ const createOptionsForScatterChart = ({
       },
       gridLineColor: '#c2cbd6',
       lineColor: 'transparent',
-      left: categoriesAreDatesOrNumberForDataParsing ? '10%' : '5%',
-      width: categoriesAreDatesOrNumberForDataParsing ? '85%' : '95%',
+      ...calcXAxisLayout(),
       tickWidth: 0,
     },
 
@@ -1457,6 +1503,14 @@ const createOptionsForRadarChart = ({
     };
   }, data.series);
 
+  const calcPaneSize = () => {
+    if (hideXAxisLabels) {
+      return '100%';
+    }
+
+    return isSmall ? '70%' : '85%';
+  };
+
   return {
     chart: {
       polar: true,
@@ -1480,7 +1534,7 @@ const createOptionsForRadarChart = ({
     pane: {
       startAngle: 0,
       endAngle: 360,
-      size: isSmall ? '70%' : '85%',
+      size: calcPaneSize(),
     },
 
     xAxis: {

@@ -91,6 +91,9 @@ The following props are supported:
 - `hideSource`: hides the source
 - `hideNote`: hides the note
 - `hideToolbox`: hides the toolbox
+- `hideXAxisLabels`: hides the x axis labels
+- `hideYAxisLabels`: hides the y axis labels
+- `hideLegend`: hides the legend
 
 ## Web components
 
