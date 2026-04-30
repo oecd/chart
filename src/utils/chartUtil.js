@@ -772,18 +772,18 @@ const createOptionsForBarChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        const pointIsHighlighted = R.any(codeOrLabelEquals(category.code))(
+        const pointIsHighlighted = R.any(codeOrLabelEquals(category))(
           highlight,
         );
 
         return baselineOrHighlightColor
           ? {
+              ...dataPoint,
               name: category.label,
               color: baselineOrHighlightColor,
               custom: { isHighlighted: pointIsHighlighted },
-              ...dataPoint,
             }
-          : { name: category.label, ...dataPoint };
+          : { ...dataPoint, name: category.label };
       }, s.data),
       color: seriesColor,
       showInLegend: true,
@@ -840,7 +840,7 @@ const createOptionsForBarChart = ({
       events: {
         fullscreenClose,
         render() {
-          barAndColumnChartRenderHandler(this);
+          barAndColumnChartRenderHandler(this, highlightColors);
         },
       },
       className: disableLegendInteraction
