@@ -4,12 +4,24 @@ import * as R from 'ramda';
  * @import { Chart, Point, PointOptionsObject, Series, SVGElement } from "highcharts"
  */
 
-const HIGHLIGHT_PADDING = 2;
+const HIGHLIGHT_PADDING = 0;
 const HIGHLIGHT_BACKGROUND_FILL = 'rgb(255 0 0 / 0.1)';
 const HIGHLIGHT_MARKER_SIZE = 5;
 const HIGHLIGHT_MARKER_FILL = 'rgb(255 0 0 / 0.5)';
 
 /**
+ * Returns the padding numbers from the point shape size.
+ *
+ * @example
+ * getPadding(point.shapeArgs.width)
+ *
+ * @param {number} pointWidth
+ */
+const getPadding = (pointWidth) => Math.max(pointWidth * 0.1, 0.5);
+
+/**
+ * Renders a background rect around highlighted points.
+ *
  * @param {Chart} chart
  * @param {Series} series
  * @param {boolean} isHighlighted
@@ -48,9 +60,12 @@ const renderHighlightBackground = (chart, series, isHighlighted, point) => {
     point.highlightBackground = highlightBackground;
   }
 
+  const padding = getPadding(point.shapeArgs.width);
+  console.log('padding', padding);
+
   highlightBackground = highlightBackground.attr({
-    x: point.shapeArgs.x - HIGHLIGHT_PADDING,
-    width: point.shapeArgs.width + 2 * HIGHLIGHT_PADDING,
+    x: point.shapeArgs.x - padding,
+    width: point.shapeArgs.width + 2 * padding,
     // Bar charts actually are column charts rotated by 90°,
     // so the vertical dimension is the horizontal dimension in this case
     height: series.type === 'bar' ? chart.plotWidth : chart.plotHeight,
@@ -61,6 +76,8 @@ const renderHighlightBackground = (chart, series, isHighlighted, point) => {
 };
 
 /**
+ * Renders a marker at the axis for highlighted points.
+ *
  * @param {Chart} chart
  * @param {Series} series
  * @param {boolean} isHighlighted
@@ -102,6 +119,8 @@ const renderAxisMarker = (chart, series, isHighlighted, point) => {
     point.highlightAxisMarker = axisMarker;
   }
 
+  const padding = getPadding(point.shapeArgs.width);
+
   axisMarker.attr(
     series.type === 'bar'
       ? {
@@ -113,9 +132,9 @@ const renderAxisMarker = (chart, series, isHighlighted, point) => {
         }
       : // Column chart
         {
-          x: point.shapeArgs.x - HIGHLIGHT_PADDING,
-          y: chart.plotHeight + HIGHLIGHT_PADDING,
-          width: point.shapeArgs.width + 2 * HIGHLIGHT_PADDING,
+          x: point.shapeArgs.x - padding,
+          y: chart.plotHeight + padding,
+          width: point.shapeArgs.width + 2 * padding,
           height: HIGHLIGHT_MARKER_SIZE,
           fill: HIGHLIGHT_MARKER_FILL,
         },
