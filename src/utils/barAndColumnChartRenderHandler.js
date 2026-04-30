@@ -1,13 +1,15 @@
+import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 
 /**
  * @import { Chart, Point, PointOptionsObject, Series, SVGElement } from "highcharts"
  */
 
-const HIGHLIGHT_PADDING = 0;
-const HIGHLIGHT_BACKGROUND_FILL = 'rgb(255 0 0 / 0.1)';
 const HIGHLIGHT_MARKER_SIZE = 5;
-const HIGHLIGHT_MARKER_FILL = 'rgb(255 0 0 / 0.5)';
+/**
+ * Gap between the axis line and the highlight marker
+ */
+const HIGHLIGHT_MARKER_GAP = 2;
 
 /**
  * Returns the padding numbers from the point shape size.
@@ -26,9 +28,16 @@ const getPadding = (pointWidth) => Math.max(pointWidth * 0.1, 0.5);
  * @param {Series} series
  * @param {boolean} isHighlighted
  * @param {Point} point
+ * @param {string[]} highlightColors
  * @returns {SVGElement | undefined}
  */
-const renderHighlightBackground = (chart, series, isHighlighted, point) => {
+const renderHighlightBackground = (
+  chart,
+  series,
+  point,
+  isHighlighted,
+  highlightColors,
+) => {
   /** @type {SVGElement | undefined} */
   let highlightBackground = point.highlightBackground;
 
@@ -42,17 +51,16 @@ const renderHighlightBackground = (chart, series, isHighlighted, point) => {
 
   if (!(point.graphic && point.shapeArgs)) {
     // eslint-disable-next-line no-undef
-    console.error('point.graphic not found');
+    console.error('renderHighlightBackground: point.graphic not found');
     return;
   }
+
+  const fill = new TinyColor(highlightColors[0]).setAlpha(0.1).toRgbString();
 
   if (!highlightBackground) {
     highlightBackground = chart.renderer
       .rect()
-      .attr({
-        y: 0,
-        fill: HIGHLIGHT_BACKGROUND_FILL,
-      })
+      .attr({ y: 0, fill })
       .css({ pointerEvents: 'none' })
       // Add rect to the parent group which already has a transformation applied, depending on the chart type (translate, rotate, flip)
       .add(point.graphic.parentGroup);
@@ -61,7 +69,6 @@ const renderHighlightBackground = (chart, series, isHighlighted, point) => {
   }
 
   const padding = getPadding(point.shapeArgs.width);
-  console.log('padding', padding);
 
   highlightBackground = highlightBackground.attr({
     x: point.shapeArgs.x - padding,
@@ -80,10 +87,17 @@ const renderHighlightBackground = (chart, series, isHighlighted, point) => {
  *
  * @param {Chart} chart
  * @param {Series} series
- * @param {boolean} isHighlighted
  * @param {Point} point
+ * @param {boolean} isHighlighted
+ * @param {string[]} highlightColors
  */
-const renderAxisMarker = (chart, series, isHighlighted, point) => {
+const renderAxisMarker = (
+  chart,
+  series,
+  point,
+  isHighlighted,
+  highlightColors,
+) => {
   /** @type {SVGElement | undefined} */
   let axisMarker = point.highlightAxisMarker;
 
@@ -97,9 +111,11 @@ const renderAxisMarker = (chart, series, isHighlighted, point) => {
 
   if (!(point.graphic && point.shapeArgs)) {
     // eslint-disable-next-line no-undef
-    console.error('point.graphic not found');
+    console.error('renderAxisMarker: point.graphic not found');
     return;
   }
+
+  const fill = highlightColors[0];
 
   if (!axisMarker) {
     axisMarker = chart.renderer
@@ -108,7 +124,7 @@ const renderAxisMarker = (chart, series, isHighlighted, point) => {
         y: 0,
         width: HIGHLIGHT_MARKER_SIZE,
         height: HIGHLIGHT_MARKER_SIZE,
-        fill: HIGHLIGHT_MARKER_FILL,
+        fill,
       })
       .css({ pointerEvents: 'none' })
       // We cannot add the rect to the point's parent <g> since it has
@@ -128,15 +144,17 @@ const renderAxisMarker = (chart, series, isHighlighted, point) => {
           y: chart.plotHeight - HIGHLIGHT_MARKER_SIZE,
           width: point.shapeArgs.width,
           height: HIGHLIGHT_MARKER_SIZE,
-          fill: HIGHLIGHT_MARKER_FILL,
+          // fill needs to be repeated here, otherwise the fill is lost on update
+          fill,
         }
       : // Column chart
         {
           x: point.shapeArgs.x - padding,
-          y: chart.plotHeight + padding,
+          y: chart.plotHeight + HIGHLIGHT_MARKER_GAP,
           width: point.shapeArgs.width + 2 * padding,
           height: HIGHLIGHT_MARKER_SIZE,
-          fill: HIGHLIGHT_MARKER_FILL,
+          // fill needs to be repeated here, otherwise the fill is lost on update
+          fill,
         },
   );
 
@@ -146,9 +164,10 @@ const renderAxisMarker = (chart, series, isHighlighted, point) => {
 /**
  * @param {Chart} chart
  * @param {Series} series
+ * @param {string[]} highlightColors
  * @returns {SVGElement[]} activeShapes
  */
-const renderSeriesHighlight = (chart, series) => {
+const renderSeriesHighlight = (chart, series, highlightColors) => {
   const seriesIsHighlighted = series.options.custom?.isHighlighted;
 
   const { renderer } = chart;
@@ -172,22 +191,29 @@ const renderSeriesHighlight = (chart, series) => {
   const activeShapes = [];
 
   points.forEach((point) => {
-    const isHighlighted =
-      seriesIsHighlighted || point.options.custom?.isHighlighted;
+    const pointIsHighlighted = point.options.custom?.isHighlighted;
+    const isHighlighted = seriesIsHighlighted || pointIsHighlighted;
 
     // Highlight background
     const highlightBackground = renderHighlightBackground(
       chart,
       series,
-      isHighlighted,
       point,
+      isHighlighted,
+      highlightColors,
     );
     if (highlightBackground) {
       activeShapes.push(highlightBackground);
     }
 
     // Axis marker
-    const axisMarker = renderAxisMarker(chart, series, isHighlighted, point);
+    const axisMarker = renderAxisMarker(
+      chart,
+      series,
+      point,
+      isHighlighted,
+      highlightColors,
+    );
     if (axisMarker) {
       activeShapes.push(axisMarker);
     }
@@ -200,8 +226,9 @@ const renderSeriesHighlight = (chart, series) => {
  * Event handler called after load (initial render) and redraw (subsequent render)
  *
  * @param {Chart} chart
+ * @params {string[]} highlightColors
  */
-export const barAndColumnChartRenderHandler = (chart) => {
+export const barAndColumnChartRenderHandler = (chart, highlightColors) => {
   chart.highlightShapes ||= new Set();
 
   // Fill the plot area for debugging
@@ -216,17 +243,10 @@ export const barAndColumnChartRenderHandler = (chart) => {
     chart.highlightShapes.clear();
   }
 
-  const reduceShapes = R.reduce((allShapes, shapes) => {
-    R.forEach((shape) => {
-      allShapes.add(shape);
-    }, shapes);
-    return allShapes;
-  }, /** @type {Set<SVGElement>} */ (new Set()));
-
   const activeShapes = R.compose(
-    reduceShapes,
-    R.map((series) => renderSeriesHighlight(chart, series)),
-    R.filter(R.prop('visible')),
+    (allShapesArray) => new Set(allShapesArray),
+    R.flatten,
+    R.map((series) => renderSeriesHighlight(chart, series, highlightColors)),
   )(chart.series);
 
   // Clean up old shapes
