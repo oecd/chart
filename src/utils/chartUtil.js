@@ -1,14 +1,5 @@
-import truncatise from 'truncatise';
 import * as R from 'ramda';
-
-import {
-  codeOrLabelEquals,
-  dataLastUpdateDateVariable,
-  latestMaxVariable,
-  latestMinVariable,
-  possibleVariables,
-} from './configUtil';
-import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
+import truncatise from 'truncatise';
 import {
   baselineColorShades,
   chartSpacing,
@@ -20,12 +11,8 @@ import {
   sortOrderOptions,
   stackingOptions,
 } from '../constants/chart';
-import { frequencies } from './dateUtil';
-import {
-  createFormatters,
-  numericSymbols,
-  thousandsSeparator,
-} from './highchartsUtil';
+import customChartRenderByChartType from '../highchartsCustomCode/customChartRenderByChartType';
+import { barAndColumnChartRenderHandler } from './barAndColumnChartRenderHandler';
 import {
   calcExistingFixedColorIndexBySeries,
   createExportFileName,
@@ -34,16 +21,29 @@ import {
   getListItemAtTurningIndex,
   getSeriesColor,
 } from './chartUtilCommon';
+import { addColorAlpha, makeColorReadableOnBackgroundColor } from './colorUtil';
+import {
+  codeOrLabelEquals,
+  dataLastUpdateDateVariable,
+  latestMaxVariable,
+  latestMinVariable,
+  possibleVariables,
+} from './configUtil';
 import { parseCSV } from './csvUtil';
+import { frequencies } from './dateUtil';
 import { createCodeLabelMap } from './generalUtil';
+import {
+  createFormatters,
+  numericSymbols,
+  thousandsSeparator,
+} from './highchartsUtil';
+import { getFinalPaletteColors } from './paletteUtil';
+import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import {
   addFromAndToColumns,
   createFromToPoints,
   rejectInvalidFromToPoints,
 } from './sankeyUtil';
-import customChartRenderByChartType from '../highchartsCustomCode/customChartRenderByChartType';
-import { addColorAlpha, makeColorReadableOnBackgroundColor } from './colorUtil';
-import { getFinalPaletteColors } from './paletteUtil';
 
 const mapsUtil = import('./mapsUtil');
 
@@ -735,6 +735,8 @@ const createOptionsForBarChart = ({
         fixedColorIndexBySeries,
       });
 
+    const seriesIsHighlighted = R.any(codeOrLabelEquals(s))(highlight);
+
     return {
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(s.label).getTime()
@@ -754,16 +756,22 @@ const createOptionsForBarChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
+        const pointIsHighlighted = R.any(codeOrLabelEquals(category.code))(
+          highlight,
+        );
+
         return baselineOrHighlightColor
           ? {
               name: category.label,
               color: baselineOrHighlightColor,
+              custom: { isHighlighted: pointIsHighlighted },
               ...dataPoint,
             }
           : { name: category.label, ...dataPoint };
       }, s.data),
       color: seriesColor,
       showInLegend: true,
+      custom: { isHighlighted: seriesIsHighlighted },
     };
   }, data.series);
 
@@ -815,6 +823,9 @@ const createOptionsForBarChart = ({
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
+        render() {
+          barAndColumnChartRenderHandler(this);
+        },
       },
       className: disableLegendInteraction
         ? 'cb-disable-legend-pointer-events'
