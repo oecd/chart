@@ -1,15 +1,7 @@
 import { TinyColor, isReadable } from '@ctrl/tinycolor';
-import truncatise from 'truncatise';
 import * as R from 'ramda';
+import truncatise from 'truncatise';
 
-import {
-  codeOrLabelEquals,
-  getFinalPalette,
-  latestMaxVariable,
-  latestMinVariable,
-  possibleVariables,
-} from './configUtil';
-import { forEachWithIndex, isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import {
   baselineColorShades,
   chartSpacing,
@@ -21,12 +13,7 @@ import {
   sortOrderOptions,
   stackingOptions,
 } from '../constants/chart';
-import { frequencies } from './dateUtil';
-import {
-  createFormatters,
-  numericSymbols,
-  thousandsSeparator,
-} from './highchartsUtil';
+import { barAndColumnChartRenderHandler } from './barAndColumnChartRenderHandler';
 import {
   calcExistingFixedColorIndexBySeries,
   createExportFileName,
@@ -35,8 +22,22 @@ import {
   getListItemAtTurningIndex,
   getSeriesColor,
 } from './chartUtilCommon';
+import {
+  codeOrLabelEquals,
+  getFinalPalette,
+  latestMaxVariable,
+  latestMinVariable,
+  possibleVariables,
+} from './configUtil';
 import { parseCSV } from './csvUtil';
+import { frequencies } from './dateUtil';
 import { createCodeLabelMap } from './generalUtil';
+import {
+  createFormatters,
+  numericSymbols,
+  thousandsSeparator,
+} from './highchartsUtil';
+import { forEachWithIndex, isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 
 const mapsUtil = import('./mapsUtil');
 
@@ -719,6 +720,8 @@ const createOptionsForBarChart = ({
         fixedColorIndexBySeries,
       });
 
+    const seriesIsHighlighted = R.any(codeOrLabelEquals(s))(highlight);
+
     return {
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(s.label).getTime()
@@ -738,16 +741,22 @@ const createOptionsForBarChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
+        const pointIsHighlighted = R.any(codeOrLabelEquals(category.code))(
+          highlight,
+        );
+
         return baselineOrHighlightColor
           ? {
               name: category.label,
               color: baselineOrHighlightColor,
+              custom: { isHighlighted: pointIsHighlighted },
               ...dataPoint,
             }
           : { name: category.label, ...dataPoint };
       }, s.data),
       color: seriesColor,
       showInLegend: true,
+      custom: { isHighlighted: seriesIsHighlighted },
     };
   }, data.series);
 
@@ -787,6 +796,9 @@ const createOptionsForBarChart = ({
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
+        render() {
+          barAndColumnChartRenderHandler(this);
+        },
       },
       className: disableLegendInteraction
         ? 'cb-disable-legend-pointer-events'
