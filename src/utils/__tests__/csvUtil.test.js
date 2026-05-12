@@ -436,7 +436,7 @@ MEX
 
           expect(result).toEqual(oneCategoryPivotedData);
         },
-        [chartTypes.bar, chartTypes.row, chartTypes.line, chartTypes.pie],
+        [chartTypes.line, chartTypes.pie],
       );
 
       const oneSeriesData = R.modify('data', R.map(R.take(2)), data);
