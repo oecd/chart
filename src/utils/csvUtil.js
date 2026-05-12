@@ -135,21 +135,18 @@ const shouldPivot = (
 
   if (
     R.length(data) === 2 &&
-    R.includes(chartType, [
-      chartTypes.bar,
-      chartTypes.row,
-      chartTypes.line,
-      chartTypes.pie,
-    ])
+    R.includes(chartType, [chartTypes.line, chartTypes.pie])
   ) {
     return true;
   }
+
   if (
     R.length(R.head(data)) === 2 &&
     R.includes(chartType, [chartTypes.stackedBar, chartTypes.stackedRow])
   ) {
     return true;
   }
+
   if (
     R.length(R.head(data)) === 2 &&
     R.includes(chartType, [chartTypes.line, chartTypes.radar])
