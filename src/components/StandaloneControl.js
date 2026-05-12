@@ -26,10 +26,12 @@ const StandaloneControl = ({
   const lastRequestedConfig = useRef(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPrevControlId(controlId);
   }, [controlId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPrevLanguage(language);
   }, [language]);
 
@@ -69,6 +71,7 @@ const StandaloneControl = ({
       return;
     }
     if (prevControlId !== controlId || prevLanguage !== language) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       getControlConfig(controlId, language);
     }
   }, [prevControlId, controlId, prevLanguage, language, getControlConfig]);

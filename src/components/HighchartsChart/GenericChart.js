@@ -3,6 +3,7 @@ import { forwardRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
 import 'highcharts/es-modules/masters/highcharts-more.src';
+import 'highcharts/es-modules/masters/modules/sankey.src';
 import 'highcharts/es-modules/masters/modules/accessibility.src';
 import 'highcharts/es-modules/masters/modules/broken-axis.src';
 import 'highcharts/es-modules/masters/modules/annotations.src';

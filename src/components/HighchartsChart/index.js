@@ -78,6 +78,7 @@ const chartByType = {
   [chartTypes.scatter]: ScatterChart,
   [chartTypes.radar]: GenericChart,
   [chartTypes.pie]: GenericChart,
+  [chartTypes.sankey]: GenericChart,
 };
 
 const getChartForType = R.propOr(NullComponent, R.__, chartByType);

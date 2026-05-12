@@ -13,6 +13,7 @@ export const chartTypes = {
   scatter: 'Scatter',
   radar: 'Radar',
   pie: 'Pie',
+  sankey: 'Sankey',
 };
 
 export const chartTypesForWhichXAxisIsAlwaysTreatedAsCategories = [
@@ -21,6 +22,7 @@ export const chartTypesForWhichXAxisIsAlwaysTreatedAsCategories = [
   chartTypes.stackedBar,
   chartTypes.stackedRow,
   chartTypes.radar,
+  chartTypes.sankey,
 ];
 
 export const stackingOptions = {

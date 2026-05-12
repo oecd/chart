@@ -21,10 +21,12 @@ const Chart = ({ chartId, language, ...otherProps }) => {
   const lastRequestedConfig = useRef(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPrevChartId(chartId);
   }, [chartId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPrevLanguage(language);
   }, [language]);
 
@@ -38,10 +40,11 @@ const Chart = ({ chartId, language, ...otherProps }) => {
         {},
         possibleVariables,
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
     [...R.map(R.prop(R.__, otherProps), possibleVariables)],
   );
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const getChartConfig = useCallback(async (id, lang, vars) => {
     try {
       setChartConfigData(
@@ -88,6 +91,7 @@ const Chart = ({ chartId, language, ...otherProps }) => {
       return;
     }
     if (prevChartId !== chartId || prevLanguage !== language) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       getChartConfig(chartId, language, propsVars);
     }
   }, [

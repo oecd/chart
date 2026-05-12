@@ -37,6 +37,11 @@ import {
 } from './chartUtilCommon';
 import { parseCSV } from './csvUtil';
 import { createCodeLabelMap } from './generalUtil';
+import {
+  addFromAndToColumns,
+  createFromToPoints,
+  rejectInvalidFromToPoints,
+} from './sankeyUtil';
 
 const mapsUtil = import('./mapsUtil');
 
@@ -1746,6 +1751,96 @@ const createOptionsForPieChart = ({
   };
 };
 
+const createOptionsForSankeyChart = ({
+  data,
+  title = '',
+  subtitle = '',
+  colorPalette,
+  highlight = null,
+  baseline = null,
+  highlightColors,
+  fullscreenClose = null,
+  isFullScreen = false,
+  height,
+  isSmall = false,
+}) => {
+  const series = R.compose(
+    ({ data: seriesData, columnByNode }) => {
+      const nodes = R.map(([code, column]) => {
+        const highlightOrBaselineColor = getBaselineOrHighlightColor(
+          { code, label: R.propOr(code, code, data.codeLabelMapping) },
+          highlight,
+          baseline,
+          highlightColors,
+        );
+
+        const color = highlightOrBaselineColor || R.head(colorPalette);
+
+        return {
+          id: code,
+          column,
+          name: R.propOr(code, code, data.codeLabelMapping),
+          color,
+          ...(R.isNil(highlightOrBaselineColor)
+            ? {}
+            : { dataLabels: { style: { fontWeight: 800 } } }),
+        };
+      }, R.toPairs(columnByNode));
+      return { data: seriesData, nodes };
+    },
+    R.evolve({
+      data: R.compose(
+        R.sortWith([
+          R.ascend(R.prop('fromColumn')),
+          R.ascend(R.prop('toColumn')),
+        ]),
+      ),
+    }),
+    addFromAndToColumns,
+    rejectInvalidFromToPoints,
+    createFromToPoints,
+  )(data);
+
+  return {
+    chart: {
+      style: {
+        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
+      },
+      marginTop: calcMarginTop(title, subtitle, isSmall),
+      height,
+      animation: false,
+      spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
+      events: {
+        fullscreenClose,
+      },
+    },
+
+    colors: [R.head(colorPalette)],
+
+    plotOptions: {
+      series: {
+        animation: false,
+      },
+      sankey: {
+        dataLabels: {
+          style: {
+            fontSize: isSmall ? '13px' : '16px',
+            fontWeight: 400,
+          },
+        },
+      },
+    },
+
+    series: [
+      {
+        data: series.data,
+        nodes: series.nodes,
+        type: 'sankey',
+      },
+    ],
+  };
+};
+
 const createChartOptionsFunc =
   (createOptionsFuncForChartType) =>
   ({
@@ -1827,7 +1922,7 @@ const createChartOptionsFunc =
       areSeriesDates: otherProps.data.areSeriesDates,
       seriesDateFomat: otherProps.data.seriesDateFomat,
       lang,
-      isCustomTooltipDefined: !isNilOrEmpty(customTooltip),
+      customTooltip,
     });
 
     const categoriesAreDatesOrNumberForDataParsing =
@@ -1870,7 +1965,10 @@ const createChartOptionsFunc =
       }),
       R.assoc('tooltip', {
         ...R.prop('tooltip', formatters),
-        ...(isNilOrEmpty(customTooltip) ? {} : { format: customTooltip }),
+        ...(isNilOrEmpty(customTooltip) ||
+        otherProps.chartType === chartTypes.sankey
+          ? {}
+          : { format: customTooltip }),
         outside: tooltipOutside,
         style: {
           zIndex: 702,
@@ -1959,6 +2057,9 @@ export const getCreateOptionsFuncForChartType = async (chartType) => {
 
     case chartTypes.pie:
       return createChartOptionsFunc(createOptionsForPieChart);
+
+    case chartTypes.sankey:
+      return createChartOptionsFunc(createOptionsForSankeyChart);
 
     default:
       return () => ({});

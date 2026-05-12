@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 /*global document, CustomEvent*/
 import {
   useMemo,
@@ -83,6 +84,7 @@ const StandaloneControlWithConfig = ({
   const [prevPropsVars, setPrevPropsVars] = useState(propsVars);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPrevPropsVars(propsVars);
   }, [propsVars]);
 
@@ -195,6 +197,7 @@ const StandaloneControlWithConfig = ({
         propsVars[otherProps.varName] &&
         propsVars[otherProps.varName] !== prevPropsVars[otherProps.varName]
       ) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         changeVar(otherProps.varName, propsVars[otherProps.varName]);
       }
       if (

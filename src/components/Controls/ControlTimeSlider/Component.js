@@ -156,12 +156,14 @@ const ControlTimeSlider = ({
 }) => {
   const [stateFrequencies, setStateFrequencies] = useState(frequencies);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStateFrequencies(frequencies);
   }, [frequencies]);
 
   const [statePrevFrequencies, setStatePrevFrequencies] =
     useState(stateFrequencies);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatePrevFrequencies(stateFrequencies);
   }, [stateFrequencies]);
 
@@ -171,6 +173,7 @@ const ControlTimeSlider = ({
 
   const [prevVars, setPrevVars] = useState(vars);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPrevVars(vars);
   }, [vars]);
 
@@ -260,6 +263,7 @@ const ControlTimeSlider = ({
           : R.findIndex(R.equals(newMaxCode), newSteps.codes);
 
       if (noData) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentRange({
           minCode: R.nth(newMinIndex, newSteps.codes),
           minIndex: newMinIndex,

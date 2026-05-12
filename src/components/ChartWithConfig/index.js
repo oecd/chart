@@ -54,6 +54,7 @@ const ChartWithConfig = ({
   });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVars({
       var1: isNilOrEmpty(var1) ? (var1DefaultValue ?? '') : decodeURI(var1),
       var2: isNilOrEmpty(var2) ? (var2DefaultValue ?? '') : decodeURI(var2),
@@ -100,6 +101,7 @@ const ChartWithConfig = ({
   ] = useState(() => getConnectedControlsDotStatDimensionIds(controls));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStateControls(controls);
     setControlConnectedDotStatDimensionIds(
       getConnectedControlsDotStatDimensionIds(controls),

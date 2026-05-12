@@ -10,10 +10,13 @@ import { frequencies } from './dateUtil';
 export const thousandsSeparator = ' ';
 export const numericSymbols = ['k', 'M', 'G', 'T', 'P', 'E'];
 
-const getNumbericFormat = (valueField, maxNumberOrDecimal) =>
+const getNumericFormat = (valueField, maxNumberOrDecimal) =>
   `{#if (ge ${valueField} 1000)}{rtz ((shorten ${valueField}):,.1f)}{ns ${valueField}}` +
   `{else}{#if (le ${valueField} -1000)}{rtz ((shorten ${valueField}):,.1f)}{ns ${valueField}}` +
   `{else}{rtz ((rtz ${valueField}):,.${maxNumberOrDecimal}f)}{/if}{/if}`;
+
+const getNumericFormatWithoutShorten = (valueField, maxNumberOrDecimal) =>
+  `{rtz ((rtz ${valueField}):,.${maxNumberOrDecimal}f)}`;
 
 const numberFormat = (number, decimals, decimalPoint) => {
   if (!isCastableToNumber(number)) {
@@ -77,13 +80,31 @@ export const createFormatters = ({
   areSeriesDates,
   seriesDateFomat,
   lang,
-  isCustomTooltipDefined,
+  customTooltip,
 }) => {
   const finalMaxNumberOrDecimal = isCastableToNumber(maxNumberOfDecimals)
     ? maxNumberOfDecimals
     : -1;
 
   const finalDecimalPoint = decimalPoint || decimalPointTypes.point.value;
+
+  if (chartType === chartTypes.sankey) {
+    return {
+      tooltip: {
+        headerFormat: null,
+        nodeFormat: `{point.name}: <b>${getNumericFormatWithoutShorten(
+          'point.sum',
+          finalMaxNumberOrDecimal,
+        )}</b><br/>`,
+        pointFormat: isNilOrEmpty(customTooltip)
+          ? `{point.fromNode.name} → {point.toNode.name}: <b>${getNumericFormatWithoutShorten(
+              'point.weight',
+              finalMaxNumberOrDecimal,
+            )}</b><br/>`
+          : customTooltip,
+      },
+    };
+  }
 
   const stepsHaveLabels =
     chartType === chartTypes.map &&
@@ -112,7 +133,7 @@ export const createFormatters = ({
     [
       () => chartType === chartTypes.pie && areCategoriesNumbers,
       () => ({
-        format: getNumbericFormat('name', finalMaxNumberOrDecimal),
+        format: getNumericFormat('name', finalMaxNumberOrDecimal),
       }),
     ],
     [
@@ -130,7 +151,7 @@ export const createFormatters = ({
     [
       () => areCategoriesNumbers,
       () => ({
-        format: getNumbericFormat('value', finalMaxNumberOrDecimal),
+        format: getNumericFormat('value', finalMaxNumberOrDecimal),
       }),
     ],
     [R.T, () => ({})],
@@ -151,17 +172,17 @@ export const createFormatters = ({
       () =>
         chartType === chartTypes.pie ? areCategoriesNumbers : areSeriesNumbers,
       () => ({
-        labelFormat: getNumbericFormat('name', finalMaxNumberOrDecimal),
+        labelFormat: getNumericFormat('name', finalMaxNumberOrDecimal),
       }),
     ],
     [R.T, () => ({})],
   ])();
 
   const yAxisLabels = {
-    format: getNumbericFormat('value', finalMaxNumberOrDecimal),
+    format: getNumericFormat('value', finalMaxNumberOrDecimal),
   };
 
-  const tooltip = isCustomTooltipDefined
+  const tooltip = !isNilOrEmpty(customTooltip)
     ? {}
     : {
         formatter: function format(tooltipInfo) {
