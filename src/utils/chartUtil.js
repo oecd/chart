@@ -1767,8 +1767,9 @@ const createOptionsForSankeyChart = ({
   const series = R.compose(
     ({ data: seriesData, columnByNode }) => {
       const nodes = R.map(([code, column]) => {
+        const label = R.propOr(code, R.toUpper(code), data.codeLabelMapping);
         const highlightOrBaselineColor = getBaselineOrHighlightColor(
-          { code, label: R.propOr(code, code, data.codeLabelMapping) },
+          { code, label },
           highlight,
           baseline,
           highlightColors,
@@ -1779,7 +1780,7 @@ const createOptionsForSankeyChart = ({
         return {
           id: code,
           column,
-          name: R.propOr(code, code, data.codeLabelMapping),
+          name: label,
           color,
           ...(R.isNil(highlightOrBaselineColor)
             ? {}
