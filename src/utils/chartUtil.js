@@ -471,6 +471,11 @@ const createOptionsForLineChart = ({
       ? seriesFrequency.tryParse(s.label).getTime()
       : s.label;
 
+    const lastDataPointWithDataIndex = R.findLastIndex(
+      (d) => !isNilOrEmpty(d.value),
+      s.data,
+    );
+
     return {
       name: seriesName,
       data: mapWithIndex((d, i) => {
@@ -480,7 +485,9 @@ const createOptionsForLineChart = ({
         );
 
         const finalDataPoint =
-          inlineLabels && i === R.length(s.data) - 1
+          inlineLabels &&
+          i === lastDataPointWithDataIndex &&
+          lastDataPointWithDataIndex !== -1
             ? R.assoc(
                 'dataLabels',
                 {
