@@ -103,10 +103,13 @@ const Chart = ({
           hideNote={finalHideNote}
           hideSource={finalHideSource}
           hideToolbox={finalHideToolbox}
-          hideXAxisLabels={finalHideXAxisLabels}
-          hideYAxisLabels={finalHideYAxisLabels}
-          hideLegend={finalHideLegend}
-          {...otherProps}
+          {...(finalHideXAxisLabels ? { hideXAxisLabels: true } : {})}
+          {...(finalHideYAxisLabels ? { hideYAxisLabels: true } : {})}
+          {...(finalHideLegend ? { hideLegend: true } : {})}
+          {...R.omit(
+            ['hideXAxisLabels', 'hideYAxisLabels', 'hideLegend'],
+            otherProps,
+          )}
         />
       </ChartErrorBoundary>
     );
@@ -138,10 +141,13 @@ const Chart = ({
           hideNote={finalHideNote}
           hideSource={finalHideSource}
           hideToolbox={finalHideToolbox}
-          hideXAxisLabels={finalHideXAxisLabels}
-          hideYAxisLabels={finalHideYAxisLabels}
-          hideLegend={finalHideLegend}
-          {...otherProps}
+          {...(finalHideXAxisLabels ? { hideXAxisLabels: true } : {})}
+          {...(finalHideYAxisLabels ? { hideYAxisLabels: true } : {})}
+          {...(finalHideLegend ? { hideLegend: true } : {})}
+          {...R.omit(
+            ['hideXAxisLabels', 'hideYAxisLabels', 'hideLegend'],
+            otherProps,
+          )}
         />
       </LazyLoadComponent>
     </ChartErrorBoundary>
