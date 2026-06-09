@@ -59,13 +59,11 @@ const createDatapoint = (d, categoriesAreDatesOrNumberForDataParsing) =>
     ? {
         x: d.metadata.parsedX,
         y: d.value,
-        __metadata: d.metadata,
-        custom: d.custom,
+        custom: { ...(d.custom || {}), ...(d.metadata || {}) },
       }
     : {
         y: d.value,
-        __metadata: d.metadata,
-        custom: d.custom,
+        custom: { ...(d.custom || {}), ...(d.metadata || {}) },
       };
 
 export const createStackedDatapoints = ({

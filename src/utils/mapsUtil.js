@@ -442,8 +442,11 @@ export const createOptionsForMapChart = ({
 }) => {
   const createMapDatapoint = (d) =>
     mapType === mapTypes.normal.value
-      ? { value: d.value, __metadata: d.metadata, custom: d.custom }
-      : { z: d.value, __metadata: d.metadata, custom: d.custom };
+      ? {
+          value: d.value,
+          custom: { ...(d.custom || {}), ...(d.metadata || {}) },
+        }
+      : { z: d.value, custom: { ...(d.custom || {}), ...(d.metadata || {}) } };
 
   const overrideCountriesLabel = (codeLabelMapping) => {
     if (isNilOrEmpty(codeLabelMapping)) {

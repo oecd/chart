@@ -192,7 +192,7 @@ export const createFormatters = ({
               : `${tooltipInfo.options.headerFormat}${tooltipInfo.options.pointFormat}`;
 
           const value = this.point.y ?? this.point.value ?? this.point.z;
-          const timeLabel = this.point.__metadata?.timeLabel;
+          const timeLabel = this.point.custom?.timeLabel;
 
           const newValue = stepsHaveLabels
             ? R.nth(
