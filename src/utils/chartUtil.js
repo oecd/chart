@@ -4,6 +4,7 @@ import * as R from 'ramda';
 
 import {
   codeOrLabelEquals,
+  dataLastUpdateDateVariable,
   getFinalPalette,
   latestMaxVariable,
   latestMinVariable,
@@ -328,7 +329,7 @@ export const tryCastAllToDatesAndDetectFormat = (values) => {
   return { isSuccessful: false, dates: null, dateFormat: null };
 };
 
-export const replaceVarsNameByVarsValue = (string, vars) =>
+export const replaceBasicVarsNameByVarsValue = (string, vars) =>
   R.reduce(
     (acc, varName) =>
       R.replace(
@@ -340,11 +341,12 @@ export const replaceVarsNameByVarsValue = (string, vars) =>
     possibleVariables,
   );
 
-export const replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax = ({
+export const replaceAllVarsNameByVarsValue = ({
   string,
   vars,
   latestMin,
   latestMax,
+  dataLastUpdateDate,
   mapping,
   replaceMissingVarByBlank = false,
   lang,
@@ -357,6 +359,10 @@ export const replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax = ({
     R.replace(
       new RegExp(`{${latestMinVariable}}`, 'gi'),
       latestMin || (replaceMissingVarByBlank ? ' ' : ''),
+    ),
+    R.replace(
+      new RegExp(`{${dataLastUpdateDateVariable}}`, 'gi'),
+      dataLastUpdateDate || (replaceMissingVarByBlank ? ' ' : ''),
     ),
     R.reduce(
       (acc, varName) => {
@@ -392,7 +398,11 @@ const anyVarRegExp = R.join(
   '|',
   R.map(
     (v) => `{${v}}`,
-    R.concat(possibleVariables, [latestMinVariable, latestMaxVariable]),
+    R.concat(possibleVariables, [
+      latestMinVariable,
+      latestMaxVariable,
+      dataLastUpdateDateVariable,
+    ]),
   ),
 );
 
@@ -1911,12 +1921,12 @@ const createChartOptionsFunc =
     const parsedHighlight = R.compose(
       R.reject(R.isEmpty),
       R.split('|'),
-    )(replaceVarsNameByVarsValue(highlight, vars));
+    )(replaceBasicVarsNameByVarsValue(highlight, vars));
 
     const parsedBaseline = R.compose(
       R.reject(R.isEmpty),
       R.split('|'),
-    )(replaceVarsNameByVarsValue(baseline, vars));
+    )(replaceBasicVarsNameByVarsValue(baseline, vars));
 
     const formatters = createFormatters({
       chartType: otherProps.chartType,

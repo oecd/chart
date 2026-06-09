@@ -43,7 +43,7 @@ import {
 } from '../../utils/csvUtil';
 import Spinner from '../Spinner';
 import {
-  replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax,
+  replaceAllVarsNameByVarsValue,
   doesStringContainVar,
   deepMergeUserOptionsWithDefaultOptions,
   createFooter,
@@ -266,6 +266,7 @@ const HighchartsChart = ({
   varForDotStatSymbolMinMax = null,
   calcAvgValue = null,
   referenceValueCode = null,
+  dataLastUpdateDate = null,
 }) => {
   const ChartForType = getChartForType(chartType);
 
@@ -326,6 +327,20 @@ const HighchartsChart = ({
   const [footerHeight, setFooterHeight] = useState(null);
   const [chartHeight, setChartHeight] = useState(height);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [finalDataLastUpdateDate, setFinalDataLastUpdateDate] = useState(() => {
+    if (
+      dataSourceType === dataSourceTypes.dotStatSnapshot.value &&
+      !R.isNil(preParsedData)
+    ) {
+      return R.pathOr(
+        '',
+        ['dotStatInfo', 'dataflowLastUpdateDate'],
+        preParsedData,
+      );
+    }
+
+    return dataLastUpdateDate;
+  });
 
   if (lang !== prevLang) {
     setPrevLang(lang);
@@ -694,6 +709,13 @@ const HighchartsChart = ({
             )}`,
           );
           setParsedData(R.prop('preParsedData', newPreParsedData));
+          setFinalDataLastUpdateDate(
+            R.pathOr(
+              '',
+              ['preParsedData', 'dotStatInfo', 'dataflowLastUpdateDate'],
+              newPreParsedData,
+            ),
+          );
           setIsFetching(false);
         } catch {
           setIsFetching(false);
@@ -851,11 +873,12 @@ const HighchartsChart = ({
   const parsedNote = useMemo(() => {
     const parsed = hideNote
       ? ''
-      : replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+      : replaceAllVarsNameByVarsValue({
           string: note,
           vars,
           latestMin: parsedData?.latestYMin,
           latestMax: parsedData?.latestYMax,
+          dataLastUpdateDate: finalDataLastUpdateDate,
           mapping: parsedData?.codeLabelMapping,
           lang,
         });
@@ -866,6 +889,7 @@ const HighchartsChart = ({
     vars,
     parsedData?.latestYMin,
     parsedData?.latestYMax,
+    finalDataLastUpdateDate,
     parsedData?.codeLabelMapping,
     lang,
   ]);
@@ -873,11 +897,12 @@ const HighchartsChart = ({
   const parsedSource = useMemo(() => {
     const parsed = hideSource
       ? ''
-      : replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+      : replaceAllVarsNameByVarsValue({
           string: source,
           vars,
           latestMin: parsedData?.latestYMin,
           latestMax: parsedData?.latestYMax,
+          dataLastUpdateDate: finalDataLastUpdateDate,
           mapping: parsedData?.codeLabelMapping,
           lang,
         });
@@ -889,20 +914,21 @@ const HighchartsChart = ({
     vars,
     parsedData?.latestYMin,
     parsedData?.latestYMax,
+    finalDataLastUpdateDate,
     parsedData?.codeLabelMapping,
     lang,
   ]);
 
   const parsedDefinition = useMemo(() => {
-    const parsed =
-      replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
-        string: definition,
-        vars,
-        latestMin: parsedData?.latestYMin,
-        latestMax: parsedData?.latestYMax,
-        mapping: parsedData?.codeLabelMapping,
-        lang,
-      });
+    const parsed = replaceAllVarsNameByVarsValue({
+      string: definition,
+      vars,
+      latestMin: parsedData?.latestYMin,
+      latestMax: parsedData?.latestYMax,
+      dataLastUpdateDate: finalDataLastUpdateDate,
+      mapping: parsedData?.codeLabelMapping,
+      lang,
+    });
 
     return R.either(R.equals('<p></p>'), isNilOrEmpty)(parsed) ? null : parsed;
   }, [
@@ -910,6 +936,7 @@ const HighchartsChart = ({
     vars,
     parsedData?.latestYMin,
     parsedData?.latestYMax,
+    finalDataLastUpdateDate,
     parsedData?.codeLabelMapping,
     lang,
   ]);
@@ -921,11 +948,12 @@ const HighchartsChart = ({
     () =>
       hideTitle
         ? ''
-        : replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+        : replaceAllVarsNameByVarsValue({
             string: title,
             vars,
             latestMin: parsedData?.latestYMin,
             latestMax: parsedData?.latestYMax,
+            dataLastUpdateDate: finalDataLastUpdateDate,
             mapping: parsedData?.codeLabelMapping,
             replaceMissingVarByBlank: true,
             lang,
@@ -935,6 +963,7 @@ const HighchartsChart = ({
       vars,
       parsedData?.latestYMin,
       parsedData?.latestYMax,
+      finalDataLastUpdateDate,
       parsedData?.codeLabelMapping,
       hideTitle,
       lang,
@@ -945,11 +974,12 @@ const HighchartsChart = ({
     () =>
       hideSubtitle
         ? ''
-        : replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+        : replaceAllVarsNameByVarsValue({
             string: subtitle,
             vars,
             latestMin: parsedData?.latestYMin,
             latestMax: parsedData?.latestYMax,
+            dataLastUpdateDate: finalDataLastUpdateDate,
             mapping: parsedData?.codeLabelMapping,
             replaceMissingVarByBlank: true,
             lang,
@@ -959,6 +989,7 @@ const HighchartsChart = ({
       vars,
       parsedData?.latestYMin,
       parsedData?.latestYMax,
+      finalDataLastUpdateDate,
       parsedData?.codeLabelMapping,
       hideSubtitle,
       lang,
@@ -1252,6 +1283,18 @@ const HighchartsChart = ({
     };
   }, [isFullScreen]);
 
+  useEffect(() => {
+    if (
+      R.includes(dataSourceType, [
+        dataSourceTypes.dotStat.value,
+        dataSourceTypes.csv.value,
+      ])
+    ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFinalDataLastUpdateDate(dataLastUpdateDate);
+    }
+  }, [dataSourceType, dataLastUpdateDate]);
+
   return (
     <div>
       <div
@@ -1422,6 +1465,7 @@ HighchartsChart.propTypes = {
   varForDotStatSymbolMinMax: PropTypes.string,
   calcAvgValue: PropTypes.bool,
   referenceValueCode: PropTypes.string,
+  dataLastUpdateDate: PropTypes.string,
 };
 
 export default memo(HighchartsChart);

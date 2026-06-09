@@ -10,8 +10,8 @@ import {
   deepMergeUserOptionsWithDefaultOptions,
   getCreateOptionsFuncForChartType,
   makeColorReadableOnBackgroundColor,
-  replaceVarsNameByVarsValue,
-  replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax,
+  replaceBasicVarsNameByVarsValue,
+  replaceAllVarsNameByVarsValue,
   tryCastAllToDatesAndDetectFormat,
 } from '../chartUtil';
 
@@ -165,10 +165,10 @@ describe('chartUtil', () => {
     });
   });
 
-  describe('replaceVarsNameByVarsValue', () => {
+  describe('replaceBasicVarsNameByVarsValue', () => {
     test('should replace vars by values', () => {
       expect(
-        replaceVarsNameByVarsValue('some text {var1} some other text', {
+        replaceBasicVarsNameByVarsValue('some text {var1} some other text', {
           var1: 'value1',
         }),
       ).toEqual('some text value1 some other text');
@@ -176,7 +176,7 @@ describe('chartUtil', () => {
 
     test('should replace vars by blank if missing values', () => {
       expect(
-        replaceVarsNameByVarsValue('some text {var1} some other text', {
+        replaceBasicVarsNameByVarsValue('some text {var1} some other text', {
           var2: 'value2',
         }),
       ).toEqual('some text  some other text');
@@ -184,7 +184,7 @@ describe('chartUtil', () => {
 
     test('should not replace unsupported vars', () => {
       expect(
-        replaceVarsNameByVarsValue(
+        replaceBasicVarsNameByVarsValue(
           'some text {var0} - {var11} some other text',
           {
             var0: 'value0',
@@ -195,11 +195,11 @@ describe('chartUtil', () => {
     });
   });
 
-  describe('replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax', () => {
+  describe('replaceAllVarsNameByVarsValue', () => {
     test('should replace vars by values', () => {
       const mapping = { CODE1: 'Value 1', CODE2: 'Value 2' };
       expect(
-        replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+        replaceAllVarsNameByVarsValue({
           string: 'some text {var1} some other text',
           vars: {
             var1: 'code1|code2',
@@ -212,7 +212,7 @@ describe('chartUtil', () => {
     test('should detect codes as dates and replace vars by formated values (if labels are not defined)', () => {
       const mapping = {};
       expect(
-        replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+        replaceAllVarsNameByVarsValue({
           string: 'some text {var1} some other text',
           vars: {
             var1: '2000-Q1',
@@ -225,7 +225,7 @@ describe('chartUtil', () => {
     test('should not detect dates if code are dates but not labels', () => {
       const mapping = { '2000-Q1': 'Aaaaa' };
       expect(
-        replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+        replaceAllVarsNameByVarsValue({
           string: 'some text {var1} some other text',
           vars: {
             var1: '2000-Q1',
@@ -238,7 +238,7 @@ describe('chartUtil', () => {
     test('should replace latest_min and latest_max vars', () => {
       const mapping = {};
       expect(
-        replaceVarsNameByVarsValueUsingCodeLabelMappingAndLatestMinMax({
+        replaceAllVarsNameByVarsValue({
           string: 'some text {latest_min} - {latest_max} some other text',
           vars: {},
           latestMin: 'Min',
@@ -247,6 +247,20 @@ describe('chartUtil', () => {
         }),
       ).toEqual('some text Min - Max some other text');
     });
+  });
+
+  test('should replace data_last_update_date vars', () => {
+    const mapping = {};
+    expect(
+      replaceAllVarsNameByVarsValue({
+        string: 'some text {data_last_update_date} some other text',
+        vars: {},
+        latestMin: 'Min',
+        latestMax: 'Max',
+        dataLastUpdateDate: 'Last update',
+        mapping,
+      }),
+    ).toEqual('some text Last update some other text');
   });
 
   describe('series colors', () => {
