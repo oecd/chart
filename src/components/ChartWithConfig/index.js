@@ -42,6 +42,7 @@ const ChartWithConfig = ({
   controls,
   hideControls = false,
   getControlsWithAvailability = null,
+  onVarChange = null,
   ...otherProps
 }) => {
   const ChartWithConfigComponent = height
@@ -138,9 +139,15 @@ const ChartWithConfig = ({
     var10DefaultValue,
   ]);
 
-  const changeVar = useCallback((varName, varValue) => {
-    setVars(R.assoc(varName, varValue));
-  }, []);
+  const changeVar = useCallback(
+    (varName, varValue) => {
+      setVars(R.assoc(varName, varValue));
+      if (onVarChange) {
+        onVarChange(varName, varValue);
+      }
+    },
+    [onVarChange],
+  );
 
   const [stateControls, setStateControls] = useState(controls);
   const [
@@ -304,6 +311,7 @@ ChartWithConfig.propTypes = {
   var10DefaultValue: PropTypes.string,
   controls: PropTypes.array,
   hideControls: PropTypes.bool,
+  onVarChange: PropTypes.func,
   getControlsWithAvailability: PropTypes.func,
 };
 

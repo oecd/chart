@@ -87,6 +87,9 @@ const Chart = ({ chartId, language, ...otherProps }) => {
     }
   }, []);
 
+  const [varsChangedByInternalControls, setVarsChangedByInternalControls] =
+    useState({});
+
   useEffect(() => {
     if (!chartId) {
       return;
@@ -94,6 +97,9 @@ const Chart = ({ chartId, language, ...otherProps }) => {
     if (prevChartId !== chartId || prevLanguage !== language) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       getChartConfig(chartId, language, propsVars);
+      if (prevChartId !== chartId) {
+        setVarsChangedByInternalControls({});
+      }
     }
   }, [
     prevChartId,
@@ -111,16 +117,31 @@ const Chart = ({ chartId, language, ...otherProps }) => {
         (acc, varName) =>
           R.assoc(
             varName,
-            R.isNil(R.prop(varName, propsVars))
-              ? R.propOr(null, varName, chartConfigData.chartConfig)
-              : R.replace(/\+/g, '|', R.prop(varName, propsVars)),
+            R.compose(() => {
+              if (!R.isNil(R.prop(varName, propsVars))) {
+                return R.replace(/\+/g, '|', R.prop(varName, propsVars));
+              }
+              if (!R.isNil(R.prop(varName, varsChangedByInternalControls))) {
+                return R.replace(
+                  /\+/g,
+                  '|',
+                  R.prop(varName, varsChangedByInternalControls),
+                );
+              }
+
+              return R.propOr(null, varName, chartConfigData.chartConfig);
+            })(),
             acc,
           ),
         {},
         possibleVariables,
       ),
-    [chartConfigData.chartConfig, propsVars],
+    [chartConfigData.chartConfig, propsVars, varsChangedByInternalControls],
   );
+
+  const changeVarSetByInternalControls = useCallback((varName, varValue) => {
+    setVarsChangedByInternalControls(R.assoc(varName, varValue));
+  }, []);
 
   if (!chartId) {
     return null;
@@ -153,6 +174,7 @@ const Chart = ({ chartId, language, ...otherProps }) => {
       {...R.omit(possibleVariables, chartConfigData.chartConfig)}
       {...finalVars}
       {...R.omit([...possibleVariables], otherProps)}
+      onVarChange={changeVarSetByInternalControls}
     />
   );
 };
