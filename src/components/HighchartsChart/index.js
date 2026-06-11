@@ -408,6 +408,7 @@ const HighchartsChart = ({
       if (anyVarHasChanged || lang !== prevLang) {
         const varsParam = R.compose(
           R.join('/'),
+          R.map(encodeURIComponent),
           R.dropLastWhile((v) => v === '-'),
           R.map((v) => (R.isEmpty(v) ? '-' : v)),
           R.values,

@@ -9,6 +9,14 @@ import { trackChartView } from '../../utils/trackingUtil';
 import { controlTypes, frequencyTypes } from '../../constants/chart';
 import { getConnectedControlsDotStatDimensionIds } from '../../utils/configUtil';
 
+const tryDecodeURIComponent = (value) => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
 const ChartWithConfig = ({
   height = null,
   var1 = null,
@@ -41,31 +49,71 @@ const ChartWithConfig = ({
     : ChartWithConfigNonFixedChartHeight;
 
   const [vars, setVars] = useState({
-    var1: isNilOrEmpty(var1) ? (var1DefaultValue ?? '') : decodeURI(var1),
-    var2: isNilOrEmpty(var2) ? (var2DefaultValue ?? '') : decodeURI(var2),
-    var3: isNilOrEmpty(var3) ? (var3DefaultValue ?? '') : decodeURI(var3),
-    var4: isNilOrEmpty(var4) ? (var4DefaultValue ?? '') : decodeURI(var4),
-    var5: isNilOrEmpty(var5) ? (var5DefaultValue ?? '') : decodeURI(var5),
-    var6: isNilOrEmpty(var6) ? (var6DefaultValue ?? '') : decodeURI(var6),
-    var7: isNilOrEmpty(var7) ? (var7DefaultValue ?? '') : decodeURI(var7),
-    var8: isNilOrEmpty(var8) ? (var8DefaultValue ?? '') : decodeURI(var8),
-    var9: isNilOrEmpty(var9) ? (var9DefaultValue ?? '') : decodeURI(var9),
-    var10: isNilOrEmpty(var10) ? (var10DefaultValue ?? '') : decodeURI(var10),
+    var1: isNilOrEmpty(var1)
+      ? (var1DefaultValue ?? '')
+      : tryDecodeURIComponent(var1),
+    var2: isNilOrEmpty(var2)
+      ? (var2DefaultValue ?? '')
+      : tryDecodeURIComponent(var2),
+    var3: isNilOrEmpty(var3)
+      ? (var3DefaultValue ?? '')
+      : tryDecodeURIComponent(var3),
+    var4: isNilOrEmpty(var4)
+      ? (var4DefaultValue ?? '')
+      : tryDecodeURIComponent(var4),
+    var5: isNilOrEmpty(var5)
+      ? (var5DefaultValue ?? '')
+      : tryDecodeURIComponent(var5),
+    var6: isNilOrEmpty(var6)
+      ? (var6DefaultValue ?? '')
+      : tryDecodeURIComponent(var6),
+    var7: isNilOrEmpty(var7)
+      ? (var7DefaultValue ?? '')
+      : tryDecodeURIComponent(var7),
+    var8: isNilOrEmpty(var8)
+      ? (var8DefaultValue ?? '')
+      : tryDecodeURIComponent(var8),
+    var9: isNilOrEmpty(var9)
+      ? (var9DefaultValue ?? '')
+      : tryDecodeURIComponent(var9),
+    var10: isNilOrEmpty(var10)
+      ? (var10DefaultValue ?? '')
+      : tryDecodeURIComponent(var10),
   });
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setVars({
-      var1: isNilOrEmpty(var1) ? (var1DefaultValue ?? '') : decodeURI(var1),
-      var2: isNilOrEmpty(var2) ? (var2DefaultValue ?? '') : decodeURI(var2),
-      var3: isNilOrEmpty(var3) ? (var3DefaultValue ?? '') : decodeURI(var3),
-      var4: isNilOrEmpty(var4) ? (var4DefaultValue ?? '') : decodeURI(var4),
-      var5: isNilOrEmpty(var5) ? (var5DefaultValue ?? '') : decodeURI(var5),
-      var6: isNilOrEmpty(var6) ? (var6DefaultValue ?? '') : decodeURI(var6),
-      var7: isNilOrEmpty(var7) ? (var7DefaultValue ?? '') : decodeURI(var7),
-      var8: isNilOrEmpty(var8) ? (var8DefaultValue ?? '') : decodeURI(var8),
-      var9: isNilOrEmpty(var9) ? (var9DefaultValue ?? '') : decodeURI(var9),
-      var10: isNilOrEmpty(var10) ? (var10DefaultValue ?? '') : decodeURI(var10),
+      var1: isNilOrEmpty(var1)
+        ? (var1DefaultValue ?? '')
+        : tryDecodeURIComponent(var1),
+      var2: isNilOrEmpty(var2)
+        ? (var2DefaultValue ?? '')
+        : tryDecodeURIComponent(var2),
+      var3: isNilOrEmpty(var3)
+        ? (var3DefaultValue ?? '')
+        : tryDecodeURIComponent(var3),
+      var4: isNilOrEmpty(var4)
+        ? (var4DefaultValue ?? '')
+        : tryDecodeURIComponent(var4),
+      var5: isNilOrEmpty(var5)
+        ? (var5DefaultValue ?? '')
+        : tryDecodeURIComponent(var5),
+      var6: isNilOrEmpty(var6)
+        ? (var6DefaultValue ?? '')
+        : tryDecodeURIComponent(var6),
+      var7: isNilOrEmpty(var7)
+        ? (var7DefaultValue ?? '')
+        : tryDecodeURIComponent(var7),
+      var8: isNilOrEmpty(var8)
+        ? (var8DefaultValue ?? '')
+        : tryDecodeURIComponent(var8),
+      var9: isNilOrEmpty(var9)
+        ? (var9DefaultValue ?? '')
+        : tryDecodeURIComponent(var9),
+      var10: isNilOrEmpty(var10)
+        ? (var10DefaultValue ?? '')
+        : tryDecodeURIComponent(var10),
     });
   }, [
     var1,

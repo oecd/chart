@@ -53,6 +53,7 @@ const Chart = ({ chartId, language, ...otherProps }) => {
 
       const varsParam = R.compose(
         R.join('/'),
+        R.map(encodeURIComponent),
         R.dropLastWhile((value) => value === '-'),
         R.map((varName) =>
           isNilOrEmpty(R.prop(varName, vars)) ? '-' : R.prop(varName, vars),
