@@ -1,4 +1,3 @@
-/*global window*/
 import { useCallback, useContext } from 'react';
 import PropTypes from 'prop-types';
 

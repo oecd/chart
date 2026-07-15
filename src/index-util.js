@@ -1,4 +1,5 @@
 import * as chartConstant from './constants/chart';
+import * as chartErrorMessages from './constants/chartErrorMessages';
 import * as configUtil from './utils/configUtil';
 import * as csvUtil from './utils/csvUtil';
 import * as sdmxJsonUtil from './utils/sdmxJsonUtil';
@@ -13,4 +14,5 @@ export {
   sdmxJsonUtil,
   chartUtil,
   dateUtil,
+  chartErrorMessages,
 };

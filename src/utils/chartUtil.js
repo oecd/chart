@@ -1,4 +1,3 @@
-import { TinyColor, isReadable } from '@ctrl/tinycolor';
 import truncatise from 'truncatise';
 import * as R from 'ramda';
 
@@ -10,7 +9,7 @@ import {
   latestMinVariable,
   possibleVariables,
 } from './configUtil';
-import { forEachWithIndex, isNilOrEmpty, mapWithIndex } from './ramdaUtil';
+import { isNilOrEmpty, mapWithIndex } from './ramdaUtil';
 import {
   baselineColorShades,
   chartSpacing,
@@ -43,16 +42,10 @@ import {
   createFromToPoints,
   rejectInvalidFromToPoints,
 } from './sankeyUtil';
+import customChartRenderByChartType from '../highchartsCustomCode/customChartRenderByChartType';
+import { addColorAlpha, makeColorReadableOnBackgroundColor } from './colorUtil';
 
 const mapsUtil = import('./mapsUtil');
-
-export const makeColorReadableOnBackgroundColor = (color, backgroundColor) =>
-  R.reduceWhile(
-    (acc) => !isReadable(acc, backgroundColor),
-    (acc) => acc.darken(10),
-    new TinyColor(color || 'black'),
-    R.times(R.identity, 3),
-  ).toHexString();
 
 const createDatapoint = (d, categoriesAreDatesOrNumberForDataParsing) =>
   categoriesAreDatesOrNumberForDataParsing && d.metadata
@@ -243,15 +236,6 @@ export const deepMergeUserOptionsWithDefaultOptions = (
       ),
     ),
   )({});
-};
-
-export const addColorAlpha = (color, alphaToAdd) => {
-  const colorObject = new TinyColor(color || 'black');
-  const newAlpha = R.compose(
-    R.when(R.gt(R.__, 1), R.always(1)),
-    R.when(R.lt(R.__, 0), R.always(0)),
-  )(colorObject.getAlpha() + alphaToAdd);
-  return colorObject.setAlpha(newAlpha).toHex8String();
 };
 
 export const tryCastAllToDatesAndDetectFormat = (values) => {
@@ -1145,8 +1129,6 @@ const createOptionsForScatterChart = ({
   const symbolLayout = chartType === chartTypes.symbol;
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
-  const firstPaletteColor = R.head(colorPalette);
-
   const getIsMinAvgOrMax =
     chartType !== chartTypes.symbolMinMax
       ? R.always(false)
@@ -1261,58 +1243,6 @@ const createOptionsForScatterChart = ({
     };
   }, data.series);
 
-  let minMaxLines = [];
-
-  const chartRender = ({ target: chart }) => {
-    if (symbolLayout || symbolMinMaxLayout) {
-      // remove previous lines (user can make series visible or not which requires to
-      // redraw the lines)
-      forEachWithIndex((l) => l?.destroy(), minMaxLines);
-
-      const categoriesMinMax = R.compose(
-        (seriesData) =>
-          R.compose(
-            R.map((categoryData) => {
-              const validData = R.reject(R.isNil, categoryData);
-              return R.isEmpty(validData)
-                ? []
-                : [Math.min(...validData), Math.max(...validData)];
-            }),
-            R.map((idx) => R.map(R.nth(idx), seriesData)),
-          )(R.times(R.identity, R.length(data.categories))),
-
-        R.map(R.compose(R.map(R.prop('y')), R.prop('data'))),
-      )(R.filter(R.propEq(true, 'visible'), chart.series));
-
-      minMaxLines = mapWithIndex((category, idx) => {
-        if (R.isEmpty(categoriesMinMax[idx])) {
-          return null;
-        }
-
-        const x = R.path([0, 'data', idx, 'x'], chart.series);
-        const ax = chart.xAxis[0]?.toPixels(x);
-        const ay = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][0]);
-        const bx = ax;
-        const by = chart.yAxis[0]?.toPixels(categoriesMinMax[idx][1]);
-
-        const lineColor = chart.series[0].color || firstPaletteColor;
-
-        return chart.renderer
-          .path(
-            symbolLayout
-              ? ['M', ax, ay, 'L', bx, by]
-              : ['M', ay, ax, 'L', by, bx],
-          )
-          .attr({
-            stroke: addColorAlpha(lineColor, -0.6),
-            'stroke-width': 1,
-            zIndex: 1,
-          })
-          .add();
-      }, data.categories);
-    }
-  };
-
   const symbolMinMaxData = symbolMinMaxLayout
     ? R.compose(
         (allSeriesFirstDatum) => {
@@ -1359,7 +1289,6 @@ const createOptionsForScatterChart = ({
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
-        render: chartRender,
       },
       inverted: symbolMinMaxLayout,
       className: disableLegendInteraction
@@ -1973,7 +1902,23 @@ const createChartOptionsFunc =
       seriesFrequency,
     });
 
+    const customChartRender = R.propOr(
+      null,
+      otherProps.chartType,
+      customChartRenderByChartType,
+    );
+
+    const customChartRenderWithCbType = ({ target: chart }) => {
+      if (customChartRender) {
+        customChartRender({ chart, cbType: otherProps.chartType });
+      }
+    };
+
     return R.compose(
+      R.when(
+        () => !R.isNil(customChartRender),
+        R.assocPath(['chart', 'events', 'render'], customChartRenderWithCbType),
+      ),
       R.assoc('lang', {
         decimalPoint,
         thousandsSep: thousandsSeparator,

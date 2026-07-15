@@ -1,4 +1,3 @@
-/*global fetch*/
 import * as R from 'ramda';
 
 const handleResponse = async (response) => {

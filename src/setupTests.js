@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 
-/* global global, window, jest */
+/* global global, jest */
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {

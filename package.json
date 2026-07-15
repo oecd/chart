@@ -15,6 +15,7 @@
     "lint": "eslint src/**/*.js",
     "prebuild": "jest --ci --watchAll=false && rimraf ./dist",
     "build": "rollup -c",
+    "prebuild:no-test": "rimraf ./dist",
     "build:no-test": "rollup -c",
     "test": "jest",
     "test:watch": "jest --watch",

@@ -7,7 +7,7 @@ import Component from './Component';
 import { possibleVariables, isCastableToNumber } from '../../utils/configUtil';
 import CenteredContainer from '../CenteredContainer';
 import ChartErrorBoundary from '../ChartErrorBoundary';
-import { errorMessages } from '../../constants/chart';
+import { errorMessages } from '../../constants/chartErrorMessages';
 
 const textPropIsEqualToTrue = (textProp) =>
   textProp === true || textProp === 'true' || textProp === '';

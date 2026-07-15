@@ -1,4 +1,3 @@
-/*global document, CustomEvent*/
 import { isNilOrEmpty } from './ramdaUtil';
 
 export const trackChartView = (chartId) => {

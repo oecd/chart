@@ -9,27 +9,9 @@ import 'highcharts/es-modules/masters/modules/exporting.src';
 import 'highcharts/es-modules/masters/modules/export-data.src';
 import HighchartsReact from 'highcharts-react-official';
 
-if (typeof Highcharts === 'object') {
-  Highcharts.SVGRenderer.prototype.symbols.cross = (x, y, w, h) => [
-    'M',
-    x,
-    y,
-    'L',
-    x + w,
-    y + h,
-    'M',
-    x + w,
-    y,
-    'L',
-    x,
-    y + h,
-    'z',
-  ];
-  if (Highcharts.VMLRenderer) {
-    Highcharts.VMLRenderer.prototype.symbols.cross =
-      Highcharts.SVGRenderer.prototype.symbols.cross;
-  }
-}
+import customizeHighchartsForScatterChart from '../../highchartsCustomCode/customizeHighchartsForScatterChart';
+
+customizeHighchartsForScatterChart(Highcharts);
 
 const ScatterChart = forwardRef(({ options }, ref) => (
   <HighchartsReact

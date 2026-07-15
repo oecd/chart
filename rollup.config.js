@@ -123,4 +123,28 @@ export default [
       terser(),
     ],
   },
+  {
+    input: './src/index-custom-export-server.js',
+    output: [
+      {
+        dir: 'dist/umd',
+        format: 'umd',
+        sourcemap: true,
+        entryFileNames: () => 'customExportServerUmd.js',
+        name: 'customExportServerUmd',
+      },
+    ],
+    plugins: [
+      replace({
+        'process.env.NODE_ENV': JSON.stringify(env),
+        'process.env.API_URL': JSON.stringify(apiUrl),
+        'process.env.NEXT_PUBLIC_CHART_LIB_API_URL': JSON.stringify(apiUrl),
+        preventAssignment: true,
+      }),
+      external(),
+      resolve(),
+      commonjs(),
+      terser(),
+    ],
+  },
 ];

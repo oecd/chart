@@ -31,12 +31,25 @@ const eslintConfig = [
     },
   }),
   {
+    files: ['src/**'],
+    languageOptions: {
+      globals: globals.browser,
+    },
+  },
+  {
     files: ['**/__tests__/**'],
     languageOptions: {
       globals: {
         ...globals.mocha,
         ...globals.jest,
+        ...globals.node,
       },
+    },
+  },
+  {
+    files: ['scripts/**'],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 ];

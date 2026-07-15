@@ -1,4 +1,3 @@
-/*global URL, fetch, AbortSignal*/
 import { parse } from 'date-fns';
 import { UTCDate } from '@date-fns/utc';
 import * as R from 'ramda';

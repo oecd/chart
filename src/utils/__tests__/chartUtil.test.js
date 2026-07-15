@@ -6,14 +6,16 @@ import {
   frequencyTypes,
 } from '../../constants/chart';
 import {
-  addColorAlpha,
   deepMergeUserOptionsWithDefaultOptions,
   getCreateOptionsFuncForChartType,
-  makeColorReadableOnBackgroundColor,
   replaceBasicVarsNameByVarsValue,
   replaceAllVarsNameByVarsValue,
   tryCastAllToDatesAndDetectFormat,
 } from '../chartUtil';
+import {
+  makeColorReadableOnBackgroundColor,
+  addColorAlpha,
+} from '../colorUtil';
 
 describe('chartUtil', () => {
   describe('makeColorReadableOnBackgroundColor', () => {

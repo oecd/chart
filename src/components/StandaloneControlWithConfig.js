@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/static-components */
-/*global document, CustomEvent*/
 import {
   useMemo,
   useCallback,

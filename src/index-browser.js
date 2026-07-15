@@ -1,4 +1,3 @@
-/*global customElements*/
 import * as R from 'ramda';
 import r2wc from '@r2wc/react-to-web-component';
 import 'rc-slider/assets/index.css';

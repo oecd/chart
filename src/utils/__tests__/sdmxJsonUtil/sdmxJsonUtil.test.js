@@ -1,5 +1,3 @@
-/* global global, AbortSignal */
-
 import {
   getAvailabilityUrlFromDotStatUrl,
   fetchDotStatData,

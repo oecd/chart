@@ -7,7 +7,8 @@ import Spinner from '../Spinner';
 import { possibleVariables } from '../../utils/configUtil';
 import { fetchJson } from '../../utils/fetchUtil';
 import CenteredContainer from '../CenteredContainer';
-import { apiUrl, errorMessages } from '../../constants/chart';
+import { apiUrl } from '../../constants/chart';
+import { errorMessages } from '../../constants/chartErrorMessages';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 
 const Chart = ({ chartId, language, ...otherProps }) => {

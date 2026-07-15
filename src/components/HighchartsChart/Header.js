@@ -1,4 +1,3 @@
-/*global window*/
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
