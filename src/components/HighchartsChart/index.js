@@ -55,9 +55,8 @@ import Header from './Header';
 import useIsFontLoaded from '../../hook/useIsFontLoaded';
 import { trackChartError } from '../../utils/trackingUtil';
 import GenericChart from './GenericChart';
-import ScatterChart from './ScatterChart';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
-import customizeHighchartsForAllChartTypes from '../../highchartsCustomCode/customizeHighchartsForAllChartTypes';
+import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -72,9 +71,9 @@ const chartByType = {
   [chartTypes.stackedRow]: GenericChart,
   [chartTypes.stackedArea]: GenericChart,
   [chartTypes.map]: MapChart,
-  [chartTypes.symbol]: ScatterChart,
-  [chartTypes.symbolMinMax]: ScatterChart,
-  [chartTypes.scatter]: ScatterChart,
+  [chartTypes.symbol]: GenericChart,
+  [chartTypes.symbolMinMax]: GenericChart,
+  [chartTypes.scatter]: GenericChart,
   [chartTypes.radar]: GenericChart,
   [chartTypes.pie]: GenericChart,
   [chartTypes.sankey]: GenericChart,
@@ -90,7 +89,7 @@ const sendDebugInfo = ({ type, data }) => {
   );
 };
 
-customizeHighchartsForAllChartTypes(Highcharts);
+customizeHighcharts(Highcharts);
 
 const getAnyVarEmpty = (varNames, vars) =>
   R.compose(R.any(R.isEmpty), R.values, R.pick(R.__, vars))(varNames || []);

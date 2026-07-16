@@ -18,10 +18,6 @@ import HighchartsReact from 'highcharts-react-official';
 import { debounce } from 'throttle-debounce';
 import * as R from 'ramda';
 
-import customizeHighchartsForMapChart from '../../highchartsCustomCode/customizeHighchartsForMapChart';
-
-customizeHighchartsForMapChart(Highcharts);
-
 const MapChart = forwardRef(({ options }, ref) => {
   const optionalDottedMapLines = useMemo(
     () =>
