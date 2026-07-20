@@ -16,7 +16,6 @@ import { barAndColumnChartRenderHandler } from './barAndColumnChartRenderHandler
 import {
   calcExistingFixedColorIndexBySeries,
   createExportFileName,
-  createShadesFromColor,
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
   getSeriesColor,
@@ -75,13 +74,15 @@ export const createStackedDatapoints = ({
     baselineColorShades,
   );
 
-  return mapWithIndex((s, yIdx) => {
+  return mapWithIndex((s, seriesIndex) => {
     const seriesColor = getSeriesColor({
       colorPalette,
-      seriesIndex: yIdx,
+      seriesIndex,
       seriesCode: s.code,
       fixedColorIndexBySeries,
     });
+
+    const seriesHighlightIndex = R.findIndex(codeOrLabelEquals(s), highlight);
 
     return {
       name: data.areSeriesDates
@@ -102,10 +103,7 @@ export const createStackedDatapoints = ({
       showInLegend: true,
       data: mapWithIndex((d, xIdx) => {
         const category = R.nth(xIdx, data.categories);
-        const highlightColorsIndex = R.findIndex(
-          codeOrLabelEquals(category),
-          highlight,
-        );
+
         const baselineColorsIndex = R.findIndex(
           codeOrLabelEquals(category),
           baseline,
@@ -114,20 +112,21 @@ export const createStackedDatapoints = ({
         const finalBaselineColor =
           baselineColorsIndex === -1
             ? null
-            : getListItemAtTurningIndex(yIdx, baselineColors);
+            : getListItemAtTurningIndex(seriesIndex, baselineColors);
+
+        const categoryIsHighlighted = R.any(
+          codeOrLabelEquals(category),
+          highlight,
+        );
 
         const highlightColor =
-          highlightColorsIndex === -1
-            ? null
-            : getListItemAtTurningIndex(
-                yIdx,
-                createShadesFromColor(
-                  getListItemAtTurningIndex(
-                    highlightColorsIndex,
-                    highlightColors,
-                  ),
-                ),
-              );
+          seriesHighlightIndex !== -1
+            ? getListItemAtTurningIndex(seriesHighlightIndex, highlightColors)
+            : categoryIsHighlighted
+              ? // Stacked bars have a highlight color according to their series index
+                // so there is enough contrast
+                getListItemAtTurningIndex(seriesIndex, highlightColors)
+              : null;
 
         const color = R.cond([
           [() => !R.isNil(finalBaselineColor), R.always(finalBaselineColor)],
@@ -702,8 +701,6 @@ const createOptionsForLineChart = ({
   };
 };
 
-const anyTruthy = R.any(R.identity);
-
 const createOptionsForBarChart = ({
   chartType,
   data,
@@ -1027,9 +1024,6 @@ const createOptionsForStackedChart = ({
 
   return {
     chart: {
-      custom: {
-        hello: 'World',
-      },
       type: highChartsChartType,
       style: {
         fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
