@@ -717,6 +717,8 @@ const createOptionsForLineChart = ({
   };
 };
 
+const anyTruthy = R.any(R.identity);
+
 const createOptionsForBarChart = ({
   chartType,
   data,
@@ -741,53 +743,76 @@ const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const series = mapWithIndex((s, xIdx) => {
+  const seriesLength = data.series.length;
+
+  const highlightedSeries = R.filter(
+    (series) => R.any(codeOrLabelEquals(series), highlight),
+    data.series,
+  );
+
+  const highlightedCategories = R.filter(
+    (category) => R.any(codeOrLabelEquals(category), highlight),
+    data.categories,
+  );
+
+  const categoryGroupIsHighlighted =
+    highlightedCategories.length > 0 &&
+    seriesLength > 1 &&
+    data.series[0].data.length > 1;
+
+  const series = mapWithIndex((s, sIdx) => {
     const seriesColor =
       getBaselineOrHighlightColor(s, highlight, baseline, highlightColors) ||
       getSeriesColor({
         colorPalette,
-        seriesIndex: xIdx,
+        seriesIndex: sIdx,
         seriesCode: s.code,
         fixedColorIndexBySeries,
       });
 
-    const seriesIsHighlighted = R.any(codeOrLabelEquals(s))(highlight);
+    const seriesIsHighlighted = R.any(codeOrLabelEquals(s), highlight);
+
+    const augmentedPoints = mapWithIndex((d, dIdx) => {
+      const category = R.nth(dIdx, data.categories);
+
+      const baselineOrHighlightColor = getBaselineOrHighlightColor(
+        category,
+        highlight,
+        baseline,
+        highlightColors,
+      );
+
+      const dataPoint = createDatapoint(
+        d,
+        categoriesAreDatesOrNumberForDataParsing,
+      );
+
+      const pointIsHighlighted = R.any(codeOrLabelEquals(category))(highlight);
+
+      return baselineOrHighlightColor
+        ? {
+            ...dataPoint,
+            name: category.label,
+            color: baselineOrHighlightColor,
+            custom: {
+              isHighlighted: pointIsHighlighted,
+              categoryGroupIsHighlighted,
+            },
+          }
+        : { ...dataPoint, name: category.label };
+    }, s.data);
 
     return {
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(s.label).getTime()
         : s.label,
-      data: mapWithIndex((d, dIdx) => {
-        const category = R.nth(dIdx, data.categories);
-
-        const baselineOrHighlightColor = getBaselineOrHighlightColor(
-          category,
-          highlight,
-          baseline,
-          highlightColors,
-        );
-
-        const dataPoint = createDatapoint(
-          d,
-          categoriesAreDatesOrNumberForDataParsing,
-        );
-
-        const pointIsHighlighted = R.any(codeOrLabelEquals(category))(
-          highlight,
-        );
-
-        return baselineOrHighlightColor
-          ? {
-              ...dataPoint,
-              name: category.label,
-              color: baselineOrHighlightColor,
-              custom: { isHighlighted: pointIsHighlighted },
-            }
-          : { ...dataPoint, name: category.label };
-      }, s.data),
+      data: augmentedPoints,
       color: seriesColor,
       showInLegend: true,
-      custom: { isHighlighted: seriesIsHighlighted },
+      custom: {
+        isHighlighted: seriesIsHighlighted,
+        categoryGroupIsHighlighted,
+      },
     };
   }, data.series);
 
@@ -826,6 +851,12 @@ const createOptionsForBarChart = ({
   };
 
   return {
+    custom: {
+      highlightedSeries,
+      highlightedCategories,
+      categoryGroupIsHighlighted,
+    },
+
     chart: {
       type: horizontal ? 'bar' : 'column',
       style: {
@@ -1011,6 +1042,9 @@ const createOptionsForStackedChart = ({
 
   return {
     chart: {
+      custom: {
+        hello: 'World',
+      },
       type: highChartsChartType,
       style: {
         fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
