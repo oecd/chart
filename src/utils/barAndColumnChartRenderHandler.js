@@ -232,9 +232,10 @@ const renderSeriesHighlight = (chart, series, highlightColors) => {
  * Draws a rect around all shapes of highlighted categories
  *
  * @param {Chart} chart
+ * @param {string[]} highlightColors
  * @returns {SVGElement[]}
  */
-const highlightCategoryGroups = (chart) => {
+const highlightCategoryGroups = (chart, highlightColors) => {
   /** @type {SVGElement[]} */
   const shapes = [];
 
@@ -295,12 +296,11 @@ const highlightCategoryGroups = (chart) => {
         .rect()
         .attr({
           strokeWidth: 1,
-          stroke: 'red',
-          fill: 'rgb(255 0 0 / 0.05)',
-          x: minX,
-          width: maxX - minX,
-          y: minY,
-          height: maxY - minY,
+          stroke: highlightColors[0],
+          x: minX - 1,
+          width: maxX - minX + 2,
+          y: minY - 1,
+          height: maxY - minY + 2,
         })
         .css({ pointerEvents: 'none' })
         .add();
@@ -331,7 +331,7 @@ export const barAndColumnChartRenderHandler = (chart, highlightColors) => {
    */
   const activeShapes = [];
 
-  activeShapes.push(...highlightCategoryGroups(chart));
+  activeShapes.push(...highlightCategoryGroups(chart, highlightColors));
 
   // Render highlight shapes for all active series. Aggregate the shapes in a Set.
   const seriesHighlightShapes = chart.series
