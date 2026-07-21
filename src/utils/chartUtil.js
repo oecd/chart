@@ -1,3 +1,5 @@
+/* global console */
+/* eslint-disable no-console */
 import * as R from 'ramda';
 import truncatise from 'truncatise';
 import {
@@ -44,6 +46,7 @@ import {
   rejectInvalidFromToPoints,
 } from './sankeyUtil';
 import { noDataErrorMessageString } from '../constants/chartErrorMessages';
+import { stackedChartRenderHandler } from './stackedChartRenderHandler';
 
 const mapsUtil = import('./mapsUtil');
 
@@ -83,6 +86,7 @@ export const createStackedDatapoints = ({
     });
 
     const seriesHighlightIndex = R.findIndex(codeOrLabelEquals(s), highlight);
+    const seriesIsHighlighted = seriesHighlightIndex !== -1;
 
     return {
       name: data.areSeriesDates
@@ -101,6 +105,9 @@ export const createStackedDatapoints = ({
         },
       },
       showInLegend: true,
+      custom: {
+        isHighlighted: seriesIsHighlighted,
+      },
       data: mapWithIndex((d, xIdx) => {
         const category = R.nth(xIdx, data.categories);
 
@@ -119,14 +126,9 @@ export const createStackedDatapoints = ({
           highlight,
         );
 
-        const highlightColor =
-          seriesHighlightIndex !== -1
-            ? getListItemAtTurningIndex(seriesHighlightIndex, highlightColors)
-            : categoryIsHighlighted
-              ? // Stacked bars have a highlight color according to their series index
-                // so there is enough contrast
-                getListItemAtTurningIndex(seriesIndex, highlightColors)
-              : null;
+        const highlightColor = seriesIsHighlighted
+          ? getListItemAtTurningIndex(seriesHighlightIndex, highlightColors)
+          : null;
 
         const color = R.cond([
           [() => !R.isNil(finalBaselineColor), R.always(finalBaselineColor)],
@@ -139,9 +141,15 @@ export const createStackedDatapoints = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        return color
-          ? { name: category.label, ...dataPoint, color }
-          : { name: category.label, ...dataPoint };
+        return {
+          name: category.label,
+          ...dataPoint,
+          color,
+          custom: {
+            ...dataPoint.custom,
+            isHighlighted: categoryIsHighlighted,
+          },
+        };
       }, s.data),
     };
   }, data.series);
@@ -725,8 +733,6 @@ const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const seriesLength = data.series.length;
-
   const highlightedSeries = R.filter(
     (series) => R.any(codeOrLabelEquals(series), highlight),
     data.series,
@@ -739,8 +745,10 @@ const createOptionsForBarChart = ({
 
   const categoryGroupIsHighlighted =
     highlightedCategories.length > 0 &&
-    seriesLength > 1 &&
+    data.series.length > 1 &&
     data.series[0].data.length > 1;
+
+  console.log('categoryGroupIsHighlighted', categoryGroupIsHighlighted);
 
   const series = mapWithIndex((s, sIdx) => {
     const seriesColor =
@@ -769,7 +777,9 @@ const createOptionsForBarChart = ({
         categoriesAreDatesOrNumberForDataParsing,
       );
 
-      const pointIsHighlighted = R.any(codeOrLabelEquals(category))(highlight);
+      const categoryIsHighlighted = R.any(codeOrLabelEquals(category))(
+        highlight,
+      );
 
       return baselineOrHighlightColor
         ? {
@@ -777,8 +787,7 @@ const createOptionsForBarChart = ({
             name: category.label,
             color: baselineOrHighlightColor,
             custom: {
-              isHighlighted: pointIsHighlighted,
-              categoryGroupIsHighlighted,
+              isHighlighted: categoryIsHighlighted,
             },
           }
         : { ...dataPoint, name: category.label };
@@ -793,7 +802,6 @@ const createOptionsForBarChart = ({
       showInLegend: true,
       custom: {
         isHighlighted: seriesIsHighlighted,
-        categoryGroupIsHighlighted,
       },
     };
   }, data.series);
@@ -1022,7 +1030,28 @@ const createOptionsForStackedChart = ({
     return horizontal ? 14 : 34;
   };
 
+  const highlightedSeries = R.filter(
+    (series) => R.any(codeOrLabelEquals(series), highlight),
+    data.series,
+  );
+
+  const highlightedCategories = R.filter(
+    (category) => R.any(codeOrLabelEquals(category), highlight),
+    data.categories,
+  );
+
+  const categoryGroupIsHighlighted =
+    highlightedCategories.length > 0 &&
+    data.series.length > 1 &&
+    data.series[0].data.length > 1;
+
   return {
+    custom: {
+      highlightedSeries,
+      highlightedCategories,
+      categoryGroupIsHighlighted,
+    },
+
     chart: {
       type: highChartsChartType,
       style: {
@@ -1036,6 +1065,9 @@ const createOptionsForStackedChart = ({
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
+        render() {
+          stackedChartRenderHandler(this, highlightColors);
+        },
       },
       className: disableLegendInteraction
         ? 'cb-disable-legend-pointer-events'
