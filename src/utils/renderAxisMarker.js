@@ -4,7 +4,7 @@
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { OUTLINE_SUM } from './highlightOutlineConstants';
+import { getOutlineWidth } from './highlightOutline';
 
 const HIGHLIGHT_MARKER_SIZE = 5;
 /**
@@ -75,6 +75,8 @@ const renderAxisMarker = (
     axisMarkers.set(point, axisMarker);
   }
 
+  const outlineWidth = getOutlineWidth(chart.plotWidth);
+
   axisMarker.attr(
     series.type === 'bar'
       ? {
@@ -88,9 +90,9 @@ const renderAxisMarker = (
         }
       : // Column chart
         {
-          x: Math.floor(shapeArgs.x - OUTLINE_SUM),
+          x: Math.floor(shapeArgs.x - 2 * outlineWidth),
           y: chart.plotHeight + HIGHLIGHT_MARKER_GAP,
-          width: Math.ceil(shapeArgs.width + 2 * OUTLINE_SUM),
+          width: Math.ceil(shapeArgs.width + 4 * outlineWidth),
           height: HIGHLIGHT_MARKER_SIZE,
           fill,
         },
@@ -138,7 +140,6 @@ export const renderAxisMarkers = (
         const isHighlighted =
           (seriesHighlight && seriesIsHighlighted) ||
           (categoryHighlight && categoryIsHighlighted);
-        console.log('isHighlighted', isHighlighted);
 
         // Axis marker
         const axisMarker = renderAxisMarker(
