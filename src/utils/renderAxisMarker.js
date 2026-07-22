@@ -4,7 +4,8 @@
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { getOutlineWidth } from './highlightOutline';
+import * as R from 'ramda';
+import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 
 const HIGHLIGHT_MARKER_SIZE = 5;
 /**
@@ -76,6 +77,11 @@ const renderAxisMarker = (
   }
 
   const outlineWidth = getOutlineWidth(chart.plotWidth);
+  const outlineGap = getOutlineGap(chart.plotWidth);
+  const outlineDistance = outlineGap + outlineWidth / 2;
+
+  const floor = chart.plotWidth >= 500 ? Math.floor : R.identity;
+  const ceil = chart.plotWidth >= 500 ? Math.ceil : R.identity;
 
   axisMarker.attr(
     series.type === 'bar'
@@ -90,9 +96,9 @@ const renderAxisMarker = (
         }
       : // Column chart
         {
-          x: Math.floor(shapeArgs.x - 2 * outlineWidth),
+          x: floor(shapeArgs.x - outlineDistance),
           y: chart.plotHeight + HIGHLIGHT_MARKER_GAP,
-          width: Math.ceil(shapeArgs.width + 4 * outlineWidth),
+          width: ceil(shapeArgs.width + 2 * outlineDistance),
           height: HIGHLIGHT_MARKER_SIZE,
           fill,
         },
