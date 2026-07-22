@@ -1,3 +1,5 @@
+import { getOutlineGap, getOutlineWidth } from './highlightOutline';
+
 /**
  * Draws a rect around all shapes of highlighted categories.
  * Returns an array of created SVG elements.
@@ -76,15 +78,22 @@ export const highlightCategoryGroups = (chart, highlightColors) => {
       if (bottommost > maxY) maxY = bottommost;
     });
 
+    const outlineWidth = getOutlineWidth(chart.plotWidth);
+    const outlineGap = getOutlineGap(chart.plotWidth);
+    const outlineDistance = outlineGap + outlineWidth / 2;
+
+    const floor = chart.plotWidth >= 500 ? Math.floor : R.identity;
+    const ceil = chart.plotWidth >= 500 ? Math.ceil : R.identity;
+
     const rect = chart.renderer
       .rect()
       .attr({
-        strokeWidth: 1,
+        strokeWidth: outlineWidth,
         stroke: highlightColors[0],
-        x: minX - 1,
-        width: maxX - minX + 2,
-        y: minY - 1,
-        height: maxY - minY + 2,
+        x: floor(minX - outlineDistance),
+        width: ceil(maxX - minX + 2 * outlineDistance),
+        y: floor(chart.plotTop + 2 * outlineDistance),
+        height: ceil(chart.plotHeight - 2 * outlineDistance),
       })
       .css({ pointerEvents: 'none' })
       .add();
