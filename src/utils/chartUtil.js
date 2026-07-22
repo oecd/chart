@@ -18,6 +18,7 @@ import { barAndColumnChartRenderHandler } from './barAndColumnChartRenderHandler
 import {
   calcExistingFixedColorIndexBySeries,
   createExportFileName,
+  getBaselineColor,
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
   getSeriesColor,
@@ -747,11 +748,9 @@ const createOptionsForBarChart = ({
     data.series.length > 1 &&
     data.series[0].data.length > 1;
 
-  console.log('categoryGroupIsHighlighted', categoryGroupIsHighlighted);
-
   const series = mapWithIndex((s, sIdx) => {
     const seriesColor =
-      getBaselineOrHighlightColor(s, highlight, baseline, highlightColors) ||
+      getBaselineColor(s, baseline) ||
       getSeriesColor({
         colorPalette,
         seriesIndex: sIdx,
@@ -764,12 +763,7 @@ const createOptionsForBarChart = ({
     const augmentedPoints = mapWithIndex((d, dIdx) => {
       const category = R.nth(dIdx, data.categories);
 
-      const baselineOrHighlightColor = getBaselineOrHighlightColor(
-        category,
-        highlight,
-        baseline,
-        highlightColors,
-      );
+      const baselineColor = getBaselineColor(category, baseline);
 
       const dataPoint = createDatapoint(
         d,
@@ -780,16 +774,14 @@ const createOptionsForBarChart = ({
         highlight,
       );
 
-      return baselineOrHighlightColor
-        ? {
-            ...dataPoint,
-            name: category.label,
-            color: baselineOrHighlightColor,
-            custom: {
-              isHighlighted: categoryIsHighlighted,
-            },
-          }
-        : { ...dataPoint, name: category.label };
+      return {
+        ...dataPoint,
+        name: category.label,
+        color: baselineColor,
+        custom: {
+          isHighlighted: categoryIsHighlighted,
+        },
+      };
     }, s.data);
 
     return {
