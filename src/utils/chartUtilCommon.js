@@ -1,7 +1,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
-import { codeOrLabelEquals } from './configUtil';
 import { baselineColor } from '../constants/chart';
+import { codeOrLabelEquals } from './configUtil';
 import { isNilOrEmpty, reduceWithIndex } from './ramdaUtil';
 
 const lightenColor = (color, percent) => {
@@ -90,17 +90,25 @@ export const getSeriesColor = ({
   );
 };
 
+export const getBaselineColor = (objWithCodeAndLabel, baseline) => {
+  const baselineIndex = R.findIndex(
+    codeOrLabelEquals(objWithCodeAndLabel),
+    baseline,
+  );
+  if (baselineIndex !== -1) {
+    return baselineColor;
+  }
+  return null;
+};
+
 export const getBaselineOrHighlightColor = (
   objWithCodeAndLabel,
   highlight,
   baseline,
   highlightColors,
 ) => {
-  const baselineIndex = R.findIndex(
-    codeOrLabelEquals(objWithCodeAndLabel),
-    baseline,
-  );
-  if (baselineIndex !== -1) {
+  const baselineColor = getBaselineColor(objWithCodeAndLabel, baseline);
+  if (baselineColor !== null) {
     return baselineColor;
   }
 
