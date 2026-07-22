@@ -4,7 +4,7 @@
  */
 
 import { highlightCategoryGroups } from './highlightCategoryGroups';
-import { OUTLINE_SUM } from './highlightOutlineConstants';
+import { getOutlineWidth } from './highlightOutline';
 import { renderAxisMarkers } from './renderAxisMarker';
 
 /**
@@ -53,10 +53,18 @@ const renderHighlightOutline = (
   //   .toRgbString();
   const highlightColor = highlightColors[0];
 
+  const outlineWidth = getOutlineWidth(chart.plotWidth);
+  const outlineDistance = outlineWidth + outlineWidth / 2;
+
   if (!outline) {
     outline = chart.renderer
       .rect()
-      .attr({ strokeWidth: 1, stroke: highlightColor, fill: 'none' })
+      .attr({
+        'stroke-width': outlineWidth,
+        stroke: highlightColor,
+        fill: 'none',
+        class: 'oecd-highlightOutline',
+      })
       .css({ pointerEvents: 'none' })
       // Add rect to the parent group which already has a transformation applied, depending on the chart type (translate, rotate, flip)
       .add(graphic.parentGroup);
@@ -65,16 +73,16 @@ const renderHighlightOutline = (
   }
 
   outline = outline.attr({
-    x: shapeArgs.x - OUTLINE_SUM,
-    y: shapeArgs.y - OUTLINE_SUM,
-    width: shapeArgs.width + 2 * OUTLINE_SUM,
-    height:
+    x: Math.floor(shapeArgs.x - outlineDistance),
+    y: Math.floor(shapeArgs.y - outlineDistance),
+    width: Math.ceil(shapeArgs.width + 2 * outlineDistance),
+    height: Math.ceil(
       // Bar charts are column charts rotated by 90° and mirrored,
       // so x and y dimensions are flipped here, and y: 0 is on the right
       series.type === 'bar'
-        ? chart.plotWidth + 2 * OUTLINE_SUM
-        : chart.plotHeight + 2 * OUTLINE_SUM,
-    zIndex: -1,
+        ? chart.plotWidth + 2 * outlineDistance
+        : chart.plotHeight + 2 * outlineDistance,
+    ),
   });
 
   return outline;
