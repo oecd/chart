@@ -1,3 +1,4 @@
+import * as R from 'ramda';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 
 /**
