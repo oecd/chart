@@ -138,7 +138,7 @@ const renderHighlightOutlines = (chart, highlightColors) => {
  */
 export const barAndColumnChartRenderHandler = (chart, highlightColors) => {
   // Fill the plot area for debugging
-  chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 0 / 0.1)');
+  // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 0 / 0.1)');
 
   /**
    * SVG elements created for highlighting
