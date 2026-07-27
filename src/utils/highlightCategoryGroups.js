@@ -1,4 +1,3 @@
-import * as R from 'ramda';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 
 /**
@@ -83,18 +82,16 @@ export const highlightCategoryGroups = (chart, highlightColors) => {
     const outlineGap = getOutlineGap(chart.plotWidth);
     const outlineDistance = outlineGap + outlineWidth / 2;
 
-    const floor = chart.plotWidth >= 500 ? Math.floor : R.identity;
-    const ceil = chart.plotWidth >= 500 ? Math.ceil : R.identity;
-
     const rect = chart.renderer
       .rect()
       .attr({
         strokeWidth: outlineWidth,
+        // TODO: Pick the right color
         stroke: highlightColors[0],
-        x: floor(minX - outlineDistance),
-        width: ceil(maxX - minX + 2 * outlineDistance),
-        y: floor(chart.plotTop + 2 * outlineDistance),
-        height: ceil(chart.plotHeight - 2 * outlineDistance),
+        x: minX - outlineDistance,
+        width: maxX - minX + 2 * outlineDistance,
+        y: chart.plotTop,
+        height: chart.plotHeight,
       })
       .css({ pointerEvents: 'none' })
       .add();
