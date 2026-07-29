@@ -1,3 +1,9 @@
+/**
+ * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
+ */
+
+import { TinyColor } from '@ctrl/tinycolor';
+import { getBoundingRectsByCategory } from './getBoundingRectsByCategory';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 
 /**
@@ -30,54 +36,23 @@ export const highlightCategoryGroups = (chart, highlightColors) => {
     return elements;
   }
 
-  const highlightedCategoryCodes = highlightedCategories.map((c) => c.code);
+  const relevantSeries = chart.series.filter(
+    ({ type }) => type === 'bar' || type === 'column',
+  );
 
-  // Gather point coordinates and group them by category
+  const firstSeries = relevantSeries[0];
+  if (!firstSeries) {
+    return elements;
+  }
+  const firstType = firstSeries.type;
 
-  /** @typedef {{ x: number, y: number, width: number, height: number }} PointRect */
-  /** @type {Map<string, PointRect[]>} */
-  const pointRectsByCategory = new Map();
+  const boundingRects = getBoundingRectsByCategory(
+    relevantSeries,
+    highlightedCategories,
+  );
 
-  chart.series.forEach((series) => {
-    const {
-      group: { translateX, translateY },
-    } = series;
-
-    series.points.forEach((point) => {
-      const { name } = point;
-      if (!highlightedCategoryCodes.includes(name)) return;
-      let pointRects = pointRectsByCategory.get(name);
-      if (!pointRects) {
-        pointRects = [];
-        pointRectsByCategory.set(name, pointRects);
-      }
-      const rect = {
-        x: point.shapeArgs.x + translateX,
-        y: point.shapeArgs.y + translateY,
-        width: point.shapeArgs.width,
-        height: point.shapeArgs.height,
-      };
-      pointRects.push(rect);
-    });
-  });
-
-  // Draws a rectangle around the bounding box of all shapes
-  pointRectsByCategory.forEach((pointCoords) => {
-    // Determine bounding box
-    let minX = Infinity;
-    let maxX = 0;
-    let minY = Infinity;
-    let maxY = 0;
-
-    pointCoords.forEach(({ x, y, width, height }) => {
-      const rightmost = x + width;
-      const bottommost = y + height;
-      if (x < minX) minX = x;
-      if (rightmost > maxX) maxX = rightmost;
-      if (y < minY) minY = y;
-      if (bottommost > maxY) maxY = bottommost;
-    });
-
+  // Draw a rectangle around the bounding box of all points of a category
+  boundingRects.forEach(({ x1, x2 }) => {
     const outlineWidth = getOutlineWidth(chart.plotWidth);
     const outlineGap = getOutlineGap(chart.plotWidth);
     const outlineDistance = outlineGap + outlineWidth / 2;
@@ -85,16 +60,19 @@ export const highlightCategoryGroups = (chart, highlightColors) => {
     const rect = chart.renderer
       .rect()
       .attr({
+        class: 'oecd-highlightCategoryGroup',
         strokeWidth: outlineWidth,
         // TODO: Pick the right color
         stroke: highlightColors[0],
-        x: minX - outlineDistance,
-        width: maxX - minX + 2 * outlineDistance,
-        y: chart.plotTop,
-        height: chart.plotHeight,
+        x: x1 - outlineDistance,
+        width: x2 - x1 + 2 * outlineDistance,
+        y: 0,
+        height: firstType === 'column' ? chart.plotHeight : chart.plotWidth,
       })
       .css({ pointerEvents: 'none' })
-      .add();
+      // Add rect to a series group which already has a transformation applied,
+      // depending on the chart type (translate, rotate, flip)
+      .add(firstSeries.group);
 
     elements.push(rect);
   });
