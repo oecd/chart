@@ -42,8 +42,6 @@
   "hideYAxisLabels": false,
   "yAxisOrderOverride": "",
   "paletteColorsOverride": [],
-  "paletteStartingColorOverride": null,
-  "highlightColorsOverride": [],
   "stacking": "percent",
   "pivotValue": 0,
   "sortBy": "none",
