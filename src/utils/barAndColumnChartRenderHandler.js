@@ -142,9 +142,9 @@ export const barAndColumnChartRenderHandler = (chart, highlightColors) => {
   const elements = [];
 
   // Render highlight shapes for all active series. Aggregate the shapes in a Set.
-  elements.push(...highlightCategoryGroups(chart, highlightColors));
   elements.push(...renderAxisMarkers(chart, highlightColors, true, true));
   elements.push(...renderHighlightOutlines(chart, highlightColors));
+  elements.push(...highlightCategoryGroups(chart, highlightColors));
 
   const elementSet = new Set(elements);
 
