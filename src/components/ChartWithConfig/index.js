@@ -7,7 +7,9 @@ import ChartWithConfigNonFixedChartHeight from './ChartWithConfigNonFixedChartHe
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import { trackChartView } from '../../utils/trackingUtil';
 import { controlTypes, frequencyTypes } from '../../constants/chart';
+import { getPaletteById } from '../../utils/chartUtil';
 import { getConnectedControlsDotStatDimensionIds } from '../../utils/configUtil';
+import { defaultPalette, highlightPalette } from '../../constants/palette';
 
 const tryDecodeURIComponent = (value) => {
   try {
@@ -43,6 +45,10 @@ const ChartWithConfig = ({
   hideControls = false,
   getControlsWithAvailability = null,
   onVarChange = null,
+  paletteId = null,
+  colorPalette = null,
+  smallerColorPalettes = null,
+  highlightColors = null,
   ...otherProps
 }) => {
   const ChartWithConfigComponent = height
@@ -263,6 +269,18 @@ const ChartWithConfig = ({
     trackChartView(otherProps.id);
   }, [otherProps.id]);
 
+  const palette = useMemo(() => {
+    if (!isNilOrEmpty(paletteId)) {
+      return getPaletteById(paletteId);
+    }
+
+    if (isNilOrEmpty(colorPalette)) {
+      return defaultPalette;
+    }
+
+    return null;
+  }, [paletteId, colorPalette]);
+
   return (
     <ChartWithConfigComponent
       height={height}
@@ -282,6 +300,23 @@ const ChartWithConfig = ({
         setControlIdForWhichDataLoadingIsPending
       }
       onDataReady={onDataReady}
+      {...(palette
+        ? {
+            colorPalette: palette.full,
+            smallerColorPalettes: palette.smallers,
+            isPaletteContinuous: palette.isContinuous,
+          }
+        : {
+            colorPalette,
+            smallerColorPalettes: smallerColorPalettes ?? [],
+            isPaletteContinuous: false,
+          })}
+      highlightColors={
+        isNilOrEmpty(highlightColors) ? highlightPalette.full : highlightColors
+      }
+      smallerHighlightColors={
+        isNilOrEmpty(highlightColors) ? highlightPalette.smallers : []
+      }
       {...otherProps}
     />
   );
@@ -313,6 +348,10 @@ ChartWithConfig.propTypes = {
   hideControls: PropTypes.bool,
   onVarChange: PropTypes.func,
   getControlsWithAvailability: PropTypes.func,
+  paletteId: PropTypes.string,
+  colorPalette: PropTypes.array,
+  smallerColorPalettes: PropTypes.array,
+  highlightColors: PropTypes.array,
 };
 
 export default ChartWithConfig;
