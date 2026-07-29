@@ -3,7 +3,6 @@
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import * as R from 'ramda';
 import { highlightCategoryGroups } from './highlightCategoryGroups';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { renderAxisMarkers } from './renderAxisMarker';
@@ -72,22 +71,18 @@ const renderHighlightOutline = (
   const outlineGap = getOutlineGap(chart.plotWidth);
   const outlineDistance = outlineGap + outlineWidth / 2;
 
-  const floor = chart.plotWidth >= 500 ? Math.floor : R.identity;
-  const ceil = chart.plotWidth >= 500 ? Math.ceil : R.identity;
-
   outline = outline
     .attr({
       'stroke-width': outlineWidth,
-      x: floor(shapeArgs.x - outlineDistance),
-      y: floor(shapeArgs.y - outlineDistance),
-      width: ceil(shapeArgs.width + 2 * outlineDistance),
-      height: ceil(
+      x: shapeArgs.x - outlineDistance,
+      y: shapeArgs.y - outlineDistance,
+      width: shapeArgs.width + 2 * outlineDistance,
+      height:
         // Bar charts are column charts rotated by 90° and mirrored,
         // so x and y dimensions are flipped here, and y: 0 is on the right
         series.type === 'bar'
           ? chart.plotWidth + 2 * outlineDistance
           : chart.plotHeight + 2 * outlineDistance,
-      ),
     })
     .toFront();
 
@@ -138,7 +133,7 @@ const renderHighlightOutlines = (chart, highlightColors) => {
  */
 export const barAndColumnChartRenderHandler = (chart, highlightColors) => {
   // Fill the plot area for debugging
-  // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 0 / 0.1)');
+  // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 255 / 0.1)');
 
   /**
    * SVG elements created for highlighting
@@ -153,7 +148,7 @@ export const barAndColumnChartRenderHandler = (chart, highlightColors) => {
 
   const elementSet = new Set(elements);
 
-  if (chart.oecd_highlightShapes) {
+  if (chart.oecd_highlightElements) {
     // Clean up old shapes
     const obsoleteElements =
       chart.oecd_highlightElements.difference(elementSet);
