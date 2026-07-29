@@ -1,6 +1,5 @@
-/* eslint-disable no-console */
 /**
- * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
+ * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
 import { highlightCategoryGroups } from './highlightCategoryGroups';

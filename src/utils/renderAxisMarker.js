@@ -1,11 +1,14 @@
-/* eslint-disable no-console */
 /* global console */
 /**
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import * as R from 'ramda';
+import { getBoundingRectsByCategory } from './getBoundingRectsByCategory';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
+
+/**
+ * @typedef {{ code: string }} Category
+ */
 
 const HIGHLIGHT_MARKER_SIZE = 5;
 /**
@@ -28,40 +31,25 @@ const axisMarkerGroups = new WeakMap();
 const axisMarkers = new WeakMap();
 
 /**
- * Renders a marker at the axis for highlighted points.
- *
  * @param {Chart} chart
- * @param {Series} series
+ * @param {string} seriesType
  * @param {Point} point
  * @param {HighchartsSVGElement} parent
- * @param {boolean} isHighlighted
- * @param {string[]} highlightColors
+ * @param {string} highlightColor
+ * @param {number} x
+ * @param {number} width
+ * @returns {HighchartsSVGElement | undefined}
  */
-const renderAxisMarker = (
+const renderAxisMarkerRect = (
   chart,
-  series,
+  seriesType,
   point,
   parent,
-  isHighlighted,
-  highlightColors,
+  highlightColor,
+  x,
+  width,
 ) => {
   let axisMarker = axisMarkers.get(point);
-
-  if (!isHighlighted) {
-    if (axisMarker) {
-      axisMarker.destroy();
-      axisMarker.delete(point);
-    }
-    return;
-  }
-
-  const { graphic, shapeArgs } = point;
-  if (!(graphic && shapeArgs)) {
-    console.error('renderAxisMarker: point.graphic not found');
-    return;
-  }
-
-  const fill = highlightColors[0];
 
   if (!axisMarker) {
     axisMarker = chart.renderer
@@ -80,42 +68,123 @@ const renderAxisMarker = (
   const outlineGap = getOutlineGap(chart.plotWidth);
   const outlineDistance = outlineGap + outlineWidth / 2;
 
-  const floor = chart.plotWidth >= 500 ? Math.floor : R.identity;
-  const ceil = chart.plotWidth >= 500 ? Math.ceil : R.identity;
-
-  axisMarker.attr(
-    series.type === 'bar'
+  const attributes =
+    seriesType === 'column'
       ? {
+          class: 'oecd-axisMarker',
+          x: x - outlineDistance,
+          y: chart.plotHeight + HIGHLIGHT_MARKER_GAP,
+          width: width + 2 * outlineDistance,
+          height: HIGHLIGHT_MARKER_SIZE,
+          fill: highlightColor,
+        }
+      : {
+          class: 'oecd-axisMarker',
           // Bar charts are column charts rotated by 90° and mirrored,
           // so x and y dimensions are flipped here, and y: 0 is on the right
-          x: shapeArgs.x,
+          x,
           y: chart.plotWidth + HIGHLIGHT_MARKER_GAP,
-          width: shapeArgs.width,
+          width: width,
           height: HIGHLIGHT_MARKER_SIZE,
-          fill,
-        }
-      : // Column chart
-        {
-          x: floor(shapeArgs.x - outlineDistance),
-          y: chart.plotHeight + HIGHLIGHT_MARKER_GAP,
-          width: ceil(shapeArgs.width + 2 * outlineDistance),
-          height: HIGHLIGHT_MARKER_SIZE,
-          fill,
-        },
-  );
+          fill: highlightColor,
+        };
+  axisMarker.attr(attributes);
 
   return axisMarker;
 };
 
 /**
- * Renders axis markers for a chart
+ * Renders a marker at the axis for highlighted points.
  *
  * @param {Chart} chart
+ * @param {string} seriesType
+ * @param {Point} point
+ * @param {HighchartsSVGElement} parent
  * @param {string[]} highlightColors
- * @param {boolean} seriesHighlight Whether to draw a marker when the series is highlighted
- * @param {boolean} categoryHighlight Whether to draw a marker when the category is highlighted
+ * @returns {HighchartsSVGElement | undefined}
  */
-export const renderAxisMarkers = (
+const renderAxisMarker = (
+  chart,
+  seriesType,
+  point,
+  parent,
+  highlightColors,
+) => {
+  const { graphic, shapeArgs } = point;
+  if (!(graphic && shapeArgs)) {
+    console.error('renderAxisMarker: point.graphic not found');
+    return;
+  }
+
+  return renderAxisMarkerRect(
+    chart,
+    seriesType,
+    point,
+    parent,
+    highlightColors[0], // TODO: Use the right color
+    shapeArgs.x,
+    shapeArgs.width,
+  );
+};
+
+/**
+ * When all columns/bars of a category are highlighted,
+ * render one marker rect spanning all points instead of many rects.
+ *
+ * @param {Chart} chart
+ * @param {Category[]} highlightedCategories
+ * @param {string[]} highlightColors
+ * @returns {HighchartsSVGElement[]}
+ */
+const renderCategoryAxisMarker = (
+  chart,
+  highlightedCategories,
+  highlightColors,
+) => {
+  const relevantSeries = chart.series.filter(
+    ({ type }) => type === 'bar' || type === 'column',
+  );
+  const firstSeries = relevantSeries[0];
+  if (!firstSeries) return [];
+  const seriesType = firstSeries.type;
+  const seriesTransform = firstSeries.group.element.getAttribute('transform');
+
+  const boundingRects = getBoundingRectsByCategory(
+    relevantSeries,
+    highlightedCategories,
+  );
+
+  return Array.from(boundingRects)
+    .map(([, boundingRect]) => {
+      const marker = renderAxisMarkerRect(
+        chart,
+        seriesType,
+        // Use first point as a map key
+        firstSeries.points[0],
+        // Append marker to the <g> containing all series, not to a particular series <g>.
+        // The latter has a clip mask that would cut off the marker.
+        chart.seriesGroup,
+        highlightColors[0], // TODO: Use the right color
+        boundingRect.x1,
+        boundingRect.x2 - boundingRect.x1,
+      );
+      if (marker) {
+        // Apply series transformation to move the marker into the right place.
+        marker.attr({ transform: seriesTransform });
+      }
+      return marker;
+    })
+    .filter((element) => element !== undefined);
+};
+
+/**
+ * @param {Chart} chart
+ * @param {string[]} highlightColors
+ * @param {boolean} seriesHighlight
+ * @param {boolean} categoryHighlight
+ * @returns {HighchartsSVGElement[]}
+ */
+const renderSeriesAxisMarker = (
   chart,
   highlightColors,
   seriesHighlight,
@@ -123,19 +192,21 @@ export const renderAxisMarkers = (
 ) =>
   chart.series
     .map((series) => {
-      // Create <g> for axis markers
+      // Create <g> for the axis markers of this series
       let group = axisMarkerGroups.get(series);
       if (!group) {
         group = chart.renderer
           .g()
           .attr({ class: 'oecd-axisMarkerGroup' })
-          .add();
-        axisMarkerGroups.get(series, group);
+          // We cannot add the element to the individual series' <g> since that
+          // has a clip mask that would cut off the axis markers
+          .add(chart.seriesGroup);
+        axisMarkerGroups.set(series, group);
       }
 
       // The series <g> has a transformation applied. We need to apply the same to the axis marker <g>.
-      // In a vertical (column) chart, the transformation moves it to the plot area.
-      // In a horizontal (row) chart, which is a column chart underneath, the transformation moves, rotates and flips it.
+      // In a column chart, the transformation moves it to the plot area.
+      // In a bar chart, which is a column chart underneath, the transformation moves, rotates and flips it.
       const seriesTransform = series.group.element.getAttribute('transform');
       group.attr({ transform: seriesTransform });
 
@@ -147,13 +218,14 @@ export const renderAxisMarkers = (
           (seriesHighlight && seriesIsHighlighted) ||
           (categoryHighlight && categoryIsHighlighted);
 
-        // Axis marker
+        // An existing axis marker will be destroyed automatically
+        if (!isHighlighted) return;
+
         const axisMarker = renderAxisMarker(
           chart,
-          series,
+          series.type,
           point,
           group,
-          isHighlighted,
           highlightColors,
         );
         return axisMarker;
@@ -164,4 +236,43 @@ export const renderAxisMarkers = (
       return elements;
     })
     .flat()
-    .filter(Boolean);
+    .filter((element) => element !== undefined);
+
+/**
+ * Renders axis markers for a chart
+ *
+ * @param {Chart} chart
+ * @param {string[]} highlightColors
+ * @param {boolean} seriesHighlight Whether to draw a marker when the series is highlighted
+ * @param {boolean} categoryHighlight Whether to draw a marker when the category is highlighted
+ * @returns {HighchartsSVGElement[]}
+ */
+export const renderAxisMarkers = (
+  chart,
+  highlightColors,
+  seriesHighlight,
+  categoryHighlight,
+) => {
+  const customOptions = chart.options.custom;
+
+  /** @type {Category[]} */
+  const highlightedCategories = customOptions?.highlightedCategories;
+
+  /** @type {boolean} */
+  const categoryGroupIsHighlighted = customOptions?.categoryGroupIsHighlighted;
+
+  if (categoryGroupIsHighlighted) {
+    return renderCategoryAxisMarker(
+      chart,
+      highlightedCategories,
+      highlightColors,
+    );
+  }
+
+  return renderSeriesAxisMarker(
+    chart,
+    highlightColors,
+    seriesHighlight,
+    categoryHighlight,
+  );
+};
