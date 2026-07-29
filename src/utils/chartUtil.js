@@ -1,4 +1,5 @@
 import truncatise from 'truncatise';
+import { defaultPalette, palettes } from '../constants/palette';
 import * as R from 'ramda';
 
 import {
@@ -1798,7 +1799,6 @@ const createChartOptionsFunc =
     smallerColorPalettes = [],
     fixedColorIndexBySeries = null,
     paletteStartingColor = null,
-    paletteStartingColorOverride = null,
     mapColorValueSteps,
     maxNumberOfDecimals,
     maxNumberOfDecimalsXAxis,
@@ -1849,7 +1849,6 @@ const createChartOptionsFunc =
               : otherProps.data.series || [],
           ),
           paletteStartingColor,
-          paletteStartingColorOverride,
         )
       : colorPalette;
 
@@ -2060,3 +2059,6 @@ export const createFooter = ({ source, note, stripLinks = false }) =>
 
 export const isParsedDataEmpty = (parsedData) =>
   R.isEmpty(parsedData?.categories) || R.isEmpty(parsedData?.series);
+
+export const getPaletteById = (paletteId) =>
+  R.find(R.propEq(paletteId, 'id'), palettes) || defaultPalette;
