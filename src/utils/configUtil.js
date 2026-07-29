@@ -49,7 +49,6 @@ export const getFinalPalette = (
   smallerColorPalettes,
   numberOfSeries,
   paletteStartingColor,
-  paletteStartingColorOverride,
 ) => {
   if (!isNilOrEmpty(smallerColorPalettes)) {
     const mostAdaptedPalette = R.find(
@@ -60,11 +59,9 @@ export const getFinalPalette = (
     return mostAdaptedPalette || colorPalette;
   }
 
-  const startingColor = paletteStartingColorOverride || paletteStartingColor;
-
-  if (startingColor) {
+  if (paletteStartingColor) {
     const startingColorIndex = R.findIndex(
-      R.equals(startingColor),
+      R.equals(paletteStartingColor),
       colorPalette,
     );
     if (startingColorIndex !== -1) {
