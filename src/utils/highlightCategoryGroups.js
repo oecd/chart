@@ -1,8 +1,7 @@
 /**
- * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
+ * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
 import { getBoundingRectsByCategory } from './getBoundingRectsByCategory';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 
@@ -37,9 +36,8 @@ export const highlightCategoryGroups = (chart, highlightColors) => {
   }
 
   const relevantSeries = chart.series.filter(
-    ({ type }) => type === 'bar' || type === 'column',
+    ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
   );
-
   const firstSeries = relevantSeries[0];
   if (!firstSeries) {
     return elements;
@@ -51,28 +49,41 @@ export const highlightCategoryGroups = (chart, highlightColors) => {
     highlightedCategories,
   );
 
+  /**
+   * Element cache for reuse across chart renderings
+   * @type {Map<string, HighchartsSVGElement>}
+   */
+  let rectByCategory = chart.oecd_highlightCategoryGroupElements;
+  if (!rectByCategory) {
+    rectByCategory = new Map();
+    chart.oecd_highlightCategoryGroupElements = rectByCategory;
+  }
+
   // Draw a rectangle around the bounding box of all points of a category
-  boundingRects.forEach(({ x1, x2 }) => {
+  boundingRects.forEach(({ x1, x2 }, category) => {
     const outlineWidth = getOutlineWidth(chart.plotWidth);
     const outlineGap = getOutlineGap(chart.plotWidth);
     const outlineDistance = outlineGap + outlineWidth / 2;
 
-    const rect = chart.renderer
-      .rect()
-      .attr({
-        class: 'oecd-highlightCategoryGroup',
-        strokeWidth: outlineWidth,
-        // TODO: Pick the right color
-        stroke: highlightColors[0],
-        x: x1 - outlineDistance,
-        width: x2 - x1 + 2 * outlineDistance,
-        y: 0,
-        height: firstType === 'column' ? chart.plotHeight : chart.plotWidth,
-      })
-      .css({ pointerEvents: 'none' })
-      // Add rect to a series group which already has a transformation applied,
-      // depending on the chart type (translate, rotate, flip)
-      .add(firstSeries.group);
+    let rect = rectByCategory.get(category);
+    if (!(rect && rect.element)) {
+      rect = chart.renderer
+        .rect({ class: 'oecd-highlightCategoryGroup' })
+        .css({ pointerEvents: 'none' })
+        // Add rect to a series group which already has a transformation applied,
+        // depending on the chart type (translate, rotate, flip)
+        .add(firstSeries.group);
+      rectByCategory.set(category, rect);
+    }
+    rect.attr({
+      strokeWidth: outlineWidth,
+      // TODO: Pick the right color
+      stroke: highlightColors[0],
+      x: x1 - outlineDistance,
+      y: 0,
+      width: x2 - x1 + 2 * outlineDistance,
+      height: firstType === 'column' ? chart.plotHeight : chart.plotWidth,
+    });
 
     elements.push(rect);
   });
