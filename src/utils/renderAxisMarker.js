@@ -1,3 +1,4 @@
+// @ts-check
 /* global console */
 /**
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
@@ -51,7 +52,7 @@ const renderAxisMarkerRect = (
 ) => {
   let axisMarker = axisMarkers.get(point);
 
-  if (!axisMarker) {
+  if (!(axisMarker && axisMarker.element)) {
     axisMarker = chart.renderer
       // The other attributes are set below
       .rect({ class: 'oecd-axisMarker' })
@@ -132,18 +133,17 @@ const renderAxisMarker = (
  * render one marker rect spanning all points instead of many rects.
  *
  * @param {Chart} chart
+ * @param {Series[]} relevantSeries
  * @param {Category[]} highlightedCategories
  * @param {string[]} highlightColors
  * @returns {HighchartsSVGElement[]}
  */
 const renderCategoryAxisMarker = (
   chart,
+  relevantSeries,
   highlightedCategories,
   highlightColors,
 ) => {
-  const relevantSeries = chart.series.filter(
-    ({ type }) => type === 'bar' || type === 'column',
-  );
   const firstSeries = relevantSeries[0];
   if (!firstSeries) return [];
   const seriesType = firstSeries.type;
@@ -179,6 +179,7 @@ const renderCategoryAxisMarker = (
 
 /**
  * @param {Chart} chart
+ * @param {Series[]} relevantSeries
  * @param {string[]} highlightColors
  * @param {boolean} seriesHighlight
  * @param {boolean} categoryHighlight
@@ -186,15 +187,16 @@ const renderCategoryAxisMarker = (
  */
 const renderSeriesAxisMarker = (
   chart,
+  relevantSeries,
   highlightColors,
   seriesHighlight,
   categoryHighlight,
 ) =>
-  chart.series
+  relevantSeries
     .map((series) => {
       // Create <g> for the axis markers of this series
       let group = axisMarkerGroups.get(series);
-      if (!group) {
+      if (!(group && group.element)) {
         group = chart.renderer
           .g()
           .attr({ class: 'oecd-axisMarkerGroup' })
@@ -218,7 +220,7 @@ const renderSeriesAxisMarker = (
           (seriesHighlight && seriesIsHighlighted) ||
           (categoryHighlight && categoryIsHighlighted);
 
-        // An existing axis marker will be destroyed automatically
+        // The potential existing axis marker will be destroyed automatically
         if (!isHighlighted) return;
 
         const axisMarker = renderAxisMarker(
@@ -261,9 +263,14 @@ export const renderAxisMarkers = (
   /** @type {boolean} */
   const categoryGroupIsHighlighted = customOptions?.categoryGroupIsHighlighted;
 
+  const relevantSeries = chart.series.filter(
+    ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
+  );
+
   if (categoryGroupIsHighlighted) {
     return renderCategoryAxisMarker(
       chart,
+      relevantSeries,
       highlightedCategories,
       highlightColors,
     );
@@ -271,6 +278,7 @@ export const renderAxisMarkers = (
 
   return renderSeriesAxisMarker(
     chart,
+    relevantSeries,
     highlightColors,
     seriesHighlight,
     categoryHighlight,
