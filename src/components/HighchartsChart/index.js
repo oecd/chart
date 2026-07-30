@@ -1,18 +1,18 @@
 /* eslint-disable react-hooks/static-components */
+import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
+import PropTypes from 'prop-types';
+import * as R from 'ramda';
 import {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  memo,
   lazy,
+  memo,
   Suspense,
   useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
-import PropTypes from 'prop-types';
 import striptags from 'striptags';
-import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
-import * as R from 'ramda';
 
 import {
   apiUrl,
@@ -27,7 +27,23 @@ import {
   stackingOptions,
 } from '../../constants/chart';
 import { errorMessages } from '../../constants/chartErrorMessages';
-import NullComponent from '../NullComponent';
+import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
+import useIsFontLoaded from '../../hook/useIsFontLoaded';
+import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
+import {
+  createFooter,
+  deepMergeUserOptionsWithDefaultOptions,
+  doesStringContainVar,
+  getCreateOptionsFuncForChartType,
+  isParsedDataEmpty,
+  replaceAllVarsNameByVarsValue,
+} from '../../utils/chartUtil';
+import {
+  createCodeLabelMapping,
+  createDataFromCSV,
+  emptyData,
+} from '../../utils/csvUtil';
+import { fetchJson } from '../../utils/fetchUtil';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import {
   createDataFromSdmxJson,
@@ -35,28 +51,12 @@ import {
   fetchDotStatData,
   isSdmxJsonEmpty,
 } from '../../utils/sdmxJsonUtil';
-import {
-  emptyData,
-  createDataFromCSV,
-  createCodeLabelMapping,
-} from '../../utils/csvUtil';
-import Spinner from '../Spinner';
-import {
-  replaceAllVarsNameByVarsValue,
-  doesStringContainVar,
-  deepMergeUserOptionsWithDefaultOptions,
-  createFooter,
-  getCreateOptionsFuncForChartType,
-  isParsedDataEmpty,
-} from '../../utils/chartUtil';
-import CenteredContainer from '../CenteredContainer';
-import { fetchJson } from '../../utils/fetchUtil';
-import Header from './Header';
-import useIsFontLoaded from '../../hook/useIsFontLoaded';
 import { trackChartError } from '../../utils/trackingUtil';
+import CenteredContainer from '../CenteredContainer';
+import NullComponent from '../NullComponent';
+import Spinner from '../Spinner';
 import GenericChart from './GenericChart';
-import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
-import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
+import Header from './Header';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -139,6 +139,7 @@ const HighchartsChart = ({
   fixedColorIndexBySeries = null,
   paletteStartingColor = null,
   highlightColors,
+  smallerHighlightColors,
   sortBy = sortByOptions.none.value,
   sortOrder = sortOrderOptions.asc.value,
   sortSeries = '',
@@ -1035,6 +1036,9 @@ const HighchartsChart = ({
   const smallerColorPalettesInternal =
     useMemoForArrayOrObject(smallerColorPalettes);
   const highlightColorsInternal = useMemoForArrayOrObject(highlightColors);
+  const smallerHighlightColorsInternal = useMemoForArrayOrObject(
+    smallerHighlightColors,
+  );
   const mapColorValueStepsInternal =
     useMemoForArrayOrObject(mapColorValueSteps);
   const optionsOverrideInternal = useMemoForArrayOrObject(optionsOverride);
@@ -1097,6 +1101,7 @@ const HighchartsChart = ({
         highlight,
         baseline,
         highlightColors: highlightColorsInternal,
+        smallerHighlightColors: smallerHighlightColorsInternal,
         pivotValue,
         mapType,
         mapAutoShade,
@@ -1170,6 +1175,7 @@ const HighchartsChart = ({
     parsedTitle,
     screenHeight,
     smallerColorPalettesInternal,
+    smallerHighlightColorsInternal,
     fixedColorIndexBySeries,
     tooltipOutside,
     vars,

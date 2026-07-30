@@ -14,7 +14,6 @@ import {
   stackingOptions,
 } from '../constants/chart';
 import customChartRenderByChartType from '../highchartsCustomCode/customChartRenderByChartType';
-import { barAndColumnChartRenderHandler } from './barAndColumnChartRenderHandler';
 import {
   calcExistingFixedColorIndexBySeries,
   createExportFileName,
@@ -46,7 +45,6 @@ import {
   createFromToPoints,
   rejectInvalidFromToPoints,
 } from './sankeyUtil';
-import { stackedChartRenderHandler } from './stackedChartRenderHandler';
 
 const mapsUtil = import('./mapsUtil');
 
@@ -719,7 +717,6 @@ const createOptionsForBarChart = ({
   fixedColorIndexBySeries = null,
   highlight = null,
   baseline = null,
-  highlightColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -849,12 +846,7 @@ const createOptionsForBarChart = ({
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
-      events: {
-        fullscreenClose,
-        render() {
-          barAndColumnChartRenderHandler(this, highlightColors);
-        },
-      },
+      events: { fullscreenClose },
       className: disableLegendInteraction
         ? 'cb-disable-legend-pointer-events'
         : undefined,
@@ -1056,9 +1048,6 @@ const createOptionsForStackedChart = ({
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
-        render() {
-          stackedChartRenderHandler(this, highlightColors);
-        },
       },
       className: disableLegendInteraction
         ? 'cb-disable-legend-pointer-events'
@@ -1986,7 +1975,12 @@ const createChartOptionsFunc =
 
     const customChartRenderWithCbType = ({ target: chart }) => {
       if (customChartRender) {
-        customChartRender({ chart, cbType: otherProps.chartType });
+        customChartRender({
+          chart,
+          cbType: otherProps.chartType,
+          highlightColors: otherProps.highlightColors,
+          smallerHighlightColors: otherProps.smallerHighlightColors,
+        });
       }
     };
 

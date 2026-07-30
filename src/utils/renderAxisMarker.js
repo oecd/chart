@@ -4,8 +4,11 @@
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { getBoundingRectsByCategory } from './getBoundingRectsByCategory';
-import { getOutlineGap, getOutlineWidth } from './highlightOutline';
+import { getBoundingRectsByCategory } from '../highchartsCustomCode/utils/getBoundingRectsByCategory';
+import {
+  getOutlineGap,
+  getOutlineWidth,
+} from '../highchartsCustomCode/utils/highlightOutline';
 
 /**
  * @typedef {{ code: string }} Category
