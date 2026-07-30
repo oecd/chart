@@ -21,7 +21,8 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm run build
-      - run: |
+      - name: npm publish
+        run: |
           GIT_TAG="${GITHUB_REF_NAME}"
 
           if [[ "$GIT_TAG" == *-* ]]; then
