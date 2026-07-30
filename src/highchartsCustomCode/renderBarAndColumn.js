@@ -2,18 +2,24 @@
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { highlightCategoryGroups } from './highlightCategoryGroups';
-import { renderAxisMarkers } from './renderAxisMarker';
-import { renderHighlightOutlines } from './renderHighlightOutlines';
+import { renderAxisMarkers } from '../utils/renderAxisMarker';
+import { highlightCategoryGroups } from './utils/highlightCategoryGroups';
+import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
 
 /**
  * Event handler called after load (initial render) and redraw (subsequent render).
  * Renders the highlight shapes and cleans up stale ones.
  *
- * @param {Chart} chart
- * @params {string[]} highlightColors
+ * @param {{
+ *   chart: Chart;
+ *   cbType: string;
+ *   highlightColors: string[];
+ *   smallerHighlightColors: string[];
+ * }} options
  */
-export const barAndColumnChartRenderHandler = (chart, highlightColors) => {
+export const renderBarAndColumn = (options) => {
+  const { chart, highlightColors, smallerHighlightColors } = options;
+
   // Fill the plot area for debugging
   // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 255 / 0.1)');
 
@@ -22,6 +28,8 @@ export const barAndColumnChartRenderHandler = (chart, highlightColors) => {
    * @type {HighchartsSVGElement[]}
    */
   const elements = [];
+
+  // TODO: Pass smallerHighlightColors
 
   // Render highlight shapes for all active series. Aggregate the shapes in a Set.
   elements.push(...renderAxisMarkers(chart, highlightColors, true, true));

@@ -1,15 +1,15 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import ChartWithConfigFixedChartHeight from './ChartWithConfigFixedChartHeight';
-import ChartWithConfigNonFixedChartHeight from './ChartWithConfigNonFixedChartHeight';
-import { isNilOrEmpty } from '../../utils/ramdaUtil';
-import { trackChartView } from '../../utils/trackingUtil';
 import { controlTypes, frequencyTypes } from '../../constants/chart';
+import { defaultPalette, highlightPalette } from '../../constants/palette';
 import { getPaletteById } from '../../utils/chartUtil';
 import { getConnectedControlsDotStatDimensionIds } from '../../utils/configUtil';
-import { defaultPalette, highlightPalette } from '../../constants/palette';
+import { isNilOrEmpty } from '../../utils/ramdaUtil';
+import { trackChartView } from '../../utils/trackingUtil';
+import ChartWithConfigFixedChartHeight from './ChartWithConfigFixedChartHeight';
+import ChartWithConfigNonFixedChartHeight from './ChartWithConfigNonFixedChartHeight';
 
 const tryDecodeURIComponent = (value) => {
   try {

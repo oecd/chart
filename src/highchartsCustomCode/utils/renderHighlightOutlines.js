@@ -1,4 +1,3 @@
-/* global console */
 /**
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */

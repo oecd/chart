@@ -1,12 +1,20 @@
 import * as R from 'ramda';
 
-import { forEachWithIndex, mapWithIndex } from '../utils/ramdaUtil';
-import { addColorAlpha } from '../utils/colorUtil';
 import { chartTypes } from '../constants/chart';
+import { addColorAlpha } from '../utils/colorUtil';
+import { forEachWithIndex, mapWithIndex } from '../utils/ramdaUtil';
 
 let minMaxLines = [];
 
-const chartRender = ({ chart, cbType }) => {
+/**
+ * @param {{
+ *   chart: Chart;
+ *   cbType: string;
+ *   highlightColors: string[];
+ *   smallerHighlightColors: string[];
+ * }} options
+ */
+export const renderSymbol = ({ chart, cbType }) => {
   try {
     if (cbType !== chartTypes.symbol && cbType !== chartTypes.symbolMinMax) {
       return;
@@ -58,5 +66,3 @@ const chartRender = ({ chart, cbType }) => {
     // too bad but not blocking
   }
 };
-
-export default chartRender;
