@@ -21,4 +21,14 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm run build
-      - run: npm publish
+      - run: |
+          GIT_TAG="${GITHUB_REF_NAME}"
+
+          if [[ "$GIT_TAG" == *-* ]]; then
+            NPM_TAG="${GIT_TAG#*-}"
+            echo "prerelease tag detected: publishing with npm dist-tag '$NPM_TAG'"
+            npm publish --tag "$NPM_TAG"
+          else
+            echo "stable tag detected: publishing with default npm dist-tag"
+            npm publish
+          fi
