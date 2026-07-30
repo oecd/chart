@@ -2,17 +2,23 @@
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { highlightCategoryGroups } from './highlightCategoryGroups';
-import { renderAxisMarkers } from './renderAxisMarker';
+import { renderAxisMarkers } from '../utils/renderAxisMarker';
+import { highlightCategoryGroups } from './utils/highlightCategoryGroups';
 
 /**
  * Event handler called after load (initial render) and redraw (subsequent render).
  * Renders the highlight shapes and cleans up stale ones.
  *
- * @param {Chart} chart
- * @params {string[]} highlightColors
+ * @param {{
+ *   chart: Chart;
+ *   cbType: string;
+ *   highlightColors: string[];
+ *   smallerHighlightColors: string[];
+ * }} options
  */
-export const stackedChartRenderHandler = (chart, highlightColors) => {
+export const renderStackedBarAndColumn = (options) => {
+  const { chart, highlightColors, smallerHighlightColors } = options;
+
   // Fill the plot area for debugging
   // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 0 / 0.1)');
 
@@ -39,3 +45,5 @@ export const stackedChartRenderHandler = (chart, highlightColors) => {
   // Save new shapes
   chart.oecd_highlightElements = elementSet;
 };
+
+export default renderStackedBarAndColumn;
