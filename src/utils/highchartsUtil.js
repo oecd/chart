@@ -10,43 +10,60 @@ import { frequencies } from './dateUtil';
 export const thousandsSeparator = ' ';
 export const numericSymbols = ['k', 'M', 'G', 'T', 'P', 'E'];
 
-const getNumericFormat = (valueField, maxNumberOrDecimal) =>
-  `{#if (ge ${valueField} 1000)}{rtz ((shorten ${valueField}):,.1f)}{ns ${valueField}}` +
-  `{else}{#if (le ${valueField} -1000)}{rtz ((shorten ${valueField}):,.1f)}{ns ${valueField}}` +
-  `{else}{rtz ((rtz ${valueField}):,.${maxNumberOrDecimal}f)}{/if}{/if}`;
+const emptyIfNil = R.when(R.isNil, R.always(''));
 
-const getNumericFormatWithoutShorten = (valueField, maxNumberOrDecimal) =>
-  `{rtz ((rtz ${valueField}):,.${maxNumberOrDecimal}f)}`;
+const getNumericFormat = (valueField, maxNumberOrDecimal, prefix, suffix) =>
+  `{#if (ge ${valueField} 1000)}${prefix}{rtz ((shorten ${valueField}):,.1f)}{ns ${valueField}}${suffix}` +
+  `{else}{#if (le ${valueField} -1000)}${prefix}{rtz ((shorten ${valueField}):,.1f)}{ns ${valueField}}${suffix}` +
+  `{else}${prefix}{rtz ((rtz ${valueField}):,.${maxNumberOrDecimal}f)}${suffix}{/if}{/if}`;
 
-const numberFormat = (number, decimals, decimalPoint) => {
+const getNumericFormatWithoutShorten = (
+  valueField,
+  maxNumberOrDecimal,
+  prefix,
+  suffix,
+) => `${prefix}{rtz ((rtz ${valueField}):,.${maxNumberOrDecimal}f)}${suffix}`;
+
+const numberFormat = (number, decimals, decimalPoint, prefix, suffix) => {
   if (!isCastableToNumber(number)) {
     return number;
   }
+
   if (
     !isCastableToNumber(decimals) ||
     Number(decimals) < 0 ||
     Number(decimals) > 100
   ) {
-    return Highcharts.numberFormat(
+    return `${prefix}${Highcharts.numberFormat(
       number,
       -1,
       decimalPoint,
       thousandsSeparator,
-    );
+    )}${suffix}`;
   }
 
-  return Highcharts.numberFormat(
+  return `${prefix}${Highcharts.numberFormat(
     number,
     roundNumber(number, decimals) === roundNumber(number, 0) ? 0 : decimals,
     decimalPoint,
     thousandsSeparator,
-  );
+  )}${suffix}`;
 };
 
-export const numberFormatAbbreviatedForm = (number, decimals, decimalPoint) => {
+export const numberFormatAbbreviatedForm = (
+  number,
+  decimals,
+  decimalPoint,
+  prefix,
+  suffix,
+) => {
   if (!isCastableToNumber(number)) {
     return number;
   }
+
+  const finalPrefix = emptyIfNil(prefix);
+  const finalSuffix = emptyIfNil(suffix);
+
   const comparisonNumbers = R.times(
     (multiplier) => 1000 ** (multiplier + 1),
     R.length(numericSymbols),
@@ -58,20 +75,31 @@ export const numberFormatAbbreviatedForm = (number, decimals, decimalPoint) => {
   );
 
   if (R.isEmpty(comparisonNumbersTrimmed)) {
-    return numberFormat(number, decimals, decimalPoint);
+    return numberFormat(
+      number,
+      decimals,
+      decimalPoint,
+      finalPrefix,
+      finalSuffix,
+    );
   }
 
   const relevantIndex = R.length(comparisonNumbersTrimmed) - 1;
 
   const newNumber = number / R.nth(relevantIndex, comparisonNumbers);
 
-  return `${numberFormat(newNumber, decimals, decimalPoint)}${R.nth(relevantIndex, numericSymbols)}`;
+  return `${numberFormat(newNumber, decimals, decimalPoint, finalPrefix, finalSuffix)}${R.nth(relevantIndex, numericSymbols)}`;
 };
 
 export const createFormatters = ({
   chartType,
   mapColorValueSteps,
   maxNumberOfDecimals,
+  maxNumberOfDecimalsXAxis,
+  numberPrefix,
+  numberPrefixXAxis,
+  numberSuffix,
+  numberSuffixXAxis,
   decimalPoint,
   areCategoriesNumbers,
   areCategoriesDates,
@@ -86,7 +114,18 @@ export const createFormatters = ({
     ? maxNumberOfDecimals
     : -1;
 
+  const finalMaxNumberOrDecimalXAxis = isCastableToNumber(
+    maxNumberOfDecimalsXAxis,
+  )
+    ? maxNumberOfDecimalsXAxis
+    : finalMaxNumberOrDecimal;
+
   const finalDecimalPoint = decimalPoint || decimalPointTypes.point.value;
+
+  const finalPrefix = emptyIfNil(numberPrefix);
+  const finalPrefixXAxis = emptyIfNil(numberPrefixXAxis);
+  const finalSuffix = emptyIfNil(numberSuffix);
+  const finalSuffixXAxis = emptyIfNil(numberSuffixXAxis);
 
   if (chartType === chartTypes.sankey) {
     return {
@@ -95,11 +134,15 @@ export const createFormatters = ({
         nodeFormat: `{point.name}: <b>${getNumericFormatWithoutShorten(
           'point.sum',
           finalMaxNumberOrDecimal,
+          finalPrefix,
+          finalSuffix,
         )}</b><br/>`,
         pointFormat: isNilOrEmpty(customTooltip)
           ? `{point.fromNode.name} → {point.toNode.name}: <b>${getNumericFormatWithoutShorten(
               'point.weight',
               finalMaxNumberOrDecimal,
+              finalPrefix,
+              finalSuffix,
             )}</b><br/>`
           : customTooltip,
       },
@@ -114,10 +157,10 @@ export const createFormatters = ({
   const dataLabels = {
     format:
       '{#if (ne null point.y)}' +
-      `${chartType === chartTypes.symbolMinMax ? '{series.name}: ' : ''}{rtz (point.y:,.${finalMaxNumberOrDecimal}f)}` +
+      `${chartType === chartTypes.symbolMinMax ? '{series.name}: ' : ''}${finalPrefix}{rtz (point.y:,.${finalMaxNumberOrDecimal}f)}${finalSuffix}` +
       '{else}' +
-      `{#if (ne null point.value)}{rtz (point.value:,.${finalMaxNumberOrDecimal}f)}` +
-      `{else}{rtz (point.z:,.${finalMaxNumberOrDecimal}f)}` +
+      `{#if (ne null point.value)}${finalPrefix}{rtz (point.value:,.${finalMaxNumberOrDecimal}f)}${finalSuffix}` +
+      `{else}${finalPrefix}{rtz (point.z:,.${finalMaxNumberOrDecimal}f)}${finalSuffix}` +
       '{/if}{/if}',
   };
 
@@ -133,7 +176,12 @@ export const createFormatters = ({
     [
       () => chartType === chartTypes.pie && areCategoriesNumbers,
       () => ({
-        format: getNumericFormat('name', finalMaxNumberOrDecimal),
+        format: getNumericFormat(
+          'name',
+          finalMaxNumberOrDecimalXAxis,
+          finalPrefixXAxis,
+          finalSuffixXAxis,
+        ),
       }),
     ],
     [
@@ -151,7 +199,12 @@ export const createFormatters = ({
     [
       () => areCategoriesNumbers,
       () => ({
-        format: getNumericFormat('value', finalMaxNumberOrDecimal),
+        format: getNumericFormat(
+          'value',
+          finalMaxNumberOrDecimalXAxis,
+          finalPrefixXAxis,
+          finalSuffixXAxis,
+        ),
       }),
     ],
     [R.T, () => ({})],
@@ -172,14 +225,24 @@ export const createFormatters = ({
       () =>
         chartType === chartTypes.pie ? areCategoriesNumbers : areSeriesNumbers,
       () => ({
-        labelFormat: getNumericFormat('name', finalMaxNumberOrDecimal),
+        labelFormat: getNumericFormat(
+          'name',
+          finalMaxNumberOrDecimal,
+          finalPrefix,
+          finalSuffix,
+        ),
       }),
     ],
     [R.T, () => ({})],
   ])();
 
   const yAxisLabels = {
-    format: getNumericFormat('value', finalMaxNumberOrDecimal),
+    format: getNumericFormat(
+      'value',
+      finalMaxNumberOrDecimal,
+      finalPrefix,
+      finalSuffix,
+    ),
   };
 
   const tooltip = !isNilOrEmpty(customTooltip)
@@ -202,7 +265,13 @@ export const createFormatters = ({
                   mapColorValueSteps,
                 ) || [],
               ) || value
-            : numberFormat(value, finalMaxNumberOrDecimal, finalDecimalPoint);
+            : numberFormat(
+                value,
+                finalMaxNumberOrDecimal,
+                finalDecimalPoint,
+                finalPrefix,
+                finalSuffix,
+              );
 
           const seriesName =
             chartType === chartTypes.map ? this.point.name : this.series.name;
@@ -224,6 +293,8 @@ export const createFormatters = ({
                   seriesName,
                   finalMaxNumberOrDecimal,
                   finalDecimalPoint,
+                  finalPrefix,
+                  finalSuffix,
                 ),
             ],
             [R.T, () => seriesName],
@@ -269,8 +340,10 @@ export const createFormatters = ({
                     /{.*point.key}/,
                     `${numberFormat(
                       key,
-                      finalMaxNumberOrDecimal,
+                      finalMaxNumberOrDecimalXAxis,
                       finalDecimalPoint,
+                      finalPrefixXAxis,
+                      finalSuffixXAxis,
                     )}${timeLabelSuffix}`,
                     content,
                   );

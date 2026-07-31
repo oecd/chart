@@ -655,7 +655,9 @@ const createOptionsForLineChart = ({
                 color: '#101d40',
               },
             }
-          : {},
+          : {
+              ...R.prop('dataLabels', formatters),
+            },
         events: {
           mouseOver: inlineLabels
             ? null
@@ -665,7 +667,6 @@ const createOptionsForLineChart = ({
                     {
                       dataLabels: {
                         enabled: true,
-                        ...R.prop('dataLabels', formatters),
                       },
                     },
                     false,
@@ -1540,6 +1541,9 @@ const createOptionsForRadarChart = ({
         animation: false,
         pointPadding: 0,
         groupPadding: 0,
+        dataLabels: {
+          ...R.prop('dataLabels', formatters),
+        },
         events: {
           mouseOver: (e) => {
             e.target.data.forEach((p) => {
@@ -1547,7 +1551,6 @@ const createOptionsForRadarChart = ({
                 {
                   dataLabels: {
                     enabled: true,
-                    ...R.prop('dataLabels', formatters),
                   },
                 },
                 false,
@@ -1798,6 +1801,11 @@ const createChartOptionsFunc =
     paletteStartingColorOverride = null,
     mapColorValueSteps,
     maxNumberOfDecimals,
+    maxNumberOfDecimalsXAxis,
+    numberPrefix,
+    numberPrefixXAxis,
+    numberSuffix,
+    numberSuffixXAxis,
     decimalPoint,
     customTooltip,
     tooltipOutside,
@@ -1859,6 +1867,11 @@ const createChartOptionsFunc =
       chartType: otherProps.chartType,
       mapColorValueSteps,
       maxNumberOfDecimals,
+      maxNumberOfDecimalsXAxis,
+      numberPrefix,
+      numberPrefixXAxis,
+      numberSuffix,
+      numberSuffixXAxis,
       decimalPoint,
       areCategoriesNumbers: otherProps.data.areCategoriesNumbers,
       areCategoriesDates: otherProps.data.areCategoriesDates,
@@ -1895,6 +1908,8 @@ const createChartOptionsFunc =
       baseline: parsedBaseline,
       mapColorValueSteps,
       maxNumberOfDecimals,
+      numberPrefix,
+      numberSuffix,
       formatters,
       decimalPoint,
       categoriesAreDatesOrNumberForDataParsing,

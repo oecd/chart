@@ -357,6 +357,8 @@ const createMapDataClasses = (
   steps,
   stepsHaveLabels,
   maxNumberOfDecimals,
+  numberPrefix,
+  numberSuffix,
   decimalPoint,
 ) => {
   const stepsLength = R.length(steps);
@@ -393,6 +395,8 @@ const createMapDataClasses = (
           n,
           finalMaxNumberOfDecimals,
           finalDecimalPoint,
+          numberPrefix,
+          numberSuffix,
         ),
       ],
       R.head,
@@ -437,6 +441,8 @@ export const createOptionsForMapChart = ({
   mapAutoShade = true,
   mapDisplayCountriesName = false,
   maxNumberOfDecimals,
+  numberPrefix,
+  numberSuffix,
   decimalPoint,
   seriesFrequency,
 }) => {
@@ -620,6 +626,8 @@ export const createOptionsForMapChart = ({
               finalMapColorValueSteps,
               stepsHaveLabels,
               maxNumberOfDecimals,
+              numberPrefix,
+              numberSuffix,
               decimalPoint,
             ),
           },
