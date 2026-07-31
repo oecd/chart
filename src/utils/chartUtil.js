@@ -2027,8 +2027,9 @@ export const getCreateOptionsFuncForChartType = async (chartType) => {
   }
 };
 
-export const createFooter = ({ source, note }) =>
+export const createFooter = ({ source, note, stripLinks = false }) =>
   R.compose(
+    R.when(() => stripLinks, R.replace(/<a\b[^>]*>(.*?)<\/a>/g, '$1')),
     R.replace(/<p>/g, '<p style="margin: 0px 0px 5px 0px">'),
     (html) =>
       truncatise(html, {

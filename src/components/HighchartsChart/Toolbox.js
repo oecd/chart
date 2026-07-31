@@ -79,6 +79,7 @@ const Toolbox = ({
           createFooter({
             source,
             note: displayNoteAsTooltip ? '' : note,
+            stripLinks: true,
           }),
         ),
         R.assocPath(['subtitle', 'text'], parsedSubtitle),
