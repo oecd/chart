@@ -48,18 +48,21 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
   const highlightColor = highlightColors[highlightIndex];
   const color = isBaseline ? baselineColor : highlightColor;
 
+  // Get the transformations from the series <g>.
+  // We cannot just append the element to the series <g> since it has a clip mask.
+  const seriesTransform = series.group.element.getAttribute('transform');
+
   if (!(outline && outline.element)) {
     outline = chart.renderer
       .rect()
       .attr({
-        stroke: color,
         fill: 'none',
         class: 'oecd-highlightOutline',
       })
       .css({ pointerEvents: 'none' })
-      // Add rect to the parent group which already has a transformation applied,
-      // depending on the chart type (translate, rotate, flip)
-      .add(graphic.parentGroup);
+      // Append to the top-level <g> that holds all series <g>.
+      // This element does not have a transform applied.
+      .add(chart.seriesGroup);
 
     outlineRects.set(point, outline);
   }
@@ -68,20 +71,15 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
   const outlineGap = getOutlineGap(chart.plotWidth);
   const outlineDistance = outlineGap + outlineWidth / 2;
 
-  outline = outline
-    .attr({
-      'stroke-width': outlineWidth,
-      x: shapeArgs.x - outlineDistance,
-      y: shapeArgs.y - outlineDistance,
-      width: shapeArgs.width + 2 * outlineDistance,
-      height:
-        // Bar charts are column charts rotated by 90° and mirrored,
-        // so x and y dimensions are flipped here, and y: 0 is on the right
-        series.type === 'bar'
-          ? chart.plotWidth + 2 * outlineDistance
-          : chart.plotHeight + 2 * outlineDistance,
-    })
-    .toFront();
+  outline = outline.attr({
+    stroke: color,
+    'stroke-width': outlineWidth,
+    x: shapeArgs.x - outlineDistance,
+    y: shapeArgs.y - outlineDistance,
+    width: shapeArgs.width + 2 * outlineDistance,
+    height: shapeArgs.height + 2 * outlineDistance,
+    transform: seriesTransform,
+  });
 
   return outline;
 };
