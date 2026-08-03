@@ -84,6 +84,7 @@ const renderAxisMarkerRect = ({
   const outlineGap = getOutlineGap(chart.plotWidth);
   const outlineDistance = outlineGap + outlineWidth / 2;
 
+  const finalTransform = transform || '';
   const attributes =
     seriesType === 'column'
       ? {
@@ -93,7 +94,7 @@ const renderAxisMarkerRect = ({
           width: width + 2 * outlineDistance,
           height: HIGHLIGHT_MARKER_SIZE,
           fill: color,
-          transform,
+          transform: finalTransform,
         }
       : {
           class: 'oecd-axisMarker',
@@ -104,7 +105,7 @@ const renderAxisMarkerRect = ({
           width,
           height: HIGHLIGHT_MARKER_SIZE,
           fill: color,
-          transform,
+          transform: finalTransform,
         };
   axisMarker.attr(attributes);
 
