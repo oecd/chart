@@ -826,16 +826,16 @@ const createOptionsForBarChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        const categoryIsBaseline = baselineCodes.indexOf(category) !== -1;
-
-        const categoryHighlightIndex = highlightedCodes.indexOf(category.code);
+        const categoryCode = category.code;
+        const categoryIsBaseline = baselineCodes.indexOf(categoryCode) !== -1;
+        const categoryHighlightIndex = highlightedCodes.indexOf(categoryCode);
         const categoryIsHighlighted = categoryHighlightIndex !== -1;
 
         return {
           ...dataPoint,
           custom: {
             ...dataPoint.custom,
-            categoryCode: category.code,
+            categoryCode,
             isBaseline: categoryIsBaseline,
             isHighlighted: categoryIsHighlighted,
             highlightIndex: categoryHighlightIndex,
@@ -892,6 +892,7 @@ const createOptionsForBarChart = ({
     categoryGroupIsHighlighted,
   };
   console.log('customChartOptions', customChartOptions);
+
   return {
     custom: customChartOptions,
 
