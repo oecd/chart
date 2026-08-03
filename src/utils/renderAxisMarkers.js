@@ -51,6 +51,7 @@ const axisMarkers = new WeakMap();
  * color: string;
  * x: number;
  * width: number;
+ * transform?: string;
  * }} options
  * @returns {HighchartsSVGElement | undefined}
  */
@@ -62,6 +63,7 @@ const renderAxisMarkerRect = ({
   color,
   x,
   width,
+  transform,
 }) => {
   let axisMarker = axisMarkers.get(point);
 
@@ -91,6 +93,7 @@ const renderAxisMarkerRect = ({
           width: width + 2 * outlineDistance,
           height: HIGHLIGHT_MARKER_SIZE,
           fill: color,
+          transform,
         }
       : {
           class: 'oecd-axisMarker',
@@ -98,9 +101,10 @@ const renderAxisMarkerRect = ({
           // so x and y dimensions are flipped here, and y: 0 is on the right
           x,
           y: chart.plotWidth + HIGHLIGHT_MARKER_GAP,
-          width: width,
+          width,
           height: HIGHLIGHT_MARKER_SIZE,
           fill: color,
+          transform,
         };
   axisMarker.attr(attributes);
 
@@ -130,6 +134,7 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
   const firstSeries = relevantSeries[0];
   if (!firstSeries) return NO_ELEMENTS;
   const seriesType = firstSeries.type;
+  // Get the transforms from the series <g>
   const seriesTransform = firstSeries.group.element.getAttribute('transform');
 
   const pointsByCategory = groupPointsByCategory(
@@ -163,11 +168,9 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
         color,
         x: boundingRect.x1,
         width: boundingRect.x2 - boundingRect.x1,
-      });
-      if (marker) {
         // Apply series transformation to move the marker into the right place.
-        marker.attr({ transform: seriesTransform });
-      }
+        transform: seriesTransform,
+      });
       return marker;
     })
     .filter((element) => element !== undefined);
@@ -199,15 +202,14 @@ const renderSeriesAxisMarkers = ({
         group = chart.renderer
           .g()
           .attr({ class: 'oecd-axisMarkerGroup' })
-          // We cannot add the element to the individual series' <g> since that
-          // has a clip mask that would cut off the axis markers
+          // Append to the top-level <g> that holds all series <g>.
+          // This element does not have a transform applied.
           .add(chart.seriesGroup);
         axisMarkerGroups.set(series, group);
       }
 
-      // The series <g> has a transformation applied. We need to apply the same to the axis marker <g>.
-      // In a column chart, the transformation moves it to the plot area.
-      // In a bar chart, which is a column chart underneath, the transformation moves, rotates and flips it.
+      // Get the transformations from the series <g>.
+      // We cannot just append the element to the series <g> since it has a clip mask.
       const seriesTransform = series.group.element.getAttribute('transform');
       group.attr({ transform: seriesTransform });
 
