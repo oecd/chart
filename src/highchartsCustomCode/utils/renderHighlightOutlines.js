@@ -2,6 +2,7 @@
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
+import { baselineColor } from '../../constants/chart';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 
 /**
@@ -38,16 +39,20 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
     return;
   }
 
+  /** @type {boolean} */
+  const isBaseline = point.options.custom.isBaseline;
+  /** @type {number} */
+  const highlightIndex = point.custom.highlightIndex;
   /** @type {string[]} */
   const highlightColors = chart.options.custom.highlightColors;
-  const highlightIndex = point.custom.highlightIndex;
   const highlightColor = highlightColors[highlightIndex];
+  const color = isBaseline ? baselineColor : highlightColor;
 
   if (!(outline && outline.element)) {
     outline = chart.renderer
       .rect()
       .attr({
-        stroke: highlightColor,
+        stroke: color,
         fill: 'none',
         class: 'oecd-highlightOutline',
       })
@@ -98,15 +103,13 @@ export const renderHighlightOutlines = (chart) => {
 
   return relevantSeries
     .map((series) => {
-      const seriesIsHighlighted = series.options.custom.isHighlighted;
-
       return series.points.map((point) => {
-        const categoryIsHighlighted = point.options.custom.isHighlighted;
-        const isHighlighted =
-          seriesIsHighlighted ||
-          (categoryIsHighlighted && !categoryGroupIsHighlighted);
+        const isHighlighted = point.options.custom.isHighlighted;
+        const isBaseline = point.options.custom.isBaseline;
+        const finalIsHighlighted =
+          (isBaseline || isHighlighted) && !categoryGroupIsHighlighted;
 
-        return renderHighlightOutline(chart, series, point, isHighlighted);
+        return renderHighlightOutline(chart, series, point, finalIsHighlighted);
       });
     })
     .flat()
