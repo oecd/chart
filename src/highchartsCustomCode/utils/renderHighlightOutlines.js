@@ -102,16 +102,16 @@ export const renderHighlightOutlines = (chart) => {
   );
 
   return relevantSeries
-    .map((series) => {
-      return series.points.map((point) => {
+    .map((series) =>
+      series.points.map((point) => {
         const isHighlighted = point.options.custom.isHighlighted;
         const isBaseline = point.options.custom.isBaseline;
         const finalIsHighlighted =
           (isBaseline || isHighlighted) && !categoryGroupIsHighlighted;
 
         return renderHighlightOutline(chart, series, point, finalIsHighlighted);
-      });
-    })
+      }),
+    )
     .flat()
     .filter(Boolean);
 };
