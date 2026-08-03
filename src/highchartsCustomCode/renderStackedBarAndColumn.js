@@ -3,7 +3,7 @@
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { renderAxisMarkers } from '../utils/renderAxisMarker';
+import { renderAxisMarkers } from '../utils/renderAxisMarkers';
 import { highlightCategoryGroups } from './utils/highlightCategoryGroups';
 
 /**
