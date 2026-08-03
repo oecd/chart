@@ -214,25 +214,24 @@ const renderSeriesAxisMarkers = ({
       group.attr({ transform: seriesTransform });
 
       const { custom: seriesCustomOptions } = series.options;
-      const seriesIsBaseline = seriesCustomOptions?.isBaseline;
       const seriesIsHighlighted = seriesCustomOptions?.isHighlighted;
 
       const elements = series.points.map((point) => {
-        const { custom: pointCustomOptions } = point.options;
-        const categoryIsBaseline = pointCustomOptions?.isBaseline;
-        const categoryIsHighlighted = pointCustomOptions?.isHighlighted;
+        const pointCustomOptions = point.options.custom;
+        if (!pointCustomOptions) return;
+        const isBaseline = pointCustomOptions.isBaseline;
+        const isHighlighted = pointCustomOptions.isHighlighted;
 
-        const isBaseline = seriesIsBaseline || categoryIsBaseline;
         const drawAxisMarker =
           isBaseline ||
           (showSeriesHighlight && seriesIsHighlighted) ||
-          (showCategoryHighlight && categoryIsHighlighted);
+          (showCategoryHighlight && isHighlighted);
 
         // The potential existing axis marker will be destroyed automatically
         if (!drawAxisMarker) return;
 
         /** @type {number} */
-        const highlightIndex = point.custom.highlightIndex;
+        const highlightIndex = pointCustomOptions.highlightIndex;
         const color = isBaseline
           ? baselineColor
           : highlightColors[highlightIndex];

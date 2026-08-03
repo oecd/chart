@@ -810,7 +810,6 @@ const createOptionsForBarChart = ({
 
     return {
       custom: {
-        seriesCode,
         isBaseline: seriesIsBaseline,
         isHighlighted: seriesIsHighlighted,
         highlightIndex: seriesHighlightIndex,
@@ -847,7 +846,6 @@ const createOptionsForBarChart = ({
           ...dataPoint,
           custom: {
             ...dataPoint.custom,
-            categoryCode,
             isBaseline: finalIsBaseline,
             isHighlighted: finalIsHighlighted,
             highlightIndex: finalHighlightIndex,
@@ -893,12 +891,8 @@ const createOptionsForBarChart = ({
   };
 
   const customChartOptions = {
-    // TODO: Clean up, pass only needed
     baselineCodes,
     highlightedCodes,
-    highlightedSeries,
-    highlightedSeriesCodes,
-    highlightedCategories,
     highlightedCategoryCodes,
     highlightColors: matchingHighlightColors,
     categoryGroupIsHighlighted,
