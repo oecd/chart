@@ -3,7 +3,7 @@
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { renderAxisMarkers } from '../utils/renderAxisMarker';
+import { renderAxisMarkers } from '../utils/renderAxisMarkers';
 import { highlightCategoryGroups } from './utils/highlightCategoryGroups';
 import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
 
@@ -21,9 +21,6 @@ export const renderBarAndColumn = (options) => {
 
   // Fill the plot area for debugging
   // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 255 / 0.1)');
-
-  /** @type {string[]} */
-  const highlightColors = chart.options.custom.highlightColors;
 
   /**
    * SVG elements created for highlighting

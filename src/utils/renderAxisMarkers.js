@@ -117,7 +117,7 @@ const renderAxisMarkerRect = ({
  * }} options
  * @returns {HighchartsSVGElement[]}
  */
-const renderCategoryAxisMarker = ({ chart, relevantSeries }) => {
+const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
   const customChartOptions = chart.options.custom;
 
   /** @type {string[]} */
@@ -182,7 +182,7 @@ const renderCategoryAxisMarker = ({ chart, relevantSeries }) => {
  * }} options
  * @returns {HighchartsSVGElement[]}
  */
-const renderSeriesAxisMarker = ({
+const renderSeriesAxisMarkers = ({
   chart,
   relevantSeries,
   showSeriesHighlight,
@@ -284,13 +284,13 @@ export const renderAxisMarkers = ({
   );
 
   if (categoryGroupIsHighlighted) {
-    return renderCategoryAxisMarker({
+    return renderCategoryAxisMarkers({
       chart,
       relevantSeries,
     });
   }
 
-  return renderSeriesAxisMarker({
+  return renderSeriesAxisMarkers({
     chart,
     relevantSeries,
     showSeriesHighlight,
