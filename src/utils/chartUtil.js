@@ -775,6 +775,7 @@ const createOptionsForBarChart = ({
     highlightedSeriesCodes,
     highlightedCategoryCodes,
   );
+
   // Find a matching highlight color palette
   const highlightedLength = highlightedCodes.length;
   const matchingHighlightColors =
@@ -790,8 +791,9 @@ const createOptionsForBarChart = ({
     data.series.length > 1 &&
     data.series[0].data.length > 1;
 
-  const series = mapWithIndex((singleSeries, singleSeriesIndex) => {
+  const allSeries = mapWithIndex((singleSeries, singleSeriesIndex) => {
     const seriesCode = singleSeries.code;
+
     const seriesColor =
       getBaselineColor(singleSeries, baseline) ||
       getSeriesColor({
@@ -803,12 +805,12 @@ const createOptionsForBarChart = ({
 
     const seriesIsBaseline = baselineCodes.includes(seriesCode);
 
-    const seriesHighlightIndex = highlightedCodes.indexOf(singleSeries.code);
+    const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
     const seriesIsHighlighted = seriesHighlightIndex !== -1;
 
     return {
       custom: {
-        seriesCode: singleSeries.code,
+        seriesCode,
         isBaseline: seriesIsBaseline,
         isHighlighted: seriesIsHighlighted,
         highlightIndex: seriesHighlightIndex,
@@ -827,18 +829,28 @@ const createOptionsForBarChart = ({
         );
 
         const categoryCode = category.code;
+
         const categoryIsBaseline = baselineCodes.indexOf(categoryCode) !== -1;
+        const finalIsBaseline = seriesIsBaseline || categoryIsBaseline;
+
         const categoryHighlightIndex = highlightedCodes.indexOf(categoryCode);
         const categoryIsHighlighted = categoryHighlightIndex !== -1;
+
+        const finalIsHighlighted = seriesIsHighlighted || categoryIsHighlighted;
+        const finalHighlightIndex = seriesIsHighlighted
+          ? seriesHighlightIndex
+          : categoryIsHighlighted
+            ? categoryHighlightIndex
+            : -1;
 
         return {
           ...dataPoint,
           custom: {
             ...dataPoint.custom,
             categoryCode,
-            isBaseline: categoryIsBaseline,
-            isHighlighted: categoryIsHighlighted,
-            highlightIndex: categoryHighlightIndex,
+            isBaseline: finalIsBaseline,
+            isHighlighted: finalIsHighlighted,
+            highlightIndex: finalHighlightIndex,
           },
           name: category.label,
         };
@@ -994,7 +1006,7 @@ const createOptionsForBarChart = ({
       },
     },
 
-    series,
+    series: allSeries,
   };
 };
 
