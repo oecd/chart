@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
@@ -10,14 +11,12 @@ import { highlightCategoryGroups } from './utils/highlightCategoryGroups';
  * Renders the highlight shapes and cleans up stale ones.
  *
  * @param {{
- *   chart: Chart;
- *   cbType: string;
- *   highlightColors: string[];
- *   smallerHighlightColors: string[];
+ * chart: Chart;
+ * cbType: string;
  * }} options
  */
 export const renderStackedBarAndColumn = (options) => {
-  const { chart, highlightColors, smallerHighlightColors } = options;
+  const { chart } = options;
 
   // Fill the plot area for debugging
   // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 0 / 0.1)');
@@ -28,8 +27,14 @@ export const renderStackedBarAndColumn = (options) => {
    */
   const elements = [];
 
-  elements.push(...highlightCategoryGroups(chart, highlightColors));
-  elements.push(...renderAxisMarkers(chart, highlightColors, false, true));
+  elements.push(...highlightCategoryGroups(chart));
+  elements.push(
+    ...renderAxisMarkers({
+      chart,
+      showSeriesHighlight: false,
+      showCategoryHighlight: true,
+    }),
+  );
 
   const elementSet = new Set(elements);
 
