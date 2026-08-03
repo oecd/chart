@@ -26,23 +26,24 @@ import { getOutlineGap, getOutlineWidth } from './highlightOutline';
  * @returns {HighchartsSVGElement[]}
  */
 export const highlightCategoryGroups = (chart) => {
-  const customOptions = chart.options.custom;
-  if (!customOptions) return NO_ELEMENTS;
+  const customChartOptions = chart.options.custom;
+  if (!customChartOptions) return NO_ELEMENTS;
 
   /** @type {string[]} */
-  const highlightedCategoryCodes = customOptions.highlightedCategoryCodes;
+  const highlightedCategoryCodes = customChartOptions.highlightedCategoryCodes;
   /** @type {boolean} */
-  const categoryGroupIsHighlighted = customOptions.categoryGroupIsHighlighted;
+  const categoryGroupIsHighlighted =
+    customChartOptions.categoryGroupIsHighlighted;
   if (!(highlightedCategoryCodes && categoryGroupIsHighlighted)) {
     return NO_ELEMENTS;
   }
 
   /** @type {string[]} */
-  const baselineCodes = customOptions.baselineCodes;
+  const baselineCodes = customChartOptions.baselineCodes;
   /** @type {string[]} */
-  const highlightedCodes = customOptions.highlightedCodes;
+  const highlightedCodes = customChartOptions.highlightedCodes;
   /** @type {string[]} */
-  const highlightColors = customOptions.highlightColors;
+  const highlightColors = customChartOptions.highlightColors;
 
   const relevantSeries = chart.series.filter(
     ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
