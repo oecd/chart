@@ -1357,6 +1357,9 @@ HighchartsChart.propTypes = {
   fixedColorIndexBySeries: PropTypes.string,
   paletteStartingColor: PropTypes.string,
   highlightColors: PropTypes.array.isRequired,
+  smallerHighlightColors: PropTypes.arrayOf(
+    PropTypes.arrayOf(PropTypes.string),
+  ),
   sortBy: PropTypes.string,
   sortOrder: PropTypes.string,
   sortSeries: PropTypes.string,

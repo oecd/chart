@@ -8,10 +8,8 @@ let minMaxLines = [];
 
 /**
  * @param {{
- *   chart: Chart;
- *   cbType: string;
- *   highlightColors: string[];
- *   smallerHighlightColors: string[];
+ * chart: Chart;
+ * cbType: string;
  * }} options
  */
 export const renderSymbol = ({ chart, cbType }) => {

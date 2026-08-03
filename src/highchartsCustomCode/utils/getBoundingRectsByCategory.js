@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * @import { Point, Series } from "highcharts"
  */
@@ -6,11 +7,11 @@
  * Groups all points of a series by the given categories
  *
  * @param {Series[]} series Relevant series
- * @param {{ code: string }[]} categories Categories to filter for
+ * @param {string[]} categories Categories to filter for
  * @returns {Map<string, Point[]>}
  */
-const groupPointsByCategory = (series, categories) => {
-  const categoryCodes = new Set(categories.map((c) => c.code));
+export const groupPointsByCategory = (series, categories) => {
+  const categoryCodes = new Set(categories);
 
   /** @type {Map<string, Point[]>} */
   const pointsByCategory = new Map();
@@ -34,22 +35,19 @@ const groupPointsByCategory = (series, categories) => {
 
 /**
  * @typedef {{
- *   x1: number;
- *   x2: number;
- *   y1: number;
- *   y2: number;
+ * x1: number;
+ * x2: number;
+ * y1: number;
+ * y2: number;
  * }} BoundingRect
  */
 
 /**
  * Gets the bounding rects for all points of the given highlight categories
- * @param {Series[]} series
- * @param {{ code: string }[]} highlightedCategories
+ * @param {Map<string, Point[]>} pointsByCategory
  * @returns {Map<string, BoundingRect>}
  */
-export const getBoundingRectsByCategory = (series, highlightedCategories) => {
-  const pointsByCategory = groupPointsByCategory(series, highlightedCategories);
-
+export const getBoundingRectsByCategory = (pointsByCategory) => {
   /** @type {Map<string, BoundingRect>} */
   const boundingRectsByCategory = new Map();
 

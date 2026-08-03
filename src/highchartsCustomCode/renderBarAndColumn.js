@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
@@ -11,17 +12,18 @@ import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
  * Renders the highlight shapes and cleans up stale ones.
  *
  * @param {{
- *   chart: Chart;
- *   cbType: string;
- *   highlightColors: string[];
- *   smallerHighlightColors: string[];
+ * chart: Chart;
+ * cbType: string;
  * }} options
  */
 export const renderBarAndColumn = (options) => {
-  const { chart, highlightColors, smallerHighlightColors } = options;
+  const { chart } = options;
 
   // Fill the plot area for debugging
   // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 255 / 0.1)');
+
+  /** @type {string[]} */
+  const highlightColors = chart.options.custom.highlightColors;
 
   /**
    * SVG elements created for highlighting
@@ -29,12 +31,16 @@ export const renderBarAndColumn = (options) => {
    */
   const elements = [];
 
-  // TODO: Pass smallerHighlightColors
-
   // Render highlight shapes for all active series. Aggregate the shapes in a Set.
-  elements.push(...renderAxisMarkers(chart, highlightColors, true, true));
-  elements.push(...renderHighlightOutlines(chart, highlightColors));
-  elements.push(...highlightCategoryGroups(chart, highlightColors));
+  elements.push(
+    ...renderAxisMarkers({
+      chart,
+      showSeriesHighlight: true,
+      showCategoryHighlight: true,
+    }),
+  );
+  elements.push(...renderHighlightOutlines(chart));
+  elements.push(...highlightCategoryGroups(chart));
 
   const elementSet = new Set(elements);
 
