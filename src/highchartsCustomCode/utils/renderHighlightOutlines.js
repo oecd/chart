@@ -19,16 +19,9 @@ const outlineRects = new WeakMap();
  * @param {Series} series
  * @param {boolean} isHighlighted
  * @param {Point} point
- * @param {string[]} highlightColors
  * @returns {HighchartsSVGElement | undefined}
  */
-const renderHighlightOutline = (
-  chart,
-  series,
-  point,
-  isHighlighted,
-  highlightColors,
-) => {
+const renderHighlightOutline = (chart, series, point, isHighlighted) => {
   let outline = outlineRects.get(point);
 
   if (!isHighlighted) {
@@ -45,8 +38,10 @@ const renderHighlightOutline = (
     return;
   }
 
-  // TODO: pick right color
-  const highlightColor = highlightColors[0];
+  /** @type {string[]} */
+  const highlightColors = chart.options.custom.highlightColors;
+  const highlightIndex = point.custom.highlightIndex;
+  const highlightColor = highlightColors[highlightIndex];
 
   if (!(outline && outline.element)) {
     outline = chart.renderer
@@ -91,12 +86,11 @@ const renderHighlightOutline = (
  * Returns the active elements.
  *
  * @param {Chart} chart
- * @param {string[]} highlightColors
  * @returns {HighchartsSVGElement[]} Active elements
  */
-export const renderHighlightOutlines = (chart, highlightColors) => {
+export const renderHighlightOutlines = (chart) => {
   const categoryGroupIsHighlighted =
-    chart.options.custom?.categoryGroupIsHighlighted;
+    chart.options.custom.categoryGroupIsHighlighted;
 
   const relevantSeries = chart.series.filter(
     ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
@@ -104,21 +98,15 @@ export const renderHighlightOutlines = (chart, highlightColors) => {
 
   return relevantSeries
     .map((series) => {
-      const seriesIsHighlighted = series.options.custom?.isHighlighted;
+      const seriesIsHighlighted = series.options.custom.isHighlighted;
 
       return series.points.map((point) => {
-        const categoryIsHighlighted = point.options.custom?.isHighlighted;
-        const finalIsHighlighted =
+        const categoryIsHighlighted = point.options.custom.isHighlighted;
+        const isHighlighted =
           seriesIsHighlighted ||
           (categoryIsHighlighted && !categoryGroupIsHighlighted);
 
-        return renderHighlightOutline(
-          chart,
-          series,
-          point,
-          finalIsHighlighted,
-          highlightColors,
-        );
+        return renderHighlightOutline(chart, series, point, isHighlighted);
       });
     })
     .flat()

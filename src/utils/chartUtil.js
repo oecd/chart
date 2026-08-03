@@ -1,4 +1,3 @@
-/* global console */
 /* eslint-disable no-console */
 import * as R from 'ramda';
 import truncatise from 'truncatise';
@@ -85,10 +84,20 @@ export const createStackedDatapoints = ({
       fixedColorIndexBySeries,
     });
 
-    const seriesHighlightIndex = R.findIndex(codeOrLabelEquals(s), highlight);
+    const seriesCodeOrLabelEquals = codeOrLabelEquals(s);
+    const seriesIsBaseline = seriesCodeOrLabelEquals(baseline);
+    const seriesHighlightIndex = R.findIndex(
+      seriesCodeOrLabelEquals,
+      highlight,
+    );
     const seriesIsHighlighted = seriesHighlightIndex !== -1;
 
     return {
+      custom: {
+        isBaseline: seriesIsBaseline,
+        isHighlighted: seriesIsHighlighted,
+        highlightIndex: seriesHighlightIndex,
+      },
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(s.label).getTime()
         : s.label,
@@ -105,14 +114,13 @@ export const createStackedDatapoints = ({
         },
       },
       showInLegend: true,
-      custom: {
-        isHighlighted: seriesIsHighlighted,
-      },
       data: mapWithIndex((d, xIdx) => {
         const category = R.nth(xIdx, data.categories);
 
+        const categoryCodeOrLabelEquals = codeOrLabelEquals(category);
+
         const baselineColorsIndex = R.findIndex(
-          codeOrLabelEquals(category),
+          categoryCodeOrLabelEquals,
           baseline,
         );
 
@@ -121,10 +129,12 @@ export const createStackedDatapoints = ({
             ? null
             : getListItemAtTurningIndex(seriesIndex, baselineColors);
 
-        const categoryIsHighlighted = R.any(
-          codeOrLabelEquals(category),
+        const categoryIsBaseline = categoryCodeOrLabelEquals(baseline);
+        const categoryHighlightIndex = R.findIndex(
+          categoryCodeOrLabelEquals,
           highlight,
         );
+        const categoryIsHighlighted = categoryHighlightIndex !== -1;
 
         const highlightColor = seriesIsHighlighted
           ? getListItemAtTurningIndex(seriesHighlightIndex, highlightColors)
@@ -142,13 +152,14 @@ export const createStackedDatapoints = ({
         );
 
         return {
+          custom: {
+            ...dataPoint.custom,
+            isBaseline: categoryIsBaseline,
+            isHighlighted: categoryIsHighlighted,
+          },
           name: category.label,
           ...dataPoint,
           color,
-          custom: {
-            ...dataPoint.custom,
-            isHighlighted: categoryIsHighlighted,
-          },
         };
       }, s.data),
     };
@@ -709,6 +720,12 @@ const createOptionsForLineChart = ({
   };
 };
 
+/**
+ * @param {{
+ * highlight?: string[];
+ * baseline?: string[];
+ * }} options
+ */
 const createOptionsForBarChart = ({
   chartType,
   data,
@@ -717,8 +734,10 @@ const createOptionsForBarChart = ({
   subtitle = '',
   colorPalette,
   fixedColorIndexBySeries = null,
-  highlight = null,
   baseline = null,
+  highlight = null,
+  highlightColors,
+  smallerHighlightColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -732,67 +751,98 @@ const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
+  const entities = R.concat(data.series, data.categories);
+  const baselineEntities = R.filter(
+    (series) => R.any(codeOrLabelEquals(series), baseline),
+    entities,
+  );
+  const baselineCodes = R.map(R.prop('code'), baselineEntities);
+
   const highlightedSeries = R.filter(
     (series) => R.any(codeOrLabelEquals(series), highlight),
     data.series,
   );
+  const highlightedSeriesCodes = R.map(R.prop('code'), highlightedSeries);
 
   const highlightedCategories = R.filter(
     (category) => R.any(codeOrLabelEquals(category), highlight),
     data.categories,
   );
+  const highlightedCategoryCodes = R.map(R.prop('code'), highlightedCategories);
 
+  // This is different from `highlight` which might contain codes or labels
+  const highlightedCodes = R.concat(
+    highlightedSeriesCodes,
+    highlightedCategoryCodes,
+  );
+  // Find a matching highlight color palette
+  const highlightedLength = highlightedCodes.length;
+  const matchingHighlightColors =
+    R.find(R.propEq(highlightedLength, 'length'), smallerHighlightColors) ||
+    highlightColors;
+
+  /**
+   * Whether a category is highlighted that contains several points
+   * that can be highlighted as a visual group, not as individual points.
+   */
   const categoryGroupIsHighlighted =
     highlightedCategories.length > 0 &&
     data.series.length > 1 &&
     data.series[0].data.length > 1;
 
-  const series = mapWithIndex((s, sIdx) => {
+  const series = mapWithIndex((singleSeries, singleSeriesIndex) => {
+    const seriesCode = singleSeries.code;
     const seriesColor =
-      getBaselineColor(s, baseline) ||
+      getBaselineColor(singleSeries, baseline) ||
       getSeriesColor({
         colorPalette,
-        seriesIndex: sIdx,
-        seriesCode: s.code,
+        seriesIndex: singleSeriesIndex,
+        seriesCode,
         fixedColorIndexBySeries,
       });
 
-    const seriesIsHighlighted = R.any(codeOrLabelEquals(s), highlight);
+    const seriesIsBaseline = baselineCodes.includes(seriesCode);
 
-    const augmentedPoints = mapWithIndex((d, dIdx) => {
-      const category = R.nth(dIdx, data.categories);
-
-      const baselineColor = getBaselineColor(category, baseline);
-
-      const dataPoint = createDatapoint(
-        d,
-        categoriesAreDatesOrNumberForDataParsing,
-      );
-
-      const categoryIsHighlighted = R.any(codeOrLabelEquals(category))(
-        highlight,
-      );
-
-      return {
-        ...dataPoint,
-        name: category.label,
-        color: baselineColor,
-        custom: {
-          isHighlighted: categoryIsHighlighted,
-        },
-      };
-    }, s.data);
+    const seriesHighlightIndex = highlightedCodes.indexOf(singleSeries.code);
+    const seriesIsHighlighted = seriesHighlightIndex !== -1;
 
     return {
+      custom: {
+        seriesCode: singleSeries.code,
+        isBaseline: seriesIsBaseline,
+        isHighlighted: seriesIsHighlighted,
+        highlightIndex: seriesHighlightIndex,
+      },
       name: data.areSeriesDates
-        ? seriesFrequency.tryParse(s.label).getTime()
-        : s.label,
-      data: augmentedPoints,
+        ? seriesFrequency.tryParse(singleSeries.label).getTime()
+        : singleSeries.label,
       color: seriesColor,
       showInLegend: true,
-      custom: {
-        isHighlighted: seriesIsHighlighted,
-      },
+      data: mapWithIndex((pointData, pointIndex) => {
+        const category = R.nth(pointIndex, data.categories);
+
+        const dataPoint = createDatapoint(
+          pointData,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
+
+        const categoryIsBaseline = baselineCodes.indexOf(category) !== -1;
+
+        const categoryHighlightIndex = highlightedCodes.indexOf(category.code);
+        const categoryIsHighlighted = categoryHighlightIndex !== -1;
+
+        return {
+          ...dataPoint,
+          custom: {
+            ...dataPoint.custom,
+            categoryCode: category.code,
+            isBaseline: categoryIsBaseline,
+            isHighlighted: categoryIsHighlighted,
+            highlightIndex: categoryHighlightIndex,
+          },
+          name: category.label,
+        };
+      }, singleSeries.data),
     };
   }, data.series);
 
@@ -830,12 +880,20 @@ const createOptionsForBarChart = ({
     return horizontal ? 14 : 34;
   };
 
+  const customChartOptions = {
+    // TODO: Clean up, pass only needed
+    baselineCodes,
+    highlightedCodes,
+    highlightedSeries,
+    highlightedSeriesCodes,
+    highlightedCategories,
+    highlightedCategoryCodes,
+    highlightColors: matchingHighlightColors,
+    categoryGroupIsHighlighted,
+  };
+  console.log('customChartOptions', customChartOptions);
   return {
-    custom: {
-      highlightedSeries,
-      highlightedCategories,
-      categoryGroupIsHighlighted,
-    },
+    custom: customChartOptions,
 
     chart: {
       type: horizontal ? 'bar' : 'column',
@@ -1977,12 +2035,7 @@ const createChartOptionsFunc =
 
     const customChartRenderWithCbType = ({ target: chart }) => {
       if (customChartRender) {
-        customChartRender({
-          chart,
-          cbType: otherProps.chartType,
-          highlightColors: otherProps.highlightColors,
-          smallerHighlightColors: otherProps.smallerHighlightColors,
-        });
+        customChartRender({ chart, cbType: otherProps.chartType });
       }
     };
 

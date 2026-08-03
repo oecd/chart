@@ -1,53 +1,61 @@
+// @ts-check
 /**
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { getBoundingRectsByCategory } from './getBoundingRectsByCategory';
+/** @type {never[]} */
+const NO_ELEMENTS = [];
+Object.freeze(NO_ELEMENTS);
+
+import { baselineColor } from '../../constants/chart';
+import {
+  getBoundingRectsByCategory,
+  groupPointsByCategory,
+} from './getBoundingRectsByCategory';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 
 /**
- * Draws a rect around all shapes of highlighted categories.
+ * Draws a rect around the shapes of highlighted or baseline categories.
  * Returns an array of created SVG elements.
  *
- * The chart options need
- * ```
- * custom: {
- *   highlightedCategories: { code: string }[] },
- *   categoryGroupIsHighlighted: true
- * }
- * ```
- * for this function to become active.
+ * Expects several custom options to be set on the chart, like
+ * `categoryGroupIsHighlighted`.`
  *
  * @param {Chart} chart
- * @param {string[]} highlightColors
+ *
  * @returns {HighchartsSVGElement[]}
  */
-export const highlightCategoryGroups = (chart, highlightColors) => {
-  /** @type {HighchartsSVGElement[]} */
-  const elements = [];
+export const highlightCategoryGroups = (chart) => {
+  const customOptions = chart.options.custom;
+  if (!customOptions) return NO_ELEMENTS;
 
-  const highlightedCategories = chart.options.custom?.highlightedCategories;
-
-  const categoryGroupIsHighlighted =
-    chart.options.custom?.categoryGroupIsHighlighted;
-
-  if (!(highlightedCategories && categoryGroupIsHighlighted)) {
-    return elements;
+  /** @type {string[]} */
+  const highlightedCategoryCodes = customOptions.highlightedCategoryCodes;
+  /** @type {boolean} */
+  const categoryGroupIsHighlighted = customOptions.categoryGroupIsHighlighted;
+  if (!(highlightedCategoryCodes && categoryGroupIsHighlighted)) {
+    return NO_ELEMENTS;
   }
+
+  /** @type {string[]} */
+  const baselineCodes = customOptions.baselineCodes;
+  /** @type {string[]} */
+  const highlightedCodes = customOptions.highlightedCodes;
+  /** @type {string[]} */
+  const highlightColors = customOptions.highlightColors;
 
   const relevantSeries = chart.series.filter(
     ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
   );
   const firstSeries = relevantSeries[0];
-  if (!firstSeries) {
-    return elements;
-  }
+  if (!firstSeries) return NO_ELEMENTS;
   const firstType = firstSeries.type;
 
-  const boundingRects = getBoundingRectsByCategory(
+  const pointsByCategory = groupPointsByCategory(
     relevantSeries,
-    highlightedCategories,
+    baselineCodes.concat(highlightedCategoryCodes),
   );
+  const boundingRects = getBoundingRectsByCategory(pointsByCategory);
 
   /**
    * Element cache for reuse across chart renderings
@@ -59,12 +67,11 @@ export const highlightCategoryGroups = (chart, highlightColors) => {
     chart.oecd_highlightCategoryGroupElements = rectByCategory;
   }
 
+  /** @type {HighchartsSVGElement[]} */
+  const elements = [];
+
   // Draw a rectangle around the bounding box of all points of a category
   boundingRects.forEach(({ x1, x2 }, category) => {
-    const outlineWidth = getOutlineWidth(chart.plotWidth);
-    const outlineGap = getOutlineGap(chart.plotWidth);
-    const outlineDistance = outlineGap + outlineWidth / 2;
-
     let rect = rectByCategory.get(category);
     if (!(rect && rect.element)) {
       rect = chart.renderer
@@ -75,10 +82,19 @@ export const highlightCategoryGroups = (chart, highlightColors) => {
         .add(firstSeries.group);
       rectByCategory.set(category, rect);
     }
+
+    const outlineWidth = getOutlineWidth(chart.plotWidth);
+    const outlineGap = getOutlineGap(chart.plotWidth);
+    const outlineDistance = outlineGap + outlineWidth / 2;
+
+    const isBaseline = baselineCodes.includes(category);
+    const highlightIndex = highlightedCodes.indexOf(category);
+    const color = isBaseline ? baselineColor : highlightColors[highlightIndex];
+
     rect.attr({
       strokeWidth: outlineWidth,
-      // TODO: Pick the right color
-      stroke: highlightColors[0],
+
+      stroke: color,
       x: x1 - outlineDistance,
       y: 0,
       width: x2 - x1 + 2 * outlineDistance,
