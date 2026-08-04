@@ -194,9 +194,6 @@ const renderSeriesAxisMarkers = ({
   showSeriesHighlight,
   showCategoryHighlight,
 }) => {
-  /** @type {string[]} */
-  const highlightColors = chart.options.custom.highlightColors;
-
   return relevantSeries
     .map((series) => {
       // Create <g> for the axis markers of this series

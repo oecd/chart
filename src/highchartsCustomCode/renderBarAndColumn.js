@@ -4,7 +4,7 @@
  */
 
 import { renderAxisMarkers } from '../utils/renderAxisMarkers';
-import { highlightCategoryGroups } from './utils/highlightCategoryGroups';
+import { renderCategoryGroupOutline } from './utils/renderCategoryGroupOutline';
 import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
 
 /**
@@ -32,12 +32,13 @@ export const renderBarAndColumn = (options) => {
   elements.push(
     ...renderAxisMarkers({
       chart,
+      showSeriesBaseline: true,
       showSeriesHighlight: true,
       showCategoryHighlight: true,
     }),
   );
   elements.push(...renderHighlightOutlines(chart));
-  elements.push(...highlightCategoryGroups(chart));
+  elements.push(...renderCategoryGroupOutline(chart));
 
   const elementSet = new Set(elements);
 
