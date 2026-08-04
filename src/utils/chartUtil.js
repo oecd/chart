@@ -119,7 +119,6 @@ const createStackedDatapoints = ({
       custom: {
         isBaseline: isSeriesBaseline,
         isHighlighted: isSeriesHighlighted,
-        highlightIndex: seriesHighlightIndex,
       },
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(singleSeries.label).getTime()
@@ -201,8 +200,6 @@ const createStackedDatapoints = ({
             isHighlighted: finalIsHighlighted,
             isSeriesHighlighted,
             isCategoryHighlighted,
-            // TODO: Remove, use highlightColor directly in render code
-            highlightIndex: finalHighlightIndex,
             highlightColor,
           },
           name: category.label,
@@ -866,7 +863,6 @@ const createOptionsForBarChart = ({
       custom: {
         isBaseline: isSeriesBaseline,
         isHighlighted: isSeriesHighlighted,
-        highlightIndex: seriesHighlightIndex,
       },
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(singleSeries.label).getTime()
@@ -935,8 +931,6 @@ const createOptionsForBarChart = ({
             isHighlighted: finalIsHighlighted,
             isSeriesHighlighted,
             isCategoryHighlighted,
-            // TODO: Remove, use highlightColor directly in render code
-            highlightIndex: finalHighlightIndex,
             highlightColor,
           },
           name: category.label,
