@@ -69,9 +69,6 @@ const renderHighlightInset = ({ chart, point, isHighlighted, transform }) => {
  * @returns {HighchartsSVGElement[]}
  */
 export const renderHighlightInsets = (chart) => {
-  console.log(
-    'renderHighlightInsets ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++',
-  );
   const isCategoryGroupHighlighted =
     chart.options.custom.isCategoryGroupHighlighted;
 
