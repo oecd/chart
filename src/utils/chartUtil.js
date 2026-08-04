@@ -915,7 +915,7 @@ const createOptionsForBarChart = ({
             )
           : null;
 
-        const highlightColor = isSeriesHighlighted
+        const highlightColor = finalIsHighlighted
           ? getListItemAtTurningIndex(
               finalHighlightIndex,
               matchingHighlightColors,
@@ -983,7 +983,6 @@ const createOptionsForBarChart = ({
     baselineCodes,
     highlightedCodes,
     highlightedCategoryCodes,
-    // TODO: Remove, should not be necessary since the color is saved at the series/point
     highlightColors: matchingHighlightColors,
     isCategoryGroupHighlighted,
   };

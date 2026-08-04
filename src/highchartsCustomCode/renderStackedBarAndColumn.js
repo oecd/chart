@@ -4,7 +4,7 @@
  */
 
 import { renderAxisMarkers } from '../utils/renderAxisMarkers';
-import { highlightCategoryGroups } from './utils/highlightCategoryGroups';
+import { renderCategoryGroupOutline } from './utils/renderCategoryGroupOutline';
 
 /**
  * Event handler called after load (initial render) and redraw (subsequent render).
@@ -27,7 +27,7 @@ export const renderStackedBarAndColumn = (options) => {
    */
   const elements = [];
 
-  elements.push(...highlightCategoryGroups(chart));
+  elements.push(...renderCategoryGroupOutline(chart));
   elements.push(
     ...renderAxisMarkers({
       chart,

@@ -54,8 +54,7 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
 
   if (!(outline && outline.element)) {
     outline = chart.renderer
-      .rect()
-      .attr({
+      .rect({
         fill: 'none',
         class: 'oecd-highlightOutline',
       })
