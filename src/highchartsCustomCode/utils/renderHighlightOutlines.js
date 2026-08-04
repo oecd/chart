@@ -92,8 +92,8 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
  * @returns {HighchartsSVGElement[]} Active elements
  */
 export const renderHighlightOutlines = (chart) => {
-  const categoryGroupIsHighlighted =
-    chart.options.custom.categoryGroupIsHighlighted;
+  const isCategoryGroupHighlighted =
+    chart.options.custom.isCategoryGroupHighlighted;
 
   const relevantSeries = chart.series.filter(
     ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
@@ -105,7 +105,7 @@ export const renderHighlightOutlines = (chart) => {
         const isHighlighted = point.options.custom.isHighlighted;
         const isBaseline = point.options.custom.isBaseline;
         const finalIsHighlighted =
-          (isBaseline || isHighlighted) && !categoryGroupIsHighlighted;
+          (isBaseline || isHighlighted) && !isCategoryGroupHighlighted;
 
         return renderHighlightOutline(chart, series, point, finalIsHighlighted);
       }),
