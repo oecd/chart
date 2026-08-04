@@ -129,8 +129,6 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
   const baselineCodes = customChartOptions.baselineCodes;
   /** @type {string[]} */
   const highlightedCategoryCodes = customChartOptions.highlightedCategoryCodes;
-  /** @type {string[]} */
-  const highlightColors = customChartOptions.highlightColors;
 
   const firstSeries = relevantSeries[0];
   if (!firstSeries) return NO_ELEMENTS;
@@ -151,12 +149,14 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
       const firstPoint = points[0];
       const customPointOptions = firstPoint.options.custom;
       if (!customPointOptions) return;
-      const isBaseline = customPointOptions.isBaseline;
 
-      const highlightIndex = customPointOptions.highlightIndex;
+      const { isBaseline, isCategoryHighlighted, highlightColor } =
+        customPointOptions;
       const color = isBaseline
         ? baselineColor
-        : highlightColors[highlightIndex];
+        : isCategoryHighlighted
+          ? highlightColor
+          : null;
 
       const marker = renderAxisMarkerRect({
         chart,
@@ -181,6 +181,7 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
  * @param {{
  * chart: Chart;
  * relevantSeries: Series[];
+ * showSeriesBaseline: boolean;
  * showSeriesHighlight: boolean;
  * showCategoryHighlight: boolean;
  * }} options
@@ -189,6 +190,7 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
 const renderSeriesAxisMarkers = ({
   chart,
   relevantSeries,
+  showSeriesBaseline,
   showSeriesHighlight,
   showCategoryHighlight,
 }) => {
@@ -214,28 +216,21 @@ const renderSeriesAxisMarkers = ({
       const seriesTransform = series.group.element.getAttribute('transform');
       group.attr({ transform: seriesTransform });
 
-      const { custom: seriesCustomOptions } = series.options;
-      const seriesIsHighlighted = seriesCustomOptions?.isHighlighted;
-
       const elements = series.points.map((point) => {
         const pointCustomOptions = point.options.custom;
         if (!pointCustomOptions) return;
-        const isBaseline = pointCustomOptions.isBaseline;
-        const isHighlighted = pointCustomOptions.isHighlighted;
 
         const drawAxisMarker =
-          isBaseline ||
-          (showSeriesHighlight && seriesIsHighlighted) ||
-          (showCategoryHighlight && isHighlighted);
+          (showSeriesBaseline && pointCustomOptions.isSeriesBaseline) ||
+          (showSeriesHighlight && pointCustomOptions.isSeriesHighlighted) ||
+          (showCategoryHighlight && pointCustomOptions.isCategoryHighlighted);
 
         // The potential existing axis marker will be destroyed automatically
         if (!drawAxisMarker) return;
 
-        /** @type {number} */
-        const highlightIndex = pointCustomOptions.highlightIndex;
-        const color = isBaseline
+        const color = pointCustomOptions.isBaseline
           ? baselineColor
-          : highlightColors[highlightIndex];
+          : pointCustomOptions.highlightColor;
 
         const { shapeArgs } = point;
         if (!shapeArgs) {
@@ -267,6 +262,7 @@ const renderSeriesAxisMarkers = ({
  *
  * @param {{
  *  chart: Chart;
+ *  showSeriesBaseline: boolean; // Whether to draw a marker when the series is baseline
  *  showSeriesHighlight: boolean; // Whether to draw a marker when the series is highlighted
  *  showCategoryHighlight: boolean; // Whether to draw a marker when the category is highlighted
  * }} options
@@ -274,18 +270,19 @@ const renderSeriesAxisMarkers = ({
  */
 export const renderAxisMarkers = ({
   chart,
+  showSeriesBaseline,
   showSeriesHighlight,
   showCategoryHighlight,
 }) => {
   /** @type {boolean} */
-  const categoryGroupIsHighlighted =
-    chart.options.custom.categoryGroupIsHighlighted;
+  const isCategoryGroupHighlighted =
+    chart.options.custom.isCategoryGroupHighlighted;
 
   const relevantSeries = chart.series.filter(
     ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
   );
 
-  if (categoryGroupIsHighlighted) {
+  if (isCategoryGroupHighlighted) {
     return renderCategoryAxisMarkers({
       chart,
       relevantSeries,
@@ -295,6 +292,7 @@ export const renderAxisMarkers = ({
   return renderSeriesAxisMarkers({
     chart,
     relevantSeries,
+    showSeriesBaseline,
     showSeriesHighlight,
     showCategoryHighlight,
   });

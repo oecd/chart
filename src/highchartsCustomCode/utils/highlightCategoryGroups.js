@@ -19,7 +19,7 @@ import { getOutlineGap, getOutlineWidth } from './highlightOutline';
  * Returns an array of created SVG elements.
  *
  * Expects several custom options to be set on the chart, like
- * `categoryGroupIsHighlighted`.`
+ * `isCategoryGroupHighlighted`.`
  *
  * @param {Chart} chart
  *
@@ -32,9 +32,9 @@ export const highlightCategoryGroups = (chart) => {
   /** @type {string[]} */
   const highlightedCategoryCodes = customChartOptions.highlightedCategoryCodes;
   /** @type {boolean} */
-  const categoryGroupIsHighlighted =
-    customChartOptions.categoryGroupIsHighlighted;
-  if (!(highlightedCategoryCodes && categoryGroupIsHighlighted)) {
+  const isCategoryGroupHighlighted =
+    customChartOptions.isCategoryGroupHighlighted;
+  if (!(highlightedCategoryCodes && isCategoryGroupHighlighted)) {
     return NO_ELEMENTS;
   }
 

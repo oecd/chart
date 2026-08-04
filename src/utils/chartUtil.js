@@ -85,20 +85,21 @@ const createStackedDatapoints = ({
   baseline,
   categoriesAreDatesOrNumberForDataParsing,
   seriesFrequency,
-  // NEW
   baselineCodes,
   highlightedCodes,
 }) => {
-  const baselineColors = R.find(
-    (shade) => R.length(shade) <= R.length(data.series),
-    baselineColorShades,
-  );
+  // Find matching color palettes
+
+  const matchingBaselineColors =
+    R.find(R.propEq(baselineCodes.length, 'length'), baselineColorShades) ||
+    baselineColorShades;
 
   // Find a matching highlight color palette
-  const highlightedLength = highlightedCodes.length;
   const matchingHighlightColors =
-    R.find(R.propEq(highlightedLength, 'length'), smallerHighlightColors) ||
-    highlightColors;
+    R.find(
+      R.propEq(highlightedCodes.length, 'length'),
+      smallerHighlightColors,
+    ) || highlightColors;
 
   return mapWithIndex((singleSeries, seriesIndex) => {
     const seriesCode = singleSeries.code;
@@ -106,20 +107,20 @@ const createStackedDatapoints = ({
     const seriesColor = getSeriesColor({
       colorPalette,
       seriesIndex,
-      seriesCode: singleSeries.code,
+      seriesCode,
       fixedColorIndexBySeries,
     });
 
     const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
-    const seriesIsBaseline = seriesBaselineIndex !== -1;
+    const isSeriesBaseline = seriesBaselineIndex !== -1;
 
     const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
-    const seriesIsHighlighted = seriesHighlightIndex !== -1;
+    const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
     return {
       custom: {
-        isBaseline: seriesIsBaseline,
-        isHighlighted: seriesIsHighlighted,
+        isBaseline: isSeriesBaseline,
+        isHighlighted: isSeriesHighlighted,
         highlightIndex: seriesHighlightIndex,
       },
       name: data.areSeriesDates
@@ -140,33 +141,70 @@ const createStackedDatapoints = ({
       showInLegend: true,
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
-
-        // Similar code as for bar/column, but ignore when the series is baseline or highlighted
-
-        const baselineColor = seriesIsBaseline
-          ? getListItemAtTurningIndex(seriesBaselineIndex, baselineColors)
-          : null;
-
-        const highlightColor = seriesIsHighlighted
-          ? getListItemAtTurningIndex(
-              seriesHighlightIndex,
-              matchingHighlightColors,
-            )
-          : null;
+        const categoryCode = category.code;
 
         const dataPoint = createDatapoint(
           pointData,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
+        // Same code as in `createOptionsForBarChart`
+
+        // Baseline
+
+        const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
+        const isCategoryBaseline = categoryBaselineIndex !== -1;
+
+        const finalBaselineIndex = isSeriesBaseline
+          ? seriesBaselineIndex
+          : isCategoryBaseline
+            ? categoryBaselineIndex
+            : -1;
+        const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
+
+        // Highlight
+
+        const categoryHighlightIndex = highlightedCodes.indexOf(categoryCode);
+        const isCategoryHighlighted = categoryHighlightIndex !== -1;
+
+        const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
+        const finalHighlightIndex = isSeriesHighlighted
+          ? seriesHighlightIndex
+          : isCategoryHighlighted
+            ? categoryHighlightIndex
+            : -1;
+
+        // Colors
+
+        const baselineColor = finalIsBaseline
+          ? getListItemAtTurningIndex(
+              finalBaselineIndex,
+              matchingBaselineColors,
+            )
+          : null;
+
+        const highlightColor = finalIsHighlighted
+          ? getListItemAtTurningIndex(
+              finalHighlightIndex,
+              matchingHighlightColors,
+            )
+          : null;
+
         return {
           ...dataPoint,
           custom: {
             ...dataPoint.custom,
-            isBaseline: seriesIsBaseline,
-            isHighlighted: seriesIsHighlighted,
-            highlightIndex: seriesHighlightIndex,
+            // Baseline
+            isBaseline: finalIsBaseline,
+            isSeriesBaseline,
+            isCategoryBaseline,
             baselineColor,
+            // Highlight
+            isHighlighted: finalIsHighlighted,
+            isSeriesHighlighted,
+            isCategoryHighlighted,
+            // TODO: Remove, use highlightColor directly in render code
+            highlightIndex: finalHighlightIndex,
             highlightColor,
           },
           name: category.label,
@@ -788,7 +826,12 @@ const createOptionsForBarChart = ({
     highlightedCategoryCodes,
   );
 
-  // Find a matching highlight color palette
+  // Find matching color palettes
+
+  const matchingBaselineColors =
+    R.find(R.propEq(baselineCodes.length, 'length'), baselineColorShades) ||
+    baselineColorShades;
+
   const highlightedLength = highlightedCodes.length;
   const matchingHighlightColors =
     R.find(R.propEq(highlightedLength, 'length'), smallerHighlightColors) ||
@@ -798,7 +841,7 @@ const createOptionsForBarChart = ({
    * Whether a category is highlighted that contains several points
    * that can be highlighted as a visual group, not as individual points.
    */
-  const categoryGroupIsHighlighted =
+  const isCategoryGroupHighlighted =
     highlightedCategories.length > 0 &&
     data.series.length > 1 &&
     data.series[0].data.length > 1;
@@ -816,15 +859,15 @@ const createOptionsForBarChart = ({
       });
 
     const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
-    const seriesIsBaseline = seriesBaselineIndex !== -1;
+    const isSeriesBaseline = seriesBaselineIndex !== -1;
 
     const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
-    const seriesIsHighlighted = seriesHighlightIndex !== -1;
+    const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
     return {
       custom: {
-        isBaseline: seriesIsBaseline,
-        isHighlighted: seriesIsHighlighted,
+        isBaseline: isSeriesBaseline,
+        isHighlighted: isSeriesHighlighted,
         highlightIndex: seriesHighlightIndex,
       },
       name: data.areSeriesDates
@@ -834,41 +877,49 @@ const createOptionsForBarChart = ({
       showInLegend: true,
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
+        const categoryCode = category.code;
 
         const dataPoint = createDatapoint(
           pointData,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        const categoryCode = category.code;
+        // Baseline
 
         const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
-        const categoryIsBaseline = categoryBaselineIndex !== -1;
+        const isCategoryBaseline = categoryBaselineIndex !== -1;
 
-        const finalBaselineIndex = seriesIsBaseline
+        const finalBaselineIndex = isSeriesBaseline
           ? seriesBaselineIndex
-          : categoryIsBaseline
+          : isCategoryBaseline
             ? categoryBaselineIndex
             : -1;
-        const finalIsBaseline = seriesIsBaseline || categoryIsBaseline;
+        const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
+
+        // Highlight
 
         const categoryHighlightIndex = highlightedCodes.indexOf(categoryCode);
-        const categoryIsHighlighted = categoryHighlightIndex !== -1;
+        const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
-        const finalIsHighlighted = seriesIsHighlighted || categoryIsHighlighted;
-        const finalHighlightIndex = seriesIsHighlighted
+        const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
+        const finalHighlightIndex = isSeriesHighlighted
           ? seriesHighlightIndex
-          : categoryIsHighlighted
+          : isCategoryHighlighted
             ? categoryHighlightIndex
             : -1;
 
+        // Colors
+
         const baselineColor = finalIsBaseline
-          ? getListItemAtTurningIndex(finalBaselineIndex, baselineColors)
+          ? getListItemAtTurningIndex(
+              finalBaselineIndex,
+              matchingBaselineColors,
+            )
           : null;
 
-        const highlightColor = seriesIsHighlighted
+        const highlightColor = isSeriesHighlighted
           ? getListItemAtTurningIndex(
-              seriesHighlightIndex,
+              finalHighlightIndex,
               matchingHighlightColors,
             )
           : null;
@@ -877,10 +928,17 @@ const createOptionsForBarChart = ({
           ...dataPoint,
           custom: {
             ...dataPoint.custom,
+            // Baseline
             isBaseline: finalIsBaseline,
-            isHighlighted: finalIsHighlighted,
-            highlightIndex: finalHighlightIndex,
+            isSeriesBaseline,
+            isCategoryBaseline,
             baselineColor,
+            // Highlight
+            isHighlighted: finalIsHighlighted,
+            isSeriesHighlighted,
+            isCategoryHighlighted,
+            // TODO: Remove, use highlightColor directly in render code
+            highlightIndex: finalHighlightIndex,
             highlightColor,
           },
           name: category.label,
@@ -927,8 +985,9 @@ const createOptionsForBarChart = ({
     baselineCodes,
     highlightedCodes,
     highlightedCategoryCodes,
+    // TODO: Remove, should not be necessary since the color is saved at the series/point
     highlightColors: matchingHighlightColors,
-    categoryGroupIsHighlighted,
+    isCategoryGroupHighlighted,
   };
   console.log('customChartOptions', customChartOptions);
 
@@ -1140,7 +1199,7 @@ const createOptionsForStackedChart = ({
     R.find(R.propEq(highlightedLength, 'length'), smallerHighlightColors) ||
     highlightColors;
 
-  const categoryGroupIsHighlighted =
+  const isCategoryGroupHighlighted =
     highlightedCategories.length > 0 &&
     data.series.length > 1 &&
     data.series[0].data.length > 1;
@@ -1164,7 +1223,7 @@ const createOptionsForStackedChart = ({
     highlightedCodes,
     highlightedCategoryCodes,
     highlightColors: matchingHighlightColors,
-    categoryGroupIsHighlighted,
+    isCategoryGroupHighlighted,
   };
   console.log('customChartOptions', customChartOptions);
 
