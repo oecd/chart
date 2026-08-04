@@ -3,16 +3,13 @@
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-/** @type {never[]} */
-const NO_ELEMENTS = [];
-Object.freeze(NO_ELEMENTS);
-
 import { baselineColor } from '../../constants/chart';
 import {
   getBoundingRectsByCategory,
   groupPointsByCategory,
 } from './getBoundingRectsByCategory';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
+import { NO_ELEMENTS } from './noElements';
 
 /**
  * Draws a rect around the shapes of highlighted or baseline categories.
