@@ -12,7 +12,7 @@ import { getOutlineGap, getOutlineWidth } from './highlightOutline';
  *
  * @type {WeakMap<Point, HighchartsSVGElement>}
  */
-const outlineRects = new WeakMap();
+const OUTLINE_RECTS = new WeakMap();
 
 /**
  * Renders an outline rect around the bars/columns of highlighted points.
@@ -24,11 +24,11 @@ const outlineRects = new WeakMap();
  * @returns {HighchartsSVGElement | undefined}
  */
 const renderHighlightOutline = (chart, series, point, isHighlighted) => {
-  let outline = outlineRects.get(point);
+  let outline = OUTLINE_RECTS.get(point);
 
   if (!isHighlighted) {
     if (outline) {
-      outlineRects.delete(point);
+      OUTLINE_RECTS.delete(point);
     }
     // The potential existing outline will be destroyed automatically
     return;
@@ -63,7 +63,7 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
       // This element does not have a transform applied.
       .add(chart.seriesGroup);
 
-    outlineRects.set(point, outline);
+    OUTLINE_RECTS.set(point, outline);
   }
 
   const outlineWidth = getOutlineWidth(chart.plotWidth);

@@ -5,6 +5,7 @@
 
 import { renderAxisMarkers } from '../utils/renderAxisMarkers';
 import { renderCategoryGroupOutline } from './utils/renderCategoryGroupOutline';
+import { renderHighlightInsets } from './utils/renderHighlightInsets';
 
 /**
  * Event handler called after load (initial render) and redraw (subsequent render).
@@ -36,6 +37,7 @@ export const renderStackedBarAndColumn = (options) => {
       showCategoryHighlight: true,
     }),
   );
+  elements.push(...renderHighlightInsets(chart));
 
   const elementSet = new Set(elements);
 
