@@ -22,7 +22,7 @@ const HIGHLIGHT_MARKER_SIZE = 5;
 /**
  * Gap between the axis line and the highlight marker
  */
-const HIGHLIGHT_MARKER_GAP = 2;
+const HIGHLIGHT_MARKER_GAP = 4;
 
 /** @type {never[]} */
 const NO_ELEMENTS = [];
