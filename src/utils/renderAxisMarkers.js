@@ -13,6 +13,7 @@ import {
   getOutlineGap,
   getOutlineWidth,
 } from '../highchartsCustomCode/utils/highlightOutline';
+import { NO_ELEMENTS } from '../highchartsCustomCode/utils/noElements';
 
 /**
  * @typedef {{ code: string }} Category
@@ -23,10 +24,6 @@ const HIGHLIGHT_MARKER_SIZE = 5;
  * Gap between the axis line and the highlight marker
  */
 const HIGHLIGHT_MARKER_GAP = 4;
-
-/** @type {never[]} */
-const NO_ELEMENTS = [];
-Object.freeze(NO_ELEMENTS);
 
 /**
  * Connects a Series object with an SVG element
@@ -40,7 +37,7 @@ const axisMarkerGroups = new WeakMap();
  *
  * @type {WeakMap<Point, HighchartsSVGElement>}
  */
-const axisMarkers = new WeakMap();
+const AXIS_MARKERS = new WeakMap();
 
 /**
  * @param {{
@@ -65,7 +62,7 @@ const renderAxisMarkerRect = ({
   width,
   transform,
 }) => {
-  let axisMarker = axisMarkers.get(point);
+  let axisMarker = AXIS_MARKERS.get(point);
 
   if (!(axisMarker && axisMarker.element)) {
     axisMarker = chart.renderer
@@ -77,7 +74,7 @@ const renderAxisMarkerRect = ({
       // The clip mask would cut it off.
       .add(parent);
 
-    axisMarkers.set(point, axisMarker);
+    AXIS_MARKERS.set(point, axisMarker);
   }
 
   const outlineWidth = getOutlineWidth(chart.plotWidth);
@@ -131,7 +128,9 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
   const highlightedCategoryCodes = customChartOptions.highlightedCategoryCodes;
 
   const firstSeries = relevantSeries[0];
-  if (!firstSeries) return NO_ELEMENTS;
+  if (!firstSeries) {
+    return NO_ELEMENTS;
+  }
   const seriesType = firstSeries.type;
   // Get the transforms from the series <g>
   const seriesTransform = firstSeries.group.element.getAttribute('transform');
@@ -251,7 +250,7 @@ const renderSeriesAxisMarkers = ({
       return elements;
     })
     .flat()
-    .filter((element) => element !== undefined);
+    .filter(Boolean);
 };
 
 /**
