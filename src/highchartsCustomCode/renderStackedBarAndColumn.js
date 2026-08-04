@@ -31,6 +31,7 @@ export const renderStackedBarAndColumn = (options) => {
   elements.push(
     ...renderAxisMarkers({
       chart,
+      showSeriesBaseline: false,
       showSeriesHighlight: false,
       showCategoryHighlight: true,
     }),
