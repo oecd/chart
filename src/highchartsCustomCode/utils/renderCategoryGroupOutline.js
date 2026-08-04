@@ -25,9 +25,8 @@ import { getOutlineGap, getOutlineWidth } from './highlightOutline';
  *
  * @returns {HighchartsSVGElement[]}
  */
-export const highlightCategoryGroups = (chart) => {
+export const renderCategoryGroupOutline = (chart) => {
   const customChartOptions = chart.options.custom;
-  if (!customChartOptions) return NO_ELEMENTS;
 
   /** @type {string[]} */
   const highlightedCategoryCodes = customChartOptions.highlightedCategoryCodes;
@@ -68,6 +67,10 @@ export const highlightCategoryGroups = (chart) => {
     chart.oecd_highlightCategoryGroupElements = rectByCategory;
   }
 
+  // Get the transformations from the series <g>.
+  // We cannot just append the element to the series <g> since it has a clip mask.
+  const seriesTransform = firstSeries.group.element.getAttribute('transform');
+
   /** @type {HighchartsSVGElement[]} */
   const elements = [];
 
@@ -78,9 +81,9 @@ export const highlightCategoryGroups = (chart) => {
       rect = chart.renderer
         .rect({ class: 'oecd-highlightCategoryGroup' })
         .css({ pointerEvents: 'none' })
-        // Add rect to a series group which already has a transformation applied,
-        // depending on the chart type (translate, rotate, flip)
-        .add(firstSeries.group);
+        // Append to the top-level <g> that holds all series <g>.
+        // This element does not have a transform applied.
+        .add(chart.seriesGroup);
       rectByCategory.set(category, rect);
     }
 
@@ -94,12 +97,12 @@ export const highlightCategoryGroups = (chart) => {
 
     rect.attr({
       strokeWidth: outlineWidth,
-
       stroke: color,
       x: x1 - outlineDistance,
       y: 0,
       width: x2 - x1 + 2 * outlineDistance,
       height: firstType === 'column' ? chart.plotHeight : chart.plotWidth,
+      transform: seriesTransform,
     });
 
     elements.push(rect);
