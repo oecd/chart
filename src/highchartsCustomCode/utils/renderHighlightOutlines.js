@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
@@ -39,13 +40,12 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
     return;
   }
 
+  const customPointOptions = point.options.custom;
+  if (!customPointOptions) return;
   /** @type {boolean} */
-  const isBaseline = point.options.custom.isBaseline;
+  const isBaseline = customPointOptions.isBaseline;
   /** @type {number} */
-  const highlightIndex = point.custom.highlightIndex;
-  /** @type {string[]} */
-  const highlightColors = chart.options.custom.highlightColors;
-  const highlightColor = highlightColors[highlightIndex];
+  const highlightColor = customPointOptions.highlightColor;
   const color = isBaseline ? baselineColor : highlightColor;
 
   // Get the transformations from the series <g>.
