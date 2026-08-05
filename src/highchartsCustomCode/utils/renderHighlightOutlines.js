@@ -5,6 +5,7 @@
 
 import { baselineColor } from '../../constants/chart';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
+import { NO_ELEMENTS } from './noElements';
 
 /**
  * Connects a Highcharts point object with an SVG shape
@@ -44,7 +45,7 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
   if (!customPointOptions) return;
   /** @type {boolean} */
   const isBaseline = customPointOptions.isBaseline;
-  /** @type {number} */
+  /** @type {string} */
   const highlightColor = customPointOptions.highlightColor;
   const color = isBaseline ? baselineColor : highlightColor;
 
@@ -93,22 +94,31 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
 export const renderHighlightOutlines = (chart) => {
   const isCategoryGroupHighlighted =
     chart.options.custom.isCategoryGroupHighlighted;
+  // The whole category group is outline, not individual rectangles.
+  if (isCategoryGroupHighlighted) return NO_ELEMENTS;
 
   const relevantSeries = chart.series.filter(
     ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
   );
 
+  const isGroupedChart =
+    relevantSeries.length > 1 && relevantSeries[0].data.length > 1;
+  // The rectangles will get an inset instead.
+  if (isGroupedChart) return NO_ELEMENTS;
+
   return relevantSeries
     .map((series) =>
       series.points.map((point) => {
-        const isHighlighted = point.options.custom.isHighlighted;
-        const isBaseline = point.options.custom.isBaseline;
-        const finalIsHighlighted =
-          (isBaseline || isHighlighted) && !isCategoryGroupHighlighted;
-
+        const pointCustomOptions = point.options.custom;
+        if (!pointCustomOptions) {
+          throw new Error('point.options.custom not defined');
+        }
+        const isHighlighted = pointCustomOptions.isHighlighted;
+        const isBaseline = pointCustomOptions.isBaseline;
+        const finalIsHighlighted = isBaseline || isHighlighted;
         return renderHighlightOutline(chart, series, point, finalIsHighlighted);
       }),
     )
     .flat()
-    .filter(Boolean);
+    .filter((element) => element !== undefined);
 };
