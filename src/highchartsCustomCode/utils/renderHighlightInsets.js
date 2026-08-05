@@ -2,8 +2,6 @@
  * @import { Chart, Point, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { NO_ELEMENTS } from './noElements';
-
 /**
  * Connects a Highcharts point object with an SVG shape
  * without creating a strong reference to the point
@@ -69,13 +67,6 @@ const renderHighlightInset = ({ chart, point, isHighlighted, transform }) => {
  * @returns {HighchartsSVGElement[]}
  */
 export const renderHighlightInsets = (chart) => {
-  const isCategoryGroupHighlighted =
-    chart.options.custom.isCategoryGroupHighlighted;
-
-  if (isCategoryGroupHighlighted) {
-    return NO_ELEMENTS;
-  }
-
   return chart.series
     .filter(
       ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
@@ -86,10 +77,10 @@ export const renderHighlightInsets = (chart) => {
       const seriesTransform = series.group.element.getAttribute('transform');
 
       series.points.map((point) => {
-        const isHighlighted = point.options.custom.isHighlighted;
-        const isBaseline = point.options.custom.isBaseline;
+        const isSeriesBaseline = point.options.custom.isSeriesBaseline;
+        const isSeriesHighlighted = point.options.custom.isSeriesHighlighted;
 
-        const finalIsHighlighted = isBaseline || isHighlighted;
+        const finalIsHighlighted = isSeriesBaseline || isSeriesHighlighted;
 
         return renderHighlightInset({
           chart,
