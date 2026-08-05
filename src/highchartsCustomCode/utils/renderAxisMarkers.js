@@ -4,16 +4,13 @@
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { baselineColor } from '../constants/chart';
+import { baselineColor } from '../../constants/chart';
 import {
   getBoundingRectsByCategory,
   groupPointsByCategory,
-} from '../highchartsCustomCode/utils/getBoundingRectsByCategory';
-import {
-  getOutlineGap,
-  getOutlineWidth,
-} from '../highchartsCustomCode/utils/highlightOutline';
-import { NO_ELEMENTS } from '../highchartsCustomCode/utils/noElements';
+} from './getBoundingRectsByCategory';
+import { getOutlineGap, getOutlineWidth } from './highlightOutline';
+import { NO_ELEMENTS } from './noElements';
 
 /**
  * @typedef {{ code: string }} Category
