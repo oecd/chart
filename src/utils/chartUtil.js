@@ -1,9 +1,5 @@
 // @ts-check
-// @ts-check
 /* eslint-disable no-console */
-/**
- * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
- */
 import * as R from 'ramda';
 import truncatise from 'truncatise';
 import { defaultPalette, palettes } from '../constants/palette';
@@ -828,14 +824,15 @@ const createOptionsForBarChart = ({
     baselineCodes,
   );
 
+  const isGroupedChart =
+    data.series.length > 1 && data.series[0].data.length > 1;
+
   /**
-   * Whether a category is highlighted that contains several points
-   * that can be highlighted as a visual group, not as individual points.
+   * Whether a category is baseline/highlighted that contains several points
+   * and can be highlighted as a visual group, not as individual points.
    */
   const isCategoryGroupHighlighted =
-    (isBaselineACategory || highlightedCategories.length > 0) &&
-    data.series.length > 1 &&
-    data.series[0].data.length > 1;
+    isGroupedChart && (isBaselineACategory || highlightedCategories.length > 0);
 
   const allSeries = mapWithIndex((singleSeries, singleSeriesIndex) => {
     const seriesCode = singleSeries.code;
@@ -902,6 +899,19 @@ const createOptionsForBarChart = ({
             )
           : null;
 
+        // Only color the bar in a grouped bar chart if the series is baseline or highlighted.
+        // If the category is highlighted, all bars in the group are framed with an outline.
+        const color = isGroupedChart
+          ? isSeriesBaseline
+            ? baselineColor
+            : isSeriesHighlighted
+              ? getListItemAtTurningIndex(
+                  seriesHighlightIndex,
+                  matchingHighlightColors,
+                )
+              : null
+          : null;
+
         return {
           ...dataPoint,
           custom: {
@@ -917,6 +927,7 @@ const createOptionsForBarChart = ({
             highlightColor,
           },
           name: category.label,
+          color,
         };
       }, singleSeries.data),
     };
@@ -1179,14 +1190,15 @@ const createOptionsForStackedChart = ({
     baselineCodes,
   );
 
+  const isGroupedChart =
+    data.series.length > 1 && data.series[0].data.length > 1;
+
   /**
-   * Whether a category is highlighted that contains several points
-   * that can be highlighted as a visual group, not as individual points.
+   * Whether a category is baseline/highlighted that contains several points
+   * and can be highlighted as a visual group, not as individual points.
    */
   const isCategoryGroupHighlighted =
-    (isBaselineACategory || highlightedCategories.length > 0) &&
-    data.series.length > 1 &&
-    data.series[0].data.length > 1;
+    isGroupedChart && (isBaselineACategory || highlightedCategories.length > 0);
 
   const allSeries = createStackedDatapoints({
     data,

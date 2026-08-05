@@ -12,7 +12,7 @@ import { renderHighlightInsets } from './utils/renderHighlightInsets';
  * Renders the highlight shapes and cleans up stale ones.
  *
  * @param {{
- * chart: Chart;
+ * chart: Chart & { oecd_highlightElements: Set<HighchartsSVGElement> };
  * cbType: string;
  * }} options
  */
