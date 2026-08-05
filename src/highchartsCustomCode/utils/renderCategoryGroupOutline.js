@@ -25,12 +25,10 @@ import { NO_ELEMENTS } from './noElements';
 export const renderCategoryGroupOutline = (chart) => {
   const customChartOptions = chart.options.custom;
 
-  /** @type {string[]} */
-  const highlightedCategoryCodes = customChartOptions.highlightedCategoryCodes;
   /** @type {boolean} */
   const isCategoryGroupHighlighted =
     customChartOptions.isCategoryGroupHighlighted;
-  if (!(highlightedCategoryCodes && isCategoryGroupHighlighted)) {
+  if (!isCategoryGroupHighlighted) {
     return NO_ELEMENTS;
   }
 
@@ -38,6 +36,8 @@ export const renderCategoryGroupOutline = (chart) => {
   const baselineCodes = customChartOptions.baselineCodes;
   /** @type {string[]} */
   const highlightedCodes = customChartOptions.highlightedCodes;
+  /** @type {string[]} */
+  const highlightedCategoryCodes = customChartOptions.highlightedCategoryCodes;
   /** @type {string[]} */
   const highlightColors = customChartOptions.highlightColors;
 
