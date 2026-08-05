@@ -126,7 +126,7 @@ export const chartSpacing = [0, 2, 10, 2];
 export const chartSpacingFullScreenAndExport = [20, 20, 40, 20];
 export const chartSpacingNoCreditExport = 20;
 
-export const baselineColor = '#48A7FF';
+export const baselineColor = '#156DF9';
 
 export const baselineColorShades = [
   ['#0A4095', '#0E51B5', '#1162D4', '#2379E2', '#3690F1', '#48A7FF', '#73BCFF'],
