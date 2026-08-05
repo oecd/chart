@@ -140,6 +140,8 @@ const createStackedDatapoints = ({
         const category = R.nth(pointIndex, data.categories);
         const categoryCode = category.code;
 
+        console.log('series', seriesCode, 'category', categoryCode);
+
         const dataPoint = createDatapoint(
           pointData,
           categoriesAreDatesOrNumberForDataParsing,
@@ -180,9 +182,23 @@ const createStackedDatapoints = ({
             )
           : null;
 
+        const seriesBaselineColor = isSeriesBaseline
+          ? getListItemAtTurningIndex(
+              seriesBaselineIndex,
+              matchingBaselineColors,
+            )
+          : null;
+
         const highlightColor = finalIsHighlighted
           ? getListItemAtTurningIndex(
               finalHighlightIndex,
+              matchingHighlightColors,
+            )
+          : null;
+
+        const seriesHighlightColor = isSeriesHighlighted
+          ? getListItemAtTurningIndex(
+              seriesHighlightIndex,
               matchingHighlightColors,
             )
           : null;
@@ -203,7 +219,9 @@ const createStackedDatapoints = ({
             highlightColor,
           },
           name: category.label,
-          color: baselineColor || highlightColor,
+          // Only color the bar segment if the series is baseline or highlighted.
+          // If the category is highlighted, all segments are framed with an outline.
+          color: seriesBaselineColor || seriesHighlightColor,
         };
       }, singleSeries.data),
     };
