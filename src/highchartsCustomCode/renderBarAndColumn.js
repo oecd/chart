@@ -5,6 +5,7 @@
 
 import { renderAxisMarkers } from '../utils/renderAxisMarkers';
 import { renderCategoryGroupOutline } from './utils/renderCategoryGroupOutline';
+import { renderHighlightInsets } from './utils/renderHighlightInsets';
 import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
 
 /**
@@ -12,7 +13,7 @@ import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
  * Renders the highlight shapes and cleans up stale ones.
  *
  * @param {{
- * chart: Chart;
+ * chart: Chart & { oecd_highlightElements: Set<HighchartsSVGElement> };
  * cbType: string;
  * }} options
  */
@@ -39,6 +40,7 @@ export const renderBarAndColumn = (options) => {
   );
   elements.push(...renderHighlightOutlines(chart));
   elements.push(...renderCategoryGroupOutline(chart));
+  elements.push(...renderHighlightInsets(chart));
 
   const elementSet = new Set(elements);
 
