@@ -20,7 +20,7 @@ const HIGHLIGHT_MARKER_SIZE = 5;
 /**
  * Gap between the axis line and the highlight marker
  */
-const HIGHLIGHT_MARKER_GAP = 4;
+const HIGHLIGHT_MARKER_GAP = 2.5;
 
 /**
  * Connects a Series object with an SVG element
