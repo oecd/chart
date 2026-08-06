@@ -1,5 +1,5 @@
 /**
- * @import { Chart, Point, SVGElement as HighchartsSVGElement } from "highcharts"
+ * @import { Chart, Series, Point, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
 /**
@@ -8,10 +8,65 @@
  *
  * @type {WeakMap<Point, HighchartsSVGElement>}
  */
-const INSET_RECTS = new WeakMap();
+const POINT_INSET_RECTS = new WeakMap();
+
+/**
+ * @type {WeakMap<Series, HighchartsSVGElement>}
+ */
+const LEGEND_INSET_RECTS = new WeakMap();
 
 const STROKE_WIDTH = 2;
 const STROKE_COLOR = 'rgb(0 0 0 / 0.3)';
+
+/**
+ * Adds an inset border to the series' legend symbol,
+ * just like the bar/column itself.
+ *
+ * @param {{
+ * chart: Chart;
+ * series: Series;
+ * isHighlighted: boolean;
+ * }} options
+ * @returns {HighchartsSVGElement | undefined}
+ */
+const renderLegendInset = ({ chart, series, isHighlighted }) => {
+  let rect = LEGEND_INSET_RECTS.get(series);
+
+  if (!isHighlighted) {
+    if (rect) {
+      LEGEND_INSET_RECTS.delete(series);
+    }
+    // Element will be removed from DOM automatically
+    return;
+  }
+
+  const { symbol } = series.legendItem;
+
+  const getSymbolAttr = (attrName) =>
+    parseFloat(symbol.element.getAttribute(attrName));
+
+  const attributes = {
+    class: 'oecd-legendHighlightInset',
+    x: getSymbolAttr('x') + STROKE_WIDTH / 2,
+    y: getSymbolAttr('y') + STROKE_WIDTH / 2,
+    width: getSymbolAttr('width') - STROKE_WIDTH,
+    height: getSymbolAttr('height') - STROKE_WIDTH,
+    'stroke-width': STROKE_WIDTH,
+    stroke: STROKE_COLOR,
+  };
+
+  if (rect && rect.element) {
+    rect.attr(attributes);
+  } else {
+    rect = chart.renderer
+      .rect(attributes)
+      .add(series.legendItem.group)
+      .toFront();
+    LEGEND_INSET_RECTS.set(series, rect);
+  }
+
+  return rect;
+};
 
 /**
  * @param {{
@@ -23,13 +78,15 @@ const STROKE_COLOR = 'rgb(0 0 0 / 0.3)';
  * @returns {HighchartsSVGElement | undefined}
  */
 const renderHighlightInset = ({ chart, point, isHighlighted, transform }) => {
+  let rect = POINT_INSET_RECTS.get(point);
+
   if (!isHighlighted) {
-    INSET_RECTS.delete(point);
+    if (rect) {
+      POINT_INSET_RECTS.delete(point);
+    }
     // Element will be remove from DOM automatically
     return;
   }
-
-  let rect = INSET_RECTS.get(point);
 
   const { shapeArgs } = point;
   const width = shapeArgs.width - STROKE_WIDTH;
@@ -46,7 +103,9 @@ const renderHighlightInset = ({ chart, point, isHighlighted, transform }) => {
     stroke: STROKE_COLOR,
   };
 
-  if (!rect) {
+  if (rect && rect.element) {
+    rect.attr(attributes);
+  } else {
     rect = chart.renderer
       .rect(attributes)
       // Append to the top-level <g> that holds all series <g>.
@@ -54,9 +113,7 @@ const renderHighlightInset = ({ chart, point, isHighlighted, transform }) => {
       .add(chart.seriesGroup)
       .toFront();
 
-    INSET_RECTS.set(point, rect);
-  } else {
-    rect.attr(attributes);
+    POINT_INSET_RECTS.set(point, rect);
   }
 
   return rect;
@@ -72,16 +129,27 @@ export const renderHighlightInsets = (chart) => {
       ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
     )
     .map((series) => {
+      /** @type {HighchartsSVGElement[]} */
+      const seriesElements = [];
+
+      const isSeriesBaseline = series.options.custom.isBaseline;
+      const isSeriesHighlighted = series.options.custom.isHighlighted;
+      const finalIsHighlighted = isSeriesBaseline || isSeriesHighlighted;
+
+      const legendInset = renderLegendInset({
+        chart,
+        series,
+        isHighlighted: finalIsHighlighted,
+      });
+      if (legendInset) {
+        seriesElements.push(legendInset);
+      }
+
       // Get the transformations from the series <g>.
       // We cannot just append the element to the series <g> since it has a clip mask.
       const seriesTransform = series.group.element.getAttribute('transform');
 
-      series.points.map((point) => {
-        const isSeriesBaseline = point.options.custom.isSeriesBaseline;
-        const isSeriesHighlighted = point.options.custom.isSeriesHighlighted;
-
-        const finalIsHighlighted = isSeriesBaseline || isSeriesHighlighted;
-
+      const pointInsets = series.points.map((point) => {
         return renderHighlightInset({
           chart,
           series,
@@ -90,6 +158,10 @@ export const renderHighlightInsets = (chart) => {
           transform: seriesTransform,
         });
       });
+
+      seriesElements.push(...pointInsets);
+
+      return seriesElements;
     })
     .flat()
     .filter(Boolean);

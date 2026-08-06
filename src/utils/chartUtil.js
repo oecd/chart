@@ -89,15 +89,8 @@ const createStackedDatapoints = ({
       smallerHighlightColors,
     ) || highlightColors;
 
-  return mapWithIndex((singleSeries, seriesIndex) => {
-    const seriesCode = singleSeries.code;
-
-    const seriesColor = getSeriesColor({
-      colorPalette,
-      seriesIndex,
-      seriesCode,
-      fixedColorIndexBySeries,
-    });
+  return mapWithIndex((series, seriesIndex) => {
+    const seriesCode = series.code;
 
     const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
     const isSeriesBaseline = seriesBaselineIndex !== -1;
@@ -105,14 +98,28 @@ const createStackedDatapoints = ({
     const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
+    const seriesColor = isSeriesBaseline
+      ? baselineColor
+      : isSeriesHighlighted
+        ? getListItemAtTurningIndex(
+            seriesHighlightIndex,
+            matchingHighlightColors,
+          )
+        : getSeriesColor({
+            colorPalette,
+            seriesIndex: seriesIndex,
+            seriesCode,
+            fixedColorIndexBySeries,
+          });
+
     return {
       custom: {
         isBaseline: isSeriesBaseline,
         isHighlighted: isSeriesHighlighted,
       },
       name: data.areSeriesDates
-        ? seriesFrequency.tryParse(singleSeries.label).getTime()
-        : singleSeries.label,
+        ? seriesFrequency.tryParse(series.label).getTime()
+        : series.label,
       color: seriesColor,
       marker: {
         enabled: false,
@@ -193,7 +200,7 @@ const createStackedDatapoints = ({
           name: category.label,
           color,
         };
-      }, singleSeries.data),
+      }, series.data),
     };
   }, data.series);
 };
@@ -976,8 +983,8 @@ const createOptionsForBarChart = ({
       },
     },
 
-    series: mapWithIndex((singleSeries, singleSeriesIndex) => {
-      const seriesCode = singleSeries.code;
+    series: mapWithIndex((series, seriesIndex) => {
+      const seriesCode = series.code;
 
       const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
       const isSeriesBaseline = seriesBaselineIndex !== -1;
@@ -987,12 +994,17 @@ const createOptionsForBarChart = ({
 
       const seriesColor = isSeriesBaseline
         ? baselineColor
-        : getSeriesColor({
-            colorPalette,
-            seriesIndex: singleSeriesIndex,
-            seriesCode,
-            fixedColorIndexBySeries,
-          });
+        : isSeriesHighlighted
+          ? getListItemAtTurningIndex(
+              seriesHighlightIndex,
+              matchingHighlightColors,
+            )
+          : getSeriesColor({
+              colorPalette,
+              seriesIndex,
+              seriesCode,
+              fixedColorIndexBySeries,
+            });
 
       return {
         custom: {
@@ -1000,8 +1012,8 @@ const createOptionsForBarChart = ({
           isHighlighted: isSeriesHighlighted,
         },
         name: data.areSeriesDates
-          ? seriesFrequency.tryParse(singleSeries.label).getTime()
-          : singleSeries.label,
+          ? seriesFrequency.tryParse(series.label).getTime()
+          : series.label,
         color: seriesColor,
         showInLegend: true,
         data: mapWithIndex((pointData, pointIndex) => {
@@ -1072,7 +1084,7 @@ const createOptionsForBarChart = ({
             name: category.label,
             color,
           };
-        }, singleSeries.data),
+        }, series.data),
       };
     }, data.series),
   };
