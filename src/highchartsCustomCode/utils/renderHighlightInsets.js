@@ -15,8 +15,46 @@ const POINT_INSET_RECTS = new WeakMap();
  */
 const LEGEND_INSET_RECTS = new WeakMap();
 
-const STROKE_WIDTH = 2;
+const STROKE_WIDTH_SMALL = 1;
+const STROKE_WIDTH_LARGE = 2;
+const STROKE_WIDTH_BREAKPOINT_LARGE = 20;
 const STROKE_COLOR = 'rgb(0 0 0 / 0.3)';
+
+/**
+ * @param {Series[]} series
+ * @returns {number}
+ */
+const getStrokeWidth = (series) => {
+  // Determine the smallest highlighted point rect
+  const smallestSize = series.reduce((previousSeriesSize, series) => {
+    const isSeriesBaseline = series.options.custom.isBaseline;
+    const isSeriesHighlighted = series.options.custom.isHighlighted;
+    const finalIsHighlighted = isSeriesBaseline || isSeriesHighlighted;
+
+    if (!finalIsHighlighted) {
+      return previousSeriesSize;
+    }
+
+    const seriesSize = series.points.reduce((previousPointSize, point) => {
+      const { width, height } = point.shapeArgs;
+      const size = Math.min(width, height);
+      if (size !== 0 && size < previousPointSize) {
+        return size;
+      }
+      return previousPointSize;
+    }, Infinity);
+    if (seriesSize < previousSeriesSize) {
+      return seriesSize;
+    }
+    return previousSeriesSize;
+  }, Infinity);
+
+  // Derive the inset stroke width
+  if (smallestSize > STROKE_WIDTH_BREAKPOINT_LARGE) {
+    return STROKE_WIDTH_LARGE;
+  }
+  return STROKE_WIDTH_SMALL;
+};
 
 /**
  * Adds an inset border to the series' legend symbol,
@@ -26,10 +64,11 @@ const STROKE_COLOR = 'rgb(0 0 0 / 0.3)';
  * chart: Chart;
  * series: Series;
  * isHighlighted: boolean;
+ * strokeWidth: number;
  * }} options
  * @returns {HighchartsSVGElement | undefined}
  */
-const renderLegendInset = ({ chart, series, isHighlighted }) => {
+const renderLegendInset = ({ chart, series, isHighlighted, strokeWidth }) => {
   let rect = LEGEND_INSET_RECTS.get(series);
 
   if (!isHighlighted) {
@@ -48,11 +87,11 @@ const renderLegendInset = ({ chart, series, isHighlighted }) => {
 
   const attributes = {
     class: 'oecd-legendHighlightInset',
-    x: getSymbolAttr('x') + STROKE_WIDTH / 2,
-    y: getSymbolAttr('y') + STROKE_WIDTH / 2,
-    width: getSymbolAttr('width') - STROKE_WIDTH,
-    height: getSymbolAttr('height') - STROKE_WIDTH,
-    'stroke-width': STROKE_WIDTH,
+    x: getSymbolAttr('x') + strokeWidth / 2,
+    y: getSymbolAttr('y') + strokeWidth / 2,
+    width: getSymbolAttr('width') - strokeWidth,
+    height: getSymbolAttr('height') - strokeWidth,
+    'stroke-width': strokeWidth,
     stroke: STROKE_COLOR,
   };
 
@@ -75,10 +114,17 @@ const renderLegendInset = ({ chart, series, isHighlighted }) => {
  * point: Point;
  * isHighlighted: boolean;
  * transform: string | null;
+ * strokeWidth: number;
  * }} options
  * @returns {HighchartsSVGElement | undefined}
  */
-const renderHighlightInset = ({ chart, point, isHighlighted, transform }) => {
+const renderHighlightInset = ({
+  chart,
+  point,
+  isHighlighted,
+  transform,
+  strokeWidth,
+}) => {
   let rect = POINT_INSET_RECTS.get(point);
 
   if (!isHighlighted) {
@@ -90,17 +136,17 @@ const renderHighlightInset = ({ chart, point, isHighlighted, transform }) => {
   }
 
   const { shapeArgs } = point;
-  const width = shapeArgs.width - STROKE_WIDTH;
-  const height = shapeArgs.height - STROKE_WIDTH;
+  const width = shapeArgs.width - strokeWidth;
+  const height = shapeArgs.height - strokeWidth;
   if (width <= 0 || height <= 0) return;
   const attributes = {
     class: 'oecd-highlightInset',
-    x: shapeArgs.x + STROKE_WIDTH / 2,
-    y: shapeArgs.y + STROKE_WIDTH / 2,
+    x: shapeArgs.x + strokeWidth / 2,
+    y: shapeArgs.y + strokeWidth / 2,
     width,
     height,
     transform: transform || '',
-    strokeWidth: STROKE_WIDTH,
+    strokeWidth: strokeWidth,
     stroke: STROKE_COLOR,
   };
 
@@ -125,10 +171,13 @@ const renderHighlightInset = ({ chart, point, isHighlighted, transform }) => {
  * @returns {HighchartsSVGElement[]}
  */
 export const renderHighlightInsets = (chart) => {
-  return chart.series
-    .filter(
-      ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
-    )
+  const relevantSeries = chart.series.filter(
+    ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
+  );
+
+  const strokeWidth = getStrokeWidth(relevantSeries);
+
+  return relevantSeries
     .map((series) => {
       /** @type {HighchartsSVGElement[]} */
       const seriesElements = [];
@@ -141,6 +190,7 @@ export const renderHighlightInsets = (chart) => {
         chart,
         series,
         isHighlighted: finalIsHighlighted,
+        strokeWidth,
       });
       if (legendInset) {
         seriesElements.push(legendInset);
@@ -157,6 +207,7 @@ export const renderHighlightInsets = (chart) => {
           point,
           isHighlighted: finalIsHighlighted,
           transform: seriesTransform,
+          strokeWidth,
         });
       });
 
