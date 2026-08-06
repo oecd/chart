@@ -40,6 +40,7 @@ const renderLegendInset = ({ chart, series, isHighlighted }) => {
     return;
   }
 
+  if (!series.legendItem) return;
   const { symbol } = series.legendItem;
 
   const getSymbolAttr = (attrName) =>
