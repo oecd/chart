@@ -23,6 +23,9 @@ export const renderBarAndColumn = (options) => {
   // Fill the plot area for debugging
   // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 255 / 0.1)');
 
+  /** @type {boolean} */
+  const isGrouped = chart.options.custom.isGrouped;
+
   /**
    * SVG elements created for highlighting
    * @type {HighchartsSVGElement[]}
@@ -33,8 +36,10 @@ export const renderBarAndColumn = (options) => {
   elements.push(
     ...renderAxisMarkers({
       chart,
-      showSeriesBaseline: true,
-      showSeriesHighlight: true,
+      // In grouped bar/column charts, the bars themselves are highlighted.
+      // No need to draw an axis marker.
+      showSeriesBaseline: !isGrouped,
+      showSeriesHighlight: !isGrouped,
       showCategoryHighlight: true,
     }),
   );

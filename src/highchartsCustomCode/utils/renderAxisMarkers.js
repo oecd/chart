@@ -247,7 +247,7 @@ const renderSeriesAxisMarkers = ({
       return elements;
     })
     .flat()
-    .filter(Boolean);
+    .filter((element) => element !== undefined);
 };
 
 /**
