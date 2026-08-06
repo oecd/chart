@@ -51,7 +51,10 @@ export const getFinalPalette = (
   paletteStartingColor,
 ) => {
   if (!isNilOrEmpty(smallerColorPalettes)) {
-    return smallerColorPalettes[numberOfSeries] || colorPalette;
+    return (
+      R.find(R.propEq(numberOfSeries, 'length'), smallerColorPalettes) ||
+      colorPalette
+    );
   }
 
   if (paletteStartingColor) {
