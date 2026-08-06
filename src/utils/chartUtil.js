@@ -824,114 +824,14 @@ const createOptionsForBarChart = ({
     baselineCodes,
   );
 
-  const isGroupedChart =
-    data.series.length > 1 && data.series[0].data.length > 1;
+  const isGrouped = data.series.length > 1 && data.series[0].data.length > 1;
 
   /**
    * Whether a category is baseline/highlighted that contains several points
    * and can be highlighted as a visual group, not as individual points.
    */
   const isCategoryGroupHighlighted =
-    isGroupedChart && (isBaselineACategory || highlightedCategories.length > 0);
-
-  const allSeries = mapWithIndex((singleSeries, singleSeriesIndex) => {
-    const seriesCode = singleSeries.code;
-
-    const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
-    const isSeriesBaseline = seriesBaselineIndex !== -1;
-
-    const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
-    const isSeriesHighlighted = seriesHighlightIndex !== -1;
-
-    const seriesColor = isSeriesBaseline
-      ? baselineColor
-      : getSeriesColor({
-          colorPalette,
-          seriesIndex: singleSeriesIndex,
-          seriesCode,
-          fixedColorIndexBySeries,
-        });
-
-    return {
-      custom: {
-        isBaseline: isSeriesBaseline,
-        isHighlighted: isSeriesHighlighted,
-      },
-      name: data.areSeriesDates
-        ? seriesFrequency.tryParse(singleSeries.label).getTime()
-        : singleSeries.label,
-      color: seriesColor,
-      showInLegend: true,
-      data: mapWithIndex((pointData, pointIndex) => {
-        const category = R.nth(pointIndex, data.categories);
-        const categoryCode = category.code;
-
-        const dataPoint = createDatapoint(
-          pointData,
-          categoriesAreDatesOrNumberForDataParsing,
-        );
-
-        // Baseline
-
-        const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
-        const isCategoryBaseline = categoryBaselineIndex !== -1;
-
-        const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
-
-        // Highlight
-
-        const categoryHighlightIndex = highlightedCodes.indexOf(categoryCode);
-        const isCategoryHighlighted = categoryHighlightIndex !== -1;
-
-        const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
-        const finalHighlightIndex = isSeriesHighlighted
-          ? seriesHighlightIndex
-          : isCategoryHighlighted
-            ? categoryHighlightIndex
-            : -1;
-
-        // Colors
-
-        const highlightColor = finalIsHighlighted
-          ? getListItemAtTurningIndex(
-              finalHighlightIndex,
-              matchingHighlightColors,
-            )
-          : null;
-
-        // Only color the bar in a grouped bar chart if the series is baseline or highlighted.
-        // If the category is highlighted, all bars in the group are framed with an outline.
-        const color = isGroupedChart
-          ? isSeriesBaseline
-            ? baselineColor
-            : isSeriesHighlighted
-              ? getListItemAtTurningIndex(
-                  seriesHighlightIndex,
-                  matchingHighlightColors,
-                )
-              : null
-          : null;
-
-        return {
-          ...dataPoint,
-          custom: {
-            ...dataPoint.custom,
-            // Baseline
-            isBaseline: finalIsBaseline,
-            isSeriesBaseline,
-            isCategoryBaseline,
-            // Highlight
-            isHighlighted: finalIsHighlighted,
-            isSeriesHighlighted,
-            isCategoryHighlighted,
-            highlightColor,
-          },
-          name: category.label,
-          color,
-        };
-      }, singleSeries.data),
-    };
-  }, data.series);
+    isGrouped && (isBaselineACategory || highlightedCategories.length > 0);
 
   const horizontal = chartType === chartTypes.row;
 
@@ -972,6 +872,7 @@ const createOptionsForBarChart = ({
     highlightedCodes,
     highlightedCategoryCodes,
     highlightColors: matchingHighlightColors,
+    isGrouped,
     isCategoryGroupHighlighted,
   };
 
@@ -1076,7 +977,105 @@ const createOptionsForBarChart = ({
       },
     },
 
-    series: allSeries,
+    series: mapWithIndex((singleSeries, singleSeriesIndex) => {
+      const seriesCode = singleSeries.code;
+
+      const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
+      const isSeriesBaseline = seriesBaselineIndex !== -1;
+
+      const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
+      const isSeriesHighlighted = seriesHighlightIndex !== -1;
+
+      const seriesColor = isSeriesBaseline
+        ? baselineColor
+        : getSeriesColor({
+            colorPalette,
+            seriesIndex: singleSeriesIndex,
+            seriesCode,
+            fixedColorIndexBySeries,
+          });
+
+      return {
+        custom: {
+          isBaseline: isSeriesBaseline,
+          isHighlighted: isSeriesHighlighted,
+        },
+        name: data.areSeriesDates
+          ? seriesFrequency.tryParse(singleSeries.label).getTime()
+          : singleSeries.label,
+        color: seriesColor,
+        showInLegend: true,
+        data: mapWithIndex((pointData, pointIndex) => {
+          const category = R.nth(pointIndex, data.categories);
+          const categoryCode = category.code;
+
+          const dataPoint = createDatapoint(
+            pointData,
+            categoriesAreDatesOrNumberForDataParsing,
+          );
+
+          // Baseline
+
+          const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
+          const isCategoryBaseline = categoryBaselineIndex !== -1;
+
+          const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
+
+          // Highlight
+
+          const categoryHighlightIndex = highlightedCodes.indexOf(categoryCode);
+          const isCategoryHighlighted = categoryHighlightIndex !== -1;
+
+          const finalIsHighlighted =
+            isSeriesHighlighted || isCategoryHighlighted;
+          const finalHighlightIndex = isSeriesHighlighted
+            ? seriesHighlightIndex
+            : isCategoryHighlighted
+              ? categoryHighlightIndex
+              : -1;
+
+          // Colors
+
+          const highlightColor = finalIsHighlighted
+            ? getListItemAtTurningIndex(
+                finalHighlightIndex,
+                matchingHighlightColors,
+              )
+            : null;
+
+          // Only color the bar in a grouped bar chart if the series is baseline or highlighted.
+          // If the category is highlighted, all bars in the group are framed with an outline.
+          const color = isGrouped
+            ? isSeriesBaseline
+              ? baselineColor
+              : isSeriesHighlighted
+                ? getListItemAtTurningIndex(
+                    seriesHighlightIndex,
+                    matchingHighlightColors,
+                  )
+                : null
+            : null;
+
+          return {
+            ...dataPoint,
+            custom: {
+              ...dataPoint.custom,
+              // Baseline
+              isBaseline: finalIsBaseline,
+              isSeriesBaseline,
+              isCategoryBaseline,
+              // Highlight
+              isHighlighted: finalIsHighlighted,
+              isSeriesHighlighted,
+              isCategoryHighlighted,
+              highlightColor,
+            },
+            name: category.label,
+            color,
+          };
+        }, singleSeries.data),
+      };
+    }, data.series),
   };
 };
 
