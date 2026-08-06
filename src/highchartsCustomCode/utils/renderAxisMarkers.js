@@ -27,7 +27,7 @@ const HIGHLIGHT_MARKER_GAP = 4;
  *
  * @type {WeakMap<Series, HighchartsSVGElement>}
  */
-const axisMarkerGroups = new WeakMap();
+const AXIS_MARKER_GROUPS = new WeakMap();
 
 /**
  * Connects a Highcharts point object with an SVG element
@@ -193,7 +193,7 @@ const renderSeriesAxisMarkers = ({
   return relevantSeries
     .map((series) => {
       // Create <g> for the axis markers of this series
-      let group = axisMarkerGroups.get(series);
+      let group = AXIS_MARKER_GROUPS.get(series);
       if (!(group && group.element)) {
         group = chart.renderer
           .g()
@@ -201,7 +201,7 @@ const renderSeriesAxisMarkers = ({
           // Append to the top-level <g> that holds all series <g>.
           // This element does not have a transform applied.
           .add(chart.seriesGroup);
-        axisMarkerGroups.set(series, group);
+        AXIS_MARKER_GROUPS.set(series, group);
       }
 
       // Get the transformations from the series <g>.
