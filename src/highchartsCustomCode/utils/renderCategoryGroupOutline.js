@@ -80,7 +80,8 @@ export const renderCategoryGroupOutline = (chart) => {
         .css({ pointerEvents: 'none' })
         // Append to the top-level <g> that holds all series <g>.
         // This element does not have a transform applied.
-        .add(chart.seriesGroup);
+        .add(chart.seriesGroup)
+        .toFront();
       rectByCategory.set(category, rect);
     }
 
