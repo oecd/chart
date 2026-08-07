@@ -3,8 +3,9 @@
  */
 
 /**
- * Connects a Highcharts point object with an SVG shape
- * without creating a strong reference to the point
+ * Connects a Highcharts Point with a Highcharts SVG element
+ * without creating a strong reference to the point.
+ * Cache for reusing elements across chart renderings.
  *
  * @type {WeakMap<Point, HighchartsSVGElement>}
  */
