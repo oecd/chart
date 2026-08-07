@@ -76,7 +76,7 @@ const renderAxisMarkerRect = ({
 
   const outlineWidth = getOutlineWidth(chart.plotWidth);
   const outlineGap = getOutlineGap(chart.plotWidth);
-  const outlineDistance = outlineGap + outlineWidth / 2;
+  const outlineDistance = outlineGap + outlineWidth;
 
   const finalTransform = transform || '';
   const attributes =
@@ -84,7 +84,7 @@ const renderAxisMarkerRect = ({
       ? {
           class: 'oecd-axisMarker',
           x: x - outlineDistance,
-          y: chart.plotHeight + HIGHLIGHT_MARKER_GAP,
+          y: chart.plotHeight + outlineDistance,
           width: width + 2 * outlineDistance,
           height: HIGHLIGHT_MARKER_SIZE,
           fill: color,
@@ -94,9 +94,9 @@ const renderAxisMarkerRect = ({
           class: 'oecd-axisMarker',
           // Bar charts are column charts rotated by 90° and mirrored,
           // so x and y dimensions are flipped here, and y: 0 is on the right
-          x,
-          y: chart.plotWidth + HIGHLIGHT_MARKER_GAP,
-          width,
+          x: x - outlineDistance,
+          y: chart.plotWidth + outlineDistance,
+          width: width + 2 * outlineDistance,
           height: HIGHLIGHT_MARKER_SIZE,
           fill: color,
           transform: finalTransform,
