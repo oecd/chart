@@ -12,6 +12,15 @@ import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
 /**
+ * Connects a Chart with a Map with categories and Highcharts elements
+ * without creating a strong reference.
+ * Cache for reusing elements across chart renderings.
+ *
+ * @type {WeakMap<Chart, Map<string, HighchartsSVGElement>>}
+ */
+const RECTS_BY_CATEGORY_BY_CHART = new WeakMap();
+
+/**
  * Draws a rect around the shapes of highlighted or baseline categories.
  * Returns an array of created SVG elements.
  *
@@ -54,14 +63,10 @@ export const renderCategoryGroupOutline = (chart) => {
   );
   const boundingRects = getBoundingRectsByCategory(pointsByCategory);
 
-  /**
-   * Element cache for reuse across chart renderings
-   * @type {Map<string, HighchartsSVGElement>}
-   */
-  let rectByCategory = chart.oecd_highlightCategoryGroupElements;
+  let rectByCategory = RECTS_BY_CATEGORY_BY_CHART.get(chart);
   if (!rectByCategory) {
     rectByCategory = new Map();
-    chart.oecd_highlightCategoryGroupElements = rectByCategory;
+    RECTS_BY_CATEGORY_BY_CHART.set(chart, rectByCategory);
   }
 
   // Get the transformations from the series <g>.
