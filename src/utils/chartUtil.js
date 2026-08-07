@@ -4,6 +4,7 @@ import * as R from 'ramda';
 import truncatise from 'truncatise';
 import { defaultPalette, palettes } from '../constants/palette';
 
+import { TinyColor } from '@ctrl/tinycolor';
 import {
   baselineColor,
   chartSpacing,
@@ -993,19 +994,27 @@ const createOptionsForBarChart = ({
       const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
       const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
-      const seriesColor = isSeriesBaseline
-        ? baselineColor
-        : isSeriesHighlighted
-          ? getListItemAtTurningIndex(
-              seriesHighlightIndex,
-              matchingHighlightColors,
-            )
-          : getSeriesColor({
-              colorPalette,
-              seriesIndex,
-              seriesCode,
-              fixedColorIndexBySeries,
-            });
+      const getFinalSeriesColor = () => {
+        if (isSeriesBaseline) return baselineColor;
+        if (isSeriesHighlighted) {
+          return getListItemAtTurningIndex(
+            seriesHighlightIndex,
+            matchingHighlightColors,
+          );
+        }
+        const colorFromPalette = getSeriesColor({
+          colorPalette,
+          seriesIndex,
+          seriesCode,
+          fixedColorIndexBySeries,
+        });
+        if (highlightedSeriesCodes.length > 0) {
+          return new TinyColor(colorFromPalette).setAlpha(0.5).toRgbString();
+        }
+        return colorFromPalette;
+      };
+
+      const seriesColor = getFinalSeriesColor();
 
       return {
         custom: {
