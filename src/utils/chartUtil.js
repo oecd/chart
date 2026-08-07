@@ -49,6 +49,11 @@ import { noDataErrorMessageString } from '../constants/chartErrorMessages';
 
 const mapsUtil = import('./mapsUtil');
 
+/**
+ * Opacity of non-highlighted chart markers in case there are any highlights
+ */
+const NON_HIGHLIGHTED_OPACITY = 0.5;
+
 const createDatapoint = (d, categoriesAreDatesOrNumberForDataParsing) =>
   categoriesAreDatesOrNumberForDataParsing && d.metadata
     ? {
@@ -80,15 +85,17 @@ const createStackedDatapoints = ({
   seriesFrequency,
   baselineCodes,
   highlightedCodes,
+  highlightedSeriesCodes,
+  highlightedCategoryCodes,
 }) => {
-  // Find matching color palettes
-
   // Find a matching highlight color palette
   const matchingHighlightColors =
     R.find(
       R.propEq(highlightedCodes.length, 'length'),
       smallerHighlightColors,
     ) || highlightColors;
+
+  const anyCategoriesHighlighted = highlightedCategoryCodes.length > 0;
 
   return mapWithIndex((series, seriesIndex) => {
     const seriesCode = series.code;
@@ -99,19 +106,28 @@ const createStackedDatapoints = ({
     const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
-    const seriesColor = isSeriesBaseline
-      ? baselineColor
-      : isSeriesHighlighted
-        ? getListItemAtTurningIndex(
-            seriesHighlightIndex,
-            matchingHighlightColors,
-          )
-        : getSeriesColor({
-            colorPalette,
-            seriesIndex: seriesIndex,
-            seriesCode,
-            fixedColorIndexBySeries,
-          });
+    const getFinalSeriesColor = () => {
+      if (isSeriesBaseline) return baselineColor;
+      if (isSeriesHighlighted) {
+        return getListItemAtTurningIndex(
+          seriesHighlightIndex,
+          matchingHighlightColors,
+        );
+      }
+      const colorFromPalette = getSeriesColor({
+        colorPalette,
+        seriesIndex,
+        seriesCode,
+        fixedColorIndexBySeries,
+      });
+      if (highlightedSeriesCodes.length > 0) {
+        return new TinyColor(colorFromPalette)
+          .setAlpha(NON_HIGHLIGHTED_OPACITY)
+          .toRgbString();
+      }
+      return colorFromPalette;
+    };
+    const seriesColor = getFinalSeriesColor();
 
     return {
       custom: {
@@ -174,15 +190,31 @@ const createStackedDatapoints = ({
           : null;
 
         // Only color the bar segment if the series is baseline or highlighted.
-        // If the category is highlighted, all segments are framed with an outline.
-        const color = isSeriesBaseline
-          ? baselineColor
-          : isSeriesHighlighted
-            ? getListItemAtTurningIndex(
-                seriesHighlightIndex,
-                matchingHighlightColors,
-              )
-            : null;
+        // If the category is highlighted, we draw an outline around all segments.
+
+        const getPointColor = () => {
+          if (isSeriesBaseline) {
+            return baselineColor;
+          }
+          if (isSeriesHighlighted) {
+            return getListItemAtTurningIndex(
+              seriesHighlightIndex,
+              matchingHighlightColors,
+            );
+          }
+          // Reduce opacity for non-baseline/non-highlighted background categories
+          if (
+            !isCategoryBaseline &&
+            !isCategoryHighlighted &&
+            anyCategoriesHighlighted
+          ) {
+            return new TinyColor(seriesColor)
+              .setAlpha(NON_HIGHLIGHTED_OPACITY)
+              .toRgbString();
+          }
+          return null;
+        };
+        const pointColor = getPointColor();
 
         return {
           ...dataPoint,
@@ -199,7 +231,7 @@ const createStackedDatapoints = ({
             highlightColor,
           },
           name: category.label,
-          color,
+          color: pointColor,
         };
       }, series.data),
     };
@@ -806,12 +838,14 @@ const createOptionsForBarChart = ({
     data.series,
   );
   const highlightedSeriesCodes = R.map(R.prop('code'), highlightedSeries);
+  const anySeriesHighlighted = highlightedSeriesCodes.length > 0;
 
   const highlightedCategories = R.filter(
     (category) => R.any(codeOrLabelEquals(category), highlight),
     data.categories,
   );
   const highlightedCategoryCodes = R.map(R.prop('code'), highlightedCategories);
+  const anyCategoriesHighlighted = highlightedCategoryCodes.length > 0;
 
   // This is different from `highlight` which might contain codes or labels
   const highlightedCodes = R.concat(
@@ -1007,12 +1041,13 @@ const createOptionsForBarChart = ({
           seriesCode,
           fixedColorIndexBySeries,
         });
-        if (highlightedSeriesCodes.length > 0) {
-          return new TinyColor(colorFromPalette).setAlpha(0.5).toRgbString();
+        if (anySeriesHighlighted) {
+          return new TinyColor(colorFromPalette)
+            .setAlpha(NON_HIGHLIGHTED_OPACITY)
+            .toRgbString();
         }
         return colorFromPalette;
       };
-
       const seriesColor = getFinalSeriesColor();
 
       return {
@@ -1039,6 +1074,7 @@ const createOptionsForBarChart = ({
           const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
           const isCategoryBaseline = categoryBaselineIndex !== -1;
 
+          /** Whether the point is baseline through series or category  */
           const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
 
           // Highlight
@@ -1046,6 +1082,7 @@ const createOptionsForBarChart = ({
           const categoryHighlightIndex = highlightedCodes.indexOf(categoryCode);
           const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
+          /** Whether the point is highlighted through series or category  */
           const finalIsHighlighted =
             isSeriesHighlighted || isCategoryHighlighted;
           const finalHighlightIndex = isSeriesHighlighted
@@ -1063,18 +1100,34 @@ const createOptionsForBarChart = ({
               )
             : null;
 
-          // Only color the bar in a grouped bar chart if the series is baseline or highlighted.
-          // If the category is highlighted, all bars in the group are framed with an outline.
-          const color = isGrouped
-            ? isSeriesBaseline
-              ? baselineColor
-              : isSeriesHighlighted
-                ? getListItemAtTurningIndex(
-                    seriesHighlightIndex,
-                    matchingHighlightColors,
-                  )
-                : null
-            : null;
+          // Only color the bar in a grouped bar chart seince we draw an outline
+          // around baseline/highlight bar groups then.
+          const getPointColor = () => {
+            if (!isGrouped) {
+              return null;
+            }
+            if (isSeriesBaseline) {
+              return baselineColor;
+            }
+            if (isSeriesHighlighted) {
+              return getListItemAtTurningIndex(
+                seriesHighlightIndex,
+                matchingHighlightColors,
+              );
+            }
+            // Reduce opacity for non-baseline/non-highlighted background categories
+            if (
+              !isCategoryBaseline &&
+              !isCategoryHighlighted &&
+              anyCategoriesHighlighted
+            ) {
+              return new TinyColor(seriesColor)
+                .setAlpha(NON_HIGHLIGHTED_OPACITY)
+                .toRgbString();
+            }
+            return null;
+          };
+          const pointColor = getPointColor();
 
           return {
             ...dataPoint,
@@ -1091,7 +1144,7 @@ const createOptionsForBarChart = ({
               highlightColor,
             },
             name: category.label,
-            color,
+            color: pointColor,
           };
         }, series.data),
       };
@@ -1229,6 +1282,8 @@ const createOptionsForStackedChart = ({
     seriesFrequency,
     baselineCodes,
     highlightedCodes,
+    highlightedSeriesCodes,
+    highlightedCategoryCodes,
   });
 
   const customChartOptions = {
