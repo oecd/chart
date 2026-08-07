@@ -17,21 +17,17 @@ import { NO_ELEMENTS } from './noElements';
  */
 
 const HIGHLIGHT_MARKER_SIZE = 5;
-/**
- * Gap between the axis line and the highlight marker
- */
-const HIGHLIGHT_MARKER_GAP = 2.5;
 
 /**
- * Connects a Series object with an SVG element
+ * Connects a Highcharts Series object with a Highcharts SVG element
+ * without creating a strong reference to the Series.
+ * Cache for reusing elements across chart renderings.
  *
  * @type {WeakMap<Series, HighchartsSVGElement>}
  */
 const AXIS_MARKER_GROUPS = new WeakMap();
 
 /**
- * Connects a Highcharts point object with an SVG element
- *
  * @type {WeakMap<Point, HighchartsSVGElement>}
  */
 const AXIS_MARKERS = new WeakMap();
