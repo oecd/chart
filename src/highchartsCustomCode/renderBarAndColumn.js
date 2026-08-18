@@ -20,11 +20,14 @@ import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
 export const renderBarAndColumn = (options) => {
   const { chart } = options;
 
+  const customChartOptions = chart.options.custom;
+  if (!customChartOptions) return;
+
   // Fill the plot area for debugging
   // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 255 / 0.1)');
 
   /** @type {boolean} */
-  const isGrouped = chart.options.custom.isGrouped;
+  const isGrouped = customChartOptions.isGrouped;
 
   /**
    * SVG elements created for highlighting
