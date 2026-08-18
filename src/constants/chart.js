@@ -129,3 +129,8 @@ export const chartSpacingNoCreditExport = 20;
 export const baselineColor = '#156DF9';
 
 export const defaultExportSize = { width: 1024, height: 768 };
+
+/**
+ * Opacity of non-highlighted chart markers in case there are any highlights
+ */
+export const nonHighlightedOpacity = 0.5;
