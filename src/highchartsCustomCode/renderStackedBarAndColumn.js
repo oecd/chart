@@ -19,6 +19,9 @@ import { renderHighlightInsets } from './utils/renderHighlightInsets';
 export const renderStackedBarAndColumn = (options) => {
   const { chart } = options;
 
+  const customChartOptions = chart.options.custom;
+  if (!customChartOptions) return;
+
   // Fill the plot area for debugging
   // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 0 / 0.1)');
 

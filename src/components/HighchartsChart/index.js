@@ -30,11 +30,11 @@ import { errorMessages } from '../../constants/chartErrorMessages';
 import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
 import useIsFontLoaded from '../../hook/useIsFontLoaded';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
+import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
+import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
 import {
   createFooter,
-  deepMergeUserOptionsWithDefaultOptions,
   doesStringContainVar,
-  getCreateOptionsFuncForChartType,
   isParsedDataEmpty,
   replaceAllVarsNameByVarsValue,
 } from '../../utils/chartUtil';
@@ -186,6 +186,9 @@ const HighchartsChart = ({
   const newControlWillCauseVarChange = useRef(false);
 
   const [createOptionsFuncForChartType, setCreateOptionsFuncForChartType] =
+    useState(null);
+  // Chart type for which createOptionsFuncForChartType was created
+  const [createOptionsFuncChartType, setCreateOptionsFuncChartType] =
     useState(null);
   const [sdmxJson, setSdmxJson] = useState(null);
   const [isFetching, setIsFetching] = useState(
@@ -1019,11 +1022,19 @@ const HighchartsChart = ({
     [customTooltip],
   );
 
+  console.log('HighchartsChart chartType', chartType);
+
   // get create option func inside effect because of lazy loading
   useEffect(() => {
+    console.log('chartType EFFECT');
+
     const getCreateOptionsFunc = async () => {
+      console.log('get create options func for chartType', chartType);
       const func = await getCreateOptionsFuncForChartType(chartType);
+      console.log('got create options func, now set');
+      setCreateOptionsFuncChartType(chartType);
       setCreateOptionsFuncForChartType(() => func);
+      console.log('!!! SET DONE !!!');
     };
 
     getCreateOptionsFunc();
@@ -1046,13 +1057,18 @@ const HighchartsChart = ({
   // create merged chart options (default + optionsOverride)
   // this must be done a minimum amount of time because it causes Highcharts chart rerender which is costly
   useEffect(() => {
+    console.log('EFFECT create options');
     if (
       !isFetching &&
       R.isNil(errorMessage) &&
       !R.isNil(createOptionsFuncForChartType) &&
+      // Make sure whe create options function is up-to-date for the desired chart type
+      createOptionsFuncChartType === chartType &&
       !R.isNil(parsedData) &&
       allHeightCalculationsHaveBeenDone
     ) {
+      console.log('    READY for create options');
+
       if (parsedData?.dotStatServerFetchFailed) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setErrorMessage(errorMessages.generic.getLabel());
@@ -1082,6 +1098,7 @@ const HighchartsChart = ({
         return;
       }
 
+      console.log('    DO CREATE OPTIONS, call createOptionsFuncForChartType');
       const defaultOptions = createOptionsFuncForChartType({
         chartType,
         data: parsedData,
@@ -1139,6 +1156,7 @@ const HighchartsChart = ({
         ),
       );
     } else {
+      console.log('   NOT READY to create options');
       setMergedOptions(null);
     }
   }, [
@@ -1194,6 +1212,8 @@ const HighchartsChart = ({
     id,
     sortOrder,
   ]);
+
+  console.log('mergedOptions', mergedOptions);
 
   useEffect(() => {
     const handleExitFullScreen = () => {
