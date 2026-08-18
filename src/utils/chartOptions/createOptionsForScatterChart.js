@@ -1,0 +1,307 @@
+// @ts-check
+import * as R from 'ramda';
+import {
+  chartSpacing,
+  chartSpacingFullScreenAndExport,
+  chartTypes,
+  sortOrderOptions,
+} from '../../constants/chart';
+import { createDatapoint } from '../chartOptions/createDataPoint';
+import { calcMarginTop } from '../chartUtil';
+import {
+  getBaselineOrHighlightColor,
+  getListItemAtTurningIndex,
+  getSeriesColor,
+} from '../chartUtilCommon';
+import { addColorAlpha } from '../colorUtil';
+import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
+
+const symbols = [
+  'circle',
+  'diamond',
+  'cross',
+  'square',
+  'triangle',
+  'triangle-down',
+];
+
+export const createOptionsForScatterChart = ({
+  chartType,
+  data,
+  formatters = {},
+  title = '',
+  subtitle = '',
+  colorPalette,
+  fixedColorIndexBySeries = null,
+  highlight = null,
+  baseline = null,
+  highlightColors,
+  hideLegend = false,
+  hideXAxisLabels = false,
+  hideYAxisLabels = false,
+  fullscreenClose = null,
+  isFullScreen = false,
+  height,
+  isSmall = false,
+  categoriesAreDatesOrNumberForDataParsing,
+  categoriesFrequency,
+  seriesFrequency,
+  sortOrder,
+  disableLegendInteraction = false,
+}) => {
+  const symbolLayout = chartType === chartTypes.symbol;
+  const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
+
+  const getIsMinAvgOrMax =
+    chartType !== chartTypes.symbolMinMax
+      ? R.always(false)
+      : (s) => {
+          const firstDatumCustom = R.path(['data', 0, 'custom'], s);
+          return (
+            R.has('isMin', firstDatumCustom) ||
+            R.has('isMax', firstDatumCustom) ||
+            R.has('isAvg', firstDatumCustom)
+          );
+        };
+
+  const series = mapWithIndex((s, yIdx) => {
+    const isMinAvgOrMax = getIsMinAvgOrMax(s);
+    const symbol = isMinAvgOrMax
+      ? R.head(symbols)
+      : getListItemAtTurningIndex(
+          yIdx,
+          isMinAvgOrMax ? R.tail(symbols) : symbols,
+        );
+
+    const seriesBaselineOrHighlightColor = getBaselineOrHighlightColor(
+      s,
+      highlight,
+      baseline,
+      highlightColors,
+    );
+
+    const seriesColor = R.compose(() => {
+      if (seriesBaselineOrHighlightColor) {
+        return seriesBaselineOrHighlightColor;
+      }
+
+      if (!isNilOrEmpty(fixedColorIndexBySeries)) {
+        return getSeriesColor({
+          colorPalette,
+          seriesIndex: yIdx,
+          seriesCode: s.code,
+          fixedColorIndexBySeries,
+        });
+      }
+
+      return isMinAvgOrMax
+        ? R.head(colorPalette)
+        : getListItemAtTurningIndex(
+            yIdx,
+            isMinAvgOrMax ? R.tail(colorPalette) : colorPalette,
+          );
+    })();
+
+    const symbolRadius = symbolMinMaxLayout ? 9 : 6;
+
+    return {
+      name: data.areSeriesDates
+        ? seriesFrequency.tryParse(s.label).getTime()
+        : s.label,
+      data: mapWithIndex((d, xIdx) => {
+        const category = R.nth(xIdx, data.categories);
+
+        const baselineOrHighlightColor = getBaselineOrHighlightColor(
+          category,
+          highlight,
+          baseline,
+          highlightColors,
+        );
+
+        const dataPoint = createDatapoint(
+          d,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
+
+        return baselineOrHighlightColor
+          ? {
+              name: category.label,
+              ...dataPoint,
+              color: baselineOrHighlightColor,
+              marker: {
+                fillColor: !symbolLayout
+                  ? addColorAlpha(baselineOrHighlightColor, -0.4)
+                  : baselineOrHighlightColor,
+              },
+            }
+          : {
+              name: category.label,
+              ...dataPoint,
+            };
+      }, s.data),
+      color: seriesColor,
+      showInLegend: true,
+      marker: {
+        symbol,
+        lineColor: symbol === 'cross' ? null : '#deeaf1',
+        lineWidth: symbol === 'cross' ? 2 : 1,
+        radius: symbol === 'cross' ? symbolRadius - 1 : symbolRadius,
+        fillColor: !symbolLayout
+          ? addColorAlpha(seriesColor, symbolMinMaxLayout ? -0.2 : -0.4)
+          : seriesColor,
+        states: {
+          hover: {
+            lineWidth: symbol === 'cross' ? 2 : 1,
+            radius: symbol === 'cross' ? symbolRadius - 1 : symbolRadius,
+          },
+        },
+      },
+      ...(symbolMinMaxLayout
+        ? {
+            dataLabels: {
+              y: isMinAvgOrMax ? 45 : -20,
+            },
+          }
+        : {}),
+    };
+  }, data.series);
+
+  const symbolMinMaxData = symbolMinMaxLayout
+    ? R.compose(
+        (allSeriesFirstDatum) => {
+          const min = R.find(
+            R.pathEq(true, ['custom', 'isMin']),
+            allSeriesFirstDatum,
+          )?.value;
+          const max = R.find(
+            R.pathEq(true, ['custom', 'isMax']),
+            allSeriesFirstDatum,
+          )?.value;
+          return { min, max };
+        },
+        R.reject(R.isNil),
+        R.map(R.path(['data', 0])),
+      )(data.series)
+    : null;
+
+  const calcXAxisLayout = () => {
+    if (hideYAxisLabels) {
+      return categoriesAreDatesOrNumberForDataParsing
+        ? { left: '5%', width: '90%' }
+        : { left: '3%', width: '97%' };
+    }
+
+    return categoriesAreDatesOrNumberForDataParsing
+      ? { left: '10%', width: '85%' }
+      : { left: '5%', width: '95%' };
+  };
+
+  return {
+    chart: {
+      type: 'scatter',
+      style: {
+        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
+      },
+      marginTop:
+        hideLegend && chartType !== chartTypes.symbolMinMax
+          ? calcMarginTop(title, subtitle, isSmall)
+          : undefined,
+      ...(symbolMinMaxLayout ? { marginLeft: 12, marginRight: 12 } : {}),
+      height,
+      animation: false,
+      spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
+      events: {
+        fullscreenClose,
+      },
+      inverted: symbolMinMaxLayout,
+      className: disableLegendInteraction
+        ? 'cb-disable-legend-pointer-events'
+        : undefined,
+    },
+
+    colors: colorPalette,
+
+    xAxis: {
+      categories: categoriesAreDatesOrNumberForDataParsing
+        ? null
+        : R.map(
+            R.compose(
+              R.when(
+                () => data.areCategoriesDates,
+                (v) => categoriesFrequency.tryParse(v).getTime(),
+              ),
+              R.prop('label'),
+            ),
+            data.categories,
+          ),
+      ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
+      labels: {
+        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        autoRotation: [-90, -45, 0],
+        ...R.prop('xAxisLabels', formatters),
+        ...(hideXAxisLabels || symbolMinMaxLayout ? { enabled: false } : {}),
+      },
+      gridLineColor: '#c2cbd6',
+      lineColor: 'transparent',
+      ...calcXAxisLayout(),
+      tickWidth: 0,
+    },
+
+    yAxis: {
+      title: {
+        enabled: false,
+      },
+      gridLineWidth: symbolMinMaxLayout ? 0 : 1,
+      gridLineColor: '#c2cbd6',
+      lineColor: '#c2cbd6',
+      labels: {
+        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        ...R.prop('yAxisLabels', formatters),
+        enabled: !hideYAxisLabels && !symbolMinMaxLayout,
+        align: 'left',
+        x: 0,
+        y: -4,
+      },
+      reversed: symbolMinMaxLayout && sortOrder === sortOrderOptions.desc.value,
+      ...(!R.isNil(symbolMinMaxData?.min) && !R.isNil(symbolMinMaxData?.max)
+        ? {
+            tickPositions: [
+              symbolMinMaxData.min,
+              //avoids a bug in Hightcharts that do not always display the max value
+              symbolMinMaxData.max + Math.abs(symbolMinMaxData.max * 0.001),
+            ],
+          }
+        : {}),
+    },
+
+    legend: {
+      enabled: !hideLegend && !symbolMinMaxLayout,
+      ...R.prop('seriesLabels', formatters),
+      itemDistance: 10,
+      itemStyle: {
+        fontWeight: 'normal',
+        color: '#586179',
+        fontSize: isSmall ? '13px' : '16px',
+      },
+      align: 'left',
+      squareSymbol: false,
+      symbolRadius: 0,
+      symbolWidth: 18,
+      x: -7,
+      verticalAlign: 'top',
+      margin: isSmall ? 26 : 34,
+    },
+
+    plotOptions: {
+      series: {
+        animation: false,
+        dataLabels: {
+          ...(symbolMinMaxLayout ? { enabled: true } : {}),
+          ...R.prop('dataLabels', formatters),
+        },
+      },
+    },
+
+    series,
+  };
+};
