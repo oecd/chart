@@ -11,9 +11,9 @@ import {
 } from '../../constants/chart';
 import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
-import { codeOrLabelEquals } from '../configUtil';
 import { mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
+import { getBaselineHighlightCodes } from './getBaselineHighlightCodes';
 
 /**
  * @param {{
@@ -108,7 +108,7 @@ const createStackedDatapoints = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        // Same code as in `createOptionsForBarChart`
+        // Same baseline/highlighting code as in `createOptionsForBarChart`
 
         // Baseline
 
@@ -138,10 +138,10 @@ const createStackedDatapoints = ({
             )
           : null;
 
-        // Only color the bar segment if the series is baseline or highlighted.
-        // If the category is highlighted, we draw an outline around all segments.
-
         const getPointColor = () => {
+          // Only color the bar segment if the series is baseline or highlighted.
+          // If the category is highlighted, we draw an outline around all segments.
+
           if (isSeriesBaseline) {
             return baselineColor;
           }
@@ -259,53 +259,20 @@ export const createOptionsForStackedChart = ({
     return horizontal ? 14 : 34;
   };
 
-  const entities = R.concat(data.series, data.categories);
-  const allCategoryCodes = R.map(R.prop('code'), data.categories);
-
-  const baselineEntities = R.filter(
-    (series) => R.any(codeOrLabelEquals(series), baseline),
-    entities,
-  );
-  const baselineCodes = R.map(R.prop('code'), baselineEntities);
-
-  const highlightedSeries = R.filter(
-    (series) => R.any(codeOrLabelEquals(series), highlight),
-    data.series,
-  );
-  const highlightedSeriesCodes = R.map(R.prop('code'), highlightedSeries);
-
-  const highlightedCategories = R.filter(
-    (category) => R.any(codeOrLabelEquals(category), highlight),
-    data.categories,
-  );
-  const highlightedCategoryCodes = R.map(R.prop('code'), highlightedCategories);
-
-  // This is different from `highlight` which might contain codes or labels
-  const highlightedCodes = R.concat(
+  const {
+    baselineCodes,
+    highlightedCodes,
     highlightedSeriesCodes,
     highlightedCategoryCodes,
-  );
-
-  // Find a matching highlight color palette
-  const highlightedLength = highlightedCodes.length;
-  const matchingHighlightColors =
-    R.find(R.propEq(highlightedLength, 'length'), smallerHighlightColors) ||
-    highlightColors;
-
-  const isBaselineACategory = R.any(
-    R.includes(R.__, allCategoryCodes),
-    baselineCodes,
-  );
-
-  const isGroupedChart =
-    data.series.length > 1 && data.series[0].data.length > 1;
-
-  /**
-   * Whether a category is baseline/highlighted that contains several points
-   * and can be highlighted as a visual group, not as individual points.
-   */
-  const isCategoryGroupHighlighted =
-    isGroupedChart && (isBaselineACategory || highlightedCategories.length > 0);
+    matchingHighlightColors,
+    isCategoryGroupHighlighted,
+  } = getBaselineHighlightCodes({
+    data,
+    baseline,
+    highlight,
+    smallerHighlightColors,
+    highlightColors,
+  });
 
   const allSeries = createStackedDatapoints({
     data,
@@ -321,6 +288,7 @@ export const createOptionsForStackedChart = ({
     highlightedCategoryCodes,
   });
 
+  /** Custom chart options used by the baseline/highlighting render callbacks */
   const customChartOptions = {
     baselineCodes,
     highlightedCodes,

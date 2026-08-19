@@ -11,8 +11,8 @@ import {
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
-import { codeOrLabelEquals } from '../configUtil';
 import { mapWithIndex } from '../ramdaUtil';
+import { getBaselineHighlightCodes } from './getBaselineHighlightCodes';
 
 /**
  * @param {{
@@ -46,56 +46,6 @@ export const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const entities = R.concat(data.series, data.categories);
-  const allCategoryCodes = R.map(R.prop('code'), data.categories);
-
-  const baselineEntities = R.filter(
-    (series) => R.any(codeOrLabelEquals(series), baseline),
-    entities,
-  );
-  const baselineCodes = R.map(R.prop('code'), baselineEntities);
-
-  const highlightedSeries = R.filter(
-    (series) => R.any(codeOrLabelEquals(series), highlight),
-    data.series,
-  );
-  const highlightedSeriesCodes = R.map(R.prop('code'), highlightedSeries);
-  const anySeriesHighlighted = highlightedSeriesCodes.length > 0;
-
-  const highlightedCategories = R.filter(
-    (category) => R.any(codeOrLabelEquals(category), highlight),
-    data.categories,
-  );
-  const highlightedCategoryCodes = R.map(R.prop('code'), highlightedCategories);
-  const anyCategoriesHighlighted = highlightedCategoryCodes.length > 0;
-
-  // This is different from `highlight` which might contain codes or labels
-  const highlightedCodes = R.concat(
-    highlightedSeriesCodes,
-    highlightedCategoryCodes,
-  );
-
-  // Find matching color palettes
-
-  const highlightedLength = highlightedCodes.length;
-  const matchingHighlightColors =
-    R.find(R.propEq(highlightedLength, 'length'), smallerHighlightColors) ||
-    highlightColors;
-
-  const isBaselineACategory = R.any(
-    R.includes(R.__, allCategoryCodes),
-    baselineCodes,
-  );
-
-  const isGrouped = data.series.length > 1 && data.series[0].data.length > 1;
-
-  /**
-   * Whether a category is baseline/highlighted that contains several points
-   * and can be highlighted as a visual group, not as individual points.
-   */
-  const isCategoryGroupHighlighted =
-    isGrouped && (isBaselineACategory || highlightedCategories.length > 0);
-
   const horizontal = chartType === chartTypes.row;
 
   const calcXAxisLayout = () => {
@@ -130,14 +80,31 @@ export const createOptionsForBarChart = ({
     return horizontal ? 14 : 34;
   };
 
+  const {
+    baselineCodes,
+    highlightedCodes,
+    highlightedCategoryCodes,
+    matchingHighlightColors,
+    isGroupedChart,
+    isCategoryGroupHighlighted,
+  } = getBaselineHighlightCodes({
+    data,
+    baseline,
+    highlight,
+    smallerHighlightColors,
+    highlightColors,
+  });
+
+  /** Custom chart options used by the baseline/highlighting render callbacks */
   const customChartOptions = {
     baselineCodes,
     highlightedCodes,
     highlightedCategoryCodes,
     highlightColors: matchingHighlightColors,
-    isGrouped,
+    isGrouped: isGroupedChart,
     isCategoryGroupHighlighted,
   };
+  const anyCategoriesHighlighted = highlightedCategoryCodes.length > 0;
 
   return {
     custom: customChartOptions,
@@ -325,7 +292,7 @@ export const createOptionsForBarChart = ({
           // Only color the bar in a grouped bar chart seince we draw an outline
           // around baseline/highlight bar groups then.
           const getPointColor = () => {
-            if (!isGrouped) {
+            if (!isGroupedChart) {
               return null;
             }
             if (isSeriesBaseline) {
