@@ -32,9 +32,9 @@ export const createOptionsForRadarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const series = mapWithIndex((s, xIdx) => {
+  const allSeries = mapWithIndex((series, seriesIndex) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
-      s,
+      series,
       highlight,
       baseline,
       highlightColors,
@@ -43,19 +43,20 @@ export const createOptionsForRadarChart = ({
       highlightOrBaselineColor ||
       getSeriesColor({
         colorPalette,
-        seriesIndex: xIdx,
-        seriesCode: s.code,
+        seriesIndex,
+        seriesCode: series.code,
         fixedColorIndexBySeries,
       });
     const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
 
     return {
       name: data.areSeriesDates
-        ? seriesFrequency.tryParse(s.label).getTime()
-        : s.label,
+        ? seriesFrequency.tryParse(series.label).getTime()
+        : series.label,
       data: R.map(
-        (d) => createDatapoint(d, categoriesAreDatesOrNumberForDataParsing),
-        s.data,
+        (pointData) =>
+          createDatapoint(pointData, categoriesAreDatesOrNumberForDataParsing),
+        series.data,
       ),
       type: 'line',
       lineWidth: 2.5,
@@ -207,6 +208,6 @@ export const createOptionsForRadarChart = ({
       },
     },
 
-    series,
+    series: allSeries,
   };
 };

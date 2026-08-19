@@ -14,12 +14,9 @@ import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
  *
  * @param {{
  * chart: Chart & { oecd_highlightElements: Set<HighchartsSVGElement> };
- * cbType: string;
  * }} options
  */
-export const renderBarAndColumn = (options) => {
-  const { chart } = options;
-
+export const renderBarAndColumn = ({ chart }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
 
