@@ -1,9 +1,11 @@
 // @ts-check
+import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
   chartSpacing,
   chartSpacingFullScreenAndExport,
   chartTypes,
+  nonHighlightedOpacity,
   sortOrderOptions,
 } from '../../constants/chart';
 import { createDatapoint } from '../chartOptions/createDataPoint';
@@ -13,7 +15,6 @@ import {
   getListItemAtTurningIndex,
   getSeriesColor,
 } from '../chartUtilCommon';
-import { addColorAlpha } from '../colorUtil';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 
 const symbols = [
@@ -49,7 +50,6 @@ export const createOptionsForScatterChart = ({
   sortOrder,
   disableLegendInteraction = false,
 }) => {
-  const symbolLayout = chartType === chartTypes.symbol;
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
   const getIsMinAvgOrMax =
@@ -64,23 +64,22 @@ export const createOptionsForScatterChart = ({
           );
         };
 
-  const series = mapWithIndex((s, yIdx) => {
-    const isMinAvgOrMax = getIsMinAvgOrMax(s);
+  const anyHighlighted = highlight.length > 0;
+
+  const allSeries = mapWithIndex((series, seriesIndex) => {
+    const isMinAvgOrMax = getIsMinAvgOrMax(series);
     const symbol = isMinAvgOrMax
       ? R.head(symbols)
-      : getListItemAtTurningIndex(
-          yIdx,
-          isMinAvgOrMax ? R.tail(symbols) : symbols,
-        );
+      : getListItemAtTurningIndex(seriesIndex, symbols);
 
     const seriesBaselineOrHighlightColor = getBaselineOrHighlightColor(
-      s,
+      series,
       highlight,
       baseline,
       highlightColors,
     );
 
-    const seriesColor = R.compose(() => {
+    const seriesColor = (() => {
       if (seriesBaselineOrHighlightColor) {
         return seriesBaselineOrHighlightColor;
       }
@@ -88,28 +87,30 @@ export const createOptionsForScatterChart = ({
       if (!isNilOrEmpty(fixedColorIndexBySeries)) {
         return getSeriesColor({
           colorPalette,
-          seriesIndex: yIdx,
-          seriesCode: s.code,
+          seriesIndex: seriesIndex,
+          seriesCode: series.code,
           fixedColorIndexBySeries,
         });
       }
 
-      return isMinAvgOrMax
+      const color = isMinAvgOrMax
         ? R.head(colorPalette)
-        : getListItemAtTurningIndex(
-            yIdx,
-            isMinAvgOrMax ? R.tail(colorPalette) : colorPalette,
-          );
+        : getListItemAtTurningIndex(seriesIndex, colorPalette);
+
+      // Reduce opacity of non-highlighted
+      return anyHighlighted
+        ? new TinyColor(color).setAlpha(nonHighlightedOpacity).toRgbString()
+        : color;
     })();
 
     const symbolRadius = symbolMinMaxLayout ? 9 : 6;
 
     return {
       name: data.areSeriesDates
-        ? seriesFrequency.tryParse(s.label).getTime()
-        : s.label,
-      data: mapWithIndex((d, xIdx) => {
-        const category = R.nth(xIdx, data.categories);
+        ? seriesFrequency.tryParse(series.label).getTime()
+        : series.label,
+      data: mapWithIndex((pointData, pointIndex) => {
+        const category = R.nth(pointIndex, data.categories);
 
         const baselineOrHighlightColor = getBaselineOrHighlightColor(
           category,
@@ -119,7 +120,7 @@ export const createOptionsForScatterChart = ({
         );
 
         const dataPoint = createDatapoint(
-          d,
+          pointData,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
@@ -129,26 +130,22 @@ export const createOptionsForScatterChart = ({
               ...dataPoint,
               color: baselineOrHighlightColor,
               marker: {
-                fillColor: !symbolLayout
-                  ? addColorAlpha(baselineOrHighlightColor, -0.4)
-                  : baselineOrHighlightColor,
+                fillColor: baselineOrHighlightColor,
               },
             }
           : {
               name: category.label,
               ...dataPoint,
             };
-      }, s.data),
+      }, series.data),
       color: seriesColor,
       showInLegend: true,
       marker: {
         symbol,
-        lineColor: symbol === 'cross' ? null : '#deeaf1',
-        lineWidth: symbol === 'cross' ? 2 : 1,
+        lineColor: symbol === 'cross' ? null : 'white',
+        lineWidth: symbol === 'cross' ? 2 : 0.2,
         radius: symbol === 'cross' ? symbolRadius - 1 : symbolRadius,
-        fillColor: !symbolLayout
-          ? addColorAlpha(seriesColor, symbolMinMaxLayout ? -0.2 : -0.4)
-          : seriesColor,
+        fillColor: seriesColor,
         states: {
           hover: {
             lineWidth: symbol === 'cross' ? 2 : 1,
@@ -302,6 +299,6 @@ export const createOptionsForScatterChart = ({
       },
     },
 
-    series,
+    series: allSeries,
   };
 };
