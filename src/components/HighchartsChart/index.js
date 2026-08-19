@@ -1022,19 +1022,12 @@ const HighchartsChart = ({
     [customTooltip],
   );
 
-  console.log('HighchartsChart chartType', chartType);
-
   // get create option func inside effect because of lazy loading
   useEffect(() => {
-    console.log('chartType EFFECT');
-
     const getCreateOptionsFunc = async () => {
-      console.log('get create options func for chartType', chartType);
       const func = await getCreateOptionsFuncForChartType(chartType);
-      console.log('got create options func, now set');
       setCreateOptionsFuncChartType(chartType);
       setCreateOptionsFuncForChartType(() => func);
-      console.log('!!! SET DONE !!!');
     };
 
     getCreateOptionsFunc();
@@ -1057,7 +1050,6 @@ const HighchartsChart = ({
   // create merged chart options (default + optionsOverride)
   // this must be done a minimum amount of time because it causes Highcharts chart rerender which is costly
   useEffect(() => {
-    console.log('EFFECT create options');
     if (
       !isFetching &&
       R.isNil(errorMessage) &&
@@ -1067,8 +1059,6 @@ const HighchartsChart = ({
       !R.isNil(parsedData) &&
       allHeightCalculationsHaveBeenDone
     ) {
-      console.log('    READY for create options');
-
       if (parsedData?.dotStatServerFetchFailed) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setErrorMessage(errorMessages.generic.getLabel());
@@ -1098,7 +1088,6 @@ const HighchartsChart = ({
         return;
       }
 
-      console.log('    DO CREATE OPTIONS, call createOptionsFuncForChartType');
       const defaultOptions = createOptionsFuncForChartType({
         chartType,
         data: parsedData,
@@ -1156,7 +1145,6 @@ const HighchartsChart = ({
         ),
       );
     } else {
-      console.log('   NOT READY to create options');
       setMergedOptions(null);
     }
   }, [
@@ -1212,8 +1200,6 @@ const HighchartsChart = ({
     id,
     sortOrder,
   ]);
-
-  console.log('mergedOptions', mergedOptions);
 
   useEffect(() => {
     const handleExitFullScreen = () => {

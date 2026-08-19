@@ -1,5 +1,4 @@
 // @ts-check
-/* eslint-disable no-console */
 import * as R from 'ramda';
 import {
   chartTypes,
@@ -161,32 +160,13 @@ const createChartOptionsFunc =
       seriesFrequency,
     });
 
-    console.log(
-      'getCreateOptionsFuncForChartType > otherProps.chartType',
-      otherProps.chartType,
-    );
     const customChartRender = R.propOr(
       null,
       otherProps.chartType,
       customChartRenderByChartType,
     );
-    console.log('customChartRender', customChartRender);
 
     const customChartRenderWithCbType = ({ target: chart }) => {
-      const typeFromProps = otherProps.chartType;
-      const typeFromOptions = chart.options.chart.type;
-      console.log(
-        'customChartRenderWithCbType\n  typeFromProps',
-        typeFromProps,
-        'typeFromOptions',
-        typeFromOptions,
-      );
-      // if (typeFromProps !== typeFromOptions) {
-      //   console.log(
-      //     'type mismatch, do not call callback. wait for the options to be updated to the new chart type',
-      //   );
-      //   return;
-      // }
       if (customChartRender) {
         customChartRender({ chart, cbType: otherProps.chartType });
       }
