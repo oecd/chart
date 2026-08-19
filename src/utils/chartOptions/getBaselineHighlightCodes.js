@@ -3,7 +3,18 @@ import * as R from 'ramda';
 import { codeOrLabelEquals } from '../configUtil';
 
 /**
- * Processes the baseline and highlight codes, finds a matching highlight palette.
+ * Processes the baseline and highlight codes, finds a matching highlight palette,
+ * determines flags used in the highlighting logic.
+ *
+ * @returns {{
+ *   baselineCodes: string[];
+ *   highlightedCodes: string[];
+ *   highlightedSeriesCodes: string[];
+ *   highlightedCategoryCodes: string[];
+ *   matchingHighlightColors: string[];
+ *   isGroupedChart: boolean;
+ *   isCategoryGroupHighlighted: boolean;
+ * }}
  */
 export const getBaselineHighlightCodes = ({
   data,
