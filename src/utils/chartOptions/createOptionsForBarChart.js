@@ -11,6 +11,7 @@ import {
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
+import { addColorAlpha } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineHighlightCodes } from './getBaselineHighlightCodes';
 
@@ -83,6 +84,7 @@ export const createOptionsForBarChart = ({
   const {
     baselineCodes,
     highlightedCodes,
+    highlightedSeriesCodes,
     highlightedCategoryCodes,
     matchingHighlightColors,
     isGroupedChart,
@@ -95,6 +97,9 @@ export const createOptionsForBarChart = ({
     highlightColors,
   });
 
+  const anySeriesHighlighted = highlightedSeriesCodes.length > 0;
+  const anyCategoriesHighlighted = highlightedCategoryCodes.length > 0;
+
   /** Custom chart options used by the baseline/highlighting render callbacks */
   const customChartOptions = {
     baselineCodes,
@@ -104,7 +109,6 @@ export const createOptionsForBarChart = ({
     isGrouped: isGroupedChart,
     isCategoryGroupHighlighted,
   };
-  const anyCategoriesHighlighted = highlightedCategoryCodes.length > 0;
 
   return {
     custom: customChartOptions,
@@ -216,7 +220,7 @@ export const createOptionsForBarChart = ({
       const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
       const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
-      const getFinalSeriesColor = () => {
+      const seriesColor = (() => {
         if (isSeriesBaseline) return baselineColor;
         if (isSeriesHighlighted) {
           return getListItemAtTurningIndex(
@@ -236,8 +240,7 @@ export const createOptionsForBarChart = ({
             .toRgbString();
         }
         return colorFromPalette;
-      };
-      const seriesColor = getFinalSeriesColor();
+      })();
 
       return {
         custom: {

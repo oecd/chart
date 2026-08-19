@@ -2,7 +2,6 @@
 /**
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
-
 import { renderAxisMarkers } from './utils/renderAxisMarkers';
 import { renderCategoryGroupOutline } from './utils/renderCategoryGroupOutline';
 import { renderHighlightInsets } from './utils/renderHighlightInsets';
@@ -13,12 +12,9 @@ import { renderHighlightInsets } from './utils/renderHighlightInsets';
  *
  * @param {{
  * chart: Chart & { oecd_highlightElements: Set<HighchartsSVGElement> };
- * cbType: string;
  * }} options
  */
-export const renderStackedBarAndColumn = (options) => {
-  const { chart } = options;
-
+export const renderStackedBarAndColumn = ({ chart }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
 

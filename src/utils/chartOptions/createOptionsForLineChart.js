@@ -36,9 +36,9 @@ export const createOptionsForLineChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
 }) => {
-  const series = mapWithIndex((s, yIdx) => {
+  const allSeries = mapWithIndex((series, seriesIndex) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(
-      s,
+      series,
       highlight,
       baseline,
       highlightColors,
@@ -48,33 +48,33 @@ export const createOptionsForLineChart = ({
       highlightOrBaselineColor ||
       getSeriesColor({
         colorPalette,
-        seriesIndex: yIdx,
-        seriesCode: s.code,
+        seriesIndex: seriesIndex,
+        seriesCode: series.code,
         fixedColorIndexBySeries,
       });
 
     const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
 
     const seriesName = data.areSeriesDates
-      ? seriesFrequency.tryParse(s.label).getTime()
-      : s.label;
+      ? seriesFrequency.tryParse(series.label).getTime()
+      : series.label;
 
     const lastDataPointWithDataIndex = R.findLastIndex(
       (d) => !isNilOrEmpty(d.value),
-      s.data,
+      series.data,
     );
 
     return {
       name: seriesName,
-      data: mapWithIndex((d, i) => {
+      data: mapWithIndex((pointData, pointIndex) => {
         const dataPoint = createDatapoint(
-          d,
+          pointData,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
         const finalDataPoint =
           inlineLabels &&
-          i === lastDataPointWithDataIndex &&
+          pointIndex === lastDataPointWithDataIndex &&
           lastDataPointWithDataIndex !== -1
             ? R.assoc(
                 'dataLabels',
@@ -90,7 +90,7 @@ export const createOptionsForLineChart = ({
             : dataPoint;
 
         return finalDataPoint;
-      }, s.data),
+      }, series.data),
       type: 'spline',
       lineWidth: 2.5,
       marker: {
@@ -293,6 +293,6 @@ export const createOptionsForLineChart = ({
       },
     },
 
-    series,
+    series: allSeries,
   };
 };
