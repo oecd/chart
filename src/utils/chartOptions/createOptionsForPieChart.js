@@ -30,13 +30,13 @@ export const createOptionsForPieChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const series = R.map(
-    (s) => ({
+  const allSeries = R.map(
+    (series) => ({
       name: data.areSeriesDates
-        ? seriesFrequency.tryParse(s.label).getTime()
-        : s.label,
-      data: mapWithIndex((d, xIdx) => {
-        const category = R.nth(xIdx, data.categories);
+        ? seriesFrequency.tryParse(series.label).getTime()
+        : series.label,
+      data: mapWithIndex((pointData, pointIndex) => {
+        const category = R.nth(pointIndex, data.categories);
 
         const color =
           getBaselineOrHighlightColor(
@@ -47,13 +47,13 @@ export const createOptionsForPieChart = ({
           ) ||
           getSeriesColor({
             colorPalette,
-            seriesIndex: xIdx,
+            seriesIndex: pointIndex,
             seriesCode: category.code,
             fixedColorIndexBySeries,
           });
 
         const dataPoint = createDatapoint(
-          d,
+          pointData,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
@@ -64,7 +64,7 @@ export const createOptionsForPieChart = ({
           ...dataPoint,
           color,
         };
-      }, s.data),
+      }, series.data),
     }),
     R.isEmpty(data.series) ? [] : [R.head(data.series)],
   );
@@ -122,6 +122,6 @@ export const createOptionsForPieChart = ({
       },
     },
 
-    series,
+    series: allSeries,
   };
 };
