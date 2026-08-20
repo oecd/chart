@@ -38,7 +38,7 @@ export const renderSymbol = ({ chart, cbType }) => {
     R.map(R.compose(R.map(R.prop('y')), R.prop('data'))),
   )(R.filter(R.propEq(true, 'visible'), chart.series));
 
-  minMaxLines = mapWithIndex((category, idx) => {
+  minMaxLines = mapWithIndex((_category, idx) => {
     if (R.isEmpty(categoriesMinMax[idx])) {
       return null;
     }

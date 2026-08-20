@@ -2,6 +2,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   chartTypes,
@@ -16,6 +17,7 @@ import {
   getSeriesColor,
 } from '../chartUtilCommon';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
+import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 
 const symbols = [
   'circle',
@@ -37,6 +39,7 @@ export const createOptionsForScatterChart = ({
   highlight = null,
   baseline = null,
   highlightColors,
+  smallerHighlightColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -64,7 +67,15 @@ export const createOptionsForScatterChart = ({
           );
         };
 
-  const anyHighlighted = highlight.length > 0;
+  const { baselineCodes, highlightCodes, matchingHighlightColors } =
+    getBaselineAndHighlightCodes({
+      data,
+      baseline,
+      highlight,
+      smallerHighlightColors,
+      highlightColors,
+    });
+  const anyHighlighted = highlightCodes.length > 0;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const isMinAvgOrMax = getIsMinAvgOrMax(series);
@@ -72,22 +83,27 @@ export const createOptionsForScatterChart = ({
       ? R.head(symbols)
       : getListItemAtTurningIndex(seriesIndex, symbols);
 
-    const seriesBaselineOrHighlightColor = getBaselineOrHighlightColor(
-      series,
-      highlight,
-      baseline,
-      highlightColors,
-    );
+    const seriesCode = series.code;
+
+    const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
+    const isSeriesBaseline = seriesBaselineIndex !== -1;
+
+    const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
+    const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
     const seriesColor = (() => {
-      if (seriesBaselineOrHighlightColor) {
-        return seriesBaselineOrHighlightColor;
+      if (isSeriesBaseline) return baselineColor;
+      if (isSeriesHighlighted) {
+        return getListItemAtTurningIndex(
+          seriesHighlightIndex,
+          matchingHighlightColors,
+        );
       }
 
       if (!isNilOrEmpty(fixedColorIndexBySeries)) {
         return getSeriesColor({
           colorPalette,
-          seriesIndex: seriesIndex,
+          seriesIndex,
           seriesCode: series.code,
           fixedColorIndexBySeries,
         });
@@ -103,7 +119,18 @@ export const createOptionsForScatterChart = ({
         : color;
     })();
 
+    const lineColor =
+      symbol === 'cross'
+        ? null
+        : isSeriesHighlighted
+          ? // Highlighted points get a outline in the darkened highlight color
+            new TinyColor(seriesColor).darken(20).toString()
+          : 'white';
+    const lineWidth = symbol === 'cross' ? 2 : isSeriesHighlighted ? 1.5 : 0.5;
+    const hoverLineWidth = symbol === 'cross' ? 2 : isSeriesHighlighted ? 2 : 1;
+
     const symbolRadius = symbolMinMaxLayout ? 9 : 6;
+    const finalRadius = symbol === 'cross' ? symbolRadius - 1 : symbolRadius;
 
     return {
       name: data.areSeriesDates
@@ -116,7 +143,7 @@ export const createOptionsForScatterChart = ({
           category,
           highlight,
           baseline,
-          highlightColors,
+          matchingHighlightColors,
         );
 
         const dataPoint = createDatapoint(
@@ -124,32 +151,27 @@ export const createOptionsForScatterChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        return baselineOrHighlightColor
-          ? {
-              name: category.label,
-              ...dataPoint,
-              color: baselineOrHighlightColor,
-              marker: {
-                fillColor: baselineOrHighlightColor,
-              },
-            }
-          : {
-              name: category.label,
-              ...dataPoint,
-            };
+        return {
+          name: category.label,
+          ...dataPoint,
+          color: baselineOrHighlightColor,
+          marker: {
+            fillColor: baselineOrHighlightColor,
+          },
+        };
       }, series.data),
       color: seriesColor,
       showInLegend: true,
       marker: {
         symbol,
-        lineColor: symbol === 'cross' ? null : 'white',
-        lineWidth: symbol === 'cross' ? 2 : 0.2,
-        radius: symbol === 'cross' ? symbolRadius - 1 : symbolRadius,
+        lineColor,
+        lineWidth,
+        radius: finalRadius,
         fillColor: seriesColor,
         states: {
           hover: {
-            lineWidth: symbol === 'cross' ? 2 : 1,
-            radius: symbol === 'cross' ? symbolRadius - 1 : symbolRadius,
+            lineWidth: hoverLineWidth,
+            radius: finalRadius,
           },
         },
       },
@@ -159,7 +181,7 @@ export const createOptionsForScatterChart = ({
               y: isMinAvgOrMax ? 45 : -20,
             },
           }
-        : {}),
+        : undefined),
     };
   }, data.series);
 

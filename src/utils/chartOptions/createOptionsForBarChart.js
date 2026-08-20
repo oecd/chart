@@ -11,9 +11,8 @@ import {
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
-import { addColorAlpha } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
-import { getBaselineHighlightCodes } from './getBaselineHighlightCodes';
+import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 
 /**
  * @param {{
@@ -83,13 +82,13 @@ export const createOptionsForBarChart = ({
 
   const {
     baselineCodes,
-    highlightedCodes,
-    highlightedSeriesCodes,
-    highlightedCategoryCodes,
+    highlightCodes,
+    highlightSeriesCodes,
+    highlightCategoryCodes,
     matchingHighlightColors,
     isGroupedChart,
     isCategoryGroupHighlighted,
-  } = getBaselineHighlightCodes({
+  } = getBaselineAndHighlightCodes({
     data,
     baseline,
     highlight,
@@ -97,14 +96,14 @@ export const createOptionsForBarChart = ({
     highlightColors,
   });
 
-  const anySeriesHighlighted = highlightedSeriesCodes.length > 0;
-  const anyCategoriesHighlighted = highlightedCategoryCodes.length > 0;
+  const anySeriesHighlighted = highlightSeriesCodes.length > 0;
+  const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
 
   /** Custom chart options used by the baseline/highlighting render callbacks */
   const customChartOptions = {
     baselineCodes,
-    highlightedCodes,
-    highlightedCategoryCodes,
+    highlightCodes,
+    highlightCategoryCodes,
     highlightColors: matchingHighlightColors,
     isGrouped: isGroupedChart,
     isCategoryGroupHighlighted,
@@ -217,7 +216,7 @@ export const createOptionsForBarChart = ({
       const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
       const isSeriesBaseline = seriesBaselineIndex !== -1;
 
-      const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
+      const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
       const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
       const seriesColor = (() => {
@@ -271,7 +270,7 @@ export const createOptionsForBarChart = ({
 
           // Highlight
 
-          const categoryHighlightIndex = highlightedCodes.indexOf(categoryCode);
+          const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
           const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
           /** Whether the point is highlighted through series or category  */
@@ -311,7 +310,7 @@ export const createOptionsForBarChart = ({
             if (
               !isCategoryBaseline &&
               !isCategoryHighlighted &&
-              anyCategoriesHighlighted
+              anyCategoryHighlighted
             ) {
               return new TinyColor(seriesColor)
                 .setAlpha(nonHighlightedOpacity)

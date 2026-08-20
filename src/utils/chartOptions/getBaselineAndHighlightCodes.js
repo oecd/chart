@@ -3,20 +3,20 @@ import * as R from 'ramda';
 import { codeOrLabelEquals } from '../configUtil';
 
 /**
- * Processes the baseline and highlight codes, finds a matching highlight palette,
+ * Returns the baseline and highlight codes, finds a matching highlight palette,
  * determines flags used in the highlighting logic.
  *
  * @returns {{
  *   baselineCodes: string[];
- *   highlightedCodes: string[];
- *   highlightedSeriesCodes: string[];
- *   highlightedCategoryCodes: string[];
+ *   highlightCodes: string[];
+ *   highlightSeriesCodes: string[];
+ *   highlightCategoryCodes: string[];
  *   matchingHighlightColors: string[];
  *   isGroupedChart: boolean;
  *   isCategoryGroupHighlighted: boolean;
  * }}
  */
-export const getBaselineHighlightCodes = ({
+export const getBaselineAndHighlightCodes = ({
   data,
   baseline,
   highlight,
@@ -36,22 +36,19 @@ export const getBaselineHighlightCodes = ({
     (series) => R.any(codeOrLabelEquals(series), highlight),
     data.series,
   );
-  const highlightedSeriesCodes = R.map(R.prop('code'), highlightedSeries);
+  const highlightSeriesCodes = R.map(R.prop('code'), highlightedSeries);
 
   const highlightedCategories = R.filter(
     (category) => R.any(codeOrLabelEquals(category), highlight),
     data.categories,
   );
-  const highlightedCategoryCodes = R.map(R.prop('code'), highlightedCategories);
+  const highlightCategoryCodes = R.map(R.prop('code'), highlightedCategories);
 
   // This is different from `highlight` which might contain codes or labels
-  const highlightedCodes = R.concat(
-    highlightedSeriesCodes,
-    highlightedCategoryCodes,
-  );
+  const highlightCodes = R.concat(highlightSeriesCodes, highlightCategoryCodes);
 
   // Find a matching highlight color palette
-  const highlightedLength = highlightedCodes.length;
+  const highlightedLength = highlightCodes.length;
   const matchingHighlightColors =
     R.find(R.propEq(highlightedLength, 'length'), smallerHighlightColors) ||
     highlightColors;
@@ -73,9 +70,9 @@ export const getBaselineHighlightCodes = ({
 
   return {
     baselineCodes,
-    highlightedCodes,
-    highlightedSeriesCodes,
-    highlightedCategoryCodes,
+    highlightCodes,
+    highlightSeriesCodes,
+    highlightCategoryCodes,
     matchingHighlightColors,
     isGroupedChart,
     isCategoryGroupHighlighted,
