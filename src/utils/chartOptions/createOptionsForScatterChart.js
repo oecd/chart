@@ -18,6 +18,7 @@ import {
 } from '../chartUtilCommon';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
+import { getMatchingHighlightColors } from './getMatchingHighlightColors';
 
 const symbols = [
   'circle',
@@ -67,15 +68,18 @@ export const createOptionsForScatterChart = ({
           );
         };
 
-  const { baselineCodes, highlightCodes, matchingHighlightColors } =
-    getBaselineAndHighlightCodes({
-      data,
-      baseline,
-      highlight,
-      smallerHighlightColors,
-      highlightColors,
-    });
+  const { baselineCodes, highlightCodes } = getBaselineAndHighlightCodes({
+    data,
+    baseline,
+    highlight,
+  });
   const anyHighlighted = highlightCodes.length > 0;
+
+  const matchingHighlightColors = getMatchingHighlightColors({
+    highlight,
+    highlightColors,
+    smallerHighlightColors,
+  });
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const isMinAvgOrMax = getIsMinAvgOrMax(series);
