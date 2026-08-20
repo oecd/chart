@@ -3,7 +3,7 @@ import * as R from 'ramda';
 import { codeOrLabelEquals } from '../configUtil';
 
 /**
- * Returns the baseline and highlight codes, finds a matching highlight palette,
+ * Returns the baseline and highlight codes,
  * determines flags used in the highlighting logic.
  *
  * @returns {{
@@ -16,13 +16,7 @@ import { codeOrLabelEquals } from '../configUtil';
  *   isCategoryGroupHighlighted: boolean;
  * }}
  */
-export const getBaselineAndHighlightCodes = ({
-  data,
-  baseline,
-  highlight,
-  smallerHighlightColors,
-  highlightColors,
-}) => {
+export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
   const entities = R.concat(data.series, data.categories);
   const allCategoryCodes = R.map(R.prop('code'), data.categories);
 
@@ -47,12 +41,6 @@ export const getBaselineAndHighlightCodes = ({
   // This is different from `highlight` which might contain codes or labels
   const highlightCodes = R.concat(highlightSeriesCodes, highlightCategoryCodes);
 
-  // Find a matching highlight color palette
-  const highlightedLength = highlightCodes.length;
-  const matchingHighlightColors =
-    R.find(R.propEq(highlightedLength, 'length'), smallerHighlightColors) ||
-    highlightColors;
-
   const isBaselineACategory = R.any(
     R.includes(R.__, allCategoryCodes),
     baselineCodes,
@@ -73,7 +61,6 @@ export const getBaselineAndHighlightCodes = ({
     highlightCodes,
     highlightSeriesCodes,
     highlightCategoryCodes,
-    matchingHighlightColors,
     isGroupedChart,
     isCategoryGroupHighlighted,
   };
