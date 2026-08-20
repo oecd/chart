@@ -118,7 +118,7 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
   /** @type {string[]} */
   const baselineCodes = customChartOptions.baselineCodes;
   /** @type {string[]} */
-  const highlightedCategoryCodes = customChartOptions.highlightedCategoryCodes;
+  const highlightCategoryCodes = customChartOptions.highlightCategoryCodes;
 
   const firstSeries = relevantSeries[0];
   if (!firstSeries) {
@@ -130,7 +130,7 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
 
   const pointsByCategory = groupPointsByCategory(
     relevantSeries,
-    baselineCodes.concat(highlightedCategoryCodes),
+    baselineCodes.concat(highlightCategoryCodes),
   );
   const boundingRectsByCategory = getBoundingRectsByCategory(pointsByCategory);
 

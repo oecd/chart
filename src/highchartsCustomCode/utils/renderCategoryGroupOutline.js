@@ -44,9 +44,9 @@ export const renderCategoryGroupOutline = (chart) => {
   /** @type {string[]} */
   const baselineCodes = customChartOptions.baselineCodes;
   /** @type {string[]} */
-  const highlightedCodes = customChartOptions.highlightedCodes;
+  const highlightCodes = customChartOptions.highlightCodes;
   /** @type {string[]} */
-  const highlightedCategoryCodes = customChartOptions.highlightedCategoryCodes;
+  const highlightCategoryCodes = customChartOptions.highlightCategoryCodes;
   /** @type {string[]} */
   const highlightColors = customChartOptions.highlightColors;
 
@@ -59,7 +59,7 @@ export const renderCategoryGroupOutline = (chart) => {
 
   const pointsByCategory = groupPointsByCategory(
     relevantSeries,
-    baselineCodes.concat(highlightedCategoryCodes),
+    baselineCodes.concat(highlightCategoryCodes),
   );
   const boundingRects = getBoundingRectsByCategory(pointsByCategory);
 
@@ -95,7 +95,7 @@ export const renderCategoryGroupOutline = (chart) => {
     const outlineDistance = outlineGap + outlineWidth / 2;
 
     const isBaseline = baselineCodes.includes(category);
-    const highlightIndex = highlightedCodes.indexOf(category);
+    const highlightIndex = highlightCodes.indexOf(category);
     const color = isBaseline ? baselineColor : highlightColors[highlightIndex];
 
     rect.attr({

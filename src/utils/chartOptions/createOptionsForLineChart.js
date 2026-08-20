@@ -48,7 +48,7 @@ export const createOptionsForLineChart = ({
       highlightOrBaselineColor ||
       getSeriesColor({
         colorPalette,
-        seriesIndex: seriesIndex,
+        seriesIndex,
         seriesCode: series.code,
         fixedColorIndexBySeries,
       });

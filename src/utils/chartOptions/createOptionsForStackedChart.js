@@ -13,7 +13,7 @@ import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
-import { getBaselineHighlightCodes } from './getBaselineHighlightCodes';
+import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 
 /**
  * @param {{
@@ -33,18 +33,17 @@ const createStackedDatapoints = ({
   categoriesAreDatesOrNumberForDataParsing,
   seriesFrequency,
   baselineCodes,
-  highlightedCodes,
-  highlightedSeriesCodes,
-  highlightedCategoryCodes,
+  highlightCodes,
+  highlightSeriesCodes,
+  highlightCategoryCodes,
 }) => {
   // Find a matching highlight color palette
   const matchingHighlightColors =
-    R.find(
-      R.propEq(highlightedCodes.length, 'length'),
-      smallerHighlightColors,
-    ) || highlightColors;
+    R.find(R.propEq(highlightCodes.length, 'length'), smallerHighlightColors) ||
+    highlightColors;
 
-  const anyCategoriesHighlighted = highlightedCategoryCodes.length > 0;
+  const anySeriesHighlighted = highlightSeriesCodes.length > 0;
+  const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
 
   return mapWithIndex((series, seriesIndex) => {
     const seriesCode = series.code;
@@ -52,10 +51,10 @@ const createStackedDatapoints = ({
     const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
     const isSeriesBaseline = seriesBaselineIndex !== -1;
 
-    const seriesHighlightIndex = highlightedCodes.indexOf(seriesCode);
+    const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
-    const getFinalSeriesColor = () => {
+    const seriesColor = (() => {
       if (isSeriesBaseline) return baselineColor;
       if (isSeriesHighlighted) {
         return getListItemAtTurningIndex(
@@ -69,14 +68,13 @@ const createStackedDatapoints = ({
         seriesCode,
         fixedColorIndexBySeries,
       });
-      if (highlightedSeriesCodes.length > 0) {
+      if (anySeriesHighlighted) {
         return new TinyColor(colorFromPalette)
           .setAlpha(nonHighlightedOpacity)
           .toRgbString();
       }
       return colorFromPalette;
-    };
-    const seriesColor = getFinalSeriesColor();
+    })();
 
     return {
       custom: {
@@ -119,7 +117,7 @@ const createStackedDatapoints = ({
 
         // Highlight
 
-        const categoryHighlightIndex = highlightedCodes.indexOf(categoryCode);
+        const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
         const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
         const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
@@ -155,7 +153,7 @@ const createStackedDatapoints = ({
           if (
             !isCategoryBaseline &&
             !isCategoryHighlighted &&
-            anyCategoriesHighlighted
+            anyCategoryHighlighted
           ) {
             return new TinyColor(seriesColor)
               .setAlpha(nonHighlightedOpacity)
@@ -261,12 +259,12 @@ export const createOptionsForStackedChart = ({
 
   const {
     baselineCodes,
-    highlightedCodes,
-    highlightedSeriesCodes,
-    highlightedCategoryCodes,
+    highlightCodes,
+    highlightSeriesCodes,
+    highlightCategoryCodes,
     matchingHighlightColors,
     isCategoryGroupHighlighted,
-  } = getBaselineHighlightCodes({
+  } = getBaselineAndHighlightCodes({
     data,
     baseline,
     highlight,
@@ -283,16 +281,16 @@ export const createOptionsForStackedChart = ({
     categoriesAreDatesOrNumberForDataParsing,
     seriesFrequency,
     baselineCodes,
-    highlightedCodes,
-    highlightedSeriesCodes,
-    highlightedCategoryCodes,
+    highlightCodes,
+    highlightSeriesCodes,
+    highlightCategoryCodes,
   });
 
   /** Custom chart options used by the baseline/highlighting render callbacks */
   const customChartOptions = {
     baselineCodes,
-    highlightedCodes,
-    highlightedCategoryCodes,
+    highlightCodes,
+    highlightCategoryCodes,
     highlightColors: matchingHighlightColors,
     isCategoryGroupHighlighted,
   };
