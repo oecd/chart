@@ -18,7 +18,7 @@ import {
 } from '../chartUtilCommon';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
-import { getMatchingHighlightColors } from './getMatchingHighlightColors';
+import { getSmallerPalette } from './getSmallerPalette';
 
 const symbols = [
   'circle',
@@ -75,11 +75,11 @@ export const createOptionsForScatterChart = ({
   });
   const anyHighlighted = highlightCodes.length > 0;
 
-  const matchingHighlightColors = getMatchingHighlightColors({
+  const matchingHighlightColors = getSmallerPalette(
     highlight,
     highlightColors,
     smallerHighlightColors,
-  });
+  );
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const isMinAvgOrMax = getIsMinAvgOrMax(series);

@@ -14,7 +14,7 @@ import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
-import { getMatchingHighlightColors } from './getMatchingHighlightColors';
+import { getSmallerPalette } from './getSmallerPalette';
 
 /**
  * @param {{
@@ -269,11 +269,11 @@ export const createOptionsForStackedChart = ({
     baseline,
     highlight,
   });
-  const matchingHighlightColors = getMatchingHighlightColors({
+  const matchingHighlightColors = getSmallerPalette(
     highlight,
     highlightColors,
     smallerHighlightColors,
-  });
+  );
 
   const allSeries = createStackedDatapoints({
     data,
