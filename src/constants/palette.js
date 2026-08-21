@@ -1,5 +1,8 @@
 import * as R from 'ramda';
 
+/**
+ * Generates a smaller palettes from the 9-color palette
+ */
 const generateSmallers = ({ base, allColors: c }) => {
   if (c.length !== 9) {
     throw new Error('generateSmallers: Color palette needs to have 9 colors');
@@ -14,6 +17,9 @@ const generateSmallers = ({ base, allColors: c }) => {
   ];
 };
 
+/**
+ * Generates a 7-color palette
+ */
 const generateFullPalette = (colors) => {
   if (colors.length !== 9) {
     throw new Error(
