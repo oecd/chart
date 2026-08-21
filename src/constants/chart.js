@@ -133,4 +133,4 @@ export const defaultExportSize = { width: 1024, height: 768 };
 /**
  * Opacity of non-highlighted chart markers in case there are any highlights
  */
-export const nonHighlightedOpacity = 0.5;
+export const nonHighlightedOpacity = 0.7;
