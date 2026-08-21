@@ -11,7 +11,7 @@ import {
 } from '../chartUtilCommon';
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
-import { getMatchingHighlightColors } from './getMatchingHighlightColors';
+import { getSmallerPalette } from './getSmallerPalette';
 
 export const createOptionsForRadarChart = ({
   data,
@@ -34,11 +34,11 @@ export const createOptionsForRadarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const matchingHighlightColors = getMatchingHighlightColors({
+  const matchingHighlightColors = getSmallerPalette(
     highlight,
     highlightColors,
     smallerHighlightColors,
-  });
+  );
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const highlightOrBaselineColor = getBaselineOrHighlightColor(

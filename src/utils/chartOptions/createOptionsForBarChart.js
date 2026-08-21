@@ -13,7 +13,7 @@ import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
-import { getMatchingHighlightColors } from './getMatchingHighlightColors';
+import { getSmallerPalette } from './getSmallerPalette';
 
 /**
  * @param {{
@@ -28,6 +28,7 @@ export const createOptionsForBarChart = ({
   title = '',
   subtitle = '',
   colorPalette,
+  smallerColorPalettes,
   fixedColorIndexBySeries = null,
   baseline = null,
   baselineColors,
@@ -93,11 +94,11 @@ export const createOptionsForBarChart = ({
     baseline,
     highlight,
   });
-  const matchingHighlightColors = getMatchingHighlightColors({
+  const matchingHighlightColors = getSmallerPalette(
     highlight,
     highlightColors,
     smallerHighlightColors,
-  });
+  );
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
