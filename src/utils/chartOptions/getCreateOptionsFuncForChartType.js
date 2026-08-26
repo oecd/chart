@@ -110,14 +110,6 @@ const createChartOptionsFunc =
       R.split('|'),
     )(replaceBasicVarsNameByVarsValue(highlight, vars));
 
-    console.log(
-      '++++++++++++++++++++++++++++++++++++++++++++++++++ createChartOptionsFunc',
-    );
-    console.log('parsedHighlight', parsedHighlight.length, parsedHighlight);
-    console.log('highlightColors', highlightColors);
-    console.log('smallerHighlightColors', smallerHighlightColors);
-    console.log('smallerHighlightOutlineColors', smallerHighlightOutlineColors);
-
     const matchingHighlightColors = getSmallerPalette(
       parsedHighlight,
       highlightColors,
@@ -127,12 +119,6 @@ const createChartOptionsFunc =
       parsedHighlight,
       highlightOutlineColors,
       smallerHighlightOutlineColors,
-    );
-
-    console.log('matchingHighlightColors', matchingHighlightColors);
-    console.log(
-      'matchingHighlightOutlineColors',
-      matchingHighlightOutlineColors,
     );
 
     const parsedBaseline = R.compose(
