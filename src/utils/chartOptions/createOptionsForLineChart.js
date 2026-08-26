@@ -1,17 +1,22 @@
 // @ts-check
+import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
+  nonHighlightedOpacity,
 } from '../../constants/chart';
 import { calcMarginTop } from '../chartUtil';
 import {
   getBaselineOrHighlightColor,
+  getListItemAtTurningIndex,
   getSeriesColor,
 } from '../chartUtilCommon';
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
+import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 
 export const createOptionsForLineChart = ({
   data,
@@ -22,7 +27,8 @@ export const createOptionsForLineChart = ({
   fixedColorIndexBySeries = null,
   highlight = null,
   baseline = null,
-  highlightColors,
+  matchingHighlightColors,
+  matchingHighlightOutlineColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -36,28 +42,76 @@ export const createOptionsForLineChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
 }) => {
-  const allSeries = mapWithIndex((series, seriesIndex) => {
-    const highlightOrBaselineColor = getBaselineOrHighlightColor(
-      series,
-      highlight,
+  console.log('########################### createOptionsForLineChart');
+  const { baselineCodes, highlightSeriesCodes, highlightCodes } =
+    getBaselineAndHighlightCodes({
+      data,
       baseline,
-      highlightColors,
+      highlight,
+    });
+  console.log('baselineCodes', baselineCodes);
+  console.log('highlight', highlight);
+  console.log('highlightCodes', highlightCodes);
+  console.log('matchingHighlightColors', matchingHighlightColors);
+
+  const anySeriesHighlighted = highlightSeriesCodes.length > 0;
+  console.log('anySeriesHighlighted', anySeriesHighlighted);
+
+  const allSeries = mapWithIndex((series, seriesIndex) => {
+    const seriesCode = series.code;
+    console.log(
+      'series',
+      seriesIndex,
+      seriesCode,
+      '-----------------------------------------------',
     );
 
-    const color =
-      highlightOrBaselineColor ||
-      getSeriesColor({
+    const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
+    const isSeriesBaseline = seriesBaselineIndex !== -1;
+
+    const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
+    const isSeriesHighlighted = seriesHighlightIndex !== -1;
+
+    if (isSeriesHighlighted) {
+      console.log('seriesHighlightIndex', seriesHighlightIndex);
+    }
+
+    const seriesColor = (() => {
+      const baselineOrHighlightColor = getBaselineOrHighlightColor(
+        series,
+        highlight,
+        baseline,
+        matchingHighlightColors,
+      );
+      if (baselineOrHighlightColor) {
+        return baselineOrHighlightColor;
+      }
+
+      const colorFromPalette = getSeriesColor({
         colorPalette,
         seriesIndex,
-        seriesCode: series.code,
+        seriesCode,
         fixedColorIndexBySeries,
       });
+      if (anySeriesHighlighted) {
+        return new TinyColor(colorFromPalette)
+          .setAlpha(nonHighlightedOpacity)
+          .toRgbString();
+      }
+      return colorFromPalette;
+    })();
+    console.log('seriesColor', seriesColor);
 
-    const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
+    const dataLabelColor = makeColorReadableOnBackgroundColor(
+      seriesColor,
+      'white',
+    );
 
     const seriesName = data.areSeriesDates
       ? seriesFrequency.tryParse(series.label).getTime()
       : series.label;
+
+    console.log('seriesName', seriesName);
 
     const lastDataPointWithDataIndex = R.findLastIndex(
       (d) => !isNilOrEmpty(d.value),
@@ -67,12 +121,17 @@ export const createOptionsForLineChart = ({
     return {
       name: seriesName,
       data: mapWithIndex((pointData, pointIndex) => {
+        const category = R.nth(pointIndex, data.categories);
+        const categoryCode = category.code;
+
+        console.log('~~~~~~~~ categoryCode', categoryCode);
+
         const dataPoint = createDatapoint(
           pointData,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        const finalDataPoint =
+        const dataPointWithLabel =
           inlineLabels &&
           pointIndex === lastDataPointWithDataIndex &&
           lastDataPointWithDataIndex !== -1
@@ -81,7 +140,7 @@ export const createOptionsForLineChart = ({
                 {
                   enabled: true,
                   format: seriesName,
-                  style: !R.isNil(highlightOrBaselineColor)
+                  style: !R.isNil(isSeriesHighlighted)
                     ? { fontWeight: 800 }
                     : {},
                 },
@@ -89,13 +148,62 @@ export const createOptionsForLineChart = ({
               )
             : dataPoint;
 
-        return finalDataPoint;
+        const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
+        const isCategoryBaseline = categoryBaselineIndex !== -1;
+
+        const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
+
+        const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
+        const isCategoryHighlighted = categoryHighlightIndex !== -1;
+
+        const finalHighlightIndex = isSeriesHighlighted
+          ? seriesHighlightIndex
+          : isCategoryHighlighted
+            ? categoryHighlightIndex
+            : -1;
+
+        const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
+        if (finalIsHighlighted) {
+          console.log('finalHighlightIndex', finalHighlightIndex);
+        }
+
+        const pointColor = finalIsBaseline
+          ? baselineColor
+          : finalIsHighlighted
+            ? getListItemAtTurningIndex(
+                finalHighlightIndex,
+                matchingHighlightColors,
+              )
+            : null;
+
+        const lineColor = finalIsHighlighted
+          ? getListItemAtTurningIndex(
+              finalHighlightIndex,
+              matchingHighlightOutlineColors,
+            )
+          : null;
+
+        if (pointColor) {
+          console.log('pointColor', pointColor, 'lineColor', lineColor);
+        }
+
+        return {
+          ...dataPointWithLabel,
+          color: pointColor,
+          marker: {
+            // TODO: For testing
+            symbol: finalIsHighlighted ? 'diamond' : null,
+            lineColor,
+            lineWidth: finalIsHighlighted ? 1.5 : null,
+            fillColor: pointColor,
+          },
+        };
       }, series.data),
       type: 'spline',
       lineWidth: 2.5,
       marker: {
         symbol: 'circle',
-        radius: 3,
+        radius: 3.5,
         lineWidth: 2,
       },
       states: {
@@ -103,7 +211,7 @@ export const createOptionsForLineChart = ({
           lineWidth: 2.5,
         },
       },
-      color,
+      color: seriesColor,
       dataLabels: {
         style: inlineLabels
           ? {}
@@ -114,8 +222,7 @@ export const createOptionsForLineChart = ({
               textOutline: 'none',
             },
       },
-      ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
-      showInLegend: true,
+      ...(isSeriesHighlighted ? { zIndex: 1 } : {}),
     };
   }, data.series);
 
@@ -125,7 +232,7 @@ export const createOptionsForLineChart = ({
     () => ({
       enabled: true,
       margin: isSmall ? -5 : -25,
-      symbolWidth: 0,
+      symbolWidth: 10,
       layout: 'vertical',
       align: 'right',
       verticalAlign: 'middle',
