@@ -108,7 +108,7 @@ export const createOptionsForScatterChart = ({
         return getSeriesColor({
           colorPalette,
           seriesIndex,
-          seriesCode: series.code,
+          seriesCode,
           fixedColorIndexBySeries,
         });
       }

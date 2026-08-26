@@ -41,20 +41,24 @@ export const createOptionsForRadarChart = ({
   );
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
-    const highlightOrBaselineColor = getBaselineOrHighlightColor(
+    const seriesCode = series.code;
+
+    const baselineOrHighlightColor = getBaselineOrHighlightColor(
       series,
       highlight,
       baseline,
       matchingHighlightColors,
     );
+
     const color =
-      highlightOrBaselineColor ||
+      baselineOrHighlightColor ||
       getSeriesColor({
         colorPalette,
         seriesIndex,
-        seriesCode: series.code,
+        seriesCode,
         fixedColorIndexBySeries,
       });
+
     const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
 
     return {
@@ -86,7 +90,7 @@ export const createOptionsForRadarChart = ({
           '0px -1px 3px white, 1px 0px 3px white, 0px 1px 3px white, -1px 0px 3px white, -1px -1px 3px white, 1px -1px 3px white, 1px 1px 3px white, -1px 1px 3px white',
         textOutline: 'none',
       },
-      ...(highlightOrBaselineColor ? { zIndex: 1 } : {}),
+      ...(baselineOrHighlightColor ? { zIndex: 1 } : {}),
     };
   }, data.series);
 
