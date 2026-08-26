@@ -181,12 +181,6 @@ const HighchartsChart = ({
   referenceValueCode = null,
   dataLastUpdateDate = null,
 }) => {
-  console.log('**************** HighchartChart');
-  console.log('highlightColors', highlightColors);
-  console.log('smallerHighlightColors', smallerHighlightColors);
-  console.log('highlightOutlineColors', highlightOutlineColors);
-  console.log('smallerHighlightOutlineColors', smallerHighlightOutlineColors);
-
   const ChartForType = getChartForType(chartType);
 
   const chartRef = useRef(null);

@@ -42,11 +42,6 @@ export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
     R.map((s) => [s.label, s.code], data.categories),
   );
 
-  console.log('seriesCodes', seriesCodes);
-  console.log('seriesCodesByLabel', seriesCodesByLabel);
-  console.log('categoryCodes', categoryCodes);
-  console.log('categoryCodesByLabel', categoryCodesByLabel);
-
   // List of highlight codes.
   // This is different from `highlight` which might contain codes *or* labels
   /** @type {string[]} */

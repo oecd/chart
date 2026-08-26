@@ -42,39 +42,23 @@ export const createOptionsForLineChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
 }) => {
-  console.log('########################### createOptionsForLineChart');
   const { baselineCodes, highlightSeriesCodes, highlightCodes } =
     getBaselineAndHighlightCodes({
       data,
       baseline,
       highlight,
     });
-  console.log('baselineCodes', baselineCodes);
-  console.log('highlight', highlight);
-  console.log('highlightCodes', highlightCodes);
-  console.log('matchingHighlightColors', matchingHighlightColors);
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
-  console.log('anySeriesHighlighted', anySeriesHighlighted);
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCode = series.code;
-    console.log(
-      'series',
-      seriesIndex,
-      seriesCode,
-      '-----------------------------------------------',
-    );
 
     const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
     const isSeriesBaseline = seriesBaselineIndex !== -1;
 
     const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
-
-    if (isSeriesHighlighted) {
-      console.log('seriesHighlightIndex', seriesHighlightIndex);
-    }
 
     const seriesColor = (() => {
       const baselineOrHighlightColor = getBaselineOrHighlightColor(
@@ -100,7 +84,6 @@ export const createOptionsForLineChart = ({
       }
       return colorFromPalette;
     })();
-    console.log('seriesColor', seriesColor);
 
     const dataLabelColor = makeColorReadableOnBackgroundColor(
       seriesColor,
@@ -110,8 +93,6 @@ export const createOptionsForLineChart = ({
     const seriesName = data.areSeriesDates
       ? seriesFrequency.tryParse(series.label).getTime()
       : series.label;
-
-    console.log('seriesName', seriesName);
 
     const lastDataPointWithDataIndex = R.findLastIndex(
       (d) => !isNilOrEmpty(d.value),
@@ -123,8 +104,6 @@ export const createOptionsForLineChart = ({
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
         const categoryCode = category.code;
-
-        console.log('~~~~~~~~ categoryCode', categoryCode);
 
         const dataPoint = createDatapoint(
           pointData,
@@ -163,9 +142,6 @@ export const createOptionsForLineChart = ({
             : -1;
 
         const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
-        if (finalIsHighlighted) {
-          console.log('finalHighlightIndex', finalHighlightIndex);
-        }
 
         const pointColor = finalIsBaseline
           ? baselineColor
@@ -182,10 +158,6 @@ export const createOptionsForLineChart = ({
               matchingHighlightOutlineColors,
             )
           : null;
-
-        if (pointColor) {
-          console.log('pointColor', pointColor, 'lineColor', lineColor);
-        }
 
         return {
           ...dataPointWithLabel,
