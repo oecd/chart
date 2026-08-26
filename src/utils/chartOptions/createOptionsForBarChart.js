@@ -10,7 +10,11 @@ import {
 } from '../../constants/chart';
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import { calcMarginTopWithHorizontal } from '../chartUtil';
-import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
+import {
+  getBaselineOrHighlightColor,
+  getListItemAtTurningIndex,
+  getSeriesColor,
+} from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
@@ -224,6 +228,7 @@ export const createOptionsForBarChart = ({
       const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
       const seriesColor = (() => {
+        // TODO: Can we use getBaselineOrHighlightColor here?
         if (isSeriesBaseline) return baselineColor;
         if (isSeriesHighlighted) {
           return getListItemAtTurningIndex(
@@ -231,6 +236,7 @@ export const createOptionsForBarChart = ({
             matchingHighlightColors,
           );
         }
+
         const colorFromPalette = getSeriesColor({
           colorPalette,
           seriesIndex,
@@ -269,7 +275,6 @@ export const createOptionsForBarChart = ({
           const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
           const isCategoryBaseline = categoryBaselineIndex !== -1;
 
-          /** Whether the point is baseline through series or category  */
           const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
 
           // Highlight
@@ -277,7 +282,6 @@ export const createOptionsForBarChart = ({
           const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
           const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
-          /** Whether the point is highlighted through series or category  */
           const finalIsHighlighted =
             isSeriesHighlighted || isCategoryHighlighted;
           const finalHighlightIndex = isSeriesHighlighted
@@ -295,12 +299,14 @@ export const createOptionsForBarChart = ({
               )
             : null;
 
-          // Only color the bar in a grouped bar chart seince we draw an outline
+          // Only color the bar in a grouped bar chart since we draw an outline
           // around baseline/highlight bar groups then.
-          const getPointColor = () => {
+          const pointColor = (() => {
             if (!isGroupedChart) {
               return null;
             }
+
+            // TODO: Can we use getBaselineOrHighlightColor here?
             if (isSeriesBaseline) {
               return baselineColor;
             }
@@ -310,6 +316,7 @@ export const createOptionsForBarChart = ({
                 matchingHighlightColors,
               );
             }
+
             // Reduce opacity for non-baseline/non-highlighted background categories
             if (
               !isCategoryBaseline &&
@@ -321,8 +328,7 @@ export const createOptionsForBarChart = ({
                 .toRgbString();
             }
             return null;
-          };
-          const pointColor = getPointColor();
+          })();
 
           return {
             ...dataPoint,

@@ -29,21 +29,21 @@ export const createOptionsForSankeyChart = ({
     ({ data: seriesData, columnByNode }) => {
       const nodes = R.map(([code, column]) => {
         const label = R.propOr(code, R.toUpper(code), data.codeLabelMapping);
-        const highlightOrBaselineColor = getBaselineOrHighlightColor(
+        const baselineOrHighlightColor = getBaselineOrHighlightColor(
           { code, label },
           highlight,
           baseline,
           highlightColors,
         );
 
-        const color = highlightOrBaselineColor || R.head(colorPalette);
+        const color = baselineOrHighlightColor || R.head(colorPalette);
 
         return {
           id: code,
           column,
           name: label,
           color,
-          ...(R.isNil(highlightOrBaselineColor)
+          ...(R.isNil(baselineOrHighlightColor)
             ? {}
             : { dataLabels: { style: { fontWeight: 800 } } }),
         };
