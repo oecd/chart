@@ -3,7 +3,11 @@ import * as R from 'ramda';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { controlTypes, frequencyTypes } from '../../constants/chart';
-import { defaultPalette, highlightPalette } from '../../constants/palette';
+import {
+  defaultPalette,
+  highlightOutlinePalette,
+  highlightPalette,
+} from '../../constants/palette';
 import { getPaletteById } from '../../utils/chartUtil';
 import { getConnectedControlsDotStatDimensionIds } from '../../utils/configUtil';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
@@ -269,7 +273,8 @@ const ChartWithConfig = ({
     trackChartView(otherProps.id);
   }, [otherProps.id]);
 
-  const palette = useMemo(() => {
+  // Official, predefined palette
+  const predefinedPalette = useMemo(() => {
     if (!isNilOrEmpty(paletteId)) {
       return getPaletteById(paletteId);
     }
@@ -280,6 +285,8 @@ const ChartWithConfig = ({
 
     return null;
   }, [paletteId, colorPalette]);
+
+  const hasHighlightColors = !isNilOrEmpty(highlightColors);
 
   return (
     <ChartWithConfigComponent
@@ -300,11 +307,11 @@ const ChartWithConfig = ({
         setControlIdForWhichDataLoadingIsPending
       }
       onDataReady={onDataReady}
-      {...(palette
+      {...(predefinedPalette
         ? {
-            colorPalette: palette.full,
-            smallerColorPalettes: palette.smallers,
-            isPaletteContinuous: palette.isContinuous,
+            colorPalette: predefinedPalette.full,
+            smallerColorPalettes: predefinedPalette.smallers,
+            isPaletteContinuous: predefinedPalette.isContinuous,
           }
         : {
             colorPalette,
@@ -312,10 +319,16 @@ const ChartWithConfig = ({
             isPaletteContinuous: false,
           })}
       highlightColors={
-        isNilOrEmpty(highlightColors) ? highlightPalette.full : highlightColors
+        hasHighlightColors ? highlightColors : highlightPalette.full
       }
       smallerHighlightColors={
-        isNilOrEmpty(highlightColors) ? highlightPalette.smallers : []
+        hasHighlightColors ? null : highlightPalette.smallers
+      }
+      highlightOutlineColors={
+        hasHighlightColors ? null : highlightOutlinePalette.full
+      }
+      smallerHighlightOutlineColors={
+        hasHighlightColors ? null : highlightOutlinePalette.smallers
       }
       {...otherProps}
     />
