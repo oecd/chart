@@ -29,9 +29,11 @@ const generateFullPalette = (colors) => {
   return [
     colors[0],
     colors[1],
+    // Skip index 2
     colors[3],
     colors[4],
     colors[5],
+    // skip index 6
     colors[7],
     colors[8],
   ];
@@ -51,7 +53,7 @@ const transformRawPalette = (rawPalette) => {
     full,
     smallers,
     isContinuous: rawPalette.isContinuous,
-    ...(rawPalette.isDefault ? { isDefault: true } : {}),
+    ...(rawPalette.isDefault ? { isDefault: true } : undefined),
   };
 };
 
@@ -75,7 +77,29 @@ const rawHighlightPalette = {
   isContinuous: true,
 };
 
+const rawHighlightOutlinePalette = {
+  id: 'highlight_outline',
+  name: 'Highlight Outline',
+  base: '#67AFB2',
+  allColors: [
+    '#67AFB2',
+    '#398FA2',
+    '#238093',
+    '#007285',
+    '#00586B',
+    '#004255',
+    '#00374A',
+    '#002E40',
+    '#001D2F',
+  ],
+  isContinuous: true,
+};
+
 export const highlightPalette = transformRawPalette(rawHighlightPalette);
+
+export const highlightOutlinePalette = transformRawPalette(
+  rawHighlightOutlinePalette,
+);
 
 const rawPalettes = [
   {

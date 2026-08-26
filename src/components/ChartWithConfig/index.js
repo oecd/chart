@@ -4,6 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { controlTypes, frequencyTypes } from '../../constants/chart';
 import { highlightPalette } from '../../constants/palette';
+import {
+  defaultPalette,
+  highlightOutlinePalette,
+  highlightPalette,
+} from '../../constants/palette';
+import { getPaletteById } from '../../utils/chartUtil';
 import { getConnectedControlsDotStatDimensionIds } from '../../utils/configUtil';
 import { getPaletteData } from '../../utils/paletteUtil';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
@@ -274,6 +280,8 @@ const ChartWithConfig = ({
     [paletteId, colorPalette, smallerColorPalettes],
   );
 
+  const hasHighlightColors = !isNilOrEmpty(highlightColors);
+
   return (
     <ChartWithConfigComponent
       height={height}
@@ -295,10 +303,16 @@ const ChartWithConfig = ({
       onDataReady={onDataReady}
       {...paletteData}
       highlightColors={
-        isNilOrEmpty(highlightColors) ? highlightPalette.full : highlightColors
+        hasHighlightColors ? highlightColors : highlightPalette.full
       }
       smallerHighlightColors={
-        isNilOrEmpty(highlightColors) ? highlightPalette.smallers : []
+        hasHighlightColors ? null : highlightPalette.smallers
+      }
+      highlightOutlineColors={
+        hasHighlightColors ? null : highlightOutlinePalette.full
+      }
+      smallerHighlightOutlineColors={
+        hasHighlightColors ? null : highlightOutlinePalette.smallers
       }
       {...otherProps}
     />

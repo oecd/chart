@@ -10,14 +10,9 @@ import {
 } from '../../constants/chart';
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import { calcMarginTopWithHorizontal } from '../chartUtil';
-import {
-  getBaselineOrHighlightColor,
-  getListItemAtTurningIndex,
-  getSeriesColor,
-} from '../chartUtilCommon';
+import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
-import { getSmallerPalette } from './getSmallerPalette';
 
 /**
  * @param {{
@@ -37,8 +32,8 @@ export const createOptionsForBarChart = ({
   baseline = null,
   baselineColors,
   highlight = null,
-  highlightColors,
-  smallerHighlightColors,
+  matchingHighlightColors,
+  matchingHighlightOutlineColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -98,12 +93,6 @@ export const createOptionsForBarChart = ({
     baseline,
     highlight,
   });
-  const matchingHighlightColors = getSmallerPalette(
-    highlight,
-    highlightColors,
-    smallerHighlightColors,
-  );
-
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
 

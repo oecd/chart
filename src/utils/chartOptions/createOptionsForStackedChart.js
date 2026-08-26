@@ -14,7 +14,6 @@ import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
-import { getSmallerPalette } from './getSmallerPalette';
 
 /**
  * @param {{
@@ -22,15 +21,23 @@ import { getSmallerPalette } from './getSmallerPalette';
  *   code: string;
  *   label: string;
  *   data: { value: number }[];
- * }
+ * };
+ * colorPalette: string[];
+ * fixedColorIndexBySeries?: { [series: string]: number };
+ * matchingHighlightColors: string[];
+ * categoriesAreDatesOrNumberForDataParsing: boolean;
+ * seriesFrequency: unknown;
+ * baselineCodes: string[];
+ * highlightCodes: string[];
+ * highlightSeriesCodes: string[];
+ * highlightCategoryCodes: string[];
  * }} options
  */
 const createStackedDatapoints = ({
   data,
   colorPalette,
   fixedColorIndexBySeries,
-  highlightColors,
-  smallerHighlightColors,
+  matchingHighlightColors,
   categoriesAreDatesOrNumberForDataParsing,
   seriesFrequency,
   baselineCodes,
@@ -38,11 +45,7 @@ const createStackedDatapoints = ({
   highlightSeriesCodes,
   highlightCategoryCodes,
 }) => {
-  // Find a matching highlight color palette
-  const matchingHighlightColors =
-    R.find(R.propEq(highlightCodes.length, 'length'), smallerHighlightColors) ||
-    highlightColors;
-
+  console.log('seriesFrequency', seriesFrequency);
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
 
@@ -202,8 +205,7 @@ export const createOptionsForStackedChart = ({
   fixedColorIndexBySeries = null,
   baseline = null,
   highlight = null,
-  highlightColors,
-  smallerHighlightColors,
+  matchingHighlightColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -269,18 +271,12 @@ export const createOptionsForStackedChart = ({
     baseline,
     highlight,
   });
-  const matchingHighlightColors = getSmallerPalette(
-    highlight,
-    highlightColors,
-    smallerHighlightColors,
-  );
 
   const allSeries = createStackedDatapoints({
     data,
     colorPalette,
     fixedColorIndexBySeries,
-    highlightColors,
-    smallerHighlightColors,
+    matchingHighlightColors,
     categoriesAreDatesOrNumberForDataParsing,
     seriesFrequency,
     baselineCodes,

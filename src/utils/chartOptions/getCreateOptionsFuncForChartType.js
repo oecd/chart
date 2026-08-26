@@ -31,6 +31,7 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
+import { getSmallerPalette } from './getSmallerPalette';
 import { noDataErrorMessageString } from '../../constants/chartErrorMessages';
 
 const mapsUtil = import('../mapsUtil');
@@ -45,6 +46,10 @@ const createChartOptionsFunc =
     baseline,
     colorPalette,
     smallerColorPalettes = [],
+    highlightColors,
+    smallerHighlightColors,
+    highlightOutlineColors,
+    smallerHighlightOutlineColors,
     fixedColorIndexBySeries = null,
     paletteStartingColor = null,
     mapColorValueSteps,
@@ -105,6 +110,31 @@ const createChartOptionsFunc =
       R.split('|'),
     )(replaceBasicVarsNameByVarsValue(highlight, vars));
 
+    console.log(
+      '++++++++++++++++++++++++++++++++++++++++++++++++++ createChartOptionsFunc',
+    );
+    console.log('parsedHighlight', parsedHighlight.length, parsedHighlight);
+    console.log('highlightColors', highlightColors);
+    console.log('smallerHighlightColors', smallerHighlightColors);
+    console.log('smallerHighlightOutlineColors', smallerHighlightOutlineColors);
+
+    const matchingHighlightColors = getSmallerPalette(
+      parsedHighlight,
+      highlightColors,
+      smallerHighlightColors,
+    );
+    const matchingHighlightOutlineColors = getSmallerPalette(
+      parsedHighlight,
+      highlightOutlineColors,
+      smallerHighlightOutlineColors,
+    );
+
+    console.log('matchingHighlightColors', matchingHighlightColors);
+    console.log(
+      'matchingHighlightOutlineColors',
+      matchingHighlightOutlineColors,
+    );
+
     const parsedBaseline = R.compose(
       R.reject(R.isEmpty),
       R.split('|'),
@@ -152,6 +182,8 @@ const createChartOptionsFunc =
       colorPalette: finalColorPalette,
       fixedColorIndexBySeries: parsedFixedColorIndexBySeries,
       highlight: parsedHighlight,
+      matchingHighlightColors,
+      matchingHighlightOutlineColors,
       baseline: parsedBaseline,
       mapColorValueSteps,
       maxNumberOfDecimals,
