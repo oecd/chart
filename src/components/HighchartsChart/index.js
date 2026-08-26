@@ -140,6 +140,8 @@ const HighchartsChart = ({
   paletteStartingColor = null,
   highlightColors,
   smallerHighlightColors,
+  highlightOutlineColors,
+  smallerHighlightOutlineColors,
   sortBy = sortByOptions.none.value,
   sortOrder = sortOrderOptions.asc.value,
   sortSeries = '',
@@ -179,6 +181,12 @@ const HighchartsChart = ({
   referenceValueCode = null,
   dataLastUpdateDate = null,
 }) => {
+  console.log('**************** HighchartChart');
+  console.log('highlightColors', highlightColors);
+  console.log('smallerHighlightColors', smallerHighlightColors);
+  console.log('highlightOutlineColors', highlightOutlineColors);
+  console.log('smallerHighlightOutlineColors', smallerHighlightOutlineColors);
+
   const ChartForType = getChartForType(chartType);
 
   const chartRef = useRef(null);
@@ -1043,6 +1051,12 @@ const HighchartsChart = ({
   const smallerHighlightColorsInternal = useMemoForArrayOrObject(
     smallerHighlightColors,
   );
+  const highlightOutlineColorsInternal = useMemoForArrayOrObject(
+    highlightOutlineColors,
+  );
+  const smallerHighlightOutlineColorsInternal = useMemoForArrayOrObject(
+    smallerHighlightOutlineColors,
+  );
   const mapColorValueStepsInternal =
     useMemoForArrayOrObject(mapColorValueSteps);
   const optionsOverrideInternal = useMemoForArrayOrObject(optionsOverride);
@@ -1108,6 +1122,8 @@ const HighchartsChart = ({
         baseline,
         highlightColors: highlightColorsInternal,
         smallerHighlightColors: smallerHighlightColorsInternal,
+        highlightOutlineColors: highlightOutlineColorsInternal,
+        smallerHighlightOutlineColors: smallerHighlightOutlineColorsInternal,
         pivotValue,
         mapType,
         mapAutoShade,
@@ -1159,7 +1175,6 @@ const HighchartsChart = ({
     hideXAxisLabels,
     hideYAxisLabels,
     highlight,
-    highlightColorsInternal,
     isFullScreen,
     isSmall,
     pivotValue,
@@ -1181,7 +1196,10 @@ const HighchartsChart = ({
     parsedTitle,
     screenHeight,
     smallerColorPalettesInternal,
+    highlightColorsInternal,
     smallerHighlightColorsInternal,
+    highlightOutlineColorsInternal,
+    smallerHighlightOutlineColorsInternal,
     fixedColorIndexBySeries,
     tooltipOutside,
     vars,
@@ -1364,6 +1382,12 @@ HighchartsChart.propTypes = {
   paletteStartingColor: PropTypes.string,
   highlightColors: PropTypes.array.isRequired,
   smallerHighlightColors: PropTypes.arrayOf(
+    PropTypes.arrayOf(PropTypes.string),
+  ),
+  highlightOutlineColors: PropTypes.arrayOf(
+    PropTypes.arrayOf(PropTypes.string),
+  ),
+  smallerHighlightOutlineColors: PropTypes.arrayOf(
     PropTypes.arrayOf(PropTypes.string),
   ),
   sortBy: PropTypes.string,
