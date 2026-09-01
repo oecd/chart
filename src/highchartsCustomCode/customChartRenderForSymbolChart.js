@@ -1,10 +1,8 @@
 import * as R from 'ramda';
 
-import { forEachWithIndex, mapWithIndex } from '../utils/ramdaUtil';
+import { mapWithIndex } from '../utils/ramdaUtil';
 import { addColorAlpha } from '../utils/colorUtil';
 import { chartTypes } from '../constants/chart';
-
-let minMaxLines = [];
 
 const chartRender = ({ chart, cbType }) => {
   try {
@@ -12,7 +10,7 @@ const chartRender = ({ chart, cbType }) => {
       return;
     }
 
-    forEachWithIndex((l) => l?.destroy(), minMaxLines);
+    R.forEach((l) => l?.destroy(), chart.minMaxLines || []);
 
     const categoriesMinMax = R.compose(
       (seriesData) =>
@@ -28,7 +26,7 @@ const chartRender = ({ chart, cbType }) => {
       R.map(R.compose(R.map(R.prop('y')), R.prop('data'))),
     )(R.filter(R.propEq(true, 'visible'), chart.series));
 
-    minMaxLines = mapWithIndex((category, idx) => {
+    chart.minMaxLines = mapWithIndex((category, idx) => {
       if (R.isEmpty(categoriesMinMax[idx])) {
         return null;
       }
