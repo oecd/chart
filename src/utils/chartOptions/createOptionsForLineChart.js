@@ -2,7 +2,6 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
-  baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
@@ -128,16 +127,7 @@ export const createOptionsForLineChart = ({
         // Ignore when category is baseline/highlighted,
         // only support series as baseline/highlight
 
-        const pointColor = isSeriesBaseline
-          ? baselineColor
-          : isSeriesHighlighted
-            ? getListItemAtTurningIndex(
-                seriesHighlightIndex,
-                matchingHighlightColors,
-              )
-            : null;
-
-        const lineColor = isSeriesHighlighted
+        const markerLineColor = isSeriesHighlighted
           ? getListItemAtTurningIndex(
               seriesHighlightIndex,
               matchingHighlightOutlineColors,
@@ -146,11 +136,11 @@ export const createOptionsForLineChart = ({
 
         return {
           ...dataPointWithLabel,
-          color: pointColor,
+          color: seriesColor,
           marker: {
-            lineColor,
+            lineColor: markerLineColor,
             lineWidth: isSeriesHighlighted ? 1.5 : null,
-            fillColor: pointColor,
+            fillColor: seriesColor,
           },
         };
       }, series.data),
