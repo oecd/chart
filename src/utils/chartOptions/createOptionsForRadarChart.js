@@ -1,16 +1,21 @@
 // @ts-check
+import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
+  nonHighlightedOpacity,
 } from '../../constants/chart';
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import {
   getBaselineOrHighlightColor,
+  getListItemAtTurningIndex,
   getSeriesColor,
 } from '../chartUtilCommon';
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
+import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 
 export const createOptionsForRadarChart = ({
   data,
@@ -20,6 +25,7 @@ export const createOptionsForRadarChart = ({
   highlight = null,
   baseline = null,
   matchingHighlightColors,
+  matchingHighlightOutlineColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -32,36 +38,91 @@ export const createOptionsForRadarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
+  const { baselineCodes, highlightSeriesCodes, highlightCodes } =
+    getBaselineAndHighlightCodes({
+      data,
+      baseline,
+      highlight,
+    });
+
+  const anySeriesHighlighted = highlightSeriesCodes.length > 0;
+
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCode = series.code;
 
-    const baselineOrHighlightColor = getBaselineOrHighlightColor(
-      series,
-      highlight,
-      baseline,
-      matchingHighlightColors,
-    );
+    const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
+    const isSeriesBaseline = seriesBaselineIndex !== -1;
 
-    const color =
-      baselineOrHighlightColor ||
-      getSeriesColor({
+    const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
+    const isSeriesHighlighted = seriesHighlightIndex !== -1;
+
+    const seriesColor = (() => {
+      const baselineOrHighlightColor = getBaselineOrHighlightColor(
+        series,
+        highlight,
+        baseline,
+        matchingHighlightColors,
+      );
+      if (baselineOrHighlightColor) {
+        return baselineOrHighlightColor;
+      }
+
+      const colorFromPalette = getSeriesColor({
         colorPalette,
         seriesIndex,
         seriesCode,
         fixedColorIndexBySeries,
       });
+      // Reduce opacity of non-highlighted lines
+      if (anySeriesHighlighted) {
+        return new TinyColor(colorFromPalette)
+          .setAlpha(nonHighlightedOpacity)
+          .toRgbString();
+      }
+      return colorFromPalette;
+    })();
 
-    const dataLabelColor = makeColorReadableOnBackgroundColor(color, 'white');
+    const dataLabelColor = makeColorReadableOnBackgroundColor(
+      seriesColor,
+      'white',
+    );
 
     return {
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(series.label).getTime()
         : series.label,
-      data: R.map(
-        (pointData) =>
-          createDatapoint(pointData, categoriesAreDatesOrNumberForDataParsing),
-        series.data,
-      ),
+      data: mapWithIndex((pointData) => {
+        const dataPoint = createDatapoint(
+          pointData,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
+
+        const pointColor = isSeriesBaseline
+          ? baselineColor
+          : isSeriesHighlighted
+            ? getListItemAtTurningIndex(
+                seriesHighlightIndex,
+                matchingHighlightColors,
+              )
+            : null;
+
+        const lineColor = isSeriesHighlighted
+          ? getListItemAtTurningIndex(
+              seriesHighlightIndex,
+              matchingHighlightOutlineColors,
+            )
+          : null;
+
+        return {
+          ...dataPoint,
+          color: pointColor,
+          marker: {
+            lineColor,
+            lineWidth: isSeriesHighlighted ? 1.5 : null,
+            fillColor: pointColor,
+          },
+        };
+      }, series.data),
       type: 'line',
       lineWidth: 2.5,
       marker: {
@@ -74,7 +135,7 @@ export const createOptionsForRadarChart = ({
           lineWidth: 2.5,
         },
       },
-      color,
+      color: seriesColor,
       showInLegend: true,
       dataLabels: {
         color: dataLabelColor,
@@ -82,7 +143,7 @@ export const createOptionsForRadarChart = ({
           '0px -1px 3px white, 1px 0px 3px white, 0px 1px 3px white, -1px 0px 3px white, -1px -1px 3px white, 1px -1px 3px white, 1px 1px 3px white, -1px 1px 3px white',
         textOutline: 'none',
       },
-      ...(baselineOrHighlightColor ? { zIndex: 1 } : {}),
+      ...(isSeriesHighlighted ? { zIndex: 1 } : {}),
     };
   }, data.series);
 
