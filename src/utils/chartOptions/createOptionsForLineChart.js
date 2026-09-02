@@ -41,20 +41,18 @@ export const createOptionsForLineChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
 }) => {
-  const { baselineCodes, highlightSeriesCodes, highlightCodes } =
-    getBaselineAndHighlightCodes({
+  const { highlightSeriesCodes, highlightCodes } = getBaselineAndHighlightCodes(
+    {
       data,
       baseline,
       highlight,
-    });
+    },
+  );
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCode = series.code;
-
-    const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
-    const isSeriesBaseline = seriesBaselineIndex !== -1;
 
     const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
@@ -158,7 +156,7 @@ export const createOptionsForLineChart = ({
               textOutline: 'none',
             },
       },
-      ...(isSeriesHighlighted ? { zIndex: 1 } : {}),
+      ...(isSeriesHighlighted ? { zIndex: 1 } : null),
     };
   }, data.series);
 
