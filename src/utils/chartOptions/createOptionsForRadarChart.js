@@ -86,41 +86,30 @@ export const createOptionsForRadarChart = ({
       'white',
     );
 
+    const markerLineColor = isSeriesHighlighted
+      ? getListItemAtTurningIndex(
+          seriesHighlightIndex,
+          matchingHighlightOutlineColors,
+        )
+      : null;
+
     return {
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(series.label).getTime()
         : series.label,
-      data: mapWithIndex((pointData) => {
-        const dataPoint = createDatapoint(
-          pointData,
-          categoriesAreDatesOrNumberForDataParsing,
-        );
-
-        // Ignore when category is baseline/highlighted,
-        // only support series as baseline/highlight
-
-        const markerLineColor = isSeriesHighlighted
-          ? getListItemAtTurningIndex(
-              seriesHighlightIndex,
-              matchingHighlightOutlineColors,
-            )
-          : null;
-
-        return {
-          ...dataPoint,
-          marker: {
-            lineColor: markerLineColor,
-            lineWidth: isSeriesHighlighted ? 1.5 : null,
-            fillColor: seriesColor,
-          },
-        };
-      }, series.data),
+      data: R.map(
+        (pointData) =>
+          createDatapoint(pointData, categoriesAreDatesOrNumberForDataParsing),
+        series.data,
+      ),
       type: 'line',
       lineWidth: 2.5,
       marker: {
         symbol: 'circle',
         radius: 3,
-        lineWidth: 2,
+        lineWidth: isSeriesHighlighted ? 1.5 : null,
+        lineColor: markerLineColor,
+        fillColor: seriesColor,
       },
       states: {
         hover: {
