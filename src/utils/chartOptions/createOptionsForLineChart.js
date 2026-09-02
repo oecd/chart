@@ -102,9 +102,6 @@ export const createOptionsForLineChart = ({
     return {
       name: seriesName,
       data: mapWithIndex((pointData, pointIndex) => {
-        const category = R.nth(pointIndex, data.categories);
-        const categoryCode = category.code;
-
         const dataPoint = createDatapoint(
           pointData,
           categoriesAreDatesOrNumberForDataParsing,
@@ -127,21 +124,17 @@ export const createOptionsForLineChart = ({
               )
             : dataPoint;
 
-        const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
-        const isCategoryBaseline = categoryBaselineIndex !== -1;
-
-        const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
-
-        const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
-        const isCategoryHighlighted = categoryHighlightIndex !== -1;
+        // Ignore when category is baseline,
+        // only support series as baseline
+        const finalIsBaseline = isSeriesBaseline;
 
         const finalHighlightIndex = isSeriesHighlighted
           ? seriesHighlightIndex
-          : isCategoryHighlighted
-            ? categoryHighlightIndex
-            : -1;
+          : -1;
 
-        const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
+        // Ignore when category is highlighted,
+        // only support series as highlight
+        const finalIsHighlighted = isSeriesHighlighted;
 
         const pointColor = finalIsBaseline
           ? baselineColor
@@ -163,8 +156,6 @@ export const createOptionsForLineChart = ({
           ...dataPointWithLabel,
           color: pointColor,
           marker: {
-            // TODO: For testing
-            symbol: finalIsHighlighted ? 'diamond' : null,
             lineColor,
             lineWidth: finalIsHighlighted ? 1.5 : null,
             fillColor: pointColor,
