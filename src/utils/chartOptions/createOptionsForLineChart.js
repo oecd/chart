@@ -77,6 +77,7 @@ export const createOptionsForLineChart = ({
         seriesCode,
         fixedColorIndexBySeries,
       });
+      // Reduce opacity of non-highlighted lines
       if (anySeriesHighlighted) {
         return new TinyColor(colorFromPalette)
           .setAlpha(nonHighlightedOpacity)
@@ -124,30 +125,21 @@ export const createOptionsForLineChart = ({
               )
             : dataPoint;
 
-        // Ignore when category is baseline,
-        // only support series as baseline
-        const finalIsBaseline = isSeriesBaseline;
+        // Ignore when category is baseline/highlighted,
+        // only support series as baseline/highlight
 
-        const finalHighlightIndex = isSeriesHighlighted
-          ? seriesHighlightIndex
-          : -1;
-
-        // Ignore when category is highlighted,
-        // only support series as highlight
-        const finalIsHighlighted = isSeriesHighlighted;
-
-        const pointColor = finalIsBaseline
+        const pointColor = isSeriesBaseline
           ? baselineColor
-          : finalIsHighlighted
+          : isSeriesHighlighted
             ? getListItemAtTurningIndex(
-                finalHighlightIndex,
+                seriesHighlightIndex,
                 matchingHighlightColors,
               )
             : null;
 
-        const lineColor = finalIsHighlighted
+        const lineColor = isSeriesHighlighted
           ? getListItemAtTurningIndex(
-              finalHighlightIndex,
+              seriesHighlightIndex,
               matchingHighlightOutlineColors,
             )
           : null;
@@ -157,7 +149,7 @@ export const createOptionsForLineChart = ({
           color: pointColor,
           marker: {
             lineColor,
-            lineWidth: finalIsHighlighted ? 1.5 : null,
+            lineWidth: isSeriesHighlighted ? 1.5 : null,
             fillColor: pointColor,
           },
         };
