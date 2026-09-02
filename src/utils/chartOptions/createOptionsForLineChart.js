@@ -99,6 +99,13 @@ export const createOptionsForLineChart = ({
       series.data,
     );
 
+    const markerLineColor = isSeriesHighlighted
+      ? getListItemAtTurningIndex(
+          seriesHighlightIndex,
+          matchingHighlightOutlineColors,
+        )
+      : null;
+
     return {
       name: seriesName,
       data: mapWithIndex((pointData, pointIndex) => {
@@ -124,32 +131,16 @@ export const createOptionsForLineChart = ({
               )
             : dataPoint;
 
-        // Ignore when category is baseline/highlighted,
-        // only support series as baseline/highlight
-
-        const markerLineColor = isSeriesHighlighted
-          ? getListItemAtTurningIndex(
-              seriesHighlightIndex,
-              matchingHighlightOutlineColors,
-            )
-          : null;
-
-        return {
-          ...dataPointWithLabel,
-          color: seriesColor,
-          marker: {
-            lineColor: markerLineColor,
-            lineWidth: isSeriesHighlighted ? 1.5 : null,
-            fillColor: seriesColor,
-          },
-        };
+        return dataPointWithLabel;
       }, series.data),
       type: 'spline',
       lineWidth: 2.5,
       marker: {
         symbol: 'circle',
         radius: 3.5,
-        lineWidth: 2,
+        lineWidth: isSeriesHighlighted ? 1.5 : null,
+        lineColor: markerLineColor,
+        fillColor: seriesColor,
       },
       states: {
         hover: {
