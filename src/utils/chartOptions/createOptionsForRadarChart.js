@@ -2,7 +2,6 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
-  baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
@@ -97,16 +96,10 @@ export const createOptionsForRadarChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        const pointColor = isSeriesBaseline
-          ? baselineColor
-          : isSeriesHighlighted
-            ? getListItemAtTurningIndex(
-                seriesHighlightIndex,
-                matchingHighlightColors,
-              )
-            : null;
+        // Ignore when category is baseline/highlighted,
+        // only support series as baseline/highlight
 
-        const lineColor = isSeriesHighlighted
+        const markerLineColor = isSeriesHighlighted
           ? getListItemAtTurningIndex(
               seriesHighlightIndex,
               matchingHighlightOutlineColors,
@@ -115,11 +108,10 @@ export const createOptionsForRadarChart = ({
 
         return {
           ...dataPoint,
-          color: pointColor,
           marker: {
-            lineColor,
+            lineColor: markerLineColor,
             lineWidth: isSeriesHighlighted ? 1.5 : null,
-            fillColor: pointColor,
+            fillColor: seriesColor,
           },
         };
       }, series.data),
