@@ -19,7 +19,7 @@ export const createOptionsForSankeyChart = ({
   colorPalette,
   highlight = null,
   baseline = null,
-  highlightColors,
+  matchingHighlightColors,
   fullscreenClose = null,
   isFullScreen = false,
   height,
@@ -33,7 +33,7 @@ export const createOptionsForSankeyChart = ({
           { code, label },
           highlight,
           baseline,
-          highlightColors,
+          matchingHighlightColors,
         );
 
         const color = baselineOrHighlightColor || R.head(colorPalette);
