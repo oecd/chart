@@ -18,7 +18,7 @@ export const createOptionsForPieChart = ({
   fixedColorIndexBySeries = null,
   highlight = null,
   baseline = null,
-  highlightColors,
+  matchingHighlightColors,
   hideLegend = false,
   hideXAxisLabels = false,
   fullscreenClose = null,
@@ -43,7 +43,7 @@ export const createOptionsForPieChart = ({
             category,
             highlight,
             baseline,
-            highlightColors,
+            matchingHighlightColors,
           ) ||
           getSeriesColor({
             colorPalette,
