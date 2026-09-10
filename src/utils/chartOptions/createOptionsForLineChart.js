@@ -17,6 +17,9 @@ import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 
+// Alternate these symbols for point highlight
+const highlightSymbols = Object.freeze(['triangle', 'square', 'diamond']);
+
 export const createOptionsForLineChart = ({
   data,
   formatters = {},
@@ -97,47 +100,75 @@ export const createOptionsForLineChart = ({
       series.data,
     );
 
-    const markerLineColor = isSeriesHighlighted
-      ? getListItemAtTurningIndex(
-          seriesHighlightIndex,
-          matchingHighlightOutlineColors,
-        )
-      : null;
-
     return {
       name: seriesName,
       data: mapWithIndex((pointData, pointIndex) => {
+        const category = R.nth(pointIndex, data.categories);
+        const categoryCode = category.code;
+
         const dataPoint = createDatapoint(
           pointData,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        const dataPointWithLabel =
-          inlineLabels &&
-          pointIndex === lastDataPointWithDataIndex &&
-          lastDataPointWithDataIndex !== -1
-            ? R.assoc(
-                'dataLabels',
-                {
+        const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
+        const isCategoryHighlighted = categoryHighlightIndex !== -1;
+
+        // The category highlight prevails for the marker point styling
+        const finalHighlightIndex = isCategoryHighlighted
+          ? categoryHighlightIndex
+          : isSeriesHighlighted
+            ? seriesHighlightIndex
+            : -1;
+
+        const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
+
+        // Category as baseline is not supported here on purpose
+        const markerFillColor = finalIsHighlighted
+          ? getListItemAtTurningIndex(
+              finalHighlightIndex,
+              matchingHighlightColors,
+            )
+          : null;
+
+        const markerLineColor = finalIsHighlighted
+          ? getListItemAtTurningIndex(
+              finalHighlightIndex,
+              matchingHighlightOutlineColors,
+            )
+          : null;
+
+        return {
+          ...dataPoint,
+          dataLabels:
+            inlineLabels &&
+            pointIndex === lastDataPointWithDataIndex &&
+            lastDataPointWithDataIndex !== -1
+              ? {
                   enabled: true,
                   format: seriesName,
                   style: !R.isNil(isSeriesHighlighted)
                     ? { fontWeight: 800 }
                     : {},
-                },
-                dataPoint,
-              )
-            : dataPoint;
-
-        return dataPointWithLabel;
+                }
+              : undefined,
+          marker: {
+            symbol: finalIsHighlighted
+              ? getListItemAtTurningIndex(finalHighlightIndex, highlightSymbols)
+              : null,
+            lineWidth: finalIsHighlighted ? 1.5 : null,
+            fillColor: markerFillColor,
+            lineColor: markerLineColor,
+          },
+        };
       }, series.data),
       type: 'spline',
       lineWidth: 2.5,
       marker: {
-        symbol: 'circle',
+        symbol: isSeriesHighlighted
+          ? getListItemAtTurningIndex(seriesHighlightIndex, highlightSymbols)
+          : 'circle',
         radius: 3.5,
-        lineWidth: isSeriesHighlighted ? 1.5 : null,
-        lineColor: markerLineColor,
         fillColor: seriesColor,
       },
       states: {
