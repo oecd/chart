@@ -20,9 +20,6 @@ export const renderBarAndColumn = ({ chart }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
 
-  // Fill the plot area for debugging
-  // chart.plotBackground.element.setAttribute('fill', 'rgb(0 255 255 / 0.1)');
-
   /** @type {boolean} */
   const isGrouped = customChartOptions.isGrouped;
 
