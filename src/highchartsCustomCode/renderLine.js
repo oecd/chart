@@ -4,9 +4,6 @@
  */
 
 import { renderAxisMarkers } from './utils/renderAxisMarkers';
-import { renderCategoryGroupOutline } from './utils/renderCategoryGroupOutline';
-import { renderHighlightInsets } from './utils/renderHighlightInsets';
-import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
 
 /**
  * Event handler called after load (initial render) and redraw (subsequent render).
@@ -16,12 +13,9 @@ import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
  * chart: Chart & { oecd_highlightElements: Set<HighchartsSVGElement> };
  * }} options
  */
-export const renderBarAndColumn = ({ chart }) => {
+export const renderLine = ({ chart }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
-
-  /** @type {boolean} */
-  const isGrouped = customChartOptions.isGrouped;
 
   /**
    * SVG elements created for highlighting
@@ -33,16 +27,11 @@ export const renderBarAndColumn = ({ chart }) => {
   elements.push(
     ...renderAxisMarkers({
       chart,
-      // In grouped bar/column charts, the bars themselves are highlighted.
-      // No need to draw an axis marker.
-      showSeriesBaseline: !isGrouped,
-      showSeriesHighlight: !isGrouped,
+      showSeriesBaseline: false,
+      showSeriesHighlight: true,
       showCategoryHighlight: true,
     }),
   );
-  elements.push(...renderHighlightOutlines(chart));
-  elements.push(...renderCategoryGroupOutline(chart));
-  elements.push(...renderHighlightInsets(chart));
 
   const elementSet = new Set(elements);
 

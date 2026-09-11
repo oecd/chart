@@ -96,7 +96,7 @@ export const createOptionsForBarChart = ({
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
 
-  /** Custom chart options used by the baseline/highlighting render callbacks */
+  /** Custom chart options used by the baseline/highlight render callbacks */
   const customChartOptions = {
     baselineCodes,
     highlightCodes,

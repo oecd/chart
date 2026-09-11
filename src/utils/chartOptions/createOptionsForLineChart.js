@@ -44,13 +44,18 @@ export const createOptionsForLineChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
 }) => {
-  const { highlightSeriesCodes, highlightCodes } = getBaselineAndHighlightCodes(
-    {
-      data,
-      baseline,
-      highlight,
-    },
-  );
+  const {
+    baselineCodes,
+    highlightCodes,
+    highlightSeriesCodes,
+    highlightCategoryCodes,
+    isGroupedChart,
+    isCategoryGroupHighlighted,
+  } = getBaselineAndHighlightCodes({
+    data,
+    baseline,
+    highlight,
+  });
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
@@ -124,7 +129,7 @@ export const createOptionsForLineChart = ({
         const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
 
         // Category as baseline is not supported here on purpose
-        const markerFillColor = finalIsHighlighted
+        const highlightColor = finalIsHighlighted
           ? getListItemAtTurningIndex(
               finalHighlightIndex,
               matchingHighlightColors,
@@ -140,6 +145,15 @@ export const createOptionsForLineChart = ({
 
         return {
           ...dataPoint,
+          /** Custom options used by the highlight render callbacks */
+          custom: {
+            ...dataPoint.custom,
+            // Highlight
+            isHighlighted: finalIsHighlighted,
+            isSeriesHighlighted,
+            isCategoryHighlighted,
+            highlightColor,
+          },
           dataLabels:
             inlineLabels &&
             pointIndex === lastDataPointWithDataIndex &&
@@ -151,13 +165,13 @@ export const createOptionsForLineChart = ({
                     ? { fontWeight: 800 }
                     : {},
                 }
-              : undefined,
+              : null,
           marker: {
             symbol: finalIsHighlighted
               ? getListItemAtTurningIndex(finalHighlightIndex, highlightSymbols)
               : null,
             lineWidth: finalIsHighlighted ? 1.5 : null,
-            fillColor: markerFillColor,
+            fillColor: highlightColor,
             lineColor: markerLineColor,
           },
         };
@@ -236,7 +250,19 @@ export const createOptionsForLineChart = ({
       : { left: '5%', width: '95%' };
   };
 
+  /** Custom chart options used by the baseline/highlight render callbacks */
+  const customChartOptions = {
+    baselineCodes,
+    highlightCodes,
+    highlightCategoryCodes,
+    highlightColors: matchingHighlightColors,
+    isGrouped: isGroupedChart,
+    isCategoryGroupHighlighted,
+  };
+
   return {
+    custom: customChartOptions,
+
     chart: {
       style: {
         fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
