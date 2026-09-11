@@ -103,6 +103,7 @@ const getAttributesColumnBar = ({
   x,
   width,
   color,
+  // Needs to be a string for Highcharts
   transform = '',
 }) => {
   const outlineWidth = getOutlineWidth(plotWidth);
