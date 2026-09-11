@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 // @ts-check
 /**
- * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
+ * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement, SVGAttributes } from "highcharts"
  */
 
 import { baselineColor } from '../../constants/chart';
@@ -12,11 +12,12 @@ import {
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
-/**
- * @typedef {{ code: string }} Category
- */
+const AXIS_MARKER_CLASS = 'oecd-axisMarker';
 
 const HIGHLIGHT_MARKER_SIZE = 5;
+
+const SPLINE_X_AXIS_MARKER_PERCENT_WIDTH = 0.8;
+const SPLINE_X_AXIS_MARKER_MAX_WIDTH = 100;
 
 /**
  * Connects a Highcharts Series object with a Highcharts SVG element
@@ -28,82 +29,112 @@ const HIGHLIGHT_MARKER_SIZE = 5;
 const AXIS_MARKER_GROUPS = new WeakMap();
 
 /**
+ * Connects a Highcharts Point object with a Highcharts SVG element
+ * without creating a strong reference to the Point.
+ * Cache for reusing elements across chart renderings.
+ *
  * @type {WeakMap<Point, HighchartsSVGElement>}
  */
 const AXIS_MARKERS = new WeakMap();
 
 /**
+ * Creates and appends an SVG rect and reuses an existing element
+ *
  * @param {{
  * chart: Chart;
- * seriesType: string;
- * point: Point;
+ * referencePoint: Point;
  * parent: HighchartsSVGElement;
- * color: string;
- * x: number;
- * width: number;
- * transform?: string;
+ * attributes: SVGAttributes;
  * }} options
- * @returns {HighchartsSVGElement | undefined}
+ * @returns {HighchartsSVGElement}
  */
 const renderAxisMarkerRect = ({
   chart,
-  seriesType,
-  point,
+  referencePoint,
   parent,
-  color,
-  x,
-  width,
-  transform,
+  attributes,
 }) => {
-  let axisMarker = AXIS_MARKERS.get(point);
-
-  if (!(axisMarker && axisMarker.element)) {
-    axisMarker = chart.renderer
-      // The other attributes are set below
-      .rect({ class: 'oecd-axisMarker' })
-      .css({ pointerEvents: 'none' })
-      // We cannot add the rect to the point's parent <g> since it has
-      // a clip mask. The marker is positioned outside of the plot area.
-      // The clip mask would cut it off.
-      .add(parent);
-
-    AXIS_MARKERS.set(point, axisMarker);
+  let axisMarker;
+  if (referencePoint) {
+    axisMarker = AXIS_MARKERS.get(referencePoint);
   }
 
-  const outlineWidth = getOutlineWidth(chart.plotWidth);
-  const outlineGap = getOutlineGap(chart.plotWidth);
-  const outlineDistance = outlineGap + outlineWidth;
+  if (axisMarker && axisMarker.element) {
+    axisMarker.attr(attributes);
+  } else {
+    axisMarker = chart.renderer
+      // .rect() allows passing attributes but only supports some
+      // while .attr() supports all
+      .rect()
+      .attr({
+        ...attributes,
+        class: AXIS_MARKER_CLASS,
+        'pointer-events': 'none',
+      })
+      // The marker is positioned outside of the plot area.
+      // We cannot simply add the rect to the point's parent <g> since it has
+      // a clip mask that would cut it off.
+      .add(parent);
 
-  const finalTransform = transform || '';
-  const attributes =
-    seriesType === 'column'
-      ? {
-          class: 'oecd-axisMarker',
-          x: x - outlineDistance,
-          y: chart.plotHeight + outlineDistance,
-          width: width + 2 * outlineDistance,
-          height: HIGHLIGHT_MARKER_SIZE,
-          fill: color,
-          transform: finalTransform,
-        }
-      : {
-          class: 'oecd-axisMarker',
-          // Bar charts are column charts rotated by 90° and mirrored,
-          // so x and y dimensions are flipped here, and y: 0 is on the right
-          x: x - outlineDistance,
-          y: chart.plotWidth + outlineDistance,
-          width: width + 2 * outlineDistance,
-          height: HIGHLIGHT_MARKER_SIZE,
-          fill: color,
-          transform: finalTransform,
-        };
-  axisMarker.attr(attributes);
+    if (referencePoint) {
+      AXIS_MARKERS.set(referencePoint, axisMarker);
+    }
+  }
 
   return axisMarker;
 };
 
 /**
- * When all columns/bars of a category are highlighted,
+ * @param {{
+ * seriesType: string;
+ * plotWidth: number;
+ * plotHeight: number;
+ * x: number;
+ * width: number;
+ * color: string;
+ * transform?: string;
+ * }} options
+ * @returns {SVGAttributes | undefined}
+ */
+const getAttributesColumnBar = ({
+  seriesType,
+  plotWidth,
+  plotHeight,
+  x,
+  width,
+  color,
+  transform = '',
+}) => {
+  const outlineWidth = getOutlineWidth(plotWidth);
+  const outlineGap = getOutlineGap(plotWidth);
+  const outlineDistance = outlineGap + outlineWidth;
+
+  if (seriesType === 'column') {
+    return {
+      x: x - outlineDistance,
+      y: plotHeight + outlineDistance,
+      width: width + 2 * outlineDistance,
+      height: HIGHLIGHT_MARKER_SIZE,
+      fill: color,
+      transform,
+    };
+  }
+  if (seriesType === 'bar') {
+    return {
+      // Bar charts are column charts rotated by 90° and mirrored,
+      // so x and y dimensions are flipped here, and y: 0 is on the right
+      x: x - outlineDistance,
+      y: plotWidth + outlineDistance,
+      width: width + 2 * outlineDistance,
+      height: HIGHLIGHT_MARKER_SIZE,
+      fill: color,
+      transform,
+    };
+  }
+};
+
+/**
+ * When all points of a category are highlighted,
  * render one marker rect spanning all points instead of many small rects.
  *
  * @param {{
@@ -150,21 +181,26 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
           ? highlightColor
           : null;
 
-      const marker = renderAxisMarkerRect({
-        chart,
+      const attributes = getAttributesColumnBar({
         seriesType,
-        // Use first point as a cache map key
-        point: firstPoint,
-        // Append marker to the <g> containing all series, not to a particular series <g>.
-        // The latter has a clip mask that would cut off the marker.
-        parent: chart.seriesGroup,
-        color,
+        plotWidth: chart.plotWidth,
+        plotHeight: chart.plotHeight,
         x: boundingRect.x1,
         width: boundingRect.x2 - boundingRect.x1,
+        color,
         // Apply series transformation to move the marker into the right place.
         transform: seriesTransform,
       });
-      return marker;
+      if (!attributes) return;
+
+      return renderAxisMarkerRect({
+        chart,
+        referencePoint: firstPoint,
+        // Append marker to the <g> containing all series, not to a particular series <g>.
+        // The latter has a clip mask that would cut off the marker.
+        parent: chart.seriesGroup,
+        attributes,
+      });
     })
     .filter((element) => element !== undefined);
 };
@@ -214,7 +250,7 @@ const renderSeriesAxisMarkers = ({
           (showSeriesHighlight && pointCustomOptions.isSeriesHighlighted) ||
           (showCategoryHighlight && pointCustomOptions.isCategoryHighlighted);
 
-        // The potential existing axis marker will be destroyed automatically
+        // Any existing axis marker will be destroyed automatically
         if (!drawAxisMarker) return;
 
         const color = pointCustomOptions.isBaseline
@@ -222,19 +258,23 @@ const renderSeriesAxisMarkers = ({
           : pointCustomOptions.highlightColor;
 
         const { shapeArgs } = point;
-        if (!shapeArgs) {
-          console.error('point.shapeArgs not found');
-          return;
-        }
+        if (!shapeArgs) return;
+
+        const attributes = getAttributesColumnBar({
+          seriesType: series.type,
+          plotWidth: chart.plotWidth,
+          plotHeight: chart.plotHeight,
+          x: shapeArgs.x,
+          width: shapeArgs.width,
+          color,
+        });
+        if (!attributes) return;
 
         return renderAxisMarkerRect({
           chart,
-          seriesType: series.type,
-          point,
+          referencePoint: point,
           parent: group,
-          color,
-          x: shapeArgs.x,
-          width: shapeArgs.width,
+          attributes,
         });
       });
 
@@ -243,6 +283,85 @@ const renderSeriesAxisMarkers = ({
       return elements;
     })
     .flat()
+    .filter((element) => element !== undefined);
+};
+
+/**
+ * Render axis markers for a line chart (spline series)
+ *
+ * @param {{
+ * chart: Chart;
+ * relevantSeries: Series[];
+ * }} options
+ * @returns {HighchartsSVGElement[]}
+ */
+const renderSplineAxisMarkers = ({ chart, relevantSeries }) => {
+  const xAxis = chart.xAxis[0];
+  if (!(xAxis && xAxis)) return NO_ELEMENTS;
+
+  // `left` is documented but not in the type definitions
+  // https://api.highcharts.com/highcharts/xAxis.left
+  const xAxisLeft = typeof xAxis.left === 'number' ? xAxis.left : 0;
+
+  const categoryLength = xAxis.categories.length;
+  const categoryWidth = xAxis.width / categoryLength;
+  const markerWidth = Math.min(
+    categoryWidth * SPLINE_X_AXIS_MARKER_PERCENT_WIDTH,
+    SPLINE_X_AXIS_MARKER_MAX_WIDTH,
+  );
+  const centeringOffset = (categoryWidth - markerWidth) / 2;
+
+  const customChartOptions = chart.options.custom;
+  /** @type {string[]} */
+  const highlightCategoryCodes = customChartOptions.highlightCategoryCodes;
+
+  // Find a point for each category so we can associate the marker
+  // with a point for caching
+  /** @type {Map<string | number, Point>} */
+  const referencePointByHighlightedCategory = new Map();
+  relevantSeries.forEach((series) => {
+    series.points.forEach((point) => {
+      const { category, options } = point;
+      if (
+        options.custom?.isCategoryHighlighted &&
+        !referencePointByHighlightedCategory.has(category)
+      ) {
+        referencePointByHighlightedCategory.set(category, point);
+      }
+    });
+  });
+
+  return highlightCategoryCodes
+    .map((category) => {
+      const referencePoint = referencePointByHighlightedCategory.get(category);
+      if (!referencePoint) return;
+
+      const categoryIndex = xAxis.categories.indexOf(category);
+      if (categoryIndex === -1) return;
+      const x = categoryWidth * categoryIndex;
+
+      const outlineWidth = getOutlineWidth(chart.plotWidth);
+      const outlineGap = getOutlineGap(chart.plotWidth);
+      const outlineDistance = outlineGap + outlineWidth;
+
+      /** @type {SVGAttributes} */
+      const attributes = {
+        x: chart.plotLeft + xAxisLeft + x + centeringOffset - outlineDistance,
+        y: chart.plotTop + chart.plotHeight + outlineDistance,
+        width: markerWidth + 2 * outlineDistance,
+        height: HIGHLIGHT_MARKER_SIZE,
+        fill: referencePoint.options.custom?.highlightColor,
+      };
+
+      return renderAxisMarkerRect({
+        chart,
+        referencePoint,
+        // Append to the top-level <g> that holds all series <g>.
+        // This element does not have a transform applied.
+        parent: chart.seriesGroup,
+        attributes,
+      });
+    })
     .filter((element) => element !== undefined);
 };
 
@@ -268,8 +387,16 @@ export const renderAxisMarkers = ({
     chart.options.custom.isCategoryGroupHighlighted;
 
   const relevantSeries = chart.series.filter(
-    ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
+    ({ type, visible }) =>
+      visible && (type === 'bar' || type === 'column' || type === 'spline'),
   );
+
+  if (relevantSeries.length === 0) return NO_ELEMENTS;
+
+  const isSpline = relevantSeries.every(({ type }) => type === 'spline');
+  if (isSpline) {
+    return renderSplineAxisMarkers({ chart, relevantSeries });
+  }
 
   if (isCategoryGroupHighlighted) {
     return renderCategoryAxisMarkers({

@@ -110,7 +110,7 @@ const createStackedDatapoints = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        // Same baseline/highlighting code as in `createOptionsForBarChart`
+        // Same baseline/highlight code as in `createOptionsForBarChart`
 
         // Baseline
 
@@ -285,7 +285,7 @@ export const createOptionsForStackedChart = ({
     highlightCategoryCodes,
   });
 
-  /** Custom chart options used by the baseline/highlighting render callbacks */
+  /** Custom chart options used by the baseline/highlight render callbacks */
   const customChartOptions = {
     baselineCodes,
     highlightCodes,
