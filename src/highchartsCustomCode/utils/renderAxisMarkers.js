@@ -288,7 +288,7 @@ const renderSeriesAxisMarkers = ({
 };
 
 /**
- * Render axis markers for a line chart (spline series)
+ * Render x axis markers (category markers) for a line chart (spline series)
  *
  * @param {{
  * chart: Chart;
@@ -297,24 +297,33 @@ const renderSeriesAxisMarkers = ({
  * @returns {HighchartsSVGElement[]}
  */
 const renderSplineAxisMarkers = ({ chart, relevantSeries }) => {
-  const xAxis = chart.xAxis[0];
-  if (!(xAxis && xAxis)) return NO_ELEMENTS;
+  const customChartOptions = chart.options.custom;
 
-  // `left` is documented but not in the type definitions
+  /** @type {string[]} */
+  const highlightCategoryCodes = customChartOptions.highlightCategoryCodes;
+
+  if (!(highlightCategoryCodes && highlightCategoryCodes.length > 0)) {
+    return NO_ELEMENTS;
+  }
+
+  const xAxis = chart.xAxis[0];
+  if (!xAxis) return NO_ELEMENTS;
+
+  // `xAxis#left` is documented but not in the type definitions
   // https://api.highcharts.com/highcharts/xAxis.left
   const xAxisLeft = typeof xAxis.left === 'number' ? xAxis.left : 0;
 
-  const categoryLength = xAxis.categories.length;
-  const categoryWidth = xAxis.width / categoryLength;
+  // `xAxis.categories` is only present for ordinal scales,
+  // not for continuous scales like time
+  let categories =
+    xAxis.categories || Array.from(customChartOptions.categories);
+  if (!(categories && categories.length > 0)) return NO_ELEMENTS;
+  const categoryWidth = xAxis.width / categories.length;
   const markerWidth = Math.min(
     categoryWidth * SPLINE_X_AXIS_MARKER_PERCENT_WIDTH,
     SPLINE_X_AXIS_MARKER_MAX_WIDTH,
   );
   const centeringOffset = (categoryWidth - markerWidth) / 2;
-
-  const customChartOptions = chart.options.custom;
-  /** @type {string[]} */
-  const highlightCategoryCodes = customChartOptions.highlightCategoryCodes;
 
   // Find a point for each category so we can associate the marker
   // with a point for caching
@@ -332,18 +341,18 @@ const renderSplineAxisMarkers = ({ chart, relevantSeries }) => {
     });
   });
 
+  const outlineWidth = getOutlineWidth(chart.plotWidth);
+  const outlineGap = getOutlineGap(chart.plotWidth);
+  const outlineDistance = outlineGap + outlineWidth;
+
   return highlightCategoryCodes
     .map((category) => {
       const referencePoint = referencePointByHighlightedCategory.get(category);
       if (!referencePoint) return;
 
-      const categoryIndex = xAxis.categories.indexOf(category);
+      const categoryIndex = categories.indexOf(category);
       if (categoryIndex === -1) return;
       const x = categoryWidth * categoryIndex;
-
-      const outlineWidth = getOutlineWidth(chart.plotWidth);
-      const outlineGap = getOutlineGap(chart.plotWidth);
-      const outlineDistance = outlineGap + outlineWidth;
 
       /** @type {SVGAttributes} */
       const attributes = {
