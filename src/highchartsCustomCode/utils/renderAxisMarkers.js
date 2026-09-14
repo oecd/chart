@@ -243,20 +243,20 @@ const renderSeriesAxisMarkers = ({
       group.attr({ transform: seriesTransform });
 
       const elements = series.points.map((point) => {
-        const pointCustomOptions = point.options.custom;
-        if (!pointCustomOptions) return;
+        const customPointOptions = point.options.custom;
+        if (!customPointOptions) return;
 
         const drawAxisMarker =
-          (showSeriesBaseline && pointCustomOptions.isSeriesBaseline) ||
-          (showSeriesHighlight && pointCustomOptions.isSeriesHighlighted) ||
-          (showCategoryHighlight && pointCustomOptions.isCategoryHighlighted);
+          (showSeriesBaseline && customPointOptions.isSeriesBaseline) ||
+          (showSeriesHighlight && customPointOptions.isSeriesHighlighted) ||
+          (showCategoryHighlight && customPointOptions.isCategoryHighlighted);
 
         // Any existing axis marker will be destroyed automatically
         if (!drawAxisMarker) return;
 
-        const color = pointCustomOptions.isBaseline
+        const color = customPointOptions.isBaseline
           ? baselineColor
-          : pointCustomOptions.highlightColor;
+          : customPointOptions.highlightColor;
 
         const { shapeArgs } = point;
         if (!shapeArgs) return;
@@ -331,12 +331,17 @@ const renderSplineAxisMarkers = ({ chart, relevantSeries }) => {
   const referencePointByHighlightedCategory = new Map();
   relevantSeries.forEach((series) => {
     series.points.forEach((point) => {
-      const { category, options } = point;
+      const customPointOptions = point.options.custom;
+      const categoryCode = customPointOptions?.categoryCode;
+      if (!categoryCode) {
+        console.error('Expected point.options.custom.categoryCode');
+        return;
+      }
       if (
-        options.custom?.isCategoryHighlighted &&
-        !referencePointByHighlightedCategory.has(category)
+        customPointOptions?.isCategoryHighlighted &&
+        !referencePointByHighlightedCategory.has(categoryCode)
       ) {
-        referencePointByHighlightedCategory.set(category, point);
+        referencePointByHighlightedCategory.set(categoryCode, point);
       }
     });
   });

@@ -110,12 +110,12 @@ export const renderHighlightOutlines = (chart) => {
   return relevantSeries
     .map((series) =>
       series.points.map((point) => {
-        const pointCustomOptions = point.options.custom;
-        if (!pointCustomOptions) {
+        const customPointOptions = point.options.custom;
+        if (!customPointOptions) {
           throw new Error('point.options.custom not defined');
         }
-        const isHighlighted = pointCustomOptions.isHighlighted;
-        const isBaseline = pointCustomOptions.isBaseline;
+        const isHighlighted = customPointOptions.isHighlighted;
+        const isBaseline = customPointOptions.isBaseline;
         const finalIsHighlighted = isBaseline || isHighlighted;
         return renderHighlightOutline(chart, series, point, finalIsHighlighted);
       }),
