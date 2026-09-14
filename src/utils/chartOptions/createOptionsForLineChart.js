@@ -145,6 +145,9 @@ export const createOptionsForLineChart = ({
           /** Custom options used by the highlight render callbacks */
           custom: {
             ...dataPoint.custom,
+            // For time scales, point.y contains timestamps,
+            // so we pass the original code here.
+            categoryCode,
             // Highlight
             isHighlighted: finalIsHighlighted,
             isSeriesHighlighted,
