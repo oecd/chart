@@ -16,7 +16,7 @@ const AXIS_MARKER_CLASS = 'oecd-axisMarker';
 
 const HIGHLIGHT_MARKER_SIZE = 5;
 
-const SPLINE_X_AXIS_MARKER_PERCENT_WIDTH = 0.8;
+const SPLINE_X_AXIS_MARKER_PERCENT_WIDTH = 0.62;
 const SPLINE_X_AXIS_MARKER_MAX_WIDTH = 100;
 
 /**
@@ -135,8 +135,9 @@ const getAttributesColumnBar = ({
 };
 
 /**
- * When all points of a category are highlighted,
- * render one marker rect spanning all points instead of many small rects.
+ * Bar/column chart:
+ * When all points of a category are highlighted, render one marker rect
+ * spanning all points instead of many small rects.
  *
  * @param {{
  * chart: Chart;
@@ -288,7 +289,7 @@ const renderSeriesAxisMarkers = ({
 };
 
 /**
- * Render x axis markers (category markers) for a line chart (spline series)
+ * Line chart (spline series): Render x axis markers (category markers)
  *
  * @param {{
  * chart: Chart;
@@ -309,21 +310,35 @@ const renderSplineAxisMarkers = ({ chart, relevantSeries }) => {
   const xAxis = chart.xAxis[0];
   if (!xAxis) return NO_ELEMENTS;
 
-  // `xAxis#left` is documented but not in the type definitions
-  // https://api.highcharts.com/highcharts/xAxis.left
-  const xAxisLeft = typeof xAxis.left === 'number' ? xAxis.left : 0;
-
-  // `xAxis.categories` is only present for ordinal scales,
-  // not for continuous scales like time
+  // `xAxis.categories` is not presents datetime scales
+  // https://api.highcharts.com/highcharts/xAxis.categories
   let categories =
     xAxis.categories || Array.from(customChartOptions.categories);
   if (!(categories && categories.length > 0)) return NO_ELEMENTS;
-  const categoryWidth = xAxis.width / categories.length;
+
+  /** @type {number} */
+  const axisLeft = xAxis.left;
+
+  const outlineWidth = getOutlineWidth(chart.plotWidth);
+  const outlineGap = getOutlineGap(chart.plotWidth);
+  const outlineDistance = outlineGap + outlineWidth;
+
+  const categoryWidth =
+    xAxis.width /
+    // For a datetime axis, xAxis.width measures the inner width:
+    // |----¤----|----¤----|----¤----|
+    //      ^-------------------^
+    // For other axis types, xAxis.width measures the outer width:
+    // |----¤----|----¤----|----¤----|
+    // ^-----------------------------^
+    // Therefore add a category band for datetime.
+    (xAxis.type === 'datetime'
+      ? Math.max(1, categories.length - 1)
+      : categories.length);
   const markerWidth = Math.min(
     categoryWidth * SPLINE_X_AXIS_MARKER_PERCENT_WIDTH,
     SPLINE_X_AXIS_MARKER_MAX_WIDTH,
   );
-  const centeringOffset = (categoryWidth - markerWidth) / 2;
 
   // Find a point for each category so we can associate the marker
   // with a point for caching
@@ -346,24 +361,18 @@ const renderSplineAxisMarkers = ({ chart, relevantSeries }) => {
     });
   });
 
-  const outlineWidth = getOutlineWidth(chart.plotWidth);
-  const outlineGap = getOutlineGap(chart.plotWidth);
-  const outlineDistance = outlineGap + outlineWidth;
-
   return highlightCategoryCodes
     .map((category) => {
       const referencePoint = referencePointByHighlightedCategory.get(category);
       if (!referencePoint) return;
 
-      const categoryIndex = categories.indexOf(category);
-      if (categoryIndex === -1) return;
-      const x = categoryWidth * categoryIndex;
+      if (typeof referencePoint.plotX !== 'number') return;
 
       /** @type {SVGAttributes} */
       const attributes = {
-        x: chart.plotLeft + xAxisLeft + x + centeringOffset - outlineDistance,
+        x: axisLeft + referencePoint.plotX - markerWidth / 2,
         y: chart.plotTop + chart.plotHeight + outlineDistance,
-        width: markerWidth + 2 * outlineDistance,
+        width: markerWidth,
         height: HIGHLIGHT_MARKER_SIZE,
         fill: referencePoint.options.custom?.highlightColor,
       };
