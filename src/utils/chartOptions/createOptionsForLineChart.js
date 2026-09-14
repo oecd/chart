@@ -44,20 +44,15 @@ export const createOptionsForLineChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
 }) => {
-  const {
-    baselineCodes,
-    highlightCodes,
-    highlightSeriesCodes,
-    highlightCategoryCodes,
-    isGroupedChart,
-    isCategoryGroupHighlighted,
-  } = getBaselineAndHighlightCodes({
-    data,
-    baseline,
-    highlight,
-  });
+  const { highlightCodes, highlightSeriesCodes, highlightCategoryCodes } =
+    getBaselineAndHighlightCodes({
+      data,
+      baseline,
+      highlight,
+    });
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
+  const seenCategories = new Set();
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCode = series.code;
@@ -110,6 +105,8 @@ export const createOptionsForLineChart = ({
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
         const categoryCode = category.code;
+
+        seenCategories.add(categoryCode);
 
         const dataPoint = createDatapoint(
           pointData,
@@ -252,12 +249,8 @@ export const createOptionsForLineChart = ({
 
   /** Custom chart options used by the baseline/highlight render callbacks */
   const customChartOptions = {
-    baselineCodes,
-    highlightCodes,
     highlightCategoryCodes,
-    highlightColors: matchingHighlightColors,
-    isGrouped: isGroupedChart,
-    isCategoryGroupHighlighted,
+    categories: seenCategories,
   };
 
   return {
