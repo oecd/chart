@@ -140,9 +140,9 @@ export const createOptionsForLineChart = ({
             )
           : null;
 
-        const categoryMarkerLineColor = isCategoryHighlighted
+        const highlightOutlineColor = finalIsHighlighted
           ? getListItemAtTurningIndex(
-              categoryHighlightIndex,
+              finalHighlightIndex,
               matchingHighlightOutlineColors,
             )
           : null;
@@ -160,6 +160,7 @@ export const createOptionsForLineChart = ({
             isSeriesHighlighted,
             isCategoryHighlighted,
             highlightColor,
+            highlightOutlineColor,
           },
           dataLabels:
             inlineLabels &&
@@ -179,7 +180,7 @@ export const createOptionsForLineChart = ({
               : null,
             lineWidth: isCategoryHighlighted ? 1.5 : null,
             fillColor: highlightColor,
-            lineColor: categoryMarkerLineColor,
+            lineColor: highlightOutlineColor,
           },
         };
       }, series.data),
