@@ -1,5 +1,6 @@
+// @ts-check
 /**
- * @import { Chart, Series, Point, SVGElement as HighchartsSVGElement } from "highcharts"
+ * @import { Chart, Series, Point, SVGElement as HighchartsSVGElement, SVGAttributes } from "highcharts"
  */
 
 /**
@@ -86,6 +87,7 @@ const renderLegendInset = ({ chart, series, isHighlighted, strokeWidth }) => {
   const getSymbolAttr = (attrName) =>
     parseFloat(symbol.element.getAttribute(attrName));
 
+  /** @type {SVGAttributes} */
   const attributes = {
     class: 'oecd-legendHighlightInset',
     x: getSymbolAttr('x') + strokeWidth / 2,
@@ -201,16 +203,17 @@ export const renderHighlightInsets = (chart) => {
       // We cannot just append the element to the series <g> since it has a clip mask.
       const seriesTransform = series.group.element.getAttribute('transform');
 
-      const pointInsets = series.points.map((point) => {
-        return renderHighlightInset({
-          chart,
-          series,
-          point,
-          isHighlighted: finalIsHighlighted,
-          transform: seriesTransform,
-          strokeWidth,
-        });
-      });
+      const pointInsets = series.points
+        .map((point) =>
+          renderHighlightInset({
+            chart,
+            point,
+            isHighlighted: finalIsHighlighted,
+            transform: seriesTransform,
+            strokeWidth,
+          }),
+        )
+        .filter((element) => element !== undefined);
 
       seriesElements.push(...pointInsets);
 
