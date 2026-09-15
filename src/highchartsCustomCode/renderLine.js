@@ -3,7 +3,7 @@
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { renderAxisMarkers } from './utils/renderAxisMarkers';
+import { renderSplineMarkers } from './utils/renderSplineMarkers';
 
 /**
  * Event handler called after load (initial render) and redraw (subsequent render).
@@ -24,14 +24,7 @@ export const renderLine = ({ chart }) => {
   const elements = [];
 
   // Render highlight shapes for all active series. Aggregate the shapes in a Set.
-  elements.push(
-    ...renderAxisMarkers({
-      chart,
-      showSeriesBaseline: false,
-      showSeriesHighlight: true,
-      showCategoryHighlight: true,
-    }),
-  );
+  elements.push(...renderSplineMarkers({ chart }));
 
   const elementSet = new Set(elements);
 
