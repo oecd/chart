@@ -86,6 +86,13 @@ export const createOptionsForLineChart = ({
       return colorFromPalette;
     })();
 
+    const seriesMarkerLineColor = isSeriesHighlighted
+      ? getListItemAtTurningIndex(
+          seriesHighlightIndex,
+          matchingHighlightOutlineColors,
+        )
+      : null;
+
     const dataLabelColor = makeColorReadableOnBackgroundColor(
       seriesColor,
       'white',
@@ -133,9 +140,9 @@ export const createOptionsForLineChart = ({
             )
           : null;
 
-        const markerLineColor = finalIsHighlighted
+        const categoryMarkerLineColor = isCategoryHighlighted
           ? getListItemAtTurningIndex(
-              finalHighlightIndex,
+              categoryHighlightIndex,
               matchingHighlightOutlineColors,
             )
           : null;
@@ -167,12 +174,12 @@ export const createOptionsForLineChart = ({
                 }
               : null,
           marker: {
-            symbol: finalIsHighlighted
+            symbol: isCategoryHighlighted
               ? getListItemAtTurningIndex(finalHighlightIndex, highlightSymbols)
               : null,
-            lineWidth: finalIsHighlighted ? 1.5 : null,
+            lineWidth: isCategoryHighlighted ? 1.5 : null,
             fillColor: highlightColor,
-            lineColor: markerLineColor,
+            lineColor: categoryMarkerLineColor,
           },
         };
       }, series.data),
@@ -184,6 +191,8 @@ export const createOptionsForLineChart = ({
           : 'circle',
         radius: 3.5,
         fillColor: seriesColor,
+        lineWidth: isSeriesHighlighted ? 1.5 : null,
+        lineColor: seriesMarkerLineColor,
       },
       states: {
         hover: {
