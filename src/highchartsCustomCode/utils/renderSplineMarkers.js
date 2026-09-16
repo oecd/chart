@@ -154,7 +154,6 @@ export const renderSplineMarkers = ({ chart }) => {
       if (!customPointOptions) return;
 
       const highlightColor = customPointOptions.highlightColor;
-      const highlightOutlineColor = customPointOptions.highlightOutlineColor;
 
       return [
         renderMarker({
@@ -180,7 +179,7 @@ export const renderSplineMarkers = ({ chart }) => {
             y: chart.plotTop,
             width: markerWidth,
             height: chart.plotHeight,
-            stroke: highlightOutlineColor,
+            stroke: highlightColor,
             strokeWidth: outlineWidth,
             fill: new TinyColor(highlightColor).setAlpha(0.2).toRgbString(),
           },
