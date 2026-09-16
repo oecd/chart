@@ -182,7 +182,7 @@ export const renderSplineMarkers = ({ chart }) => {
             height: chart.plotHeight,
             stroke: highlightOutlineColor,
             strokeWidth: outlineWidth,
-            fill: new TinyColor(highlightColor).setAlpha(0.3).toRgbString(),
+            fill: new TinyColor(highlightColor).setAlpha(0.2).toRgbString(),
           },
         }),
       ];
