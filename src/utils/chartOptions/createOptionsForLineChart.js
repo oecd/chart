@@ -16,9 +16,11 @@ import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
+import { highlightSymbols } from './highlightSymbols';
 
-// Alternate these symbols for point highlight
-const highlightSymbols = Object.freeze(['triangle', 'square', 'diamond']);
+const SYMBOL_RADIUS = 3;
+const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
+const HIGHLIGHTED_SYMBOL_LINE_WIDTH = 1.5;
 
 export const createOptionsForLineChart = ({
   data,
@@ -175,12 +177,12 @@ export const createOptionsForLineChart = ({
                 }
               : null,
           marker: {
-            symbol: isCategoryHighlighted
-              ? getListItemAtTurningIndex(finalHighlightIndex, highlightSymbols)
+            radius: isCategoryHighlighted ? HIGHLIGHTED_SYMBOL_RADIUS : null,
+            lineWidth: isCategoryHighlighted
+              ? HIGHLIGHTED_SYMBOL_LINE_WIDTH
               : null,
-            lineWidth: isCategoryHighlighted ? 1.5 : null,
-            fillColor: highlightColor,
             lineColor: highlightOutlineColor,
+            fillColor: highlightColor,
           },
         };
       }, series.data),
@@ -190,10 +192,10 @@ export const createOptionsForLineChart = ({
         symbol: isSeriesHighlighted
           ? getListItemAtTurningIndex(seriesHighlightIndex, highlightSymbols)
           : 'circle',
-        radius: 3.5,
-        fillColor: seriesColor,
-        lineWidth: isSeriesHighlighted ? 1.5 : null,
+        radius: isSeriesHighlighted ? HIGHLIGHTED_SYMBOL_RADIUS : SYMBOL_RADIUS,
+        lineWidth: isSeriesHighlighted ? HIGHLIGHTED_SYMBOL_LINE_WIDTH : null,
         lineColor: seriesMarkerLineColor,
+        fillColor: seriesColor,
       },
       states: {
         hover: {

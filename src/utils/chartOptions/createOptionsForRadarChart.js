@@ -15,6 +15,11 @@ import {
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
+import { highlightSymbols } from './highlightSymbols';
+
+const SYMBOL_RADIUS = 3;
+const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
+const HIGHLIGHTED_SYMBOL_LINE_WIDTH = 1.5;
 
 export const createOptionsForRadarChart = ({
   data,
@@ -86,29 +91,51 @@ export const createOptionsForRadarChart = ({
       'white',
     );
 
-    const markerLineColor = isSeriesHighlighted
+    const seriesMarkerLineColor = isSeriesHighlighted
       ? getListItemAtTurningIndex(
           seriesHighlightIndex,
           matchingHighlightOutlineColors,
         )
       : null;
 
+    console.log('data.categories', data.categories);
     return {
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(series.label).getTime()
         : series.label,
-      data: R.map(
-        (pointData) =>
-          createDatapoint(pointData, categoriesAreDatesOrNumberForDataParsing),
-        series.data,
-      ),
+      data: mapWithIndex((pointData, pointIndex) => {
+        console.log('pointIndex', pointIndex);
+        const category = R.nth(pointIndex, data.categories);
+        const categoryCode = category.code;
+
+        const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
+        const isCategoryHighlighted = categoryHighlightIndex !== -1;
+
+        console.log(categoryCode, isCategoryHighlighted);
+
+        const point = createDatapoint(
+          pointData,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
+        return {
+          ...point,
+          marker: {
+            radius: isSeriesHighlighted ? HIGHLIGHTED_SYMBOL_RADIUS : null,
+            lineWidth: isCategoryHighlighted
+              ? HIGHLIGHTED_SYMBOL_LINE_WIDTH
+              : null,
+          },
+        };
+      }, series.data),
       type: 'line',
       lineWidth: 2.5,
       marker: {
-        symbol: 'circle',
-        radius: 3,
-        lineWidth: isSeriesHighlighted ? 1.5 : null,
-        lineColor: markerLineColor,
+        symbol: isSeriesHighlighted
+          ? getListItemAtTurningIndex(seriesHighlightIndex, highlightSymbols)
+          : 'circle',
+        radius: isSeriesHighlighted ? HIGHLIGHTED_SYMBOL_RADIUS : SYMBOL_RADIUS,
+        lineWidth: isSeriesHighlighted ? HIGHLIGHTED_SYMBOL_LINE_WIDTH : null,
+        lineColor: seriesMarkerLineColor,
         fillColor: seriesColor,
       },
       states: {
