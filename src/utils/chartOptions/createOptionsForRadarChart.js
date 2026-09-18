@@ -42,20 +42,19 @@ export const createOptionsForRadarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const { baselineCodes, highlightSeriesCodes, highlightCodes } =
+  const { highlightCodes, highlightSeriesCodes, highlightCategoryCodes } =
     getBaselineAndHighlightCodes({
       data,
       baseline,
       highlight,
     });
 
+  const seenCategories = new Set();
+
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCode = series.code;
-
-    const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
-    const isSeriesBaseline = seriesBaselineIndex !== -1;
 
     const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
@@ -98,20 +97,18 @@ export const createOptionsForRadarChart = ({
         )
       : null;
 
-    console.log('data.categories', data.categories);
     return {
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(series.label).getTime()
         : series.label,
       data: mapWithIndex((pointData, pointIndex) => {
-        console.log('pointIndex', pointIndex);
         const category = R.nth(pointIndex, data.categories);
         const categoryCode = category.code;
 
+        seenCategories.add(categoryCode);
+
         const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
         const isCategoryHighlighted = categoryHighlightIndex !== -1;
-
-        console.log(categoryCode, isCategoryHighlighted);
 
         const point = createDatapoint(
           pointData,
@@ -163,6 +160,25 @@ export const createOptionsForRadarChart = ({
     return isSmall ? '70%' : '85%';
   };
 
+  // Create a plot band for each category highlight
+  const categories = Array.from(seenCategories);
+  const plotBands = categories
+    .map((category) => {
+      const categoryHighlightIndex = highlightCodes.indexOf(category);
+      const isCategoryHighlighted = categoryHighlightIndex !== -1;
+      const categoryIndex = categories.indexOf(category);
+      if (isCategoryHighlighted) {
+        const from = categoryIndex - 0.5;
+        const to = from + 1;
+        const color = getListItemAtTurningIndex(
+          categoryHighlightIndex,
+          matchingHighlightColors,
+        );
+        return { color, from, to };
+      }
+    })
+    .filter((plotBand) => plotBand !== undefined);
+
   return {
     chart: {
       polar: true,
@@ -190,6 +206,7 @@ export const createOptionsForRadarChart = ({
     },
 
     xAxis: {
+      plotBands,
       categories: R.map(
         R.compose(
           R.when(
