@@ -167,16 +167,27 @@ export const createOptionsForRadarChart = ({
       const categoryHighlightIndex = highlightCodes.indexOf(category);
       const isCategoryHighlighted = categoryHighlightIndex !== -1;
       const categoryIndex = categories.indexOf(category);
-      if (isCategoryHighlighted) {
-        const from = categoryIndex - 0.5;
-        const to = from + 1;
-        const color = getListItemAtTurningIndex(
-          categoryHighlightIndex,
-          matchingHighlightColors,
-        );
-        return { color, from, to };
+      if (!isCategoryHighlighted) return;
+      const color = getListItemAtTurningIndex(
+        categoryHighlightIndex,
+        matchingHighlightColors,
+      );
+      const from = categoryIndex - 0.5;
+      const to = from + 1;
+      // Two plot bands are needed to highlight the first segment
+      // because from: 0 is actually in the middle of the first segment
+      // and we cannot set from: -0.5
+      if (categoryIndex === 0) {
+        const from2 = categories.length - 1 + 0.5;
+        const to2 = from2 + 0.5;
+        return [
+          { color, from: from2, to: to2 },
+          { color, from, to },
+        ];
       }
+      return { color, from, to };
     })
+    .flat()
     .filter((plotBand) => plotBand !== undefined);
 
   return {
