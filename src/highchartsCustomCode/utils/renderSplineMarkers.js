@@ -7,8 +7,10 @@ import { HIGHLIGHT_MARKER_SIZE } from './highlightMarkerSize';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
-const SPLINE_X_AXIS_MARKER_PERCENT_WIDTH = 0.62;
-const SPLINE_X_AXIS_MARKER_MAX_WIDTH = 100;
+/** The marker width starts at this percent value of the category width */
+const MARKER_PERCENT_WIDTH = 0.62;
+/** Cap marker width at this value in pixels */
+const MARKER_MAX_WIDTH = 100;
 
 const PLOT_AREA_MARKER_CLASS = 'oecd-plotAreaMarker';
 const AXIS_MARKER_CLASS = 'oecd-axisMarker';
@@ -28,6 +30,7 @@ const PLOT_AREA_MARKERS = new WeakMap();
 const AXIS_MARKERS = new WeakMap();
 
 /**
+ * Creates or updates a marker rect for the given reference point.
  *
  * @param {{
  * chart: Chart;
@@ -59,7 +62,7 @@ const renderMarker = ({
         ...attributes,
       })
       // Append to the top-level <g> that holds all series <g>.
-      // This element does not have a transform applied.
+      // This element does  not have a transform applied.
       .add(chart.seriesGroup);
 
     if (referencePoint) {
@@ -95,7 +98,8 @@ export const renderSplineMarkers = ({ chart }) => {
   const xAxis = chart.xAxis[0];
   if (!xAxis) return NO_ELEMENTS;
 
-  // `xAxis.categories` is not presents datetime scales
+  // `xAxis.categories` is not present for datetime scales,
+  // use the Set from the custom chart options in this case.
   // https://api.highcharts.com/highcharts/xAxis.categories
   let categories =
     xAxis.categories || Array.from(customChartOptions.categories);
@@ -103,6 +107,8 @@ export const renderSplineMarkers = ({ chart }) => {
 
   /** @type {number} */
   const axisLeft = xAxis.left;
+  /** @type {number} */
+  const axisRight = xAxis.right;
 
   const outlineWidth = getOutlineWidth(chart.plotWidth);
   const outlineGap = getOutlineGap(chart.plotWidth);
@@ -120,10 +126,12 @@ export const renderSplineMarkers = ({ chart }) => {
     (xAxis.type === 'datetime'
       ? Math.max(1, categories.length - 1)
       : categories.length);
-  const markerWidth = Math.min(
-    categoryWidth * SPLINE_X_AXIS_MARKER_PERCENT_WIDTH,
-    SPLINE_X_AXIS_MARKER_MAX_WIDTH,
-  );
+  let markerWidth = categoryWidth * MARKER_PERCENT_WIDTH;
+  // Cap marker at a max with
+  markerWidth = Math.min(markerWidth, MARKER_MAX_WIDTH);
+  // Make sure the marker for the outmost left or right point
+  // is not painted outside of the SVG.
+  markerWidth = Math.min(markerWidth, Math.min(2 * axisLeft, 2 * axisRight));
 
   // Find a point for each category so we can
   // associate the marker with a point for caching
@@ -153,35 +161,39 @@ export const renderSplineMarkers = ({ chart }) => {
       const customPointOptions = referencePoint.options.custom;
       if (!customPointOptions) return;
 
+      const x = axisLeft + referencePoint.plotX - markerWidth / 2;
       const highlightColor = customPointOptions.highlightColor;
 
       return [
+        // Top semi-transparent rect behind the lines and points
+        // spanning the whole plot height
         renderMarker({
           chart,
           cache: PLOT_AREA_MARKERS,
           referencePoint,
-          class: PLOT_AREA_MARKER_CLASS,
-          attributes: {
-            x: axisLeft + referencePoint.plotX - markerWidth / 2,
-            y: chart.plotTop + chart.plotHeight + outlineDistance,
-            width: markerWidth,
-            height: HIGHLIGHT_MARKER_SIZE,
-            fill: highlightColor,
-          },
-        }),
-        renderMarker({
-          chart,
-          cache: AXIS_MARKERS,
-          referencePoint,
           class: AXIS_MARKER_CLASS,
           attributes: {
-            x: axisLeft + referencePoint.plotX - markerWidth / 2,
+            x,
             y: chart.plotTop,
             width: markerWidth,
             height: chart.plotHeight,
             stroke: highlightColor,
             strokeWidth: outlineWidth,
             fill: new TinyColor(highlightColor).setAlpha(0.2).toRgbString(),
+          },
+        }),
+        // Bottom rect below the x axis line
+        renderMarker({
+          chart,
+          cache: AXIS_MARKERS,
+          referencePoint,
+          class: PLOT_AREA_MARKER_CLASS,
+          attributes: {
+            x,
+            y: chart.plotTop + chart.plotHeight + outlineDistance,
+            width: markerWidth,
+            height: HIGHLIGHT_MARKER_SIZE,
+            fill: highlightColor,
           },
         }),
       ];
