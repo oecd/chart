@@ -27,10 +27,8 @@ export const createOptionsForBarChart = ({
   title = '',
   subtitle = '',
   colorPalette,
-  smallerColorPalettes,
   fixedColorIndexBySeries = null,
   baseline = null,
-  baselineColors,
   highlight = null,
   matchingHighlightColors,
   matchingHighlightOutlineColors,
@@ -102,6 +100,7 @@ export const createOptionsForBarChart = ({
     highlightCodes,
     highlightCategoryCodes,
     highlightColors: matchingHighlightColors,
+    highlightOutlineColors: matchingHighlightOutlineColors,
     isGrouped: isGroupedChart,
     isCategoryGroupHighlighted,
   };
