@@ -286,6 +286,12 @@ export const createOptionsForBarChart = ({
                 matchingHighlightColors,
               )
             : null;
+          const highlightOutlineColor = finalIsHighlighted
+            ? getListItemAtTurningIndex(
+                finalHighlightIndex,
+                matchingHighlightOutlineColors,
+              )
+            : null;
 
           // Only color the bar in a grouped bar chart since we draw an outline
           // around baseline/highlight bar groups then.
@@ -331,6 +337,7 @@ export const createOptionsForBarChart = ({
               isSeriesHighlighted,
               isCategoryHighlighted,
               highlightColor,
+              highlightOutlineColor,
             },
             name: category.label,
             color: pointColor,
