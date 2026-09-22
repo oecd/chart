@@ -84,8 +84,10 @@ export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
     baselineCodes,
   );
 
+  /** Whether there are multiple series with multiple categories */
   const isGroupedChart =
-    data.series.length > 1 && data.series[0].data.length > 1;
+    data.series.length > 1 &&
+    data.series.some((series) => series.data.length > 1);
 
   /**
    * Whether a category is baseline/highlighted that contains several points
