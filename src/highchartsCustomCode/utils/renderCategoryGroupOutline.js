@@ -3,6 +3,7 @@
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
+import { TinyColor } from '@ctrl/tinycolor';
 import { baselineColor } from '../../constants/chart';
 import {
   getBoundingRectsByCategory,
@@ -49,6 +50,8 @@ export const renderCategoryGroupOutline = (chart) => {
   const highlightCategoryCodes = customChartOptions.highlightCategoryCodes;
   /** @type {string[]} */
   const highlightColors = customChartOptions.highlightColors;
+  /** @type {string[]} */
+  const highlightOutlineColors = customChartOptions.highlightOutlineColors;
 
   const relevantSeries = chart.series.filter(
     ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
@@ -85,8 +88,7 @@ export const renderCategoryGroupOutline = (chart) => {
         .css({ pointerEvents: 'none' })
         // Append to the top-level <g> that holds all series <g>.
         // This element does not have a transform applied.
-        .add(chart.seriesGroup)
-        .toFront();
+        .add(chart.seriesGroup);
       rectByCategory.set(category, rect);
     }
 
@@ -96,11 +98,19 @@ export const renderCategoryGroupOutline = (chart) => {
 
     const isBaseline = baselineCodes.includes(category);
     const highlightIndex = highlightCodes.indexOf(category);
-    const color = isBaseline ? baselineColor : highlightColors[highlightIndex];
+    const stroke = isBaseline
+      ? baselineColor
+      : highlightOutlineColors[highlightIndex];
+    const fill = isBaseline ? baselineColor : highlightColors[highlightIndex];
+    const fillOpacity = isBaseline ? 0.2 : 0.3;
+    const fillWithOpacity = new TinyColor(fill)
+      .setAlpha(fillOpacity)
+      .toRgbString();
 
     rect.attr({
       strokeWidth: outlineWidth,
-      stroke: color,
+      stroke,
+      fill: fillWithOpacity,
       x: x1 - outlineDistance,
       y: 0,
       width: x2 - x1 + 2 * outlineDistance,
