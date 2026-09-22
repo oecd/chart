@@ -102,9 +102,8 @@ export const renderCategoryGroupOutline = (chart) => {
       ? baselineColor
       : highlightOutlineColors[highlightIndex];
     const fill = isBaseline ? baselineColor : highlightColors[highlightIndex];
-    const fillOpacity = isBaseline ? 0.2 : 0.3;
     const fillWithOpacity = new TinyColor(fill)
-      .setAlpha(fillOpacity)
+      .setAlpha(isBaseline ? 0.2 : 0.3)
       .toRgbString();
 
     rect.attr({
