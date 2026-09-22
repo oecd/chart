@@ -45,7 +45,6 @@ const createStackedDatapoints = ({
   highlightSeriesCodes,
   highlightCategoryCodes,
 }) => {
-  console.log('seriesFrequency', seriesFrequency);
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
 
@@ -206,6 +205,7 @@ export const createOptionsForStackedChart = ({
   baseline = null,
   highlight = null,
   matchingHighlightColors,
+  matchingHighlightOutlineColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -291,6 +291,7 @@ export const createOptionsForStackedChart = ({
     highlightCodes,
     highlightCategoryCodes,
     highlightColors: matchingHighlightColors,
+    highlightOutlineColors: matchingHighlightOutlineColors,
     isCategoryGroupHighlighted,
   };
 
