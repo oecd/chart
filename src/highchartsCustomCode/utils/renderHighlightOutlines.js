@@ -3,6 +3,7 @@
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
+import { TinyColor } from '@ctrl/tinycolor';
 import { baselineColor } from '../../constants/chart';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
@@ -21,14 +22,21 @@ const OUTLINE_RECTS = new WeakMap();
  *
  * @param {Chart} chart
  * @param {Series} series
- * @param {boolean} isHighlighted
  * @param {Point} point
  * @returns {HighchartsSVGElement | undefined}
  */
-const renderHighlightOutline = (chart, series, point, isHighlighted) => {
+const renderHighlightOutline = (chart, series, point) => {
+  const customPointOptions = point.options.custom;
+  if (!customPointOptions) return;
+  /** @type {boolean} */
+  const isHighlighted = customPointOptions.isHighlighted;
+  /** @type {boolean} */
+  const isBaseline = customPointOptions.isBaseline;
+  const isBaselineOrHighlighted = isBaseline || isHighlighted;
+
   let outline = OUTLINE_RECTS.get(point);
 
-  if (!isHighlighted) {
+  if (!isBaselineOrHighlighted) {
     if (outline) {
       OUTLINE_RECTS.delete(point);
     }
@@ -42,13 +50,13 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
     return;
   }
 
-  const customPointOptions = point.options.custom;
-  if (!customPointOptions) return;
-  /** @type {boolean} */
-  const isBaseline = customPointOptions.isBaseline;
-  /** @type {string} */
-  const highlightColor = customPointOptions.highlightColor;
-  const color = isBaseline ? baselineColor : highlightColor;
+  const stroke = isBaseline
+    ? baselineColor
+    : customPointOptions.highlightOutlineColor;
+  const fill = isBaseline ? baselineColor : customPointOptions.highlightColor;
+  const fillWithOpacity = new TinyColor(fill)
+    .setAlpha(isBaseline ? 0.2 : 0.3)
+    .toRgbString();
 
   // Get the transformations from the series <g>.
   // We cannot just append the element to the series <g> since it has a clip mask.
@@ -56,10 +64,7 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
 
   if (!(outline && outline.element)) {
     outline = chart.renderer
-      .rect({
-        fill: 'none',
-        class: 'oecd-highlightOutline',
-      })
+      .rect({ class: 'oecd-highlightOutline' })
       .css({ pointerEvents: 'none' })
       // Append to the top-level <g> that holds all series <g>.
       // This element does not have a transform applied.
@@ -73,8 +78,9 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
   const outlineDistance = outlineGap + outlineWidth / 2;
 
   outline = outline.attr({
-    stroke: color,
+    stroke,
     'stroke-width': outlineWidth,
+    fill: fillWithOpacity,
     x: shapeArgs.x - outlineDistance,
     y: shapeArgs.y - outlineDistance,
     width: shapeArgs.width + 2 * outlineDistance,
@@ -86,7 +92,7 @@ const renderHighlightOutline = (chart, series, point, isHighlighted) => {
 };
 
 /**
- * Renders the highlight outlines around highlighted points.
+ * Renders outlines around highlighted bars/columns.
  * Returns the active elements.
  *
  * @param {Chart} chart
@@ -109,16 +115,9 @@ export const renderHighlightOutlines = (chart) => {
 
   return relevantSeries
     .map((series) =>
-      series.points.map((point) => {
-        const customPointOptions = point.options.custom;
-        if (!customPointOptions) {
-          throw new Error('point.options.custom not defined');
-        }
-        const isHighlighted = customPointOptions.isHighlighted;
-        const isBaseline = customPointOptions.isBaseline;
-        const finalIsHighlighted = isBaseline || isHighlighted;
-        return renderHighlightOutline(chart, series, point, finalIsHighlighted);
-      }),
+      series.points.map((point) =>
+        renderHighlightOutline(chart, series, point),
+      ),
     )
     .flat()
     .filter((element) => element !== undefined);
