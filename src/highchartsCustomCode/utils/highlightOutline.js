@@ -13,7 +13,7 @@ const BREAKPOINT_L = 600;
 const BREAKPOINT_XL = 800;
 
 /**
- * Returns the stroke width of outline
+ * Returns the stroke width of the outline.
  * @param {number} chartWidth
  */
 export const getOutlineWidth = (chartWidth) =>
@@ -26,7 +26,8 @@ export const getOutlineWidth = (chartWidth) =>
         : OUTLINE_WIDTH_S;
 
 /**
- * Returns the gap between the value shape and the outline
+ * Returns the gap between the marker (e.g. bar/column rectangle)
+ * and the outline.
  * @param {number} chartWidth
  */
 export const getOutlineGap = (chartWidth) =>
