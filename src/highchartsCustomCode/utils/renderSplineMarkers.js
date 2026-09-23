@@ -39,6 +39,7 @@ const AXIS_MARKERS = new WeakMap();
  * class: string
  * attributes: SVGAttributes;
  * }} options
+ * @returns {HighchartsSVGElement}
  */
 const renderMarker = ({
   chart,
@@ -69,6 +70,8 @@ const renderMarker = ({
       cache.set(referencePoint, marker);
     }
   }
+
+  return marker;
 };
 
 /**
@@ -139,6 +142,9 @@ export const renderSplineMarkers = ({ chart }) => {
   const referencePointByHighlightedCategory = new Map();
   relevantSeries.forEach((series) => {
     series.points.forEach((point) => {
+      // Ignore points without value. They are rendered with an accessibility
+      // placeholder.
+      if (point.y === null) return;
       const customPointOptions = point.options.custom;
       const categoryCode = customPointOptions?.categoryCode;
       if (!categoryCode) {

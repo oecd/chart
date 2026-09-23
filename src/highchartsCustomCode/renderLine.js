@@ -2,7 +2,7 @@
 /**
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
-
+import * as R from 'ramda';
 import { renderSplineMarkers } from './utils/renderSplineMarkers';
 
 /**
@@ -10,7 +10,7 @@ import { renderSplineMarkers } from './utils/renderSplineMarkers';
  * Renders the highlight shapes and cleans up stale ones.
  *
  * @param {{
- * chart: Chart & { oecd_highlightElements: Set<HighchartsSVGElement> };
+ * chart: Chart & { oecd_highlightElements: HighchartsSVGElement[] };
  * }} options
  */
 export const renderLine = ({ chart }) => {
@@ -21,23 +21,18 @@ export const renderLine = ({ chart }) => {
    * SVG elements created for highlighting
    * @type {HighchartsSVGElement[]}
    */
-  const elements = [];
-
-  // Render highlight shapes for all active series. Aggregate the shapes in a Set.
-  elements.push(...renderSplineMarkers({ chart }));
-
-  const elementSet = new Set(elements);
+  const elements = renderSplineMarkers({ chart });
 
   if (chart.oecd_highlightElements) {
     // Clean up old shapes
-    /** @type {Set<HighchartsSVGElement>} */
-    const obsoleteElements =
-      chart.oecd_highlightElements.difference(elementSet);
-    for (const obsoleteElement of obsoleteElements) {
-      obsoleteElement.destroy();
-    }
+    // Use R.difference since Set.prototype.difference is not well supported yet
+    const obsoleteElements = R.difference(
+      chart.oecd_highlightElements,
+      elements,
+    );
+    R.map((obsoleteElement) => obsoleteElement.destroy(), obsoleteElements);
   }
 
   // Save new shapes
-  chart.oecd_highlightElements = elementSet;
+  chart.oecd_highlightElements = elements;
 };
