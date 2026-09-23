@@ -12,6 +12,8 @@ import { HIGHLIGHT_MARKER_SIZE } from './highlightMarkerSize';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
+const GAP_BETWEEN_OUTLINE_AND_AXIS_MARKER = 1.5;
+
 const AXIS_MARKER_CLASS = 'oecd-axisMarker';
 
 /**
@@ -98,7 +100,7 @@ const getAttributesColumnBar = ({
   x,
   width,
   color,
-  // Needs to be a string for Highcharts
+  // Needs to be a string for Highcharts; undefined would cause an exception
   transform = '',
 }) => {
   const outlineWidth = getOutlineWidth(plotWidth);
@@ -108,7 +110,7 @@ const getAttributesColumnBar = ({
   if (seriesType === 'column') {
     return {
       x: x - outlineDistance,
-      y: plotHeight + outlineDistance,
+      y: plotHeight + outlineDistance + GAP_BETWEEN_OUTLINE_AND_AXIS_MARKER,
       width: width + 2 * outlineDistance,
       height: HIGHLIGHT_MARKER_SIZE,
       fill: color,
@@ -120,7 +122,7 @@ const getAttributesColumnBar = ({
       // Bar charts are column charts rotated by 90° and mirrored,
       // so x and y dimensions are flipped here, and y: 0 is on the right
       x: x - outlineDistance,
-      y: plotWidth + outlineDistance,
+      y: plotWidth + outlineDistance + GAP_BETWEEN_OUTLINE_AND_AXIS_MARKER,
       width: width + 2 * outlineDistance,
       height: HIGHLIGHT_MARKER_SIZE,
       fill: color,
@@ -218,8 +220,8 @@ const renderSeriesAxisMarkers = ({
   showSeriesBaseline,
   showSeriesHighlight,
   showCategoryHighlight,
-}) => {
-  return relevantSeries
+}) =>
+  relevantSeries
     .map((series) => {
       // Create <g> for the axis markers of this series
       let group = AXIS_MARKER_GROUPS.get(series);
@@ -281,7 +283,6 @@ const renderSeriesAxisMarkers = ({
     })
     .flat()
     .filter((element) => element !== undefined);
-};
 
 /**
  * Renders axis markers for a chart
