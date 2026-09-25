@@ -101,6 +101,8 @@ export const renderSplineMarkers = ({ chart }) => {
   const xAxis = chart.xAxis[0];
   if (!xAxis) return NO_ELEMENTS;
 
+  const isDatetimeAxis = xAxis.type === 'datetime';
+
   // `xAxis.categories` is not present for datetime scales,
   // use the Set from the custom chart options in this case.
   // https://api.highcharts.com/highcharts/xAxis.categories
@@ -126,15 +128,15 @@ export const renderSplineMarkers = ({ chart }) => {
     // |----¤----|----¤----|----¤----|
     // ^-----------------------------^
     // Therefore add a category band for datetime.
-    (xAxis.type === 'datetime'
-      ? Math.max(1, categories.length - 1)
-      : categories.length);
+    (isDatetimeAxis ? Math.max(1, categories.length - 1) : categories.length);
   let markerWidth = categoryWidth * MARKER_PERCENT_WIDTH;
-  // Cap marker at a max with
+  // Cap marker at a max width
   markerWidth = Math.min(markerWidth, MARKER_MAX_WIDTH);
-  // Make sure the marker for the outmost left or right point
-  // is not painted outside of the SVG.
-  markerWidth = Math.min(markerWidth, Math.min(2 * axisLeft, 2 * axisRight));
+  if (isDatetimeAxis) {
+    // Make sure the marker for the outmost left or right point
+    // is not painted outside of the SVG.
+    markerWidth = Math.min(markerWidth, Math.min(2 * axisLeft, 2 * axisRight));
+  }
 
   // Find a point for each category so we can
   // associate the marker with a point for caching
