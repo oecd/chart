@@ -45,6 +45,7 @@ export const createOptionsForLineChart = ({
   seriesFrequency,
   inlineLabels = false,
   disableLegendInteraction = false,
+  hideLineSymbols = false,
 }) => {
   const { highlightCodes, highlightSeriesCodes, highlightCategoryCodes } =
     getBaselineAndHighlightCodes({
@@ -189,6 +190,7 @@ export const createOptionsForLineChart = ({
       type: 'spline',
       lineWidth: 2.5,
       marker: {
+        enabled: !hideLineSymbols,
         symbol: isSeriesHighlighted
           ? getListItemAtTurningIndex(seriesHighlightIndex, highlightSymbols)
           : 'circle',
