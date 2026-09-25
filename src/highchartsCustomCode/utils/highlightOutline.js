@@ -3,10 +3,10 @@ const OUTLINE_WIDTH_M = 1;
 const OUTLINE_WIDTH_L = 1.5;
 const OUTLINE_WIDTH_XL = 2;
 
-const OUTLINE_GAP_S = 2;
-const OUTLINE_GAP_M = 3;
-const OUTLINE_GAP_L = 4;
-const OUTLINE_GAP_XL = 5;
+const OUTLINE_GAP_S = 1.5;
+const OUTLINE_GAP_M = 1.5;
+const OUTLINE_GAP_L = 2;
+const OUTLINE_GAP_XL = 2.5;
 
 const BREAKPOINT_M = 400;
 const BREAKPOINT_L = 600;
