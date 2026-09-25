@@ -12,8 +12,6 @@ import { HIGHLIGHT_MARKER_SIZE } from './highlightMarkerSize';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
-const GAP_BETWEEN_OUTLINE_AND_AXIS_MARKER = 1.5;
-
 const AXIS_MARKER_CLASS = 'oecd-axisMarker';
 
 /**
@@ -105,12 +103,12 @@ const getAttributesColumnBar = ({
 }) => {
   const outlineWidth = getOutlineWidth(plotWidth);
   const outlineGap = getOutlineGap(plotWidth);
-  const outlineDistance = outlineGap + outlineWidth;
+  const outlineDistance = outlineGap + outlineWidth / 2;
 
   if (seriesType === 'column') {
     return {
       x: x - outlineDistance,
-      y: plotHeight + outlineDistance + GAP_BETWEEN_OUTLINE_AND_AXIS_MARKER,
+      y: plotHeight + outlineDistance,
       width: width + 2 * outlineDistance,
       height: HIGHLIGHT_MARKER_SIZE,
       fill: color,
@@ -122,7 +120,7 @@ const getAttributesColumnBar = ({
       // Bar charts are column charts rotated by 90° and mirrored,
       // so x and y dimensions are flipped here, and y: 0 is on the right
       x: x - outlineDistance,
-      y: plotWidth + outlineDistance + GAP_BETWEEN_OUTLINE_AND_AXIS_MARKER,
+      y: plotWidth + outlineDistance,
       width: width + 2 * outlineDistance,
       height: HIGHLIGHT_MARKER_SIZE,
       fill: color,
