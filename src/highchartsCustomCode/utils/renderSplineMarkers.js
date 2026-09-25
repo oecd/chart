@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @import { Chart, Point, SVGElement as HighchartsSVGElement, SVGAttributes } from "highcharts"
+ * @import { Chart, Point, SVGElement as HighchartsSVGElement, SVGAttributes, CSSObject } from "highcharts"
  */
 import { TinyColor } from '@ctrl/tinycolor';
 import { HIGHLIGHT_MARKER_SIZE } from './highlightMarkerSize';
@@ -36,18 +36,12 @@ const AXIS_MARKERS = new WeakMap();
  * chart: Chart;
  * cache: WeakMap<Point, HighchartsSVGElement>;
  * referencePoint: Point;
- * class: string
  * attributes: SVGAttributes;
+ * style?: CSSObject;
  * }} options
  * @returns {HighchartsSVGElement}
  */
-const renderMarker = ({
-  chart,
-  cache,
-  referencePoint,
-  class: className,
-  attributes,
-}) => {
+const renderMarker = ({ chart, cache, referencePoint, attributes, style }) => {
   let marker = cache.get(referencePoint);
 
   if (marker && marker.element) {
@@ -57,11 +51,8 @@ const renderMarker = ({
       // .rect() allows passing attributes but only supports some
       // while .attr() supports all
       .rect()
-      .attr({
-        class: className,
-        'pointer-events': 'none',
-        ...attributes,
-      })
+      .attr(attributes)
+      .css(style)
       // Append to the top-level <g> that holds all series <g>.
       // This element does  not have a transform applied.
       .add(chart.seriesGroup);
@@ -162,6 +153,9 @@ export const renderSplineMarkers = ({ chart }) => {
     });
   });
 
+  // Enable mix-blend-mode, ignore white background
+  chart.seriesGroup.css({ isolation: 'isolate' });
+
   return highlightCategoryCodes
     .map((category) => {
       const referencePoint = referencePointByHighlightedCategory.get(category);
@@ -171,6 +165,7 @@ export const renderSplineMarkers = ({ chart }) => {
 
       const x = axisLeft + referencePoint.plotX - markerWidth / 2;
       const highlightColor = customPointOptions.highlightColor;
+      const highlightOutlineColor = customPointOptions.highlightOutlineColor;
 
       return [
         // Top semi-transparent rect behind the lines and points
@@ -179,29 +174,32 @@ export const renderSplineMarkers = ({ chart }) => {
           chart,
           cache: PLOT_AREA_MARKERS,
           referencePoint,
-          class: AXIS_MARKER_CLASS,
           attributes: {
+            class: AXIS_MARKER_CLASS,
             x,
             y: chart.plotTop,
             width: markerWidth,
             height: chart.plotHeight,
-            stroke: highlightColor,
+            stroke: highlightOutlineColor,
             strokeWidth: outlineWidth,
-            fill: new TinyColor(highlightColor).setAlpha(0.2).toRgbString(),
+            fill: new TinyColor(highlightColor).setAlpha(0.3).toRgbString(),
+            'pointer-events': 'none',
           },
-        }),
-        // Bottom rect below the x axis line
+          style: { 'mix-blend-mode': 'color' },
+        }).toFront(),
+        // Bottom rect below the x axis line (axis marker)
         renderMarker({
           chart,
           cache: AXIS_MARKERS,
           referencePoint,
-          class: PLOT_AREA_MARKER_CLASS,
           attributes: {
+            class: PLOT_AREA_MARKER_CLASS,
             x,
             y: chart.plotTop + chart.plotHeight + outlineDistance,
             width: markerWidth,
             height: HIGHLIGHT_MARKER_SIZE,
             fill: highlightColor,
+            'pointer-events': 'none',
           },
         }),
       ];
