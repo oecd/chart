@@ -58,7 +58,7 @@ export const renderCategoryGroupOutline = (chart) => {
   );
   const firstSeries = relevantSeries[0];
   if (!firstSeries) return NO_ELEMENTS;
-  const firstType = firstSeries.type;
+  const seriesType = firstSeries.type;
 
   const pointsByCategory = groupPointsByCategory(
     relevantSeries,
@@ -106,16 +106,18 @@ export const renderCategoryGroupOutline = (chart) => {
       .setAlpha(isBaseline ? 0.2 : 0.3)
       .toRgbString();
 
-    rect.attr({
-      strokeWidth: outlineWidth,
-      stroke,
-      fill: fillWithOpacity,
-      x: x1 - outlineDistance,
-      y: 0,
-      width: x2 - x1 + 2 * outlineDistance,
-      height: firstType === 'column' ? chart.plotHeight : chart.plotWidth,
-      transform: seriesTransform,
-    });
+    rect
+      .attr({
+        strokeWidth: outlineWidth,
+        stroke,
+        fill: fillWithOpacity,
+        x: x1 - outlineDistance,
+        y: 0,
+        width: x2 - x1 + 2 * outlineDistance,
+        height: seriesType === 'column' ? chart.plotHeight : chart.plotWidth,
+        transform: seriesTransform,
+      })
+      .toFront();
 
     elements.push(rect);
   });

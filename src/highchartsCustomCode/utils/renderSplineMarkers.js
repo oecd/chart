@@ -108,7 +108,7 @@ export const renderSplineMarkers = ({ chart }) => {
 
   const outlineWidth = getOutlineWidth(chart.plotWidth);
   const outlineGap = getOutlineGap(chart.plotWidth);
-  const outlineDistance = outlineGap + outlineWidth;
+  const outlineDistance = outlineGap + outlineWidth / 2;
 
   const categoryWidth =
     xAxis.width /
@@ -175,7 +175,7 @@ export const renderSplineMarkers = ({ chart }) => {
           cache: PLOT_AREA_MARKERS,
           referencePoint,
           attributes: {
-            class: AXIS_MARKER_CLASS,
+            class: PLOT_AREA_MARKER_CLASS,
             x,
             y: chart.plotTop,
             width: markerWidth,
@@ -183,23 +183,27 @@ export const renderSplineMarkers = ({ chart }) => {
             stroke: highlightOutlineColor,
             strokeWidth: outlineWidth,
             fill: new TinyColor(highlightColor).setAlpha(0.3).toRgbString(),
-            'pointer-events': 'none',
+            // 'pointer-events': 'none',
+            // Move on top of lines and point dots
+            zIndex: 1,
           },
           style: { 'mix-blend-mode': 'color' },
-        }).toFront(),
+        }),
         // Bottom rect below the x axis line (axis marker)
         renderMarker({
           chart,
           cache: AXIS_MARKERS,
           referencePoint,
           attributes: {
-            class: PLOT_AREA_MARKER_CLASS,
+            class: AXIS_MARKER_CLASS,
             x,
             y: chart.plotTop + chart.plotHeight + outlineDistance,
             width: markerWidth,
             height: HIGHLIGHT_MARKER_SIZE,
             fill: highlightColor,
-            'pointer-events': 'none',
+            // 'pointer-events': 'none',
+            // Move below lines and point dots
+            zIndex: -1,
           },
         }),
       ];
