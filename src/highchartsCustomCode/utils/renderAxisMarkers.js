@@ -81,6 +81,7 @@ const renderAxisMarkerRect = ({
 
 /**
  * @param {{
+ * seriesCount: number;
  * seriesType: string;
  * plotWidth: number;
  * plotHeight: number;
@@ -92,6 +93,7 @@ const renderAxisMarkerRect = ({
  * @returns {SVGAttributes | undefined}
  */
 const getAttributesColumnBar = ({
+  seriesCount,
   seriesType,
   plotWidth,
   plotHeight,
@@ -105,10 +107,14 @@ const getAttributesColumnBar = ({
   const outlineGap = getOutlineGap(plotWidth);
   const outlineDistance = outlineGap + outlineWidth / 2;
 
+  // When there is only one series, all columns/bars are outline.
+  // Make sure there's a gap between the outline and the axis marker.
+  const extraDistance = seriesCount === 1 ? outlineGap : 0;
+
   if (seriesType === 'column') {
     return {
       x: x - outlineDistance,
-      y: plotHeight + outlineDistance,
+      y: plotHeight + outlineDistance + extraDistance,
       width: width + 2 * outlineDistance,
       height: AXIS_MARKER_SIZE,
       fill: color,
@@ -120,7 +126,7 @@ const getAttributesColumnBar = ({
       // Bar charts are column charts rotated by 90° and mirrored,
       // so x and y dimensions are flipped here, and y: 0 is on the right
       x: x - outlineDistance,
-      y: plotWidth + outlineDistance,
+      y: plotWidth + outlineDistance + extraDistance,
       width: width + 2 * outlineDistance,
       height: AXIS_MARKER_SIZE,
       fill: color,
@@ -152,6 +158,7 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
   if (!firstSeries) {
     return NO_ELEMENTS;
   }
+  const seriesCount = relevantSeries.length;
   const seriesType = firstSeries.type;
   // Get the transforms from the series <g>
   const seriesTransform = firstSeries.group.element.getAttribute('transform');
@@ -179,6 +186,7 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
           : null;
 
       const attributes = getAttributesColumnBar({
+        seriesCount,
         seriesType,
         plotWidth: chart.plotWidth,
         plotHeight: chart.plotHeight,
@@ -258,6 +266,7 @@ const renderSeriesAxisMarkers = ({
         if (!shapeArgs) return;
 
         const attributes = getAttributesColumnBar({
+          seriesCount: relevantSeries.length,
           seriesType: series.type,
           plotWidth: chart.plotWidth,
           plotHeight: chart.plotHeight,
