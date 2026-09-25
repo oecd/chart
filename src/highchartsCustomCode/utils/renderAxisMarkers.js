@@ -4,11 +4,11 @@
  */
 
 import { baselineColor } from '../../constants/chart';
+import { AXIS_MARKER_SIZE } from './axisMarkerSize';
 import {
   getBoundingRectsByCategory,
   groupPointsByCategory,
 } from './getBoundingRectsByCategory';
-import { HIGHLIGHT_MARKER_SIZE } from './highlightMarkerSize';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
@@ -110,7 +110,7 @@ const getAttributesColumnBar = ({
       x: x - outlineDistance,
       y: plotHeight + outlineDistance,
       width: width + 2 * outlineDistance,
-      height: HIGHLIGHT_MARKER_SIZE,
+      height: AXIS_MARKER_SIZE,
       fill: color,
       transform,
     };
@@ -122,7 +122,7 @@ const getAttributesColumnBar = ({
       x: x - outlineDistance,
       y: plotWidth + outlineDistance,
       width: width + 2 * outlineDistance,
-      height: HIGHLIGHT_MARKER_SIZE,
+      height: AXIS_MARKER_SIZE,
       fill: color,
       transform,
     };
