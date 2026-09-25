@@ -3,7 +3,7 @@
  * @import { Chart, Point, SVGElement as HighchartsSVGElement, SVGAttributes, CSSObject } from "highcharts"
  */
 import { TinyColor } from '@ctrl/tinycolor';
-import { HIGHLIGHT_MARKER_SIZE } from './highlightMarkerSize';
+import { AXIS_MARKER_SIZE } from './axisMarkerSize';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
@@ -199,7 +199,7 @@ export const renderSplineMarkers = ({ chart }) => {
             x,
             y: chart.plotTop + chart.plotHeight + outlineDistance,
             width: markerWidth,
-            height: HIGHLIGHT_MARKER_SIZE,
+            height: AXIS_MARKER_SIZE,
             fill: highlightColor,
             // 'pointer-events': 'none',
             // Move below lines and point dots
