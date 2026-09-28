@@ -17,11 +17,18 @@ import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { highlightSymbols } from './highlightSymbols';
+import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
 const HIGHLIGHTED_SYMBOL_LINE_WIDTH = 1.5;
 
+/**
+ * @param {{
+ * highlight?: string[];
+ * baseline?: string[];
+ * }} options
+ */
 export const createOptionsForLineChart = ({
   data,
   formatters = {},
@@ -272,6 +279,9 @@ export const createOptionsForLineChart = ({
     categories: seenCategories,
   };
 
+  const xAxisLabelFormatters = formatters.xAxisLabels;
+  const xAxisLabelFormat = xAxisLabelFormatters?.format;
+
   return {
     custom: customChartOptions,
 
@@ -314,7 +324,9 @@ export const createOptionsForLineChart = ({
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
-        ...R.prop('xAxisLabels', formatters),
+        ...xAxisLabelFormatters,
+        formatter: (context) =>
+          xAxisLabelFormatter(context, xAxisLabelFormat, highlightCodes),
         ...(hideXAxisLabels ? { enabled: false } : {}),
       },
       gridLineColor: '#c2cbd6',
