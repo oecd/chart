@@ -26,14 +26,7 @@ export const renderStackedBarAndColumn = ({ chart }) => {
   const elements = [];
 
   elements.push(...renderCategoryGroupOutline(chart));
-  elements.push(
-    ...renderAxisMarkers({
-      chart,
-      showSeriesBaseline: false,
-      showSeriesHighlight: false,
-      showCategoryHighlight: true,
-    }),
-  );
+  elements.push(...renderAxisMarkers(chart));
   elements.push(...renderHighlightInsets(chart));
 
   if (chart.oecd_highlightElements) {

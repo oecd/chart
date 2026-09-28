@@ -13,6 +13,7 @@ import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
+import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 /**
  * @param {{
@@ -81,18 +82,33 @@ export const createOptionsForBarChart = ({
 
   const {
     baselineCodes,
+    categoryCodes,
     highlightCodes,
     highlightSeriesCodes,
     highlightCategoryCodes,
-    isGroupedChart,
-    isCategoryGroupHighlighted,
   } = getBaselineAndHighlightCodes({
     data,
     baseline,
     highlight,
   });
+
+  /** Whether there are multiple series */
+  const isGroupedChart = data.series.length > 1;
+
+  const isBaselineACategory = R.any(
+    (baselineCode) => categoryCodes.has(baselineCode),
+    baselineCodes,
+  );
+
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
+
+  /**
+   * Whether a category is baseline/highlighted that contains several points
+   * and can be highlighted as a visual group, not as individual points.
+   */
+  const isCategoryGroupHighlighted =
+    isGroupedChart && (isBaselineACategory || anyCategoryHighlighted);
 
   /** Custom chart options used by the baseline/highlight render callbacks */
   const customChartOptions = {
@@ -101,9 +117,11 @@ export const createOptionsForBarChart = ({
     highlightCategoryCodes,
     highlightColors: matchingHighlightColors,
     highlightOutlineColors: matchingHighlightOutlineColors,
-    isGrouped: isGroupedChart,
     isCategoryGroupHighlighted,
   };
+
+  const xAxisLabelFormatters = formatters.xAxisLabels;
+  const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
   return {
     custom: customChartOptions,
@@ -144,7 +162,9 @@ export const createOptionsForBarChart = ({
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
-        ...R.prop('xAxisLabels', formatters),
+        ...xAxisLabelFormatters,
+        formatter: (context) =>
+          xAxisLabelFormatter(context, xAxisLabelFormat, highlightCodes),
         ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
           ? { enabled: false }
           : {}),
@@ -239,11 +259,13 @@ export const createOptionsForBarChart = ({
         return colorFromPalette;
       })();
 
+      const customSeriesOptions = {
+        isBaseline: isSeriesBaseline,
+        isHighlighted: isSeriesHighlighted,
+      };
+
       return {
-        custom: {
-          isBaseline: isSeriesBaseline,
-          isHighlighted: isSeriesHighlighted,
-        },
+        custom: customSeriesOptions,
         name: data.areSeriesDates
           ? seriesFrequency.tryParse(series.label).getTime()
           : series.label,
@@ -266,7 +288,6 @@ export const createOptionsForBarChart = ({
           const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
 
           // Highlight
-
           const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
           const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
@@ -278,7 +299,7 @@ export const createOptionsForBarChart = ({
               ? categoryHighlightIndex
               : -1;
 
-          // Colors
+          // Highlight colors
 
           const highlightColor = finalIsHighlighted
             ? getListItemAtTurningIndex(
@@ -289,6 +310,22 @@ export const createOptionsForBarChart = ({
           const highlightOutlineColor = finalIsHighlighted
             ? getListItemAtTurningIndex(
                 finalHighlightIndex,
+                matchingHighlightOutlineColors,
+              )
+            : null;
+
+          // Category highlight colors
+
+          const categoryHighlightColor = isCategoryHighlighted
+            ? getListItemAtTurningIndex(
+                categoryHighlightIndex,
+                matchingHighlightColors,
+              )
+            : null;
+
+          const categoryHighlightOutlineColor = isCategoryHighlighted
+            ? getListItemAtTurningIndex(
+                categoryHighlightIndex,
                 matchingHighlightOutlineColors,
               )
             : null;
@@ -324,21 +361,25 @@ export const createOptionsForBarChart = ({
             return null;
           })();
 
+          const customPointOptions = {
+            ...dataPoint.custom,
+            // Baseline
+            isBaseline: finalIsBaseline,
+            isSeriesBaseline,
+            isCategoryBaseline,
+            // Highlight
+            isHighlighted: finalIsHighlighted,
+            isSeriesHighlighted,
+            isCategoryHighlighted,
+            highlightColor,
+            highlightOutlineColor,
+            categoryHighlightColor,
+            categoryHighlightOutlineColor,
+          };
+
           return {
             ...dataPoint,
-            custom: {
-              ...dataPoint.custom,
-              // Baseline
-              isBaseline: finalIsBaseline,
-              isSeriesBaseline,
-              isCategoryBaseline,
-              // Highlight
-              isHighlighted: finalIsHighlighted,
-              isSeriesHighlighted,
-              isCategoryHighlighted,
-              highlightColor,
-              highlightOutlineColor,
-            },
+            custom: customPointOptions,
             name: category.label,
             color: pointColor,
           };

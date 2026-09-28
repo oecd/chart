@@ -38,6 +38,7 @@ export const renderCategoryGroupOutline = (chart) => {
   /** @type {boolean} */
   const isCategoryGroupHighlighted =
     customChartOptions.isCategoryGroupHighlighted;
+
   if (!isCategoryGroupHighlighted) {
     return NO_ELEMENTS;
   }
@@ -114,7 +115,9 @@ export const renderCategoryGroupOutline = (chart) => {
         x: x1 - outlineDistance,
         y: 0,
         width: x2 - x1 + 2 * outlineDistance,
-        height: seriesType === 'column' ? chart.plotHeight : chart.plotWidth,
+        height:
+          (seriesType === 'column' ? chart.plotHeight : chart.plotWidth) +
+          outlineDistance,
         transform: seriesTransform,
       })
       .toFront();
