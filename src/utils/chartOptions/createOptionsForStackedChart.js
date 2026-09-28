@@ -14,6 +14,7 @@ import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
+import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 /**
  * @param {{
@@ -79,11 +80,13 @@ const createStackedDatapoints = ({
       return colorFromPalette;
     })();
 
+    const customSeriesOptions = {
+      isBaseline: isSeriesBaseline,
+      isHighlighted: isSeriesHighlighted,
+    };
+
     return {
-      custom: {
-        isBaseline: isSeriesBaseline,
-        isHighlighted: isSeriesHighlighted,
-      },
+      custom: customSeriesOptions,
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(series.label).getTime()
         : series.label,
@@ -130,7 +133,7 @@ const createStackedDatapoints = ({
             ? categoryHighlightIndex
             : -1;
 
-        // Colors
+        // Highlight color
 
         const highlightColor = finalIsHighlighted
           ? getListItemAtTurningIndex(
@@ -138,6 +141,17 @@ const createStackedDatapoints = ({
               matchingHighlightColors,
             )
           : null;
+
+        // Category highlight color
+
+        const categoryHighlightColor = isCategoryHighlighted
+          ? getListItemAtTurningIndex(
+              categoryHighlightIndex,
+              matchingHighlightColors,
+            )
+          : null;
+
+        // Point color
 
         const getPointColor = () => {
           // Only color the bar segment if the series is baseline or highlighted.
@@ -166,20 +180,23 @@ const createStackedDatapoints = ({
         };
         const pointColor = getPointColor();
 
+        const customPointOptions = {
+          ...dataPoint.custom,
+          // Baseline
+          isBaseline,
+          isSeriesBaseline,
+          isCategoryBaseline,
+          // Highlight
+          isHighlighted: finalIsHighlighted,
+          isSeriesHighlighted,
+          isCategoryHighlighted,
+          highlightColor,
+          categoryHighlightColor,
+        };
+
         return {
           ...dataPoint,
-          custom: {
-            ...dataPoint.custom,
-            // Baseline
-            isBaseline,
-            isSeriesBaseline,
-            isCategoryBaseline,
-            // Highlight
-            isHighlighted: finalIsHighlighted,
-            isSeriesHighlighted,
-            isCategoryHighlighted,
-            highlightColor,
-          },
+          custom: customPointOptions,
           name: category.label,
           color: pointColor,
         };
@@ -261,16 +278,27 @@ export const createOptionsForStackedChart = ({
   };
 
   const {
+    categoryCodes,
     baselineCodes,
     highlightCodes,
     highlightSeriesCodes,
     highlightCategoryCodes,
-    isCategoryGroupHighlighted,
   } = getBaselineAndHighlightCodes({
     data,
     baseline,
     highlight,
   });
+
+  // Use Set#intersection in the future
+  const isBaselineACategory = R.any(
+    (baselineCode) => categoryCodes.has(baselineCode),
+    baselineCodes,
+  );
+
+  const anySeriesHighlighted = highlightSeriesCodes.length > 0;
+
+  const isCategoryGroupHighlighted =
+    isBaselineACategory || anySeriesHighlighted;
 
   const allSeries = createStackedDatapoints({
     data,
@@ -294,6 +322,9 @@ export const createOptionsForStackedChart = ({
     highlightOutlineColors: matchingHighlightOutlineColors,
     isCategoryGroupHighlighted,
   };
+
+  const xAxisLabelFormatters = formatters.xAxisLabels;
+  const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
   return {
     custom: customChartOptions,
@@ -341,7 +372,9 @@ export const createOptionsForStackedChart = ({
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
-        ...R.prop('xAxisLabels', formatters),
+        ...xAxisLabelFormatters,
+        formatter: (context) =>
+          xAxisLabelFormatter(context, xAxisLabelFormat, highlightCodes),
         ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
           ? { enabled: false }
           : {}),

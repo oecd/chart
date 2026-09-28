@@ -25,18 +25,21 @@ const OUTLINE_RECTS = new WeakMap();
  * @param {Point} point
  * @returns {HighchartsSVGElement | undefined}
  */
-const renderHighlightOutline = (chart, series, point) => {
+const renderHighlightOutlineForPoint = (chart, series, point) => {
   const customPointOptions = point.options.custom;
   if (!customPointOptions) return;
+
   /** @type {boolean} */
-  const isHighlighted = customPointOptions.isHighlighted;
+  const isCategoryHighlighted = customPointOptions.isCategoryHighlighted;
+
   /** @type {boolean} */
-  const isBaseline = customPointOptions.isBaseline;
-  const isBaselineOrHighlighted = isBaseline || isHighlighted;
+  const isCategoryBaseline = customPointOptions.isCategoryBaseline;
+  const isCategoryBaselineOrHighlighted =
+    isCategoryBaseline || isCategoryHighlighted;
 
   let outline = OUTLINE_RECTS.get(point);
 
-  if (!isBaselineOrHighlighted) {
+  if (!isCategoryBaselineOrHighlighted) {
     if (outline) {
       OUTLINE_RECTS.delete(point);
     }
@@ -50,12 +53,14 @@ const renderHighlightOutline = (chart, series, point) => {
     return;
   }
 
-  const stroke = isBaseline
+  const stroke = isCategoryBaseline
     ? baselineColor
-    : customPointOptions.highlightOutlineColor;
-  const fill = isBaseline ? baselineColor : customPointOptions.highlightColor;
+    : customPointOptions.categoryHighlightOutlineColor;
+  const fill = isCategoryBaseline
+    ? baselineColor
+    : customPointOptions.categoryHighlightColor;
   const fillWithOpacity = new TinyColor(fill)
-    .setAlpha(isBaseline ? 0.2 : 0.3)
+    .setAlpha(isCategoryBaseline ? 0.2 : 0.3)
     .toRgbString();
 
   // Get the transformations from the series <g>.
@@ -99,24 +104,24 @@ const renderHighlightOutline = (chart, series, point) => {
  * @returns {HighchartsSVGElement[]} Active elements
  */
 export const renderHighlightOutlines = (chart) => {
+  const customChartOptions = chart.options.custom;
+
   const isCategoryGroupHighlighted =
-    chart.options.custom.isCategoryGroupHighlighted;
+    customChartOptions.isCategoryGroupHighlighted;
   // The whole category group is outline, not individual rectangles.
   if (isCategoryGroupHighlighted) return NO_ELEMENTS;
 
   const relevantSeries = chart.series.filter(
     ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
   );
+  const seriesCount = relevantSeries.length;
 
-  const isGroupedChart =
-    relevantSeries.length > 1 && relevantSeries[0].data.length > 1;
-  // The rectangles will get an inset instead.
-  if (isGroupedChart) return NO_ELEMENTS;
+  if (seriesCount === 0) return NO_ELEMENTS;
 
   return relevantSeries
     .map((series) =>
       series.points.map((point) =>
-        renderHighlightOutline(chart, series, point),
+        renderHighlightOutlineForPoint(chart, series, point),
       ),
     )
     .flat()

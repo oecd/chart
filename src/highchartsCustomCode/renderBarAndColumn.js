@@ -20,9 +20,6 @@ export const renderBarAndColumn = ({ chart }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
 
-  /** @type {boolean} */
-  const isGrouped = customChartOptions.isGrouped;
-
   /**
    * SVG elements created for highlighting
    * @type {HighchartsSVGElement[]}
@@ -30,16 +27,7 @@ export const renderBarAndColumn = ({ chart }) => {
   const elements = [];
 
   // Render highlight shapes for all active series. Aggregate the shapes in a Set.
-  elements.push(
-    ...renderAxisMarkers({
-      chart,
-      // In grouped bar/column charts, the bars themselves are highlighted.
-      // No need to draw an axis marker.
-      showSeriesBaseline: !isGrouped,
-      showSeriesHighlight: !isGrouped,
-      showCategoryHighlight: true,
-    }),
-  );
+  elements.push(...renderAxisMarkers(chart));
   elements.push(...renderHighlightOutlines(chart));
   elements.push(...renderCategoryGroupOutline(chart));
   elements.push(...renderHighlightInsets(chart));
