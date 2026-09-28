@@ -15,12 +15,12 @@ import { codeOrLabelEquals } from '../configUtil';
  * highlight: string[];
  * }} options
  * @returns {{
- *   baselineCodes: string[];
- *   highlightCodes: string[];
- *   highlightSeriesCodes: string[];
- *   highlightCategoryCodes: string[];
- *   isGroupedChart: boolean;
- *   isCategoryGroupHighlighted: boolean;
+ * seriesCodes: Set<string>;
+ * categoryCodes: Set<string>;
+ * baselineCodes: string[];
+ * highlightCodes: string[];
+ * highlightSeriesCodes: string[];
+ * highlightCategoryCodes: string[];
  * }}
  */
 export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
@@ -79,30 +79,12 @@ export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
     }
   });
 
-  const isBaselineACategory = R.any(
-    (baselineCode) => categoryCodes.has(baselineCode),
-    baselineCodes,
-  );
-
-  /** Whether there are multiple series with multiple categories */
-  const isGroupedChart =
-    data.series.length > 1 &&
-    data.series.some((series) => series.data.length > 1);
-
-  /**
-   * Whether a category is baseline/highlighted that contains several points
-   * and can be highlighted as a visual group, not as individual points.
-   */
-  const isCategoryGroupHighlighted =
-    isGroupedChart &&
-    (isBaselineACategory || highlightCategoryCodes.length > 0);
-
   return {
+    seriesCodes,
+    categoryCodes,
     baselineCodes,
     highlightCodes,
     highlightSeriesCodes,
     highlightCategoryCodes,
-    isGroupedChart,
-    isCategoryGroupHighlighted,
   };
 };

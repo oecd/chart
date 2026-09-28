@@ -12,6 +12,7 @@ import {
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
+const DISTANCE = 1.5;
 const AXIS_MARKER_CLASS = 'oecd-axisMarker';
 
 /**
@@ -81,25 +82,25 @@ const renderAxisMarkerRect = ({
 
 /**
  * @param {{
- * seriesCount: number;
  * seriesType: string;
  * plotWidth: number;
  * plotHeight: number;
  * x: number;
  * width: number;
  * color: string;
+ * distance: number;
  * transform?: string;
  * }} options
  * @returns {SVGAttributes | undefined}
  */
 const getAttributesColumnBar = ({
-  seriesCount,
   seriesType,
   plotWidth,
   plotHeight,
   x,
   width,
   color,
+  distance,
   // Needs to be a string for Highcharts; undefined would cause an exception
   transform = '',
 }) => {
@@ -107,14 +108,10 @@ const getAttributesColumnBar = ({
   const outlineGap = getOutlineGap(plotWidth);
   const outlineDistance = outlineGap + outlineWidth / 2;
 
-  // When there is only one series, all columns/bars are outline.
-  // Make sure there's a gap between the outline and the axis marker.
-  const extraDistance = seriesCount === 1 ? outlineGap : 0;
-
   if (seriesType === 'column') {
     return {
       x: x - outlineDistance,
-      y: plotHeight + outlineDistance + extraDistance,
+      y: plotHeight + outlineDistance + distance,
       width: width + 2 * outlineDistance,
       height: AXIS_MARKER_SIZE,
       fill: color,
@@ -126,7 +123,7 @@ const getAttributesColumnBar = ({
       // Bar charts are column charts rotated by 90° and mirrored,
       // so x and y dimensions are flipped here, and y: 0 is on the right
       x: x - outlineDistance,
-      y: plotWidth + outlineDistance + extraDistance,
+      y: plotWidth + outlineDistance + distance,
       width: width + 2 * outlineDistance,
       height: AXIS_MARKER_SIZE,
       fill: color,
@@ -146,7 +143,9 @@ const getAttributesColumnBar = ({
  * }} options
  * @returns {HighchartsSVGElement[]}
  */
-const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
+const renderCategoryGroupAxisMarkers = ({ chart, relevantSeries }) => {
+  const outlineWidth = getOutlineWidth(chart.plotWidth);
+
   const customChartOptions = chart.options.custom;
 
   /** @type {string[]} */
@@ -155,10 +154,7 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
   const highlightCategoryCodes = customChartOptions.highlightCategoryCodes;
 
   const firstSeries = relevantSeries[0];
-  if (!firstSeries) {
-    return NO_ELEMENTS;
-  }
-  const seriesCount = relevantSeries.length;
+  if (!firstSeries) return NO_ELEMENTS;
   const seriesType = firstSeries.type;
   // Get the transforms from the series <g>
   const seriesTransform = firstSeries.group.element.getAttribute('transform');
@@ -173,26 +169,34 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
     .map(([category, points]) => {
       const boundingRect = boundingRectsByCategory.get(category);
       if (!boundingRect) return;
+
       const firstPoint = points[0];
       const customPointOptions = firstPoint.options.custom;
       if (!customPointOptions) return;
 
-      const { isBaseline, isCategoryHighlighted, highlightColor } =
-        customPointOptions;
-      const color = isBaseline
+      const {
+        isCategoryBaseline,
+        isCategoryHighlighted,
+        categoryHighlightColor,
+      } = customPointOptions;
+
+      const color = isCategoryBaseline
         ? baselineColor
         : isCategoryHighlighted
-          ? highlightColor
+          ? categoryHighlightColor
           : null;
 
+      const { x1, x2 } = boundingRect;
+      const width = x2 - x1 + outlineWidth / 2;
+
       const attributes = getAttributesColumnBar({
-        seriesCount,
         seriesType,
         plotWidth: chart.plotWidth,
         plotHeight: chart.plotHeight,
-        x: boundingRect.x1,
-        width: boundingRect.x2 - boundingRect.x1,
+        x: x1,
+        width,
         color,
+        distance: DISTANCE,
         // Apply series transformation to move the marker into the right place.
         transform: seriesTransform,
       });
@@ -214,19 +218,10 @@ const renderCategoryAxisMarkers = ({ chart, relevantSeries }) => {
  * @param {{
  * chart: Chart;
  * relevantSeries: Series[];
- * showSeriesBaseline: boolean;
- * showSeriesHighlight: boolean;
- * showCategoryHighlight: boolean;
  * }} options
  * @returns {HighchartsSVGElement[]}
  */
-const renderSeriesAxisMarkers = ({
-  chart,
-  relevantSeries,
-  showSeriesBaseline,
-  showSeriesHighlight,
-  showCategoryHighlight,
-}) =>
+const renderNormalAxisMarkers = ({ chart, relevantSeries }) =>
   relevantSeries
     .map((series) => {
       // Create <g> for the axis markers of this series
@@ -250,29 +245,31 @@ const renderSeriesAxisMarkers = ({
         const customPointOptions = point.options.custom;
         if (!customPointOptions) return;
 
-        const drawAxisMarker =
-          (showSeriesBaseline && customPointOptions.isSeriesBaseline) ||
-          (showSeriesHighlight && customPointOptions.isSeriesHighlighted) ||
-          (showCategoryHighlight && customPointOptions.isCategoryHighlighted);
+        /** @type {boolean} */
+        const isCategoryBaseline = customPointOptions.isCategoryBaseline;
+        /** @type {boolean} */
+        const isCategoryHighlighted = customPointOptions.isCategoryHighlighted;
+        const isCategoryBaselineOrHighlighted =
+          isCategoryBaseline || isCategoryHighlighted;
 
         // Any existing axis marker will be destroyed automatically
-        if (!drawAxisMarker) return;
+        if (!isCategoryBaselineOrHighlighted) return;
 
-        const color = customPointOptions.isBaseline
+        const color = isCategoryBaseline
           ? baselineColor
-          : customPointOptions.highlightColor;
+          : customPointOptions.categoryHighlightColor;
 
         const { shapeArgs } = point;
         if (!shapeArgs) return;
 
         const attributes = getAttributesColumnBar({
-          seriesCount: relevantSeries.length,
           seriesType: series.type,
           plotWidth: chart.plotWidth,
           plotHeight: chart.plotHeight,
           x: shapeArgs.x,
           width: shapeArgs.width,
           color,
+          distance: DISTANCE,
         });
         if (!attributes) return;
 
@@ -294,42 +291,28 @@ const renderSeriesAxisMarkers = ({
 /**
  * Renders axis markers for a chart
  *
- * @param {{
- *  chart: Chart;
- *  showSeriesBaseline: boolean; // Whether to draw a marker when the series is baseline
- *  showSeriesHighlight: boolean; // Whether to draw a marker when the series is highlighted
- *  showCategoryHighlight: boolean; // Whether to draw a marker when the category is highlighted
- * }} options
+ * @param {Chart} chart
  * @returns {HighchartsSVGElement[]}
  */
-export const renderAxisMarkers = ({
-  chart,
-  showSeriesBaseline,
-  showSeriesHighlight,
-  showCategoryHighlight,
-}) => {
-  /** @type {boolean} */
-  const isCategoryGroupHighlighted =
-    chart.options.custom.isCategoryGroupHighlighted;
-
+export const renderAxisMarkers = (chart) => {
   const relevantSeries = chart.series.filter(
     ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
   );
 
   if (relevantSeries.length === 0) return NO_ELEMENTS;
 
+  /** @type {boolean} */
+  const isCategoryGroupHighlighted =
+    chart.options.custom.isCategoryGroupHighlighted;
   if (isCategoryGroupHighlighted) {
-    return renderCategoryAxisMarkers({
+    return renderCategoryGroupAxisMarkers({
       chart,
       relevantSeries,
     });
   }
 
-  return renderSeriesAxisMarkers({
+  return renderNormalAxisMarkers({
     chart,
     relevantSeries,
-    showSeriesBaseline,
-    showSeriesHighlight,
-    showCategoryHighlight,
   });
 };
