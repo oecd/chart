@@ -101,7 +101,7 @@ export const renderCategoryGroupOutline = (chart) => {
     rect
       .attr({
         stroke,
-        strokeWidth: outlineWidth,
+        'stroke-width': outlineWidth,
         x: x1 - outlineDistance,
         y: 0,
         width: x2 - x1 + 2 * outlineDistance,

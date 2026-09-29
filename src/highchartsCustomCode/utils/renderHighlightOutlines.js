@@ -77,7 +77,7 @@ const renderHighlightOutlineForPoint = (chart, series, point) => {
 
   outline = outline.attr({
     stroke,
-    strokeWidth: outlineWidth,
+    'stroke-width': outlineWidth,
     x: shapeArgs.x - outlineDistance,
     y: shapeArgs.y - outlineDistance,
     width: shapeArgs.width + 2 * outlineDistance,

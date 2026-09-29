@@ -106,7 +106,7 @@ const getAttributesColumnBar = ({
 }) => {
   const outlineWidth = getOutlineWidth(plotWidth);
   const outlineGap = getOutlineGap(plotWidth);
-  const outlineDistance = outlineGap + outlineWidth / 2;
+  const outlineDistance = outlineGap + outlineWidth;
 
   if (seriesType === 'column') {
     return {
