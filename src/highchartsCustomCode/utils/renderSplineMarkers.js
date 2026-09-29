@@ -174,9 +174,6 @@ export const renderSplineMarkers = ({ chart }) => {
       const highlightColor = customPointOptions.isCategoryBaseline
         ? baselineColor
         : customPointOptions.highlightColor;
-      const highlightOutlineColor = customPointOptions.isCategoryBaseline
-        ? baselineColor
-        : customPointOptions.highlightOutlineColor;
 
       return [
         // Top semi-transparent rect behind the lines and points
@@ -191,7 +188,7 @@ export const renderSplineMarkers = ({ chart }) => {
             y: chart.plotTop,
             width: markerWidth,
             height: chart.plotHeight,
-            stroke: highlightOutlineColor,
+            stroke: highlightColor,
             'stroke-width': outlineWidth,
             fill: new TinyColor(highlightColor).setAlpha(0.3).toRgbString(),
             // 'pointer-events': 'none',
