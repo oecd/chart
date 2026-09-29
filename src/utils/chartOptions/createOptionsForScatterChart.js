@@ -19,6 +19,13 @@ import {
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 
+// Symbol sizes
+const RADIUS = 6;
+const RADIUS_MIN_MAX = 9;
+const DEFAULT_LINE_WIDTH = 0.5;
+const HIGHLIGHTED_LINE_WIDTH = 1.5;
+const CROSS_LINE_WIDTH = 2;
+
 const symbols = [
   'circle',
   'diamond',
@@ -39,6 +46,7 @@ export const createOptionsForScatterChart = ({
   highlight = null,
   baseline = null,
   matchingHighlightColors,
+  matchingHighlightOutlineColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -115,18 +123,30 @@ export const createOptionsForScatterChart = ({
         : color;
     })();
 
-    const lineColor =
-      symbol === 'cross'
-        ? null
-        : isSeriesHighlighted
-          ? // Highlighted points get a outline in the darkened highlight color
-            new TinyColor(seriesColor).darken(20).toString()
-          : 'white';
-    const lineWidth = symbol === 'cross' ? 2 : isSeriesHighlighted ? 1.5 : 0.5;
-    const hoverLineWidth = symbol === 'cross' ? 2 : isSeriesHighlighted ? 2 : 1;
+    const isCross = symbol === 'cross';
+    const lineColor = isCross
+      ? null
+      : isSeriesHighlighted
+        ? // Highlighted points get a outline in the darkened highlight color
+          getListItemAtTurningIndex(
+            seriesHighlightIndex,
+            matchingHighlightOutlineColors,
+          )
+        : 'white';
 
-    const symbolRadius = symbolMinMaxLayout ? 9 : 6;
-    const finalRadius = symbol === 'cross' ? symbolRadius - 1 : symbolRadius;
+    const seriesLineWidth = isCross
+      ? CROSS_LINE_WIDTH
+      : isSeriesHighlighted
+        ? HIGHLIGHTED_LINE_WIDTH
+        : DEFAULT_LINE_WIDTH;
+    const seriesHoverLineWidth = isCross
+      ? CROSS_LINE_WIDTH
+      : isSeriesHighlighted
+        ? HIGHLIGHTED_LINE_WIDTH * 1.5
+        : DEFAULT_LINE_WIDTH * 1.5;
+
+    const symbolRadius = symbolMinMaxLayout ? RADIUS_MIN_MAX : RADIUS;
+    const finalRadius = isCross ? symbolRadius - 1 : symbolRadius;
 
     return {
       name: data.areSeriesDates
@@ -135,23 +155,37 @@ export const createOptionsForScatterChart = ({
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
 
+        const dataPoint = createDatapoint(
+          pointData,
+          categoriesAreDatesOrNumberForDataParsing,
+        );
+
         const baselineOrHighlightColor = getBaselineOrHighlightColor(
           category,
           highlight,
           baseline,
           matchingHighlightColors,
         );
-
-        const dataPoint = createDatapoint(
-          pointData,
-          categoriesAreDatesOrNumberForDataParsing,
+        const baselineOrHighlightOutlineColor = getBaselineOrHighlightColor(
+          category,
+          highlight,
+          baseline,
+          matchingHighlightOutlineColors,
         );
+
+        const pointLineWidth = isCross
+          ? null
+          : baselineOrHighlightColor
+            ? HIGHLIGHTED_LINE_WIDTH
+            : null;
 
         return {
           name: category.label,
           ...dataPoint,
           color: baselineOrHighlightColor,
           marker: {
+            lineColor: baselineOrHighlightOutlineColor,
+            lineWidth: pointLineWidth,
             fillColor: baselineOrHighlightColor,
           },
         };
@@ -160,13 +194,13 @@ export const createOptionsForScatterChart = ({
       showInLegend: true,
       marker: {
         symbol,
-        lineColor,
-        lineWidth,
         radius: finalRadius,
+        lineColor,
+        lineWidth: seriesLineWidth,
         fillColor: seriesColor,
         states: {
           hover: {
-            lineWidth: hoverLineWidth,
+            lineWidth: seriesHoverLineWidth,
             radius: finalRadius,
           },
         },
