@@ -3,7 +3,6 @@
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
 import { baselineColor } from '../../constants/chart';
 import {
   getBoundingRectsByCategory,
@@ -51,8 +50,6 @@ export const renderCategoryGroupOutline = (chart) => {
   const highlightCategoryCodes = customChartOptions.highlightCategoryCodes;
   /** @type {string[]} */
   const highlightColors = customChartOptions.highlightColors;
-  /** @type {string[]} */
-  const highlightOutlineColors = customChartOptions.highlightOutlineColors;
 
   const relevantSeries = chart.series.filter(
     ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
@@ -99,19 +96,12 @@ export const renderCategoryGroupOutline = (chart) => {
 
     const isBaseline = baselineCodes.includes(category);
     const highlightIndex = highlightCodes.indexOf(category);
-    const stroke = isBaseline
-      ? baselineColor
-      : highlightOutlineColors[highlightIndex];
-    const fill = isBaseline ? baselineColor : highlightColors[highlightIndex];
-    const fillWithOpacity = new TinyColor(fill)
-      .setAlpha(isBaseline ? 0.2 : 0.3)
-      .toRgbString();
+    const stroke = isBaseline ? baselineColor : highlightColors[highlightIndex];
 
     rect
       .attr({
-        strokeWidth: outlineWidth,
         stroke,
-        fill: fillWithOpacity,
+        strokeWidth: outlineWidth,
         x: x1 - outlineDistance,
         y: 0,
         width: x2 - x1 + 2 * outlineDistance,
