@@ -3,7 +3,6 @@
  * @import { Chart, Point, Series, SVGElement as HighchartsSVGElement } from "highcharts"
  */
 
-import { TinyColor } from '@ctrl/tinycolor';
 import { baselineColor } from '../../constants/chart';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
@@ -55,13 +54,7 @@ const renderHighlightOutlineForPoint = (chart, series, point) => {
 
   const stroke = isCategoryBaseline
     ? baselineColor
-    : customPointOptions.categoryHighlightOutlineColor;
-  const fill = isCategoryBaseline
-    ? baselineColor
     : customPointOptions.categoryHighlightColor;
-  const fillWithOpacity = new TinyColor(fill)
-    .setAlpha(isCategoryBaseline ? 0.2 : 0.3)
-    .toRgbString();
 
   // Get the transformations from the series <g>.
   // We cannot just append the element to the series <g> since it has a clip mask.
@@ -84,8 +77,7 @@ const renderHighlightOutlineForPoint = (chart, series, point) => {
 
   outline = outline.attr({
     stroke,
-    'stroke-width': outlineWidth,
-    fill: fillWithOpacity,
+    strokeWidth: outlineWidth,
     x: shapeArgs.x - outlineDistance,
     y: shapeArgs.y - outlineDistance,
     width: shapeArgs.width + 2 * outlineDistance,
