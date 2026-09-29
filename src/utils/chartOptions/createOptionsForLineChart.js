@@ -54,12 +54,16 @@ export const createOptionsForLineChart = ({
   disableLegendInteraction = false,
   hideLineSymbols = false,
 }) => {
-  const { highlightCodes, highlightSeriesCodes, highlightCategoryCodes } =
-    getBaselineAndHighlightCodes({
-      data,
-      baseline,
-      highlight,
-    });
+  const {
+    baselineCodes,
+    highlightCodes,
+    highlightSeriesCodes,
+    highlightCategoryCodes,
+  } = getBaselineAndHighlightCodes({
+    data,
+    baseline,
+    highlight,
+  });
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const seenCategories = new Set();
@@ -130,6 +134,8 @@ export const createOptionsForLineChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
+        const isCategoryBaseline = baselineCodes.indexOf(categoryCode) !== -1;
+
         const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
         const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
@@ -159,9 +165,10 @@ export const createOptionsForLineChart = ({
 
         const customPointOptions = {
           ...dataPoint.custom,
-          // For time scales, point.y contains timestamps,
+          // For time scales, `point.category` contains timestamps,
           // so we pass the original code here.
           categoryCode,
+          isCategoryBaseline,
           // Highlight
           isHighlighted: finalIsHighlighted,
           isSeriesHighlighted,
@@ -275,8 +282,9 @@ export const createOptionsForLineChart = ({
 
   /** Custom chart options used by the baseline/highlight render callbacks */
   const customChartOptions = {
+    baselineCodes,
     highlightCategoryCodes,
-    categories: seenCategories,
+    categories: Array.from(seenCategories),
   };
 
   const xAxisLabelFormatters = formatters.xAxisLabels;
@@ -326,7 +334,11 @@ export const createOptionsForLineChart = ({
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         formatter: (context) =>
-          xAxisLabelFormatter(context, xAxisLabelFormat, highlightCodes),
+          xAxisLabelFormatter(
+            context,
+            xAxisLabelFormat,
+            baselineCodes.concat(highlightCodes),
+          ),
         ...(hideXAxisLabels ? { enabled: false } : {}),
       },
       gridLineColor: '#c2cbd6',

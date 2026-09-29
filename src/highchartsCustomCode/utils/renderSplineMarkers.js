@@ -3,6 +3,7 @@
  * @import { Chart, Point, SVGElement as HighchartsSVGElement, SVGAttributes, CSSObject } from "highcharts"
  */
 import { TinyColor } from '@ctrl/tinycolor';
+import { baselineColor } from '../../constants/chart';
 import { AXIS_MARKER_SIZE } from './axisMarkerSize';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
@@ -83,11 +84,15 @@ export const renderSplineMarkers = ({ chart }) => {
   const customChartOptions = chart.options.custom;
 
   /** @type {string[]} */
+  const baselineCodes = customChartOptions.baselineCodes;
+  /** @type {string[]} */
   const highlightCategoryCodes = customChartOptions.highlightCategoryCodes;
 
-  if (!(highlightCategoryCodes && highlightCategoryCodes.length > 0)) {
-    return NO_ELEMENTS;
-  }
+  const baselineAndHighlightCodes = baselineCodes.concat(
+    highlightCategoryCodes,
+  );
+
+  if (!(baselineAndHighlightCodes.length > 0)) return NO_ELEMENTS;
 
   const xAxis = chart.xAxis[0];
   if (!xAxis) return NO_ELEMENTS;
@@ -97,8 +102,7 @@ export const renderSplineMarkers = ({ chart }) => {
   // `xAxis.categories` is not present for datetime scales,
   // use the Set from the custom chart options in this case.
   // https://api.highcharts.com/highcharts/xAxis.categories
-  let categories =
-    xAxis.categories || Array.from(customChartOptions.categories);
+  let categories = xAxis.categories || customChartOptions.categories;
   if (!(categories && categories.length > 0)) return NO_ELEMENTS;
 
   /** @type {number} */
@@ -139,13 +143,15 @@ export const renderSplineMarkers = ({ chart }) => {
       // placeholder.
       if (point.y === null) return;
       const customPointOptions = point.options.custom;
-      const categoryCode = customPointOptions?.categoryCode;
+      if (!customPointOptions) return;
+      const categoryCode = customPointOptions.categoryCode;
       if (!categoryCode) {
         console.error('Expected point.options.custom.categoryCode');
         return;
       }
       if (
-        customPointOptions?.isCategoryHighlighted &&
+        (customPointOptions.isCategoryBaseline ||
+          customPointOptions.isCategoryHighlighted) &&
         !referencePointByHighlightedCategory.has(categoryCode)
       ) {
         referencePointByHighlightedCategory.set(categoryCode, point);
@@ -156,16 +162,21 @@ export const renderSplineMarkers = ({ chart }) => {
   // Enable mix-blend-mode, ignore white background
   chart.seriesGroup.css({ isolation: 'isolate' });
 
-  return highlightCategoryCodes
-    .map((category) => {
-      const referencePoint = referencePointByHighlightedCategory.get(category);
+  return baselineAndHighlightCodes
+    .map((code) => {
+      const referencePoint = referencePointByHighlightedCategory.get(code);
       if (!(referencePoint && typeof referencePoint.plotX === 'number')) return;
       const customPointOptions = referencePoint.options.custom;
       if (!customPointOptions) return;
 
       const x = axisLeft + referencePoint.plotX - markerWidth / 2;
-      const highlightColor = customPointOptions.highlightColor;
-      const highlightOutlineColor = customPointOptions.highlightOutlineColor;
+
+      const highlightColor = customPointOptions.isCategoryBaseline
+        ? baselineColor
+        : customPointOptions.highlightColor;
+      const highlightOutlineColor = customPointOptions.isCategoryBaseline
+        ? baselineColor
+        : customPointOptions.highlightOutlineColor;
 
       return [
         // Top semi-transparent rect behind the lines and points
