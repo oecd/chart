@@ -1,11 +1,9 @@
 import truncatise from 'truncatise';
-import { defaultPalette, palettes } from '../constants/palette';
 import * as R from 'ramda';
 
 import {
   codeOrLabelEquals,
   dataLastUpdateDateVariable,
-  getFinalPalette,
   latestMaxVariable,
   latestMinVariable,
   possibleVariables,
@@ -45,6 +43,7 @@ import {
 } from './sankeyUtil';
 import customChartRenderByChartType from '../highchartsCustomCode/customChartRenderByChartType';
 import { addColorAlpha, makeColorReadableOnBackgroundColor } from './colorUtil';
+import { getFinalPaletteColors } from './paletteUtil';
 
 const mapsUtil = import('./mapsUtil');
 
@@ -1839,8 +1838,8 @@ const createChartOptionsFunc =
           parseCSV,
         )(fixedColorIndexBySeries);
 
-    const finalColorPalette = R.isEmpty(parsedFixedColorIndexBySeries)
-      ? getFinalPalette(
+    const finalColorPaletteColors = R.isEmpty(parsedFixedColorIndexBySeries)
+      ? getFinalPaletteColors(
           colorPalette,
           smallerColorPalettes,
           R.length(
@@ -1901,7 +1900,7 @@ const createChartOptionsFunc =
 
     const options = createOptionsFuncForChartType({
       ...otherProps,
-      colorPalette: finalColorPalette,
+      colorPalette: finalColorPaletteColors,
       fixedColorIndexBySeries: parsedFixedColorIndexBySeries,
       highlight: parsedHighlight,
       baseline: parsedBaseline,
@@ -2059,6 +2058,3 @@ export const createFooter = ({ source, note, stripLinks = false }) =>
 
 export const isParsedDataEmpty = (parsedData) =>
   R.isEmpty(parsedData?.categories) || R.isEmpty(parsedData?.series);
-
-export const getPaletteById = (paletteId) =>
-  R.find(R.propEq(paletteId, 'id'), palettes) || defaultPalette;
