@@ -6,6 +6,7 @@ import * as csvUtil from './utils/csvUtil';
 import * as sdmxJsonUtil from './utils/sdmxJsonUtil';
 import * as chartUtil from './utils/chartUtil';
 import * as dateUtil from './utils/dateUtil';
+import * as paletteUtil from './utils/paletteUtil';
 
 export { default as Spinner } from './components/Spinner';
 export {
@@ -17,4 +18,5 @@ export {
   chartUtil,
   dateUtil,
   chartErrorMessages,
+  paletteUtil,
 };

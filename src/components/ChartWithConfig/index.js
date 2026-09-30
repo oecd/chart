@@ -7,9 +7,9 @@ import ChartWithConfigNonFixedChartHeight from './ChartWithConfigNonFixedChartHe
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import { trackChartView } from '../../utils/trackingUtil';
 import { controlTypes, frequencyTypes } from '../../constants/chart';
-import { getPaletteById } from '../../utils/chartUtil';
 import { getConnectedControlsDotStatDimensionIds } from '../../utils/configUtil';
-import { defaultPalette, highlightPalette } from '../../constants/palette';
+import { highlightPalette } from '../../constants/palette';
+import { getPaletteData } from '../../utils/paletteUtil';
 
 const tryDecodeURIComponent = (value) => {
   try {
@@ -269,17 +269,10 @@ const ChartWithConfig = ({
     trackChartView(otherProps.id);
   }, [otherProps.id]);
 
-  const palette = useMemo(() => {
-    if (!isNilOrEmpty(paletteId)) {
-      return getPaletteById(paletteId);
-    }
-
-    if (isNilOrEmpty(colorPalette)) {
-      return defaultPalette;
-    }
-
-    return null;
-  }, [paletteId, colorPalette]);
+  const paletteData = useMemo(
+    () => getPaletteData(paletteId, colorPalette, smallerColorPalettes),
+    [paletteId, colorPalette, smallerColorPalettes],
+  );
 
   return (
     <ChartWithConfigComponent
@@ -300,17 +293,7 @@ const ChartWithConfig = ({
         setControlIdForWhichDataLoadingIsPending
       }
       onDataReady={onDataReady}
-      {...(palette
-        ? {
-            colorPalette: palette.full,
-            smallerColorPalettes: palette.smallers,
-            isPaletteContinuous: palette.isContinuous,
-          }
-        : {
-            colorPalette,
-            smallerColorPalettes: smallerColorPalettes ?? [],
-            isPaletteContinuous: false,
-          })}
+      {...paletteData}
       highlightColors={
         isNilOrEmpty(highlightColors) ? highlightPalette.full : highlightColors
       }
