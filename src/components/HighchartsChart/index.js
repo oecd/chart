@@ -170,7 +170,7 @@ const HighchartsChart = ({
   hideNote = false,
   hideSource = false,
   hideToolbox = false,
-  hideLineSymbols = false,
+  hideLineSymbols = true,
   inlineLabels = false,
   disableLegendInteraction = false,
   tooltipContainerId,

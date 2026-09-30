@@ -280,6 +280,60 @@ export const createOptionsForLineChart = ({
       : { left: '5%', width: '95%' };
   };
 
+  // const plotBandColor = new TinyColor(matchingHighlightColors[0])
+  //   .setAlpha(0.2)
+  //   .toString();
+
+  const plotBandColor = new TinyColor(matchingHighlightColors[0])
+    .mix('#fff', 80)
+    .toString();
+  console.log('plotBandColor', plotBandColor);
+  const plotBandOutlineColor = matchingHighlightOutlineColors[0];
+  console.log('matchingHighlightColors', matchingHighlightColors);
+  /** @type {import('highcharts').XAxisPlotBandsOptions[]} */
+  const plotBands = [
+    {
+      color: plotBandColor,
+      borderWidth: 1,
+      borderColor: plotBandOutlineColor,
+      from: categoriesAreDatesOrNumberForDataParsing
+        ? new Date(2011, 0).getTime()
+        : 1.5,
+      to: categoriesAreDatesOrNumberForDataParsing
+        ? new Date(2013, 0).getTime()
+        : 2.5,
+      label: {
+        text: 'The quick brown fox jumps over the lazy dog. Quand un pingouin prend un goûter, les autres pingouins prennent un goûter, et ça fait beaucoup de goûters pour les pingouins.',
+        align: 'left',
+        // textAlign: 'left',
+        x: 0,
+        y: 14,
+        allowOverlap: false,
+        inside: false,
+        useHTML: true,
+        style: {
+          'box-sizing': 'border-box',
+          // fontSize: '14px',
+          // lineClamp: 2,
+          // lineWidth: 1,
+          // outline: '1px solid blue',
+          // width: 100,
+          // 'mix-blend-mode': 'color',
+          // padding: '5px',
+          // 'margin-left': -5,
+          // transform: 'translateX(-5px)',
+          // 'padding-left': '5px',
+          // 'padding-right': '30px',
+          paddingInline: '5px',
+          paddingRight: '30px',
+          // backgroundColor: 'color-mix(in srgb, red, transparent 20%)',
+          // backgroundColor: 'rgb(255 255 255 / 0.8)',
+          textShadow: '-1px -1px 2px white, 1px 1px 2px white',
+        },
+      },
+    },
+  ];
+
   /** Custom chart options used by the baseline/highlight render callbacks */
   const customChartOptions = {
     baselineCodes,
@@ -345,6 +399,7 @@ export const createOptionsForLineChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {

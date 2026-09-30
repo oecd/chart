@@ -17,6 +17,23 @@ export const renderLine = ({ chart }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
 
+  console.log('chart', chart);
+  console.log('chart.chartWidth', chart.chartWidth);
+  console.log('chart.plotWidth', chart.plotWidth);
+
+  const plotBandLabels = chart.container.querySelectorAll(
+    '.highcharts-plot-band-label',
+  );
+  plotBandLabels.forEach((label) => {
+    const { left, width } = label.style;
+    if (typeof left === 'string' && left.slice(-2) === 'px') {
+      const leftPx = parseFloat(left);
+      console.log('leftPx', leftPx);
+    }
+    console.log('label.style.left', label.style.left);
+    console.log('label.style.width', label.style.width);
+  });
+
   /**
    * SVG elements created for highlighting
    * @type {HighchartsSVGElement[]}
