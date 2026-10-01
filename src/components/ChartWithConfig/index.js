@@ -3,13 +3,10 @@ import * as R from 'ramda';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { controlTypes, frequencyTypes } from '../../constants/chart';
-import { highlightPalette } from '../../constants/palette';
 import {
-  defaultPalette,
   highlightOutlinePalette,
   highlightPalette,
 } from '../../constants/palette';
-import { getPaletteById } from '../../utils/chartUtil';
 import { getConnectedControlsDotStatDimensionIds } from '../../utils/configUtil';
 import { getPaletteData } from '../../utils/paletteUtil';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
