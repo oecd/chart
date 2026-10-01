@@ -1,4 +1,4 @@
-import { deepMergeUserOptionsWithDefaultOptions } from '../chartOptions/deepMergeUserOptionsWithDefaultOptions';
+import { deepMergeUserOptionsWithDefaultOptions } from '../deepMergeUserOptionsWithDefaultOptions';
 
 describe('deepMergeUserOptionsWithDefaultOptions', () => {
   test('should merge options correctly', () => {
