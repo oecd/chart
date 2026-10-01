@@ -42,12 +42,13 @@ export const createOptionsForRadarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const { highlightCodes, highlightSeriesCodes, highlightCategoryCodes } =
-    getBaselineAndHighlightCodes({
+  const { highlightCodes, highlightSeriesCodes } = getBaselineAndHighlightCodes(
+    {
       data,
       baseline,
       highlight,
-    });
+    },
+  );
 
   const seenCategories = new Set();
 
