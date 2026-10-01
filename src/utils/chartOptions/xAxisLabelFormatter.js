@@ -3,6 +3,8 @@
 import { format } from 'highcharts';
 
 /**
+ * Formats x axis labels, rendering them bold when highlighted.
+ *
  * @param {import('highcharts').AxisLabelsFormatterContextObject} context
  * @param {string} xAxisLabelFormat
  * @param {string[]} highlightCodes
