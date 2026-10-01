@@ -32,7 +32,6 @@ export const createOptionsForBarChart = ({
   baseline = null,
   highlight = null,
   matchingHighlightColors,
-  matchingHighlightOutlineColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -116,7 +115,6 @@ export const createOptionsForBarChart = ({
     highlightCodes,
     highlightCategoryCodes,
     highlightColors: matchingHighlightColors,
-    highlightOutlineColors: matchingHighlightOutlineColors,
     isCategoryGroupHighlighted,
   };
 
@@ -236,7 +234,6 @@ export const createOptionsForBarChart = ({
       const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
       const seriesColor = (() => {
-        // TODO: Can we use getBaselineOrHighlightColor here?
         if (isSeriesBaseline) return baselineColor;
         if (isSeriesHighlighted) {
           return getListItemAtTurningIndex(
@@ -307,12 +304,6 @@ export const createOptionsForBarChart = ({
                 matchingHighlightColors,
               )
             : null;
-          const highlightOutlineColor = finalIsHighlighted
-            ? getListItemAtTurningIndex(
-                finalHighlightIndex,
-                matchingHighlightOutlineColors,
-              )
-            : null;
 
           // Category highlight colors
 
@@ -320,13 +311,6 @@ export const createOptionsForBarChart = ({
             ? getListItemAtTurningIndex(
                 categoryHighlightIndex,
                 matchingHighlightColors,
-              )
-            : null;
-
-          const categoryHighlightOutlineColor = isCategoryHighlighted
-            ? getListItemAtTurningIndex(
-                categoryHighlightIndex,
-                matchingHighlightOutlineColors,
               )
             : null;
 
@@ -372,9 +356,7 @@ export const createOptionsForBarChart = ({
             isSeriesHighlighted,
             isCategoryHighlighted,
             highlightColor,
-            highlightOutlineColor,
             categoryHighlightColor,
-            categoryHighlightOutlineColor,
           };
 
           return {

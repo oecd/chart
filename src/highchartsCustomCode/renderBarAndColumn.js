@@ -34,7 +34,6 @@ export const renderBarAndColumn = ({ chart }) => {
 
   if (chart.oecd_highlightElements) {
     // Clean up old shapes
-    // Use R.difference since Set.prototype.difference is not well supported yet
     const obsoleteElements = R.difference(
       chart.oecd_highlightElements,
       elements,

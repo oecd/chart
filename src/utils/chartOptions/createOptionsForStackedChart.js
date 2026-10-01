@@ -222,7 +222,6 @@ export const createOptionsForStackedChart = ({
   baseline = null,
   highlight = null,
   matchingHighlightColors,
-  matchingHighlightOutlineColors,
   hideLegend = false,
   hideXAxisLabels = false,
   hideYAxisLabels = false,
@@ -319,7 +318,6 @@ export const createOptionsForStackedChart = ({
     highlightCodes,
     highlightCategoryCodes,
     highlightColors: matchingHighlightColors,
-    highlightOutlineColors: matchingHighlightOutlineColors,
     isCategoryGroupHighlighted,
   };
 

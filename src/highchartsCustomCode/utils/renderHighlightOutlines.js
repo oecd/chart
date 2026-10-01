@@ -30,7 +30,6 @@ const renderHighlightOutlineForPoint = (chart, series, point) => {
 
   /** @type {boolean} */
   const isCategoryHighlighted = customPointOptions.isCategoryHighlighted;
-
   /** @type {boolean} */
   const isCategoryBaseline = customPointOptions.isCategoryBaseline;
   const isCategoryBaselineOrHighlighted =
@@ -98,6 +97,7 @@ const renderHighlightOutlineForPoint = (chart, series, point) => {
 export const renderHighlightOutlines = (chart) => {
   const customChartOptions = chart.options.custom;
 
+  /** @type {boolean} */
   const isCategoryGroupHighlighted =
     customChartOptions.isCategoryGroupHighlighted;
   // The whole category group is outline, not individual rectangles.
