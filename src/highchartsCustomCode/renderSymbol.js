@@ -7,9 +7,6 @@ import * as R from 'ramda';
 import { chartTypes, nonHighlightedOpacity } from '../constants/chart';
 import { mapWithIndex } from '../utils/ramdaUtil';
 
-/** @type {HighchartsSVGElement[]} */
-let minMaxLines = [];
-
 /**
  * @param {{
  * chart: Chart;
@@ -22,7 +19,7 @@ export const renderSymbol = ({ chart, cbType }) => {
     .setAlpha(nonHighlightedOpacity)
     .toRgbString();
 
-  R.forEach((l) => l?.destroy(), minMaxLines);
+  R.forEach((l) => l?.destroy(), chart.minMaxLines);
 
   const categoriesMinMax = R.compose(
     (seriesData) =>
@@ -38,7 +35,7 @@ export const renderSymbol = ({ chart, cbType }) => {
     R.map(R.compose(R.map(R.prop('y')), R.prop('data'))),
   )(R.filter(R.propEq(true, 'visible'), chart.series));
 
-  minMaxLines = mapWithIndex((_category, idx) => {
+  chart.minMaxLines = mapWithIndex((_category, idx) => {
     if (R.isEmpty(categoriesMinMax[idx])) {
       return null;
     }
