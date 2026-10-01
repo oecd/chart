@@ -29,8 +29,11 @@ const STROKE_COLOR = 'rgb(0 0 0 / 0.3)';
 const getStrokeWidth = (series) => {
   // Determine the smallest highlighted point rect
   const smallestSize = series.reduce((previousSeriesSize, series) => {
-    const isSeriesBaseline = series.options.custom.isBaseline;
-    const isSeriesHighlighted = series.options.custom.isHighlighted;
+    const customSeriesOptions = series.options.custom;
+    /** @type {boolean} */
+    const isSeriesBaseline = customSeriesOptions.isBaseline;
+    /** @type {boolean} */
+    const isSeriesHighlighted = customSeriesOptions.isHighlighted;
     const finalIsHighlighted = isSeriesBaseline || isSeriesHighlighted;
 
     if (!finalIsHighlighted) {
@@ -185,8 +188,9 @@ export const renderHighlightInsets = (chart) => {
       /** @type {HighchartsSVGElement[]} */
       const seriesElements = [];
 
-      const isSeriesBaseline = series.options.custom.isBaseline;
-      const isSeriesHighlighted = series.options.custom.isHighlighted;
+      const customSeriesOptions = series.options.custom;
+      const isSeriesBaseline = customSeriesOptions.isBaseline;
+      const isSeriesHighlighted = customSeriesOptions.isHighlighted;
       const finalIsHighlighted = isSeriesBaseline || isSeriesHighlighted;
 
       const legendInset = renderLegendInset({
@@ -219,6 +223,5 @@ export const renderHighlightInsets = (chart) => {
 
       return seriesElements;
     })
-    .flat()
-    .filter(Boolean);
+    .flat();
 };

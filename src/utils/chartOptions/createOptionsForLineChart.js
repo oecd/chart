@@ -174,7 +174,6 @@ export const createOptionsForLineChart = ({
           isSeriesHighlighted,
           isCategoryHighlighted,
           highlightColor,
-          highlightOutlineColor,
         };
 
         return {

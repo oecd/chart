@@ -28,7 +28,6 @@ const RECTS_BY_CATEGORY_BY_CHART = new WeakMap();
  * `isCategoryGroupHighlighted`.`
  *
  * @param {Chart} chart
- *
  * @returns {HighchartsSVGElement[]}
  */
 export const renderCategoryGroupOutline = (chart) => {
@@ -38,9 +37,7 @@ export const renderCategoryGroupOutline = (chart) => {
   const isCategoryGroupHighlighted =
     customChartOptions.isCategoryGroupHighlighted;
 
-  if (!isCategoryGroupHighlighted) {
-    return NO_ELEMENTS;
-  }
+  if (!isCategoryGroupHighlighted) return NO_ELEMENTS;
 
   /** @type {string[]} */
   const baselineCodes = customChartOptions.baselineCodes;
