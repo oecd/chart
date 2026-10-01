@@ -11,7 +11,6 @@ import {
   calcExistingFixedColorIndexBySeries,
   createExportFileName,
 } from '../chartUtilCommon';
-import { getFinalPalette } from '../configUtil';
 import { parseCSV } from '../csvUtil';
 import { frequencies } from '../dateUtil';
 import { createCodeLabelMap } from '../generalUtil';
@@ -20,6 +19,7 @@ import {
   numericSymbols,
   thousandsSeparator,
 } from '../highchartsUtil';
+import { getFinalPaletteColors } from '../paletteUtil';
 import { isNilOrEmpty } from '../ramdaUtil';
 import { createOptionsForBarChart } from './createOptionsForBarChart';
 import { createOptionsForLineChart } from './createOptionsForLineChart';
@@ -88,8 +88,8 @@ const createChartOptionsFunc =
           parseCSV,
         )(fixedColorIndexBySeries);
 
-    const finalColorPalette = R.isEmpty(parsedFixedColorIndexBySeries)
-      ? getFinalPalette(
+    const finalColorPaletteColors = R.isEmpty(parsedFixedColorIndexBySeries)
+      ? getFinalPaletteColors(
           colorPalette,
           smallerColorPalettes,
           R.length(
@@ -161,7 +161,7 @@ const createChartOptionsFunc =
 
     const options = createOptionsFuncForChartType({
       ...otherProps,
-      colorPalette: finalColorPalette,
+      colorPalette: finalColorPaletteColors,
       fixedColorIndexBySeries: parsedFixedColorIndexBySeries,
       highlight: parsedHighlight,
       matchingHighlightColors,
