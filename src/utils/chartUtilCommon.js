@@ -90,25 +90,17 @@ export const getSeriesColor = ({
   );
 };
 
-export const getBaselineColor = (objWithCodeAndLabel, baseline) => {
-  const baselineIndex = R.findIndex(
-    codeOrLabelEquals(objWithCodeAndLabel),
-    baseline,
-  );
-  if (baselineIndex !== -1) {
-    return baselineColor;
-  }
-  return null;
-};
-
 export const getBaselineOrHighlightColor = (
   objWithCodeAndLabel,
   highlight,
   baseline,
   highlightColors,
 ) => {
-  const baselineColor = getBaselineColor(objWithCodeAndLabel, baseline);
-  if (baselineColor !== null) {
+  const baselineIndex = R.findIndex(
+    codeOrLabelEquals(objWithCodeAndLabel),
+    baseline,
+  );
+  if (baselineIndex !== -1) {
     return baselineColor;
   }
 
