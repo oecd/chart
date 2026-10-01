@@ -191,7 +191,7 @@ export const renderSplineMarkers = ({ chart }) => {
             stroke: highlightColor,
             'stroke-width': outlineWidth,
             fill: new TinyColor(highlightColor).setAlpha(0.3).toRgbString(),
-            // 'pointer-events': 'none',
+            'pointer-events': 'none',
             // Move on top of lines and point dots
             zIndex: 1,
           },
@@ -209,7 +209,7 @@ export const renderSplineMarkers = ({ chart }) => {
             width: markerWidth + outlineWidth,
             height: AXIS_MARKER_SIZE,
             fill: highlightColor,
-            // 'pointer-events': 'none',
+            'pointer-events': 'none',
             // Move below lines and point dots
             zIndex: -1,
           },
