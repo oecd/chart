@@ -187,9 +187,7 @@ export const createOptionsForLineChart = ({
               ? {
                   enabled: true,
                   format: seriesName,
-                  style: !R.isNil(isSeriesHighlighted)
-                    ? { fontWeight: 800 }
-                    : {},
+                  style: isSeriesHighlighted ? { fontWeight: 'bolder' } : {},
                 }
               : null,
           marker: {
@@ -240,7 +238,7 @@ export const createOptionsForLineChart = ({
     () => ({
       enabled: true,
       margin: isSmall ? -5 : -25,
-      symbolWidth: 10,
+      symbolWidth: 0,
       layout: 'vertical',
       align: 'right',
       verticalAlign: 'middle',
