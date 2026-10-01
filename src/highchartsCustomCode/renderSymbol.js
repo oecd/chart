@@ -19,7 +19,7 @@ export const renderSymbol = ({ chart, cbType }) => {
     .setAlpha(nonHighlightedOpacity)
     .toRgbString();
 
-  R.forEach((l) => l?.destroy(), chart.minMaxLines);
+  R.forEach((l) => l?.destroy(), chart.minMaxLines || []);
 
   const categoriesMinMax = R.compose(
     (seriesData) =>
