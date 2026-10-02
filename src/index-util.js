@@ -7,6 +7,13 @@ import * as sdmxJsonUtil from './utils/sdmxJsonUtil';
 import * as chartUtil from './utils/chartUtil';
 import * as dateUtil from './utils/dateUtil';
 import * as paletteUtil from './utils/paletteUtil';
+import { getCreateOptionsFuncForChartType } from './utils/chartOptions/getCreateOptionsFuncForChartType';
+import { deepMergeUserOptionsWithDefaultOptions } from './utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
+
+const chartOptionsUtil = {
+  getCreateOptionsFuncForChartType,
+  deepMergeUserOptionsWithDefaultOptions,
+};
 
 export { default as Spinner } from './components/Spinner';
 export {
@@ -19,4 +26,5 @@ export {
   dateUtil,
   chartErrorMessages,
   paletteUtil,
+  chartOptionsUtil,
 };
