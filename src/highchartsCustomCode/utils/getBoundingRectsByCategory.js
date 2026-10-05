@@ -19,12 +19,13 @@ export const groupPointsByCategory = (series, categories) => {
   // Gather the bounding boxes of points for highlighted categories
   series.forEach((singleSeries) => {
     singleSeries.points.forEach((point) => {
-      const { name } = point;
-      if (!categoryCodes.has(name)) return;
-      let points = pointsByCategory.get(name);
+      const customPointOptions = point.options.custom;
+      const code = customPointOptions.categoryCodeLowercase;
+      if (!categoryCodes.has(code)) return;
+      let points = pointsByCategory.get(code);
       if (!points) {
         points = [];
-        pointsByCategory.set(name, points);
+        pointsByCategory.set(code, points);
       }
       points.push(point);
     });

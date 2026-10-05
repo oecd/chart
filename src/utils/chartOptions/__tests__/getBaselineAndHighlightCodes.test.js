@@ -24,12 +24,12 @@ describe('getBaselineAndHighlightCodes', () => {
       highlight: ['Japan', 'BRA', 'Bananas', 'ORA'],
     });
     expect(result).toStrictEqual({
-      seriesCodes: new Set(['ITA', 'FRA', 'JPN', 'BRA', 'ISR']),
-      categoryCodes: new Set(['APL', 'AVO', 'BAN', 'ORA', 'MAG', 'PIN']),
-      baselineCodes: ['ITA', 'FRA', 'APL', 'AVO'],
-      highlightCodes: ['JPN', 'BRA', 'BAN', 'ORA'],
-      highlightSeriesCodes: ['JPN', 'BRA'],
-      highlightCategoryCodes: ['BAN', 'ORA'],
+      seriesCodes: new Set(['ita', 'fra', 'jpn', 'bra', 'isr']),
+      categoryCodes: new Set(['apl', 'avo', 'ban', 'ora', 'mag', 'pin']),
+      baselineCodes: ['ita', 'fra', 'apl', 'avo'],
+      highlightCodes: ['jpn', 'bra', 'ban', 'ora'],
+      highlightSeriesCodes: ['jpn', 'bra'],
+      highlightCategoryCodes: ['ban', 'ora'],
     });
   });
 });
