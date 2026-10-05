@@ -82,17 +82,17 @@ export const createOptionsForScatterChart = ({
   const anyHighlighted = highlightCodes.length > 0;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
+    const seriesCodeLowercase = series.code.toLowerCase();
+
     const isMinAvgOrMax = getIsMinAvgOrMax(series);
     const symbol = isMinAvgOrMax
       ? R.head(symbols)
       : getListItemAtTurningIndex(seriesIndex, symbols);
 
-    const seriesCode = series.code;
-
-    const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
+    const seriesBaselineIndex = baselineCodes.indexOf(seriesCodeLowercase);
     const isSeriesBaseline = seriesBaselineIndex !== -1;
 
-    const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
+    const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
     const seriesColor = (() => {
@@ -108,7 +108,7 @@ export const createOptionsForScatterChart = ({
         return getSeriesColor({
           colorPalette,
           seriesIndex,
-          seriesCode,
+          seriesCode: seriesCodeLowercase,
           fixedColorIndexBySeries,
         });
       }

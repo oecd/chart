@@ -225,8 +225,7 @@ export const createOptionsForBarChart = ({
     },
 
     series: mapWithIndex((series, seriesIndex) => {
-      const seriesCode = series.code;
-      const seriesCodeLowercase = seriesCode.toLowerCase();
+      const seriesCodeLowercase = series.code.toLowerCase();
 
       const seriesBaselineIndex = baselineCodes.indexOf(seriesCodeLowercase);
       const isSeriesBaseline = seriesBaselineIndex !== -1;
@@ -246,7 +245,7 @@ export const createOptionsForBarChart = ({
         const colorFromPalette = getSeriesColor({
           colorPalette,
           seriesIndex,
-          seriesCode,
+          seriesCode: seriesCodeLowercase,
           fixedColorIndexBySeries,
         });
         if (anySeriesHighlighted) {
@@ -272,8 +271,7 @@ export const createOptionsForBarChart = ({
         showInLegend: true,
         data: mapWithIndex((pointData, pointIndex) => {
           const category = R.nth(pointIndex, data.categories);
-          const categoryCode = category.code;
-          const categoryCodeLowercase = categoryCode.toLowerCase();
+          const categoryCodeLowercase = category.code.toLowerCase();
 
           const dataPoint = createDatapoint(
             pointData,
