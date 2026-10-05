@@ -226,11 +226,12 @@ export const createOptionsForBarChart = ({
 
     series: mapWithIndex((series, seriesIndex) => {
       const seriesCode = series.code;
+      const seriesCodeLowercase = seriesCode.toLowerCase();
 
-      const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
+      const seriesBaselineIndex = baselineCodes.indexOf(seriesCodeLowercase);
       const isSeriesBaseline = seriesBaselineIndex !== -1;
 
-      const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
+      const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
       const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
       const seriesColor = (() => {
@@ -257,6 +258,7 @@ export const createOptionsForBarChart = ({
       })();
 
       const customSeriesOptions = {
+        seriesCodeLowercase,
         isBaseline: isSeriesBaseline,
         isHighlighted: isSeriesHighlighted,
       };
@@ -271,6 +273,7 @@ export const createOptionsForBarChart = ({
         data: mapWithIndex((pointData, pointIndex) => {
           const category = R.nth(pointIndex, data.categories);
           const categoryCode = category.code;
+          const categoryCodeLowercase = categoryCode.toLowerCase();
 
           const dataPoint = createDatapoint(
             pointData,
@@ -279,13 +282,17 @@ export const createOptionsForBarChart = ({
 
           // Baseline
 
-          const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
+          const categoryBaselineIndex = baselineCodes.indexOf(
+            categoryCodeLowercase,
+          );
           const isCategoryBaseline = categoryBaselineIndex !== -1;
 
           const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
 
           // Highlight
-          const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
+          const categoryHighlightIndex = highlightCodes.indexOf(
+            categoryCodeLowercase,
+          );
           const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
           const finalIsHighlighted =
@@ -321,7 +328,6 @@ export const createOptionsForBarChart = ({
               return null;
             }
 
-            // TODO: Can we use getBaselineOrHighlightColor here?
             if (isSeriesBaseline) {
               return baselineColor;
             }
@@ -347,6 +353,7 @@ export const createOptionsForBarChart = ({
 
           const customPointOptions = {
             ...dataPoint.custom,
+            categoryCodeLowercase,
             // Baseline
             isBaseline: finalIsBaseline,
             isSeriesBaseline,
