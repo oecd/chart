@@ -50,7 +50,6 @@ const createStackedDatapoints = ({
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
 
   return mapWithIndex((series, seriesIndex) => {
-    const seriesCode = series.code;
     const seriesCodeLowercase = series.code.toLowerCase();
 
     const seriesBaselineIndex = baselineCodes.indexOf(seriesCodeLowercase);
@@ -70,7 +69,7 @@ const createStackedDatapoints = ({
       const colorFromPalette = getSeriesColor({
         colorPalette,
         seriesIndex,
-        seriesCode,
+        seriesCode: seriesCodeLowercase,
         fixedColorIndexBySeries,
       });
       if (anySeriesHighlighted) {

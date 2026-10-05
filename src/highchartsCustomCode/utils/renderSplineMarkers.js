@@ -144,11 +144,9 @@ export const renderSplineMarkers = ({ chart }) => {
       if (point.y === null) return;
       const customPointOptions = point.options.custom;
       if (!customPointOptions) return;
-      const categoryCode = customPointOptions.categoryCode;
-      if (!categoryCode) {
-        console.error('Expected point.options.custom.categoryCode');
-        return;
-      }
+      /** @type {string} */
+      const categoryCode = customPointOptions.categoryCodeLowercase;
+      if (!categoryCode) return;
       if (
         (customPointOptions.isCategoryBaseline ||
           customPointOptions.isCategoryHighlighted) &&

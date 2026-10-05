@@ -69,9 +69,9 @@ export const createOptionsForLineChart = ({
   const seenCategories = new Set();
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
-    const seriesCode = series.code;
+    const seriesCodeLowercase = series.code.toLowerCase();
 
-    const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
+    const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
     const seriesColor = (() => {
@@ -88,7 +88,7 @@ export const createOptionsForLineChart = ({
       const colorFromPalette = getSeriesColor({
         colorPalette,
         seriesIndex,
-        seriesCode,
+        seriesCode: seriesCodeLowercase,
         fixedColorIndexBySeries,
       });
       // Reduce opacity of non-highlighted lines
@@ -125,18 +125,21 @@ export const createOptionsForLineChart = ({
       name: seriesName,
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
-        const categoryCode = category.code;
+        const categoryCodeLowercase = category.code.toLowerCase();
 
-        seenCategories.add(categoryCode);
+        seenCategories.add(categoryCodeLowercase);
 
         const dataPoint = createDatapoint(
           pointData,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        const isCategoryBaseline = baselineCodes.indexOf(categoryCode) !== -1;
+        const isCategoryBaseline =
+          baselineCodes.indexOf(categoryCodeLowercase) !== -1;
 
-        const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
+        const categoryHighlightIndex = highlightCodes.indexOf(
+          categoryCodeLowercase,
+        );
         const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
         // The category highlight prevails for the marker point styling
@@ -167,7 +170,7 @@ export const createOptionsForLineChart = ({
           ...dataPoint.custom,
           // For time scales, `point.category` contains timestamps,
           // so we pass the original code here.
-          categoryCode,
+          categoryCodeLowercase,
           isCategoryBaseline,
           // Highlight
           isHighlighted: finalIsHighlighted,

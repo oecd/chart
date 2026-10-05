@@ -23,13 +23,13 @@ import { codeOrLabelEquals } from '../configUtil';
  * }}
  */
 export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
-  const entities = R.concat(data.series, data.categories);
+  const seriesAndCategories = R.concat(data.series, data.categories);
   const baselineEntities = R.filter(
     (series) => R.any(codeOrLabelEquals(series), baseline),
-    entities,
+    seriesAndCategories,
   );
   const getLowercaseCode = R.compose(R.toLower, R.prop('code'));
-  const baselineCodes = R.map(getLowercaseCode, baselineEntities);
+  const baselineSeriesAndCategories = R.map(getLowercaseCode, baselineEntities);
 
   // Determine series and category codes while preserving the original order
 
@@ -93,7 +93,7 @@ export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
   return {
     seriesCodes,
     categoryCodes,
-    baselineCodes,
+    baselineCodes: baselineSeriesAndCategories,
     highlightCodes,
     highlightSeriesCodes,
     highlightCategoryCodes,

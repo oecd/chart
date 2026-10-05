@@ -2,6 +2,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
@@ -42,22 +43,21 @@ export const createOptionsForRadarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const { highlightCodes, highlightSeriesCodes } = getBaselineAndHighlightCodes(
-    {
+  const { baselineCodes, categoryCodes, highlightCodes, highlightSeriesCodes } =
+    getBaselineAndHighlightCodes({
       data,
       baseline,
       highlight,
-    },
-  );
+    });
 
   const seenCategories = new Set();
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
-    const seriesCode = series.code;
+    const seriesCodeLowercase = series.code.toLowerCase();
 
-    const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
+    const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
     const seriesColor = (() => {
@@ -74,7 +74,7 @@ export const createOptionsForRadarChart = ({
       const colorFromPalette = getSeriesColor({
         colorPalette,
         seriesIndex,
-        seriesCode,
+        seriesCode: seriesCodeLowercase,
         fixedColorIndexBySeries,
       });
       // Reduce opacity of non-highlighted lines
@@ -104,11 +104,13 @@ export const createOptionsForRadarChart = ({
         : series.label,
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
-        const categoryCode = category.code;
+        const categoryCodeLowercase = category.code.toLowerCase();
 
-        seenCategories.add(categoryCode);
+        seenCategories.add(categoryCodeLowercase);
 
-        const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
+        const categoryHighlightIndex = highlightCodes.indexOf(
+          categoryCodeLowercase,
+        );
         const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
         const point = createDatapoint(
