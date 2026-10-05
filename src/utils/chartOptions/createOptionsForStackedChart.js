@@ -294,10 +294,9 @@ export const createOptionsForStackedChart = ({
     baselineCodes,
   );
 
-  const anySeriesHighlighted = highlightSeriesCodes.length > 0;
-
+  const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
   const isCategoryGroupHighlighted =
-    isBaselineACategory || anySeriesHighlighted;
+    isBaselineACategory || anyCategoryHighlighted;
 
   const allSeries = createStackedDatapoints({
     data,
