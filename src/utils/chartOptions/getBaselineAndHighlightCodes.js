@@ -3,8 +3,7 @@ import * as R from 'ramda';
 import { codeOrLabelEquals } from '../configUtil';
 
 /**
- * Returns the baseline and highlight codes,
- * determines flags used in the highlighting logic.
+ * Returns the baseline and highlight codes in lowercase.
  *
  * @param {{
  * data: {
@@ -29,17 +28,23 @@ export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
     (series) => R.any(codeOrLabelEquals(series), baseline),
     entities,
   );
-  const baselineCodes = R.map(R.prop('code'), baselineEntities);
+  const getLowercaseCode = R.compose(R.toLower, R.prop('code'));
+  const baselineCodes = R.map(getLowercaseCode, baselineEntities);
 
   // Determine series and category codes while preserving the original order
 
-  const seriesCodes = new Set(R.map(R.prop('code'), data.series));
+  const seriesCodes = new Set(R.map(getLowercaseCode, data.series));
+  /** @param {{ label: string; code: string }} s */
+  const getCodeAndLabelLowercase = (s) => [
+    R.toLower(s.label),
+    R.toLower(s.code),
+  ];
   const seriesCodesByLabel = new Map(
-    R.map((s) => [s.label, s.code], data.series),
+    R.map(getCodeAndLabelLowercase, data.series),
   );
-  const categoryCodes = new Set(R.map(R.prop('code'), data.categories));
+  const categoryCodes = new Set(R.map(getLowercaseCode, data.categories));
   const categoryCodesByLabel = new Map(
-    R.map((s) => [s.label, s.code], data.categories),
+    R.map(getCodeAndLabelLowercase, data.categories),
   );
 
   // List of highlight codes.
@@ -52,26 +57,32 @@ export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
   const highlightCategoryCodes = [];
 
   highlight.forEach((codeOrLabel) => {
+    const codeOrLabelLowercase = R.toLower(codeOrLabel);
+
     // Is it a series code?
-    if (seriesCodes.has(codeOrLabel)) {
-      highlightCodes.push(codeOrLabel);
-      highlightSeriesCodes.push(codeOrLabel);
+    if (seriesCodes.has(codeOrLabelLowercase)) {
+      highlightCodes.push(codeOrLabelLowercase);
+      highlightSeriesCodes.push(codeOrLabelLowercase);
       return;
     }
+
     // Is it a series label?
-    const seriesCode = seriesCodesByLabel.get(codeOrLabel);
+    const seriesCode = seriesCodesByLabel.get(codeOrLabelLowercase);
     if (seriesCode) {
       highlightCodes.push(seriesCode);
       highlightSeriesCodes.push(seriesCode);
       return;
     }
+
     // Is it a category code?
-    if (categoryCodes.has(codeOrLabel)) {
-      highlightCodes.push(codeOrLabel);
-      highlightCategoryCodes.push(codeOrLabel);
+    if (categoryCodes.has(codeOrLabelLowercase)) {
+      highlightCodes.push(codeOrLabelLowercase);
+      highlightCategoryCodes.push(codeOrLabelLowercase);
       return;
-    } // Is it a category label?
-    const categoryCode = categoryCodesByLabel.get(codeOrLabel);
+    }
+
+    // Is it a category label?
+    const categoryCode = categoryCodesByLabel.get(codeOrLabelLowercase);
     if (categoryCode) {
       highlightCodes.push(categoryCode);
       highlightCategoryCodes.push(categoryCode);

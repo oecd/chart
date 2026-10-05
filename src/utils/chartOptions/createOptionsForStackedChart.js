@@ -51,11 +51,12 @@ const createStackedDatapoints = ({
 
   return mapWithIndex((series, seriesIndex) => {
     const seriesCode = series.code;
+    const seriesCodeLowercase = series.code.toLowerCase();
 
-    const seriesBaselineIndex = baselineCodes.indexOf(seriesCode);
+    const seriesBaselineIndex = baselineCodes.indexOf(seriesCodeLowercase);
     const isSeriesBaseline = seriesBaselineIndex !== -1;
 
-    const seriesHighlightIndex = highlightCodes.indexOf(seriesCode);
+    const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
     const seriesColor = (() => {
@@ -81,6 +82,7 @@ const createStackedDatapoints = ({
     })();
 
     const customSeriesOptions = {
+      seriesCodeLowercase,
       isBaseline: isSeriesBaseline,
       isHighlighted: isSeriesHighlighted,
     };
@@ -105,7 +107,7 @@ const createStackedDatapoints = ({
       showInLegend: true,
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
-        const categoryCode = category.code;
+        const categoryCodeLowercase = category.code.toLowerCase();
 
         const dataPoint = createDatapoint(
           pointData,
@@ -116,14 +118,18 @@ const createStackedDatapoints = ({
 
         // Baseline
 
-        const categoryBaselineIndex = baselineCodes.indexOf(categoryCode);
+        const categoryBaselineIndex = baselineCodes.indexOf(
+          categoryCodeLowercase,
+        );
         const isCategoryBaseline = categoryBaselineIndex !== -1;
 
         const isBaseline = isSeriesBaseline || isCategoryBaseline;
 
         // Highlight
 
-        const categoryHighlightIndex = highlightCodes.indexOf(categoryCode);
+        const categoryHighlightIndex = highlightCodes.indexOf(
+          categoryCodeLowercase,
+        );
         const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
         const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
@@ -182,6 +188,7 @@ const createStackedDatapoints = ({
 
         const customPointOptions = {
           ...dataPoint.custom,
+          categoryCodeLowercase,
           // Baseline
           isBaseline,
           isSeriesBaseline,
