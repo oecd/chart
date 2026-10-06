@@ -29,9 +29,11 @@ export const xAxisLabelFormatter = (
   }
 
   // Find category code
-  const valueLowercase = String(value).toLowerCase();
+  const categoryValueLowercase = String(
+    typeof value === 'number' ? formattedValue : value,
+  ).toLowerCase();
   const category = categories.find(
-    (candidate) => candidate.label.toLowerCase() === valueLowercase,
+    (candidate) => candidate.label.toLowerCase() === categoryValueLowercase,
   );
   const categoryCode = category?.code.toLowerCase();
 
