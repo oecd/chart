@@ -193,18 +193,7 @@ export const createOptionsForRadarChart = ({
         return [firstHalf, secondHalf];
       }
       /** @type {import('highcharts').XAxisPlotBandsOptions} */
-      const plotBand = {
-        color,
-        from,
-        to,
-        ...(isBaseline
-          ? {
-              borderColor: 'white',
-              borderRadius: 2,
-              borderWidth: 3,
-            }
-          : null),
-      };
+      const plotBand = { color, from, to };
       return plotBand;
     })
     .flat()
