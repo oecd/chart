@@ -89,8 +89,7 @@ export const createOptionsForScatterChart = ({
       ? R.head(symbols)
       : getListItemAtTurningIndex(seriesIndex, symbols);
 
-    const seriesBaselineIndex = baselineCodes.indexOf(seriesCodeLowercase);
-    const isSeriesBaseline = seriesBaselineIndex !== -1;
+    const isSeriesBaseline = baselineCodes.includes(seriesCodeLowercase);
 
     const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;

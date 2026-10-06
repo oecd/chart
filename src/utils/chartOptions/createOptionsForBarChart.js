@@ -234,8 +234,7 @@ export const createOptionsForBarChart = ({
     series: mapWithIndex((series, seriesIndex) => {
       const seriesCodeLowercase = series.code.toLowerCase();
 
-      const seriesBaselineIndex = baselineCodes.indexOf(seriesCodeLowercase);
-      const isSeriesBaseline = seriesBaselineIndex !== -1;
+      const isSeriesBaseline = baselineCodes.includes(seriesCodeLowercase);
 
       const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
       const isSeriesHighlighted = seriesHighlightIndex !== -1;
@@ -286,12 +285,9 @@ export const createOptionsForBarChart = ({
           );
 
           // Baseline
-
-          const categoryBaselineIndex = baselineCodes.indexOf(
+          const isCategoryBaseline = baselineCodes.includes(
             categoryCodeLowercase,
           );
-          const isCategoryBaseline = categoryBaselineIndex !== -1;
-
           const finalIsBaseline = isSeriesBaseline || isCategoryBaseline;
 
           // Highlight

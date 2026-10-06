@@ -108,10 +108,9 @@ export const createOptionsForRadarChart = ({
 
         seenCategories.add(categoryCodeLowercase);
 
-        const categoryHighlightIndex = highlightCodes.indexOf(
+        const isCategoryHighlighted = highlightCodes.includes(
           categoryCodeLowercase,
         );
-        const isCategoryHighlighted = categoryHighlightIndex !== -1;
 
         const point = createDatapoint(
           pointData,
