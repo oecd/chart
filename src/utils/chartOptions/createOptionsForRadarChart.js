@@ -17,6 +17,7 @@ import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { highlightSymbols } from './highlightSymbols';
+import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -199,6 +200,9 @@ export const createOptionsForRadarChart = ({
     .flat()
     .filter((plotBand) => plotBand !== undefined);
 
+  const xAxisLabelFormatters = formatters.xAxisLabels;
+  const xAxisLabelFormat = xAxisLabelFormatters?.format;
+
   return {
     chart: {
       polar: true,
@@ -239,7 +243,16 @@ export const createOptionsForRadarChart = ({
       ),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
-        ...R.prop('xAxisLabels', formatters),
+        ...xAxisLabelFormatters,
+        /** @param {import('highcharts').AxisLabelsFormatterContextObject} context */
+        formatter: (context) =>
+          xAxisLabelFormatter(
+            context,
+            xAxisLabelFormat,
+            data.categories,
+            baselineCodes,
+            highlightCodes,
+          ),
         enabled: !hideXAxisLabels,
       },
       gridLineColor: '#c2cbd6',
