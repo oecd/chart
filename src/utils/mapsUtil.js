@@ -6,8 +6,6 @@ import {
   mapTypes,
 } from '../constants/chart';
 
-import map from './world-highres-custom-topo.json';
-import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
 import {
   convertColorToHex,
   createLighterColor,
@@ -17,6 +15,8 @@ import {
 } from './chartUtilCommon';
 import { isCastableToNumber } from './configUtil';
 import { numberFormatAbbreviatedForm } from './highchartsUtil';
+import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
+import map from './world-highres-custom-topo.json';
 
 const dottedBorderNames = {
   ETH_SOM: 'ETH_SOM',
@@ -430,7 +430,7 @@ export const createOptionsForMapChart = ({
   colorPalette,
   highlight = [],
   baseline = [],
-  highlightColors,
+  matchingHighlightColors,
   hideLegend = false,
   fullscreenClose = null,
   isFullScreen = false,
@@ -563,7 +563,7 @@ export const createOptionsForMapChart = ({
               { code: countryCode, label: getLabelFromMap(countryCode) },
               R.map(R.toUpper, highlight),
               R.map(R.toUpper, baseline),
-              highlightColors,
+              matchingHighlightColors,
             );
 
             return R.append(
