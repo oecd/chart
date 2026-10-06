@@ -134,8 +134,9 @@ export const createOptionsForLineChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        const isCategoryBaseline =
-          baselineCodes.indexOf(categoryCodeLowercase) !== -1;
+        const isCategoryBaseline = baselineCodes.includes(
+          categoryCodeLowercase,
+        );
 
         const categoryHighlightIndex = highlightCodes.indexOf(
           categoryCodeLowercase,
@@ -333,11 +334,14 @@ export const createOptionsForLineChart = ({
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
+        /** @param {import('highcharts').AxisLabelsFormatterContextObject} context */
         formatter: (context) =>
           xAxisLabelFormatter(
             context,
             xAxisLabelFormat,
-            baselineCodes.concat(highlightCodes),
+            data.categories,
+            baselineCodes,
+            highlightCodes,
           ),
         ...(hideXAxisLabels ? { enabled: false } : {}),
       },
