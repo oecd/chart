@@ -2,7 +2,7 @@
 /**
  * @import { Chart, SVGElement as HighchartsSVGElement } from "highcharts"
  */
-
+import { TinyColor } from '@ctrl/tinycolor';
 import { baselineColor } from '../../constants/chart';
 import {
   getBoundingRectsByCategory,
@@ -93,21 +93,20 @@ export const renderCategoryGroupOutline = (chart) => {
 
     const isBaseline = baselineCodes.includes(category);
     const highlightIndex = highlightCodes.indexOf(category);
-    const stroke = isBaseline ? baselineColor : highlightColors[highlightIndex];
+    const color = isBaseline ? baselineColor : highlightColors[highlightIndex];
 
-    rect
-      .attr({
-        stroke,
-        'stroke-width': outlineWidth,
-        x: x1 - outlineDistance,
-        y: 0,
-        width: x2 - x1 + 2 * outlineDistance,
-        height:
-          (seriesType === 'column' ? chart.plotHeight : chart.plotWidth) +
-          outlineDistance,
-        transform: seriesTransform,
-      })
-      .toFront();
+    rect.attr({
+      stroke: color,
+      'stroke-width': outlineWidth,
+      fill: new TinyColor(color).setAlpha(0.15).toRgbString(),
+      x: x1 - outlineDistance,
+      y: 0,
+      width: x2 - x1 + 2 * outlineDistance,
+      height:
+        (seriesType === 'column' ? chart.plotHeight : chart.plotWidth) +
+        outlineDistance,
+      transform: seriesTransform,
+    });
 
     elements.push(rect);
   });
