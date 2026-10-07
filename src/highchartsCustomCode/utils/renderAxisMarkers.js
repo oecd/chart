@@ -144,8 +144,6 @@ const getAttributesColumnBar = ({
  * @returns {HighchartsSVGElement[]}
  */
 const renderCategoryGroupAxisMarkers = ({ chart, relevantSeries }) => {
-  const outlineWidth = getOutlineWidth(chart.plotWidth);
-
   const customChartOptions = chart.options.custom;
 
   /** @type {string[]} */
@@ -187,14 +185,13 @@ const renderCategoryGroupAxisMarkers = ({ chart, relevantSeries }) => {
           : null;
 
       const { x1, x2 } = boundingRect;
-      const width = x2 - x1 + outlineWidth / 2;
 
       const attributes = getAttributesColumnBar({
         seriesType,
         plotWidth: chart.plotWidth,
         plotHeight: chart.plotHeight,
         x: x1,
-        width,
+        width: x2 - x1,
         color,
         distance: DISTANCE,
         // Apply series transformation to move the marker into the right place.
