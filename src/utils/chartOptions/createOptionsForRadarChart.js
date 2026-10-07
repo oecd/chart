@@ -244,10 +244,11 @@ export const createOptionsForRadarChart = ({
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         ...xAxisLabelFormatters,
-        /** @param {import('highcharts').AxisLabelsFormatterContextObject} context */
-        formatter: (context) =>
+        /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
+        formatter: ({ chart, value }) =>
           xAxisLabelFormatter(
-            context,
+            chart,
+            value,
             xAxisLabelFormat,
             data.categories,
             baselineCodes,

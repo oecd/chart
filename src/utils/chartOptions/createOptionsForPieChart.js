@@ -10,6 +10,8 @@ import {
   getSeriesColor,
 } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
+import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
+import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 export const createOptionsForPieChart = ({
   data,
@@ -30,6 +32,12 @@ export const createOptionsForPieChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
+  const { baselineCodes, highlightCodes } = getBaselineAndHighlightCodes({
+    data,
+    baseline,
+    highlight,
+  });
+
   const allSeries = R.map(
     (series) => ({
       name: data.areSeriesDates
@@ -68,6 +76,9 @@ export const createOptionsForPieChart = ({
     }),
     R.isEmpty(data.series) ? [] : [R.head(data.series)],
   );
+
+  const xAxisLabelFormatters = formatters.xAxisLabels;
+  const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
   return {
     chart: {
@@ -111,7 +122,20 @@ export const createOptionsForPieChart = ({
       pie: {
         dataLabels: {
           enabled: !hideXAxisLabels,
-          ...R.prop('xAxisLabels', formatters),
+          // We can't use an arrow function `(context) => {}` here. For pie charts,
+          // the `context` param does not carry the point value we need.
+          /** @type {import('highcharts').DataLabelsFormatterCallbackFunction} */
+          formatter: function () {
+            const { name } = this;
+            return xAxisLabelFormatter(
+              this.series.chart,
+              name,
+              xAxisLabelFormat,
+              data.categories,
+              baselineCodes,
+              highlightCodes,
+            );
+          },
           style: {
             fontSize: isSmall ? '13px' : '16px',
             color: '#586179',

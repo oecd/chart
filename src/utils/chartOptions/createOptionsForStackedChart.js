@@ -373,10 +373,11 @@ export const createOptionsForStackedChart = ({
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
-        /** @param {import('highcharts').AxisLabelsFormatterContextObject} context */
-        formatter: (context) =>
+        /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
+        formatter: ({ chart, value }) =>
           xAxisLabelFormatter(
-            context,
+            chart,
+            value,
             xAxisLabelFormat,
             data.categories,
             baselineCodes,
