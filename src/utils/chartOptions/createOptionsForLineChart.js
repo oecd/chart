@@ -329,7 +329,9 @@ export const createOptionsForLineChart = ({
             ),
             data.categories,
           ),
-      ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
+      ...(categoriesAreDatesOrNumberForDataParsing && data.areCategoriesDates
+        ? { type: 'datetime' }
+        : null),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
