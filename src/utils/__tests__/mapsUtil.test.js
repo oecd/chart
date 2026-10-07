@@ -1,60 +1,30 @@
 import * as R from 'ramda';
 
-import { createOptionsForMapChart } from '../mapsUtil';
 import { baselineColor } from '../../constants/chart';
+import { createOptionsForMapChart } from '../mapsUtil';
 
 describe('mapsUtil', () => {
   describe('createOptionsForMapChart', () => {
     const data = {
       categories: [
-        {
-          code: 'FRA',
-          label: 'FRA',
-        },
-        {
-          code: 'AUS',
-          label: 'AUS',
-        },
-        {
-          code: 'CAN',
-          label: 'CAN',
-        },
-        {
-          code: 'BRA',
-          label: 'Brazil override',
-        },
-        {
-          code: 'ARG',
-          label: 'ARG',
-        },
-        {
-          code: 'USA',
-          label: 'USA',
-        },
+        { code: 'FRA', label: 'FRA' },
+        { code: 'AUS', label: 'AUS' },
+        { code: 'CAN', label: 'CAN' },
+        { code: 'BRA', label: 'Brazil override' },
+        { code: 'ARG', label: 'ARG' },
+        { code: 'USA', label: 'USA' },
       ],
       series: [
         {
           code: 'Apples',
           label: 'Apples',
           data: [
-            {
-              value: 10,
-            },
-            {
-              value: 40,
-            },
-            {
-              value: 37,
-            },
-            {
-              value: 15,
-            },
-            {
-              value: 5,
-            },
-            {
-              value: 20,
-            },
+            { value: 10 },
+            { value: 40 },
+            { value: 37 },
+            { value: 15 },
+            { value: 5 },
+            { value: 20 },
           ],
         },
       ],
@@ -80,21 +50,12 @@ describe('mapsUtil', () => {
     };
 
     const colorPalette = ['#264042'];
-    const highlightColors = [
-      '#E5DC89',
-      '#F2C786',
-      '#E5AB6E',
-      '#D88F57',
-      '#CB733F',
-      '#BE5727',
-      '#B13B10',
-    ];
 
     test('should return the expected counties label', () => {
       const options = createOptionsForMapChart({
         data,
         colorPalette,
-        highlightColors,
+        matchingHighlightColors: [],
       });
 
       const geometries = R.path(
@@ -115,12 +76,13 @@ describe('mapsUtil', () => {
     });
 
     test('highlight and baseline should work with both code and labels (countries name)', () => {
+      const matchingHighlightColors = ['#E5DC89', '#F2C786'];
       const options = createOptionsForMapChart({
         data,
         colorPalette,
         highlight: ['AUS', 'France'],
         baseline: ['USA', 'Canada'],
-        highlightColors,
+        matchingHighlightColors,
       });
 
       const dataSeries = R.find(R.propEq('Apples', 'name'), options.series);
@@ -129,10 +91,10 @@ describe('mapsUtil', () => {
         R.find(R.propEq(code, 'code'), dataSeries.data);
 
       expect(getSeriesDatumByCode('AUS').color).toEqual(
-        R.head(highlightColors),
+        R.head(matchingHighlightColors),
       );
       expect(getSeriesDatumByCode('FRA').color).toEqual(
-        R.nth(1, highlightColors),
+        R.nth(1, matchingHighlightColors),
       );
 
       expect(getSeriesDatumByCode('USA').color).toEqual(baselineColor);
