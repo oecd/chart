@@ -8,6 +8,8 @@ const OUTLINE_GAP_M = 1.5;
 const OUTLINE_GAP_L = 2;
 const OUTLINE_GAP_XL = 2.5;
 
+export const OUTLINE_FILL_OPACITY = 0.15;
+
 const BREAKPOINT_M = 400;
 const BREAKPOINT_L = 600;
 const BREAKPOINT_XL = 800;

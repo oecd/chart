@@ -8,7 +8,11 @@ import {
   getBoundingRectsByCategory,
   groupPointsByCategory,
 } from './getBoundingRectsByCategory';
-import { getOutlineGap, getOutlineWidth } from './highlightOutline';
+import {
+  getOutlineGap,
+  getOutlineWidth,
+  OUTLINE_FILL_OPACITY,
+} from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
 /**
@@ -98,7 +102,7 @@ export const renderCategoryGroupOutline = (chart) => {
     rect.attr({
       stroke: color,
       'stroke-width': outlineWidth,
-      fill: new TinyColor(color).setAlpha(0.15).toRgbString(),
+      fill: new TinyColor(color).setAlpha(OUTLINE_FILL_OPACITY).toRgbString(),
       x: x1 - outlineDistance,
       y: 0,
       width: x2 - x1 + 2 * outlineDistance,
