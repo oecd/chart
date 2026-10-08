@@ -37,6 +37,9 @@ const RECTS_BY_CATEGORY_BY_CHART = new WeakMap();
 export const renderCategoryGroupOutline = (chart) => {
   const customChartOptions = chart.options.custom;
 
+  const chartUsesPercentStacking =
+    chart.options.plotOptions?.series?.stacking === 'percent';
+
   /** @type {boolean} */
   const isCategoryGroupHighlighted =
     customChartOptions.isCategoryGroupHighlighted;
@@ -75,11 +78,8 @@ export const renderCategoryGroupOutline = (chart) => {
   // We cannot just append the element to the series <g> since it has a clip mask.
   const seriesTransform = firstSeries.group.element.getAttribute('transform');
 
-  /** @type {HighchartsSVGElement[]} */
-  const elements = [];
-
   // Draw a rectangle around the bounding box of all points of a category
-  boundingRects.forEach(({ x1, x2 }, category) => {
+  const elements = Array.from(boundingRects).map(([category, { x1, x2 }]) => {
     let rect = rectByCategory.get(category);
     if (!(rect && rect.element)) {
       rect = chart.renderer
@@ -104,15 +104,16 @@ export const renderCategoryGroupOutline = (chart) => {
       'stroke-width': outlineWidth,
       fill: new TinyColor(color).setAlpha(OUTLINE_FILL_OPACITY).toRgbString(),
       x: x1 - outlineDistance,
-      y: 0,
+      y: chartUsesPercentStacking ? -outlineDistance : 0,
       width: x2 - x1 + 2 * outlineDistance,
       height:
         (seriesType === 'column' ? chart.plotHeight : chart.plotWidth) +
-        outlineDistance,
+        outlineDistance +
+        (chartUsesPercentStacking ? outlineDistance : 0),
       transform: seriesTransform,
     });
 
-    elements.push(rect);
+    return rect;
   });
 
   return elements;
