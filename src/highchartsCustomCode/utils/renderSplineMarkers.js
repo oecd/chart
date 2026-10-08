@@ -5,7 +5,11 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import { baselineColor } from '../../constants/chart';
 import { AXIS_MARKER_SIZE } from './axisMarkerSize';
-import { getOutlineGap, getOutlineWidth } from './highlightOutline';
+import {
+  getOutlineGap,
+  getOutlineWidth,
+  OUTLINE_FILL_OPACITY,
+} from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
 /** The marker width starts at this percent value of the category width */
@@ -188,7 +192,9 @@ export const renderSplineMarkers = ({ chart }) => {
             height: chart.plotHeight,
             stroke: highlightColor,
             'stroke-width': outlineWidth,
-            fill: new TinyColor(highlightColor).setAlpha(0.3).toRgbString(),
+            fill: new TinyColor(highlightColor)
+              .setAlpha(OUTLINE_FILL_OPACITY)
+              .toRgbString(),
             'pointer-events': 'none',
             // Move on top of lines and point dots
             zIndex: 1,
