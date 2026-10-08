@@ -28,6 +28,7 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
+import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
 
 const mapsUtil = import('../mapsUtil');
@@ -38,6 +39,8 @@ const mapsUtil = import('../mapsUtil');
 const createChartOptionsFunc =
   (createOptionsFuncForChartType) =>
   ({
+    chartType,
+    data,
     highlight,
     baseline,
     colorPalette,
@@ -70,9 +73,7 @@ const createChartOptionsFunc =
       ? {}
       : R.compose(
           calcExistingFixedColorIndexBySeries(
-            otherProps.chartType === chartTypes.pie
-              ? otherProps.data.categories
-              : otherProps.data.series,
+            chartType === chartTypes.pie ? data.categories : data.series,
           ),
           createCodeLabelMap,
           R.map(R.adjust('1', Number.parseInt)),
@@ -93,18 +94,27 @@ const createChartOptionsFunc =
           colorPalette,
           smallerColorPalettes,
           R.length(
-            otherProps.chartType === chartTypes.pie
-              ? otherProps.data.categories
-              : otherProps.data.series || [],
+            chartType === chartTypes.pie ? data.categories : data.series || [],
           ),
           paletteStartingColor,
         )
       : colorPalette;
 
+    const parsedBaseline = R.compose(
+      R.reject(R.isEmpty),
+      R.split('|'),
+    )(replaceBasicVarsNameByVarsValue(baseline, vars));
+
     const parsedHighlight = R.compose(
       R.reject(R.isEmpty),
       R.split('|'),
     )(replaceBasicVarsNameByVarsValue(highlight, vars));
+
+    const baselineAndHighlightCodes = getBaselineAndHighlightCodes(
+      data,
+      parsedBaseline,
+      parsedHighlight,
+    );
 
     const matchingHighlightColors = getSmallerPalette(
       parsedHighlight,
@@ -117,13 +127,8 @@ const createChartOptionsFunc =
       smallerHighlightOutlineColors,
     );
 
-    const parsedBaseline = R.compose(
-      R.reject(R.isEmpty),
-      R.split('|'),
-    )(replaceBasicVarsNameByVarsValue(baseline, vars));
-
     const formatters = createFormatters({
-      chartType: otherProps.chartType,
+      chartType: chartType,
       mapColorValueSteps,
       maxNumberOfDecimals,
       maxNumberOfDecimalsXAxis,
@@ -132,41 +137,43 @@ const createChartOptionsFunc =
       numberSuffix,
       numberSuffixXAxis,
       decimalPoint,
-      areCategoriesNumbers: otherProps.data.areCategoriesNumbers,
-      areCategoriesDates: otherProps.data.areCategoriesDates,
-      categoriesDateFomat: otherProps.data.categoriesDateFomat,
-      areSeriesNumbers: otherProps.data.areSeriesNumbers,
-      areSeriesDates: otherProps.data.areSeriesDates,
-      seriesDateFomat: otherProps.data.seriesDateFomat,
+      areCategoriesNumbers: data.areCategoriesNumbers,
+      areCategoriesDates: data.areCategoriesDates,
+      categoriesDateFomat: data.categoriesDateFomat,
+      areSeriesNumbers: data.areSeriesNumbers,
+      areSeriesDates: data.areSeriesDates,
+      seriesDateFomat: data.seriesDateFomat,
       lang,
       customTooltip,
     });
 
     const categoriesAreDatesOrNumberForDataParsing =
-      (otherProps.data.areCategoriesDates ||
-        otherProps.data.areCategoriesNumbers) &&
+      (data.areCategoriesDates || data.areCategoriesNumbers) &&
       !forceXAxisToBeTreatedAsCategories &&
       !R.includes(
-        otherProps.chartType,
+        chartType,
         chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
       );
 
-    const categoriesFrequency = otherProps.data.areCategoriesDates
-      ? R.prop(otherProps.data.categoriesDateFomat, frequencies)
+    const categoriesFrequency = data.areCategoriesDates
+      ? R.prop(data.categoriesDateFomat, frequencies)
       : null;
 
-    const seriesFrequency = otherProps.data.areSeriesDates
-      ? R.prop(otherProps.data.seriesDateFomat, frequencies)
+    const seriesFrequency = data.areSeriesDates
+      ? R.prop(data.seriesDateFomat, frequencies)
       : null;
 
     const options = createOptionsFuncForChartType({
       ...otherProps,
+      data,
+      chartType,
       colorPalette: finalColorPaletteColors,
       fixedColorIndexBySeries: parsedFixedColorIndexBySeries,
       highlight: parsedHighlight,
+      baseline: parsedBaseline,
+      ...baselineAndHighlightCodes,
       matchingHighlightColors,
       matchingHighlightOutlineColors,
-      baseline: parsedBaseline,
       mapColorValueSteps,
       maxNumberOfDecimals,
       numberPrefix,
@@ -180,13 +187,13 @@ const createChartOptionsFunc =
 
     const customChartRender = R.propOr(
       null,
-      otherProps.chartType,
+      chartType,
       customChartRenderByChartType,
     );
 
     const customChartRenderWithCbType = ({ target: chart }) => {
       if (customChartRender) {
-        customChartRender({ chart, cbType: otherProps.chartType });
+        customChartRender({ chart, cbType: chartType });
       }
     };
 
@@ -202,8 +209,7 @@ const createChartOptionsFunc =
       }),
       R.assoc('tooltip', {
         ...R.prop('tooltip', formatters),
-        ...(isNilOrEmpty(customTooltip) ||
-        otherProps.chartType === chartTypes.sankey
+        ...(isNilOrEmpty(customTooltip) || chartType === chartTypes.sankey
           ? {}
           : { format: customTooltip }),
         outside: tooltipOutside,
