@@ -1,5 +1,6 @@
 import * as R from 'ramda';
 import {
+  baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   decimalPointTypes,
@@ -10,7 +11,6 @@ import {
   convertColorToHex,
   createLighterColor,
   createShadesFromColor,
-  getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
 } from './chartUtilCommon';
 import { isCastableToNumber } from './configUtil';
@@ -424,13 +424,16 @@ const createMapDataClasses = (
   );
 };
 
+/**
+ * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
+ */
 export const createOptionsForMapChart = ({
   data,
-  formatters = {},
+  highlight,
+  baseline,
   colorPalette,
-  highlight = [],
-  baseline = [],
   matchingHighlightColors,
+  formatters = {},
   hideLegend = false,
   fullscreenClose = null,
   isFullScreen = false,
@@ -450,9 +453,12 @@ export const createOptionsForMapChart = ({
     mapType === mapTypes.normal.value
       ? {
           value: d.value,
-          custom: { ...(d.custom || {}), ...(d.metadata || {}) },
+          custom: { ...(d.custom || null), ...(d.metadata || null) },
         }
-      : { z: d.value, custom: { ...(d.custom || {}), ...(d.metadata || {}) } };
+      : {
+          z: d.value,
+          custom: { ...(d.custom || null), ...(d.metadata || null) },
+        };
 
   const overrideCountriesLabel = (codeLabelMapping) => {
     if (isNilOrEmpty(codeLabelMapping)) {
@@ -490,8 +496,7 @@ export const createOptionsForMapChart = ({
   );
 
   const getLabelFromMap = (code) =>
-    R.pathOr(
-      code,
+    R.path(
       ['properties', 'name'],
       R.find(R.pathEq(code, ['properties', 'iso-a3']), geometries),
     );
@@ -516,6 +521,9 @@ export const createOptionsForMapChart = ({
     R.map(R.prop('code'), data.categories),
     mapType,
   );
+
+  const highlightLowercase = R.map(R.toLower, highlight);
+  const baselineLowercase = R.map(R.toLower, baseline);
 
   const series = R.when(
     () => optionalDottedMapLines,
@@ -545,34 +553,53 @@ export const createOptionsForMapChart = ({
               minSize: 8,
               maxSize: mapType === mapTypes.point.value ? 8 : '10%',
             }
-          : {}),
+          : null),
 
         showInLegend: false,
 
         data: reduceWithIndex(
           (acc, d, xIdx) => {
-            if (isNilOrEmpty(d)) {
-              return acc;
-            }
+            if (isNilOrEmpty(d)) return acc;
 
-            const countryCode = R.toUpper(
-              `${R.nth(xIdx, data.categories)?.code}`,
-            );
+            const countryCode = R.nth(xIdx, data.categories)?.code;
+            if (!countryCode) return acc;
+            const codeLowercase = R.toLower(countryCode);
 
-            const baselineOrHighlightColor = getBaselineOrHighlightColor(
-              { code: countryCode, label: getLabelFromMap(countryCode) },
-              R.map(R.toUpper, highlight),
-              R.map(R.toUpper, baseline),
-              matchingHighlightColors,
-            );
+            // For baseline and highlighting, take label from the TopoJSON into account
+            /** @type {string | undefined} */
+            const label = getLabelFromMap(R.toUpper(countryCode));
+            const labelLowercase = label ? R.toLower(label) : null;
+
+            const baselineOrHighlightColor = (() => {
+              if (
+                // Is the code baseline?
+                baselineLowercase.includes(codeLowercase) ||
+                // Is the label from our Topology baseline?
+                (labelLowercase && baselineLowercase.includes(labelLowercase))
+              ) {
+                return baselineColor;
+              }
+              // Is the code highlighted?
+              let highlightIndex = highlightLowercase.indexOf(codeLowercase);
+              // Is the label from our Topology highlighted?
+              if (highlightIndex === -1 && labelLowercase) {
+                highlightIndex = highlightLowercase.indexOf(labelLowercase);
+              }
+              return highlightIndex === -1
+                ? null
+                : getListItemAtTurningIndex(
+                    highlightIndex,
+                    matchingHighlightColors,
+                  );
+            })();
 
             return R.append(
               {
-                code: R.toUpper(`${R.nth(xIdx, data.categories)?.code}`),
+                code: countryCode,
                 ...createMapDatapoint(d, mapType),
                 ...(baselineOrHighlightColor
                   ? { color: baselineOrHighlightColor }
-                  : {}),
+                  : null),
               },
               acc,
             );

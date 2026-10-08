@@ -1,7 +1,6 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import { baselineColor } from '../constants/chart';
-import { codeOrLabelEquals } from './configUtil';
 import { isNilOrEmpty, reduceWithIndex } from './ramdaUtil';
 
 const lightenColor = (color, percent) => {
@@ -90,28 +89,30 @@ export const getSeriesColor = ({
   );
 };
 
+/**
+ * Returns the baseline color, the matching highlight color or null.
+ *
+ * @param {string} code
+ * @param {string[]} baselineCodes Lowercase baseline codes
+ * @param {string[]} highlightCodes Lowercase highlight codes
+ * @param {string[]} highlightColors
+ */
 export const getBaselineOrHighlightColor = (
-  objWithCodeAndLabel,
-  highlight,
-  baseline,
+  code,
+  baselineCodes,
+  highlightCodes,
   highlightColors,
 ) => {
-  const baselineIndex = R.findIndex(
-    codeOrLabelEquals(objWithCodeAndLabel),
-    baseline,
-  );
-  if (baselineIndex !== -1) {
+  const codeLowercase = R.toLower(code);
+
+  if (baselineCodes.includes(codeLowercase)) {
     return baselineColor;
   }
 
-  const highlightColorsIndex = R.findIndex(
-    codeOrLabelEquals(objWithCodeAndLabel),
-    highlight,
-  );
-
-  return highlightColorsIndex === -1
+  const highlightIndex = highlightCodes.indexOf(codeLowercase);
+  return highlightIndex === -1
     ? null
-    : getListItemAtTurningIndex(highlightColorsIndex, highlightColors);
+    : getListItemAtTurningIndex(highlightIndex, highlightColors);
 };
 
 export const createExportFileName = () =>

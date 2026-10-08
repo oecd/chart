@@ -12,25 +12,24 @@ import { createDatapoint } from '../chartOptions/createDataPoint';
 import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
-import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 /**
- * @param {{
- * highlight?: string[];
- * baseline?: string[];
- * }} options
+ * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
  */
 export const createOptionsForBarChart = ({
   chartType,
   data,
+  categoryCodes,
+  baselineCodes,
+  highlightCodes,
+  highlightSeriesCodes,
+  highlightCategoryCodes,
   formatters = {},
   title = '',
   subtitle = '',
   colorPalette,
   fixedColorIndexBySeries = null,
-  baseline = null,
-  highlight = null,
   matchingHighlightColors,
   hideLegend = false,
   hideXAxisLabels = false,
@@ -79,23 +78,11 @@ export const createOptionsForBarChart = ({
     return horizontal ? 14 : 34;
   };
 
-  const {
-    baselineCodes,
-    categoryCodes,
-    highlightCodes,
-    highlightSeriesCodes,
-    highlightCategoryCodes,
-  } = getBaselineAndHighlightCodes({
-    data,
-    baseline,
-    highlight,
-  });
-
   /** Whether there are multiple series */
   const isGroupedChart = data.series.length > 1;
 
-  const isBaselineACategory = R.any(
-    (baselineCode) => categoryCodes.has(baselineCode),
+  const isBaselineACategory = R.intersection(
+    Array.from(categoryCodes),
     baselineCodes,
   );
 
@@ -156,7 +143,7 @@ export const createOptionsForBarChart = ({
             ),
             data.categories,
           ),
-      ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
+      ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
@@ -173,7 +160,7 @@ export const createOptionsForBarChart = ({
           ),
         ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
           ? { enabled: false }
-          : {}),
+          : null),
       },
       gridLineColor: '#c2cbd6',
       lineColor: 'transparent',

@@ -3,33 +3,35 @@ import * as R from 'ramda';
 import { codeOrLabelEquals } from '../configUtil';
 
 /**
- * Returns the baseline and highlight codes in lowercase.
- *
- * @param {{
- * data: {
- *   series: { label: string, code: string }[];
- *   categories: { label: string, code: string }[];
- * },
- * baseline: string[];
- * highlight: string[];
- * }} options
- * @returns {{
+ * @typedef {{
  * seriesCodes: Set<string>;
  * categoryCodes: Set<string>;
  * baselineCodes: string[];
  * highlightCodes: string[];
  * highlightSeriesCodes: string[];
  * highlightCategoryCodes: string[];
- * }}
+ * }} BaselineAndHighlightCodes
  */
-export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
+
+/**
+ * Returns the baseline and highlight codes in lowercase.
+ *
+ * @param {{
+ * series: { label: string, code: string }[];
+ * categories: { label: string, code: string }[];
+ * }} data
+ * @param {string[]} baseline
+ * @param {string[]} highlight
+ * @returns {BaselineAndHighlightCodes}
+ */
+export const getBaselineAndHighlightCodes = (data, baseline, highlight) => {
   const seriesAndCategories = R.concat(data.series, data.categories);
   const baselineEntities = R.filter(
     (series) => R.any(codeOrLabelEquals(series), baseline),
     seriesAndCategories,
   );
   const getLowercaseCode = R.compose(R.toLower, R.prop('code'));
-  const baselineSeriesAndCategories = R.map(getLowercaseCode, baselineEntities);
+  const baselineCodes = R.map(getLowercaseCode, baselineEntities);
 
   // Determine series and category codes while preserving the original order
 
@@ -93,7 +95,7 @@ export const getBaselineAndHighlightCodes = ({ data, baseline, highlight }) => {
   return {
     seriesCodes,
     categoryCodes,
-    baselineCodes: baselineSeriesAndCategories,
+    baselineCodes,
     highlightCodes,
     highlightSeriesCodes,
     highlightCategoryCodes,

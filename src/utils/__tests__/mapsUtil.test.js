@@ -55,6 +55,8 @@ describe('mapsUtil', () => {
       const options = createOptionsForMapChart({
         data,
         colorPalette,
+        highlight: [],
+        baseline: [],
         matchingHighlightColors: [],
       });
 

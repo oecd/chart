@@ -2,8 +2,8 @@ import { getBaselineAndHighlightCodes } from '../getBaselineAndHighlightCodes';
 
 describe('getBaselineAndHighlightCodes', () => {
   test('extracts codes', () => {
-    const result = getBaselineAndHighlightCodes({
-      data: {
+    const result = getBaselineAndHighlightCodes(
+      {
         series: [
           { label: 'Italy', code: 'ITA' },
           { label: 'France', code: 'FRA' },
@@ -20,9 +20,9 @@ describe('getBaselineAndHighlightCodes', () => {
           { label: 'Pineapple', code: 'PIN' },
         ],
       },
-      baseline: ['France', 'ITA', 'Apples', 'AVO'],
-      highlight: ['Japan', 'BRA', 'Bananas', 'ORA'],
-    });
+      ['France', 'ITA', 'Apples', 'AVO'],
+      ['Japan', 'BRA', 'Bananas', 'ORA'],
+    );
     expect(result).toStrictEqual({
       seriesCodes: new Set(['ita', 'fra', 'jpn', 'bra', 'isr']),
       categoryCodes: new Set(['apl', 'avo', 'ban', 'ora', 'mag', 'pin']),

@@ -15,7 +15,6 @@ import {
 } from '../chartUtilCommon';
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
-import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
@@ -23,13 +22,17 @@ const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
 const HIGHLIGHTED_SYMBOL_LINE_WIDTH = 1.5;
 
+/**
+ * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
+ */
 export const createOptionsForRadarChart = ({
   data,
+  baselineCodes,
+  highlightCodes,
+  highlightSeriesCodes,
   formatters = {},
   colorPalette,
   fixedColorIndexBySeries = null,
-  highlight = null,
-  baseline = null,
   matchingHighlightColors,
   matchingHighlightOutlineColors,
   hideLegend = false,
@@ -44,13 +47,6 @@ export const createOptionsForRadarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const { baselineCodes, categoryCodes, highlightCodes, highlightSeriesCodes } =
-    getBaselineAndHighlightCodes({
-      data,
-      baseline,
-      highlight,
-    });
-
   const seenCategories = new Set();
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
@@ -58,14 +54,11 @@ export const createOptionsForRadarChart = ({
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
 
-    const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
-    const isSeriesHighlighted = seriesHighlightIndex !== -1;
-
     const seriesColor = (() => {
       const baselineOrHighlightColor = getBaselineOrHighlightColor(
-        series,
-        highlight,
-        baseline,
+        seriesCodeLowercase,
+        baselineCodes,
+        highlightCodes,
         matchingHighlightColors,
       );
       if (baselineOrHighlightColor) {
@@ -92,6 +85,8 @@ export const createOptionsForRadarChart = ({
       'white',
     );
 
+    const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
+    const isSeriesHighlighted = seriesHighlightIndex !== -1;
     const seriesMarkerLineColor = isSeriesHighlighted
       ? getListItemAtTurningIndex(
           seriesHighlightIndex,
@@ -151,7 +146,7 @@ export const createOptionsForRadarChart = ({
           '0px -1px 3px white, 1px 0px 3px white, 0px 1px 3px white, -1px 0px 3px white, -1px -1px 3px white, 1px -1px 3px white, 1px 1px 3px white, -1px 1px 3px white',
         textOutline: 'none',
       },
-      ...(isSeriesHighlighted ? { zIndex: 1 } : {}),
+      ...(isSeriesHighlighted ? { zIndex: 1 } : null),
     };
   }, data.series);
 

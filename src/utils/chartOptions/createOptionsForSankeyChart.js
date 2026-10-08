@@ -12,13 +12,16 @@ import {
   rejectInvalidFromToPoints,
 } from '../sankeyUtil';
 
+/**
+ * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
+ */
 export const createOptionsForSankeyChart = ({
   data,
+  baselineCodes,
+  highlightCodes,
   title = '',
   subtitle = '',
   colorPalette,
-  highlight = null,
-  baseline = null,
   matchingHighlightColors,
   fullscreenClose = null,
   isFullScreen = false,
@@ -30,9 +33,9 @@ export const createOptionsForSankeyChart = ({
       const nodes = R.map(([code, column]) => {
         const label = R.propOr(code, R.toUpper(code), data.codeLabelMapping);
         const baselineOrHighlightColor = getBaselineOrHighlightColor(
-          { code, label },
-          highlight,
-          baseline,
+          code,
+          baselineCodes,
+          highlightCodes,
           matchingHighlightColors,
         );
 
