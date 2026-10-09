@@ -15,7 +15,6 @@ import {
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
-import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
@@ -24,20 +23,19 @@ const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
 const HIGHLIGHTED_SYMBOL_LINE_WIDTH = 1.5;
 
 /**
- * @param {{
- * highlight?: string[];
- * baseline?: string[];
- * }} options
+ * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
  */
 export const createOptionsForLineChart = ({
   data,
+  baselineCodes,
+  highlightCodes,
+  highlightSeriesCodes,
+  highlightCategoryCodes,
   formatters = {},
   title = '',
   subtitle = '',
   colorPalette,
   fixedColorIndexBySeries = null,
-  highlight = null,
-  baseline = null,
   matchingHighlightColors,
   matchingHighlightOutlineColors,
   hideLegend = false,
@@ -54,17 +52,6 @@ export const createOptionsForLineChart = ({
   disableLegendInteraction = false,
   hideLineSymbols = false,
 }) => {
-  const {
-    baselineCodes,
-    highlightCodes,
-    highlightSeriesCodes,
-    highlightCategoryCodes,
-  } = getBaselineAndHighlightCodes({
-    data,
-    baseline,
-    highlight,
-  });
-
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const seenCategories = new Set();
 
@@ -76,9 +63,9 @@ export const createOptionsForLineChart = ({
 
     const seriesColor = (() => {
       const baselineOrHighlightColor = getBaselineOrHighlightColor(
-        series,
-        highlight,
-        baseline,
+        seriesCodeLowercase,
+        baselineCodes,
+        highlightCodes,
         matchingHighlightColors,
       );
       if (baselineOrHighlightColor) {
@@ -191,7 +178,7 @@ export const createOptionsForLineChart = ({
               ? {
                   enabled: true,
                   format: seriesName,
-                  style: isSeriesHighlighted ? { fontWeight: 'bolder' } : {},
+                  style: isSeriesHighlighted ? { fontWeight: 'bolder' } : null,
                 }
               : null,
           marker: {
@@ -346,7 +333,7 @@ export const createOptionsForLineChart = ({
             baselineCodes,
             highlightCodes,
           ),
-        ...(hideXAxisLabels ? { enabled: false } : {}),
+        ...(hideXAxisLabels ? { enabled: false } : null),
       },
       gridLineColor: '#c2cbd6',
       lineColor: 'transparent',

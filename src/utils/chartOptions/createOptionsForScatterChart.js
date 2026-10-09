@@ -17,7 +17,6 @@ import {
   getSeriesColor,
 } from '../chartUtilCommon';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
-import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 
 // Symbol sizes
 const RADIUS = 6;
@@ -35,16 +34,19 @@ const symbols = [
   'triangle-down',
 ];
 
+/**
+ * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
+ */
 export const createOptionsForScatterChart = ({
   chartType,
   data,
+  baselineCodes,
+  highlightCodes,
   formatters = {},
   title = '',
   subtitle = '',
   colorPalette,
   fixedColorIndexBySeries = null,
-  highlight = null,
-  baseline = null,
   matchingHighlightColors,
   matchingHighlightOutlineColors,
   hideLegend = false,
@@ -74,11 +76,6 @@ export const createOptionsForScatterChart = ({
           );
         };
 
-  const { baselineCodes, highlightCodes } = getBaselineAndHighlightCodes({
-    data,
-    baseline,
-    highlight,
-  });
   const anyHighlighted = highlightCodes.length > 0;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
@@ -160,15 +157,15 @@ export const createOptionsForScatterChart = ({
         );
 
         const baselineOrHighlightColor = getBaselineOrHighlightColor(
-          category,
-          highlight,
-          baseline,
+          category.code,
+          baselineCodes,
+          highlightCodes,
           matchingHighlightColors,
         );
         const baselineOrHighlightOutlineColor = getBaselineOrHighlightColor(
-          category,
-          highlight,
-          baseline,
+          category.code,
+          baselineCodes,
+          highlightCodes,
           matchingHighlightOutlineColors,
         );
 
@@ -254,7 +251,7 @@ export const createOptionsForScatterChart = ({
         hideLegend && chartType !== chartTypes.symbolMinMax
           ? calcMarginTop(title, subtitle, isSmall)
           : undefined,
-      ...(symbolMinMaxLayout ? { marginLeft: 12, marginRight: 12 } : {}),
+      ...(symbolMinMaxLayout ? { marginLeft: 12, marginRight: 12 } : null),
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -282,12 +279,12 @@ export const createOptionsForScatterChart = ({
             ),
             data.categories,
           ),
-      ...(data.areCategoriesDates ? { type: 'datetime' } : {}),
+      ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
         ...R.prop('xAxisLabels', formatters),
-        ...(hideXAxisLabels || symbolMinMaxLayout ? { enabled: false } : {}),
+        ...(hideXAxisLabels || symbolMinMaxLayout ? { enabled: false } : null),
       },
       gridLineColor: '#c2cbd6',
       lineColor: 'transparent',
@@ -319,7 +316,7 @@ export const createOptionsForScatterChart = ({
               symbolMinMaxData.max + Math.abs(symbolMinMaxData.max * 0.001),
             ],
           }
-        : {}),
+        : null),
     },
 
     legend: {
@@ -344,7 +341,7 @@ export const createOptionsForScatterChart = ({
       series: {
         animation: false,
         dataLabels: {
-          ...(symbolMinMaxLayout ? { enabled: true } : {}),
+          ...(symbolMinMaxLayout ? { enabled: true } : null),
           ...R.prop('dataLabels', formatters),
         },
       },

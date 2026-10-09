@@ -10,16 +10,18 @@ import {
   getSeriesColor,
 } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
-import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
+/**
+ * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
+ */
 export const createOptionsForPieChart = ({
   data,
+  baselineCodes,
+  highlightCodes,
   formatters = {},
   colorPalette,
   fixedColorIndexBySeries = null,
-  highlight = null,
-  baseline = null,
   matchingHighlightColors,
   hideLegend = false,
   hideXAxisLabels = false,
@@ -32,12 +34,6 @@ export const createOptionsForPieChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const { baselineCodes, highlightCodes } = getBaselineAndHighlightCodes({
-    data,
-    baseline,
-    highlight,
-  });
-
   const allSeries = R.map(
     (series) => ({
       name: data.areSeriesDates
@@ -48,9 +44,9 @@ export const createOptionsForPieChart = ({
 
         const color =
           getBaselineOrHighlightColor(
-            category,
-            highlight,
-            baseline,
+            category.code,
+            baselineCodes,
+            highlightCodes,
             matchingHighlightColors,
           ) ||
           getSeriesColor({

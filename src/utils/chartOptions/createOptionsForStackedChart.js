@@ -13,7 +13,6 @@ import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
-import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 /**
@@ -209,21 +208,21 @@ const createStackedDatapoints = ({
 };
 
 /**
- * @param {{
- * highlight?: string[];
- * baseline?: string[];
- * }} options
+ * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
  */
 export const createOptionsForStackedChart = ({
   chartType,
   data,
+  categoryCodes,
+  baselineCodes,
+  highlightCodes,
+  highlightSeriesCodes,
+  highlightCategoryCodes,
   formatters = {},
   title = '',
   subtitle = '',
   colorPalette,
   fixedColorIndexBySeries = null,
-  baseline = null,
-  highlight = null,
   matchingHighlightColors,
   hideLegend = false,
   hideXAxisLabels = false,
@@ -279,21 +278,8 @@ export const createOptionsForStackedChart = ({
     return horizontal ? 14 : 34;
   };
 
-  const {
-    categoryCodes,
-    baselineCodes,
-    highlightCodes,
-    highlightSeriesCodes,
-    highlightCategoryCodes,
-  } = getBaselineAndHighlightCodes({
-    data,
-    baseline,
-    highlight,
-  });
-
-  // Use Set#intersection in the future
-  const isBaselineACategory = R.any(
-    (baselineCode) => categoryCodes.has(baselineCode),
+  const isBaselineACategory = R.intersection(
+    Array.from(categoryCodes),
     baselineCodes,
   );
 
@@ -368,7 +354,7 @@ export const createOptionsForStackedChart = ({
         ? {
             type: 'datetime',
           }
-        : {}),
+        : null),
       labels: {
         style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
@@ -385,7 +371,7 @@ export const createOptionsForStackedChart = ({
           ),
         ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
           ? { enabled: false }
-          : {}),
+          : null),
       },
       gridLineColor: '#c2cbd6',
       lineColor: 'transparent',
