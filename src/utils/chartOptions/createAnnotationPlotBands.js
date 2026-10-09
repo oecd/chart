@@ -22,7 +22,7 @@ export const createAnnotationPlotBands = (
 ) =>
   annotations
     .filter(({ type }) => type === 'band')
-    .map((annotation, index) => {
+    .map((annotation) => {
       let from = -1;
       let to = -1;
       if (areCategoriesDates) {
@@ -51,7 +51,10 @@ export const createAnnotationPlotBands = (
         from -= 0.5;
         to += 0.5;
       }
-
+      return { annotation, from, to };
+    })
+    .filter((definition) => definition !== undefined)
+    .map(({ annotation, from, to }, index) => {
       const fontSize = isSmall ? 13 : 16;
       const isEven = index % 2 === 0;
       /** @type {import('highcharts').XAxisPlotBandsOptions} */
@@ -76,5 +79,4 @@ export const createAnnotationPlotBands = (
           : undefined,
       };
       return plotBand;
-    })
-    .filter((plotBand) => plotBand !== undefined);
+    });
