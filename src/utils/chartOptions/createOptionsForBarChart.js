@@ -4,12 +4,13 @@ import * as R from 'ramda';
 import {
   animationConfig,
   baselineColor,
+  chartSizes,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   chartTypes,
   nonHighlightedOpacity,
 } from '../../constants/chart';
-import { textElementTypes } from '../../constants/styling';
+import { fontColors, textElementTypes } from '../../constants/styling';
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
@@ -19,6 +20,8 @@ import {
   calcYAxisCoordinatesForBarAndStacked,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
+import { exampleAnnotations } from './exampleAnnotations';
 import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
@@ -121,6 +124,15 @@ export const createOptionsForBarChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const plotBands = createAnnotationPlotBands(
+    exampleAnnotations,
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+    chartSize === chartSizes.small,
+    fontColors.normal,
+  );
+
   return {
     custom: customChartOptions,
 
@@ -164,6 +176,7 @@ export const createOptionsForBarChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
