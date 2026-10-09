@@ -163,33 +163,6 @@ const anyVarRegExp = R.join(
 
 export const doesStringContainVar = R.test(new RegExp(anyVarRegExp, 'i'));
 
-export const calcIsSmall = (width, height) =>
-  !width || !height ? false : width < 540 || height < 350;
-
-export const calcMarginTop = (title, subtitle, isSmall) => {
-  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
-    return isSmall ? 20 : 32;
-  }
-
-  return undefined;
-};
-
-export const calcMarginTopWithHorizontal = (
-  title,
-  subtitle,
-  horizontal,
-  isSmall,
-) => {
-  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
-    if (isSmall) {
-      return 22;
-    }
-    return horizontal ? 22 : 32;
-  }
-
-  return undefined;
-};
-
 export const createFooter = ({ source, note, stripLinks = false }) =>
   R.compose(
     R.when(() => stripLinks, R.replace(/<a\b[^>]*>(.*?)<\/a>/g, '$1')),

@@ -4,7 +4,7 @@ import {
   chartSpacing,
   chartSpacingFullScreenAndExport,
 } from '../../constants/chart';
-import { calcMarginTop } from '../chartUtil';
+import { calcMarginTop } from '../stylingUtil';
 import { getBaselineOrHighlightColor } from '../chartUtilCommon';
 import {
   addFromAndToColumns,
@@ -24,6 +24,7 @@ export const createOptionsForSankeyChart = ({
   isFullScreen = false,
   height,
   isSmall = false,
+  chartSize,
 }) => {
   const series = R.compose(
     ({ data: seriesData, columnByNode }) => {
@@ -65,9 +66,6 @@ export const createOptionsForSankeyChart = ({
 
   return {
     chart: {
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       marginTop: calcMarginTop(title, subtitle, isSmall),
       height,
       animation: false,

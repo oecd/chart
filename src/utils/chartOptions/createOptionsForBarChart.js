@@ -9,11 +9,15 @@ import {
   nonHighlightedOpacity,
 } from '../../constants/chart';
 import { createDatapoint } from '../chartOptions/createDataPoint';
-import { calcMarginTopWithHorizontal } from '../chartUtil';
+import {
+  calcMarginTopWithHorizontal,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import { textElementTypes } from '../../constants/styling';
 
 /**
  * @param {{
@@ -44,6 +48,7 @@ export const createOptionsForBarChart = ({
   categoriesFrequency,
   seriesFrequency,
   disableLegendInteraction = false,
+  chartSize,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -126,9 +131,6 @@ export const createOptionsForBarChart = ({
 
     chart: {
       type: horizontal ? 'bar' : 'column',
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       marginTop: hideLegend
         ? calcMarginTopWithHorizontal(title, subtitle, horizontal, isSmall)
         : undefined,
@@ -203,11 +205,10 @@ export const createOptionsForBarChart = ({
       enabled: !hideLegend,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(
+        textElementTypes.legendRegular,
+        chartSize,
+      ),
       align: 'left',
       squareSymbol: false,
       symbolRadius: 0,

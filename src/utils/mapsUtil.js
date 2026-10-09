@@ -17,6 +17,8 @@ import { isCastableToNumber } from './configUtil';
 import { numberFormatAbbreviatedForm } from './highchartsUtil';
 import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
 import map from './world-highres-custom-topo.json';
+import { textElementTypes } from '../constants/styling';
+import { fontStyleForTextElement } from './stylingUtil';
 
 const dottedBorderNames = {
   ETH_SOM: 'ETH_SOM',
@@ -445,6 +447,7 @@ export const createOptionsForMapChart = ({
   numberSuffix,
   decimalPoint,
   seriesFrequency,
+  chartSize,
 }) => {
   const createMapDatapoint = (d) =>
     mapType === mapTypes.normal.value
@@ -588,9 +591,6 @@ export const createOptionsForMapChart = ({
   return {
     chart: {
       map: finalMap,
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -648,11 +648,10 @@ export const createOptionsForMapChart = ({
       verticalAlign: 'top',
       x: -7,
       margin: isSmall ? 16 : 24,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(
+        textElementTypes.legendRegular,
+        chartSize,
+      ),
       align: 'left',
       squareSymbol: false,
       symbolRadius: mapType === mapTypes.normal.value ? 0 : undefined,

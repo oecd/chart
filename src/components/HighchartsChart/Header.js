@@ -1,8 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useContext } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
 import Toolbox from './Toolbox';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
+import { textElementTypes } from '../../constants/styling';
+import { fontStyleForTextElement } from '../../utils/stylingUtil';
 
 const Header = ({
   chartType,
@@ -36,12 +39,19 @@ const Header = ({
     [],
   );
 
+  const chartSize = useContext(ChartSizeContext);
+
+  if (R.isEmpty(title) && R.isEmpty(subtitle) && hideToolbox) {
+    return null;
+  }
+
   return (
     <div style={{ display: 'flex', paddingBottom: isSmall ? '2px' : '5px' }}>
       <div style={{ flex: '1 1 auto' }}>
         {!R.isEmpty(title) && canTitleAndSubtitleBeDisplayed && (
           <div
             className={`cb-title ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+            style={fontStyleForTextElement(textElementTypes.title, chartSize)}
             dangerouslySetInnerHTML={{
               __html: title,
             }}
@@ -50,6 +60,10 @@ const Header = ({
         {!R.isEmpty(subtitle) && canTitleAndSubtitleBeDisplayed && (
           <div
             className={`cb-subtitle ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+            style={fontStyleForTextElement(
+              textElementTypes.subtitle,
+              chartSize,
+            )}
             dangerouslySetInnerHTML={{
               __html: subtitle,
             }}

@@ -130,6 +130,12 @@ export const baselineColor = '#156DF9';
 
 export const defaultExportSize = { width: 1024, height: 768 };
 
+export const chartSizes = {
+  small: 'small',
+  medium: 'medium',
+  large: 'large',
+};
+
 /**
  * Opacity of non-highlighted chart markers in case there are any highlights
  */

@@ -8,6 +8,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useContext,
   useMemo,
   useRef,
   useState,
@@ -57,6 +58,7 @@ import NullComponent from '../NullComponent';
 import Spinner from '../Spinner';
 import GenericChart from './GenericChart';
 import Header from './Header';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -925,6 +927,14 @@ const HighchartsChart = ({
 
   const isFontLoaded = useIsFontLoaded();
 
+  const chartSize = useContext(ChartSizeContext);
+
+  console.log('*********');
+  console.log(isFontLoaded);
+  console.log(chartSize);
+  console.log(mergedOptions);
+  console.log('*********');
+
   const [
     allHeightCalculationsHaveBeenDone,
     setAllHeightCalculationsHaveBeenDone,
@@ -1135,6 +1145,7 @@ const HighchartsChart = ({
         customTooltip: finalCustomTooltip,
         height: isFullScreen ? screenHeight : chartHeight,
         isSmall,
+        chartSize,
         hideLegend,
         hideXAxisLabels,
         hideYAxisLabels,
@@ -1174,6 +1185,7 @@ const HighchartsChart = ({
     highlight,
     isFullScreen,
     isSmall,
+    chartSize,
     pivotValue,
     mapType,
     mapAutoShade,

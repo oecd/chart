@@ -12,6 +12,8 @@ import {
 import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import { textElementTypes } from '../../constants/styling';
+import { fontStyleForTextElement } from '../stylingUtil';
 
 export const createOptionsForPieChart = ({
   data,
@@ -31,6 +33,7 @@ export const createOptionsForPieChart = ({
   categoriesFrequency,
   seriesFrequency,
   disableLegendInteraction = false,
+  chartSize,
 }) => {
   const { baselineCodes, highlightCodes } = getBaselineAndHighlightCodes({
     data,
@@ -83,9 +86,6 @@ export const createOptionsForPieChart = ({
   return {
     chart: {
       type: 'pie',
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -100,11 +100,10 @@ export const createOptionsForPieChart = ({
     legend: {
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(
+        textElementTypes.legendRegular,
+        chartSize,
+      ),
       align: 'left',
       symbolWidth: 18,
       x: -7,

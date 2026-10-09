@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;500&family=Noto+Sans:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;800&family=Noto+Sans:wght@400;800&display=swap');
 
 .cb-container {
   padding: 22px 24px;
@@ -16,15 +16,12 @@
 }
 
 .cb-title {
-  font-family: Helvetica, sans-serif;
-  font-weight: 800;
+  font-family: Helvetica, sans-serif !important;
   letter-spacing: -0.764px;
-  font-size: 18px;
-  line-height: 22px;
 }
 
 .cb-title.cb-font-loaded {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
+  font-family: 'Noto Sans', Helvetica, sans-serif !important;
   letter-spacing: unset;
 }
 
@@ -40,16 +37,12 @@
 }
 
 .cb-subtitle {
-  font-family: Helvetica, sans-serif;
+  font-family: Helvetica, sans-serif !important;
   letter-spacing: 0.21px;
-  font-weight: 500;
-  font-size: 17px;
-  line-height: 22px;
-  color: #586179;
 }
 
 .cb-subtitle.cb-font-loaded {
-  font-family: 'Noto Sans Display', Helvetica, sans-serif;
+  font-family: 'Noto Sans Display', Helvetica, sans-serif !important;
   letter-spacing: unset;
 }
 
@@ -133,7 +126,7 @@
 }
 
 .cb-footer {
-  font-family: Helvetica, sans-serif;
+  font-family: Helvetica, sans-serif !important;
   letter-spacing: 0.44px;
   font-size: 14px;
   line-height: 18px;
@@ -141,7 +134,7 @@
 }
 
 .cb-footer.cb-font-loaded {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
+  font-family: 'Noto Sans', Helvetica, sans-serif !important;
   letter-spacing: unset;
 }
 

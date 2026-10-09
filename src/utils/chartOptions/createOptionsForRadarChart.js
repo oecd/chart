@@ -18,6 +18,8 @@ import { mapWithIndex } from '../ramdaUtil';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import { textElementTypes } from '../../constants/styling';
+import { fontStyleForTextElement } from '../stylingUtil';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -43,8 +45,9 @@ export const createOptionsForRadarChart = ({
   categoriesFrequency,
   seriesFrequency,
   disableLegendInteraction = false,
+  chartSize,
 }) => {
-  const { baselineCodes, categoryCodes, highlightCodes, highlightSeriesCodes } =
+  const { baselineCodes, highlightCodes, highlightSeriesCodes } =
     getBaselineAndHighlightCodes({
       data,
       baseline,
@@ -207,9 +210,6 @@ export const createOptionsForRadarChart = ({
     chart: {
       polar: true,
       type: 'line',
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       height,
       animation: false,
       margin: hideLegend ? 40 : undefined,
@@ -277,11 +277,10 @@ export const createOptionsForRadarChart = ({
       enabled: !hideLegend,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(
+        textElementTypes.legendRegular,
+        chartSize,
+      ),
       align: 'left',
       symbolWidth: 18,
       x: -7,
