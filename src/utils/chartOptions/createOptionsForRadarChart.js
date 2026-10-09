@@ -47,8 +47,6 @@ export const createOptionsForRadarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
 }) => {
-  const seenCategories = new Set();
-
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
@@ -101,8 +99,6 @@ export const createOptionsForRadarChart = ({
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
         const categoryCodeLowercase = category.code.toLowerCase();
-
-        seenCategories.add(categoryCodeLowercase);
 
         const isCategoryHighlighted = highlightCodes.includes(
           categoryCodeLowercase,
@@ -160,13 +156,13 @@ export const createOptionsForRadarChart = ({
 
   // Create a plot band for each category highlight
   // https://www.highcharts.com/docs/chart-concepts/plot-bands-and-plot-lines
-  const categories = Array.from(seenCategories);
   /** @type {import('highcharts').XAxisPlotBandsOptions[]} */
-  const plotBands = categories
-    .map((category, index) => {
-      const isBaseline = baselineCodes.includes(category);
+  const plotBands = data.categories
+    .map(({ code }, index) => {
+      const categoryCodeLowercase = code.toLowerCase();
+      const isBaseline = baselineCodes.includes(categoryCodeLowercase);
 
-      const highlightIndex = highlightCodes.indexOf(category);
+      const highlightIndex = highlightCodes.indexOf(categoryCodeLowercase);
       const isHighlighted = highlightIndex !== -1;
 
       if (!(isBaseline || isHighlighted)) return;
@@ -180,8 +176,8 @@ export const createOptionsForRadarChart = ({
       // because `from: 0` is actually in the middle of the first segment,
       // on the line on which the points sit, and we cannot set `from: -0.5`
       if (index === 0) {
-        const from2 = categories.length - 0.5;
-        const to2 = categories.length;
+        const from2 = data.categories.length - 0.5;
+        const to2 = data.categories.length;
         /** @type {import('highcharts').XAxisPlotBandsOptions} */
         const firstHalf = { color, from: from2, to: to2, zIndex: 2 };
         /** @type {import('highcharts').XAxisPlotBandsOptions} */
