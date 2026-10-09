@@ -5,8 +5,9 @@ import PropTypes from 'prop-types';
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
-import { calcIsSmall } from '../../utils/chartUtil';
+import { calcChartSize, calcIsSmall } from '../../utils/stylingUtil';
 import { minChartWidthForControlsDisplayOnRightSide } from '../../constants/chart';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
 
 const ChartWithConfigFixedChartHeight = ({
   width = null,
@@ -52,8 +53,13 @@ const ChartWithConfigFixedChartHeight = ({
     [fullContainerWidth, fullContainerHeight],
   );
 
+  const chartSize = useMemo(
+    () => calcChartSize(fullContainerWidth, fullContainerHeight),
+    [fullContainerWidth, fullContainerHeight],
+  );
+
   return (
-    <>
+    <ChartSizeContext.Provider value={chartSize}>
       <div
         ref={fullContainerRef}
         style={{
@@ -149,7 +155,7 @@ const ChartWithConfigFixedChartHeight = ({
             isSmall={isSmall}
           />
         )}
-    </>
+    </ChartSizeContext.Provider>
   );
 };
 

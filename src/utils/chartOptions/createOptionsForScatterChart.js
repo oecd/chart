@@ -10,13 +10,14 @@ import {
   sortOrderOptions,
 } from '../../constants/chart';
 import { createDatapoint } from '../chartOptions/createDataPoint';
-import { calcMarginTop } from '../chartUtil';
+import { calcMarginTop, fontStyleForTextElement } from '../stylingUtil';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
   getSeriesColor,
 } from '../chartUtilCommon';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
+import { textElementTypes } from '../../constants/styling';
 
 // Symbol sizes
 const RADIUS = 6;
@@ -61,6 +62,7 @@ export const createOptionsForScatterChart = ({
   seriesFrequency,
   sortOrder,
   disableLegendInteraction = false,
+  chartSize,
 }) => {
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
@@ -244,9 +246,6 @@ export const createOptionsForScatterChart = ({
   return {
     chart: {
       type: 'scatter',
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       marginTop:
         hideLegend && chartType !== chartTypes.symbolMinMax
           ? calcMarginTop(title, subtitle, isSmall)
@@ -323,11 +322,10 @@ export const createOptionsForScatterChart = ({
       enabled: !hideLegend && !symbolMinMaxLayout,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(
+        textElementTypes.legendRegular,
+        chartSize,
+      ),
       align: 'left',
       squareSymbol: false,
       symbolRadius: 0,

@@ -30,6 +30,12 @@ import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
+import {
+  fontColors,
+  fontFamilies,
+  textElementTypes,
+} from '../../constants/styling';
+import { fontStyleForTextElement } from '../stylingUtil';
 
 const mapsUtil = import('../mapsUtil');
 
@@ -67,6 +73,7 @@ const createChartOptionsFunc =
     vars,
     lang,
     forceXAxisToBeTreatedAsCategories,
+    chartSize,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -183,6 +190,7 @@ const createChartOptionsFunc =
       categoriesAreDatesOrNumberForDataParsing,
       categoriesFrequency,
       seriesFrequency,
+      chartSize,
     });
 
     const customChartRender = R.propOr(
@@ -255,20 +263,17 @@ const createChartOptionsFunc =
       R.assoc('subtitle', {
         text: otherProps.subtitle,
         align: 'left',
-        style: {
-          color: '#586179',
-          fontSize: '17px',
-        },
+        style: fontStyleForTextElement(textElementTypes.subtitle, chartSize),
       }),
       R.assoc('title', {
         text: otherProps.title,
         align: 'left',
         margin: 20,
-        style: {
-          color: '#101d40',
-          fontWeight: 'bold',
-          fontSize: '18px',
-        },
+        style: fontStyleForTextElement(textElementTypes.title, chartSize),
+      }),
+      R.assocPath(['chart', 'style', 'fontFamily'], {
+        fontFamily: fontFamilies.normal,
+        color: fontColors.normal,
       }),
     )(options);
   };

@@ -6,7 +6,7 @@ import {
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
 } from '../../constants/chart';
-import { calcMarginTop } from '../chartUtil';
+import { calcMarginTop, fontStyleForTextElement } from '../stylingUtil';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -17,6 +17,7 @@ import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import { textElementTypes } from '../../constants/styling';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -51,6 +52,7 @@ export const createOptionsForLineChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
   hideLineSymbols = false,
+  chartSize,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const seenCategories = new Set();
@@ -237,19 +239,17 @@ export const createOptionsForLineChart = ({
       verticalAlign: 'middle',
       itemStyle: {
         visibility: 'hidden',
-        fontSize: isSmall ? '13px' : '16px',
-        fontWeight: 400,
+        ...fontStyleForTextElement(textElementTypes.legendRegular, chartSize),
       },
     }),
     () => ({
       enabled: !hideLegend,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(
+        textElementTypes.legendRegular,
+        chartSize,
+      ),
       align: 'left',
       symbolWidth: 18,
       x: -7,
@@ -284,9 +284,6 @@ export const createOptionsForLineChart = ({
     custom: customChartOptions,
 
     chart: {
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       marginTop:
         hideLegend || inlineLabels
           ? calcMarginTop(title, subtitle, isSmall)

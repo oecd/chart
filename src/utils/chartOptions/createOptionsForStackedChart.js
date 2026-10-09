@@ -9,11 +9,15 @@ import {
   nonHighlightedOpacity,
   stackingOptions,
 } from '../../constants/chart';
-import { calcMarginTopWithHorizontal } from '../chartUtil';
+import {
+  calcMarginTopWithHorizontal,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import { textElementTypes } from '../../constants/styling';
 
 /**
  * @param {{
@@ -236,6 +240,7 @@ export const createOptionsForStackedChart = ({
   categoriesFrequency,
   seriesFrequency,
   disableLegendInteraction = false,
+  chartSize,
 }) => {
   const horizontal = chartType === chartTypes.stackedRow;
   const area = chartType === chartTypes.stackedArea;
@@ -316,9 +321,6 @@ export const createOptionsForStackedChart = ({
 
     chart: {
       type: highChartsChartType,
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       marginTop: hideLegend
         ? calcMarginTopWithHorizontal(title, subtitle, horizontal, isSmall)
         : undefined,
@@ -402,11 +404,10 @@ export const createOptionsForStackedChart = ({
       ...R.prop('seriesLabels', formatters),
       reversed: false,
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(
+        textElementTypes.legendRegular,
+        chartSize,
+      ),
       align: 'left',
       squareSymbol: false,
       symbolRadius: 0,
