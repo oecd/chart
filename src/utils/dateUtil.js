@@ -1,21 +1,21 @@
+import { UTCDate, utc } from '@date-fns/utc';
 import {
-  parse,
-  format,
-  differenceInMonths,
-  differenceInQuarters,
-  differenceInYears,
   addMonths,
   addQuarters,
   addYears,
-  isValid,
-  startOfYear,
-  endOfYear,
-  startOfQuarter,
-  endOfQuarter,
-  startOfMonth,
+  differenceInMonths,
+  differenceInQuarters,
+  differenceInYears,
   endOfMonth,
+  endOfQuarter,
+  endOfYear,
+  format,
+  isValid,
+  parse,
+  startOfMonth,
+  startOfQuarter,
+  startOfYear,
 } from 'date-fns';
-import { UTCDate, utc } from '@date-fns/utc';
 import * as R from 'ramda';
 
 import { frequencyTypes } from '../constants/chart';
@@ -55,6 +55,21 @@ const freqenciesLabels = {
   },
 };
 
+/**
+ * Adds/subtracts periods to a date using given `addFunc`
+ * and returns the half point between the two dates.
+ *
+ * @param {(date: Date, step: number) => Date} addFunc
+ * @param {Date} date
+ * @param {number} step positive or negative integer
+ */
+const getMiddle = (addFunc, date, step) => {
+  const otherDate = addFunc(date, step);
+  const difference = (otherDate.getTime() - date.getTime()) / 2;
+  const timestamp = date.getTime() + difference;
+  return new UTCDate(timestamp);
+};
+
 export const frequencies = {
   [frequencyTypes.monthly.value]: {
     tryParse: (string) =>
@@ -63,6 +78,7 @@ export const frequencies = {
     formatToLabel: (date) => format(date, 'MM-yyyy'),
     differenceFunc: differenceInMonths,
     addFunc: addMonths,
+    getMiddle: R.curry(getMiddle)(addMonths),
     getStartPeriod: (date) => (isValid(date) ? startOfMonth(date) : ''),
     getEndPeriod: (date) => (isValid(date) ? endOfMonth(date) : ''),
     frequencyTypeCode: frequencyTypes.monthly.value,
@@ -86,6 +102,7 @@ export const frequencies = {
     },
     differenceFunc: differenceInQuarters,
     addFunc: addQuarters,
+    getMiddle: R.curry(getMiddle)(addQuarters),
     getStartPeriod: (date) => (isValid(date) ? startOfQuarter(date) : ''),
     getEndPeriod: (date) => (isValid(date) ? endOfQuarter(date) : ''),
     frequencyTypeCode: frequencyTypes.quarterly.value,
@@ -108,6 +125,7 @@ export const frequencies = {
     formatToLabel: (date) => format(date, 'yyyy'),
     differenceFunc: differenceInYears,
     addFunc: addYears,
+    getMiddle: R.curry(getMiddle)(addYears),
     getStartPeriod: (date) => (isValid(date) ? startOfYear(date) : ''),
     getEndPeriod: (date) => (isValid(date) ? endOfYear(date) : ''),
     frequencyTypeCode: frequencyTypes.yearly.value,
@@ -132,6 +150,7 @@ export const frequencies = {
     formatToLabel: (date) => format(date, 'yyyy'),
     differenceFunc: differenceInQinquennials,
     addFunc: addQinquennials,
+    getMiddle: R.curry(getMiddle)(addQinquennials),
     getStartPeriod: (date) => {
       if (isValid(date)) {
         const year = date.getFullYear();

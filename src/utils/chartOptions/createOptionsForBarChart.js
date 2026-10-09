@@ -12,7 +12,11 @@ import { createDatapoint } from '../chartOptions/createDataPoint';
 import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
+import { exampleAnnotations } from './exampleAnnotations';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+
+const LABEL_COLOR = '#586179';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -108,6 +112,15 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+  const plotBands = createAnnotationPlotBands(
+    exampleAnnotations,
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+    isSmall,
+    LABEL_COLOR,
+  );
+
   return {
     custom: customChartOptions,
 
@@ -145,7 +158,7 @@ export const createOptionsForBarChart = ({
           ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        style: { color: LABEL_COLOR, fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -166,6 +179,7 @@ export const createOptionsForBarChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
@@ -175,7 +189,7 @@ export const createOptionsForBarChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        style: { fontSize: isSmall ? '13px' : '16px', color: LABEL_COLOR },
         ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
@@ -192,7 +206,7 @@ export const createOptionsForBarChart = ({
       itemDistance: 10,
       itemStyle: {
         fontWeight: 'normal',
-        color: '#586179',
+        color: LABEL_COLOR,
         fontSize: isSmall ? '13px' : '16px',
       },
       align: 'left',

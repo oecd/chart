@@ -53,7 +53,6 @@ export const createOptionsForLineChart = ({
   hideLineSymbols = false,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
-  const seenCategories = new Set();
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
@@ -113,8 +112,6 @@ export const createOptionsForLineChart = ({
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
         const categoryCodeLowercase = category.code.toLowerCase();
-
-        seenCategories.add(categoryCodeLowercase);
 
         const dataPoint = createDatapoint(
           pointData,
@@ -272,7 +269,7 @@ export const createOptionsForLineChart = ({
   const customChartOptions = {
     baselineCodes,
     highlightCategoryCodes,
-    categories: Array.from(seenCategories),
+    categories: data.categories.map((category) => category.code.toLowerCase()),
   };
 
   const xAxisLabelFormatters = formatters.xAxisLabels;
