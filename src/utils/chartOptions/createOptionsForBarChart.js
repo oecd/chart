@@ -8,17 +8,21 @@ import {
   chartTypes,
   nonHighlightedOpacity,
 } from '../../constants/chart';
+import { textElementTypes } from '../../constants/styling';
 import { createDatapoint } from '../chartOptions/createDataPoint';
+import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
+import { mapWithIndex } from '../ramdaUtil';
 import {
   calcLegendMarginForBarAndStacked,
   calcMarginTopForBarAndStacked,
   calcYAxisCoordinatesForBarAndStacked,
   fontStyleForTextElement,
 } from '../stylingUtil';
-import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
-import { mapWithIndex } from '../ramdaUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
+import { exampleAnnotations } from './exampleAnnotations';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
-import { textElementTypes } from '../../constants/styling';
+
+const LABEL_COLOR = '#586179';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -105,6 +109,15 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+  const plotBands = createAnnotationPlotBands(
+    exampleAnnotations,
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+    isSmall,
+    LABEL_COLOR,
+  );
+
   return {
     custom: customChartOptions,
 
@@ -160,6 +173,7 @@ export const createOptionsForBarChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
