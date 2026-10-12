@@ -278,9 +278,8 @@ export const createOptionsForStackedChart = ({
     return horizontal ? 14 : 34;
   };
 
-  const isBaselineACategory = R.intersection(
-    Array.from(categoryCodes),
-    baselineCodes,
+  const isBaselineACategory = !R.isEmpty(
+    R.intersection(Array.from(categoryCodes), baselineCodes),
   );
 
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;

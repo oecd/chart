@@ -169,8 +169,6 @@ const createChartOptionsFunc =
       chartType,
       colorPalette: finalColorPaletteColors,
       fixedColorIndexBySeries: parsedFixedColorIndexBySeries,
-      highlight: parsedHighlight,
-      baseline: parsedBaseline,
       ...baselineAndHighlightCodes,
       matchingHighlightColors,
       matchingHighlightOutlineColors,

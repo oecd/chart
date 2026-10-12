@@ -81,9 +81,8 @@ export const createOptionsForBarChart = ({
   /** Whether there are multiple series */
   const isGroupedChart = data.series.length > 1;
 
-  const isBaselineACategory = R.intersection(
-    Array.from(categoryCodes),
-    baselineCodes,
+  const isBaselineACategory = !R.isEmpty(
+    R.intersection(Array.from(categoryCodes), baselineCodes),
   );
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
