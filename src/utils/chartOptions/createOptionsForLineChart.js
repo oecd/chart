@@ -178,7 +178,9 @@ export const createOptionsForLineChart = ({
               ? {
                   enabled: true,
                   format: seriesName,
-                  style: isSeriesHighlighted ? { fontWeight: 'bolder' } : null,
+                  ...(isSeriesHighlighted
+                    ? { style: { fontWeight: 'bolder' } }
+                    : null),
                 }
               : null,
           marker: {
