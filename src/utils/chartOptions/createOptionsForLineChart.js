@@ -2,16 +2,17 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  chartSizes,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
 } from '../../constants/chart';
 import {
-  calcLegendMarginDefault,
-  calcLegendMarginInlineLabels,
-  calcMarginTopDefault,
-  fontStyleForTextElement,
-} from '../stylingUtil';
+  fontColors,
+  fontFamilies,
+  fontWeights,
+  textElementTypes,
+} from '../../constants/styling';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -19,14 +20,17 @@ import {
 } from '../chartUtilCommon';
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
+import {
+  calcLegendMarginDefault,
+  calcLegendMarginInlineLabels,
+  calcMarginTopDefault,
+  fontStyleForTextElement,
+} from '../stylingUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { createDatapoint } from './createDataPoint';
+import { exampleAnnotations } from './exampleAnnotations';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
-import {
-  fontFamilies,
-  fontWeights,
-  textElementTypes,
-} from '../../constants/styling';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -291,6 +295,17 @@ export const createOptionsForLineChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+  const plotBands = createAnnotationPlotBands({
+    annotations: exampleAnnotations,
+    series: data.series,
+    categories: data.categories,
+    areCategoriesDates: data.areCategoriesDates,
+    categoriesFrequency,
+    isSmall: chartSize === chartSizes.small,
+    showLabels: false,
+    labelColor: fontColors.normal,
+  });
+
   return {
     custom: customChartOptions,
 
@@ -349,6 +364,7 @@ export const createOptionsForLineChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {

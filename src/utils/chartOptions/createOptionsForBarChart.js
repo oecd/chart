@@ -3,12 +3,13 @@ import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
   baselineColor,
+  chartSizes,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   chartTypes,
   nonHighlightedOpacity,
 } from '../../constants/chart';
-import { textElementTypes } from '../../constants/styling';
+import { fontColors, textElementTypes } from '../../constants/styling';
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
@@ -21,8 +22,6 @@ import {
 import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { exampleAnnotations } from './exampleAnnotations';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
-
-const LABEL_COLOR = '#586179';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -109,14 +108,16 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
-  const plotBands = createAnnotationPlotBands(
-    exampleAnnotations,
-    data.categories,
-    data.areCategoriesDates,
+  const plotBands = createAnnotationPlotBands({
+    annotations: exampleAnnotations,
+    series: data.series,
+    categories: data.categories,
+    areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
-    isSmall,
-    LABEL_COLOR,
-  );
+    isSmall: chartSize === chartSizes.small,
+    showLabels: !horizontal,
+    labelColor: fontColors.normal,
+  });
 
   return {
     custom: customChartOptions,
