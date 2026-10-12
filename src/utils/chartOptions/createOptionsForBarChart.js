@@ -122,14 +122,16 @@ export const createOptionsForBarChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
-  const plotBands = createAnnotationPlotBands(
-    exampleAnnotations,
-    data.categories,
-    data.areCategoriesDates,
+  const plotBands = createAnnotationPlotBands({
+    annotations: exampleAnnotations,
+    series: data.series,
+    categories: data.categories,
+    areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
-    chartSize === chartSizes.small,
-    fontColors.normal,
-  );
+    isSmall: chartSize === chartSizes.small,
+    showLabels: !horizontal,
+    labelColor: fontColors.normal,
+  });
 
   return {
     custom: customChartOptions,
