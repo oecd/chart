@@ -4,7 +4,6 @@
  * fromCategoryCode: string;
  * toCategoryCode: string;
  * label: string;
- * color: string;
  * showLabelInline: boolean;
  * }} Annotation */
 
@@ -15,7 +14,6 @@ export const exampleAnnotations = [
     type: 'band',
     fromCategoryCode: 'Oranges',
     toCategoryCode: 'Grapes',
-    color: 'mistyrose',
     label:
       'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
     showLabelInline: true,
@@ -24,7 +22,6 @@ export const exampleAnnotations = [
     type: 'band',
     fromCategoryCode: 'Avocado',
     toCategoryCode: 'Avocado',
-    color: 'powderblue',
     label:
       'Quand un pingouin prend un goûter, les autres pingouins prennent un goûter, et ça fait beaucoup de goûters pour les pingouins.',
     showLabelInline: true,
@@ -34,7 +31,14 @@ export const exampleAnnotations = [
     type: 'band',
     fromCategoryCode: '2011',
     toCategoryCode: '2012',
-    color: 'powderblue',
+    label:
+      'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
+    showLabelInline: true,
+  },
+  {
+    type: 'band',
+    fromCategoryCode: '2021',
+    toCategoryCode: '2022',
     label:
       'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
     showLabelInline: true,
@@ -44,7 +48,14 @@ export const exampleAnnotations = [
     type: 'band',
     fromCategoryCode: '2010-05',
     toCategoryCode: '2010-06',
-    color: 'powderblue',
+    label:
+      'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
+    showLabelInline: true,
+  },
+  {
+    type: 'band',
+    fromCategoryCode: '2020-05',
+    toCategoryCode: '2020-06',
     label:
       'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
     showLabelInline: true,
@@ -54,7 +65,14 @@ export const exampleAnnotations = [
     type: 'band',
     fromCategoryCode: '2011-Q2',
     toCategoryCode: '2012-Q3',
-    color: 'powderblue',
+    label:
+      'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
+    showLabelInline: true,
+  },
+  {
+    type: 'band',
+    fromCategoryCode: '2021-Q2',
+    toCategoryCode: '2022-Q3',
     label:
       'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
     showLabelInline: true,
@@ -62,9 +80,16 @@ export const exampleAnnotations = [
   // Time: quinquennial
   {
     type: 'band',
+    fromCategoryCode: '2000',
+    toCategoryCode: '2005',
+    label:
+      'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
+    showLabelInline: true,
+  },
+  {
+    type: 'band',
     fromCategoryCode: '2015',
     toCategoryCode: '2020',
-    color: 'powderblue',
     label:
       'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
     showLabelInline: true,

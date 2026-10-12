@@ -4,11 +4,13 @@ import * as R from 'ramda';
 import {
   animationConfig,
   baselineColor,
+  chartSizes,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
 } from '../../constants/chart';
 import {
+  fontColors,
   fontFamilies,
   fontWeights,
   textElementTypes,
@@ -26,7 +28,9 @@ import {
   calcMarginTopDefault,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { createDatapoint } from './createDataPoint';
+import { exampleAnnotations } from './exampleAnnotations';
 import { highlightSymbols } from './highlightSymbols';
 import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
@@ -329,6 +333,17 @@ export const createOptionsForLineChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const plotBands = createAnnotationPlotBands({
+    annotations: exampleAnnotations,
+    series: data.series,
+    categories: data.categories,
+    areCategoriesDates: data.areCategoriesDates,
+    categoriesFrequency,
+    isSmall: chartSize === chartSizes.small,
+    showLabels: false,
+    labelColor: fontColors.normal,
+  });
+
   return {
     custom: customChartOptions,
 
@@ -375,6 +390,7 @@ export const createOptionsForLineChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
