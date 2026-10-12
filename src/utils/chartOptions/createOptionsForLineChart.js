@@ -14,13 +14,16 @@ import {
 } from '../chartUtilCommon';
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { createDatapoint } from './createDataPoint';
+import { exampleAnnotations } from './exampleAnnotations';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
 const HIGHLIGHTED_SYMBOL_LINE_WIDTH = 1.5;
+const LABEL_COLOR = '#586179';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -244,7 +247,7 @@ export const createOptionsForLineChart = ({
       itemDistance: 10,
       itemStyle: {
         fontWeight: 'normal',
-        color: '#586179',
+        color: LABEL_COLOR,
         fontSize: isSmall ? '13px' : '16px',
       },
       align: 'left',
@@ -276,6 +279,16 @@ export const createOptionsForLineChart = ({
 
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
+
+  const plotBands = createAnnotationPlotBands({
+    annotations: exampleAnnotations,
+    categories: data.categories,
+    areCategoriesDates: data.areCategoriesDates,
+    categoriesFrequency,
+    isSmall,
+    showLabels: false,
+    labelColor: LABEL_COLOR,
+  });
 
   return {
     custom: customChartOptions,
@@ -319,7 +332,7 @@ export const createOptionsForLineChart = ({
         ? { type: 'datetime' }
         : null),
       labels: {
-        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        style: { color: LABEL_COLOR, fontSize: isSmall ? '13px' : '16px' },
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -338,6 +351,7 @@ export const createOptionsForLineChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
@@ -348,7 +362,7 @@ export const createOptionsForLineChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        style: { fontSize: isSmall ? '13px' : '16px', color: LABEL_COLOR },
         ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels,
         align: 'left',

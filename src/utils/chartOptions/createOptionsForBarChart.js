@@ -111,14 +111,16 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
-  const plotBands = createAnnotationPlotBands(
-    exampleAnnotations,
-    data.categories,
-    data.areCategoriesDates,
+  const plotBands = createAnnotationPlotBands({
+    annotations: exampleAnnotations,
+    series: data.series,
+    categories: data.categories,
+    areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
     isSmall,
-    LABEL_COLOR,
-  );
+    showLabels: !horizontal,
+    labelColor: LABEL_COLOR,
+  });
 
   return {
     custom: customChartOptions,
