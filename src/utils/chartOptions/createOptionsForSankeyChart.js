@@ -4,13 +4,14 @@ import {
   chartSpacing,
   chartSpacingFullScreenAndExport,
 } from '../../constants/chart';
-import { calcMarginTop } from '../stylingUtil';
+import { calcMarginTopDefault, fontStyleForTextElement } from '../stylingUtil';
 import { getBaselineOrHighlightColor } from '../chartUtilCommon';
 import {
   addFromAndToColumns,
   createFromToPoints,
   rejectInvalidFromToPoints,
 } from '../sankeyUtil';
+import { textElementTypes } from '../../constants/styling';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -26,7 +27,6 @@ export const createOptionsForSankeyChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   chartSize,
 }) => {
   const series = R.compose(
@@ -69,7 +69,7 @@ export const createOptionsForSankeyChart = ({
 
   return {
     chart: {
-      marginTop: calcMarginTop(title, subtitle, isSmall),
+      marginTop: calcMarginTopDefault(title, subtitle, chartSize),
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -86,10 +86,7 @@ export const createOptionsForSankeyChart = ({
       },
       sankey: {
         dataLabels: {
-          style: {
-            fontSize: isSmall ? '13px' : '16px',
-            fontWeight: 400,
-          },
+          style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         },
       },
     },

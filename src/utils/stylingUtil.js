@@ -20,33 +20,6 @@ export const calcChartSize = (width, height) => {
   return chartSizes.large;
 };
 
-export const calcIsSmall = (width, height) =>
-  !width || !height ? false : width < 540 || height < 350;
-
-export const calcMarginTop = (title, subtitle, isSmall) => {
-  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
-    return isSmall ? 20 : 32;
-  }
-
-  return undefined;
-};
-
-export const calcMarginTopWithHorizontal = (
-  title,
-  subtitle,
-  horizontal,
-  isSmall,
-) => {
-  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
-    if (isSmall) {
-      return 22;
-    }
-    return horizontal ? 22 : 32;
-  }
-
-  return undefined;
-};
-
 export const fontStyleForTextElement = (textElementType, chartSize) => {
   if (!R.has(textElementType, fontStyleByTextElementTypes)) {
     throw new Error(
@@ -60,4 +33,112 @@ export const fontStyleForTextElement = (textElementType, chartSize) => {
   )(fontStyleByTextElementTypes);
 
   return styles;
+};
+
+export const calcLegendMarginForBarAndStacked = (chartSize, horizontal) => {
+  if (chartSize === chartSizes.small) {
+    return horizontal ? 10 : 26;
+  }
+  if (chartSize === chartSizes.medium) {
+    return horizontal ? 12 : 30;
+  }
+
+  return horizontal ? 14 : 34;
+};
+
+export const calcLegendMarginDefault = (chartSize) => {
+  if (chartSize === chartSizes.small) {
+    return 16;
+  }
+  if (chartSize === chartSizes.medium) {
+    return 20;
+  }
+
+  return 24;
+};
+
+export const calcLegendMarginInlineLabels = (chartSize) => {
+  if (chartSize === chartSizes.small) {
+    return -5;
+  }
+  if (chartSize === chartSizes.medium) {
+    return -15;
+  }
+
+  return -25;
+};
+
+export const calcMarginTopDefault = (title, subtitle, chartSize) => {
+  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
+    if (chartSize === chartSizes.small) {
+      return 20;
+    }
+
+    if (chartSize === chartSizes.medium) {
+      return 26;
+    }
+
+    return 32;
+  }
+
+  return undefined;
+};
+
+export const calcMarginTopForBarAndStacked = (
+  title,
+  subtitle,
+  horizontal,
+  chartSize,
+) => {
+  if (isNilOrEmpty(title) && isNilOrEmpty(subtitle)) {
+    if (chartSize === chartSizes.small) {
+      return 22;
+    }
+
+    if (chartSize === chartSizes.medium) {
+      return 26;
+    }
+
+    return horizontal ? 22 : 32;
+  }
+
+  return undefined;
+};
+
+export const calcMarginBottomForRadar = (chartSize) => {
+  if (chartSize === chartSizes.small) {
+    return 10;
+  }
+  if (chartSize === chartSizes.medium) {
+    return 5;
+  }
+
+  return undefined;
+};
+
+export const calcYAxisCoordinatesForBarAndStacked = (horizontal, chartSize) => {
+  if (!horizontal) {
+    return { x: 0, y: -4 };
+  }
+
+  if (chartSize === chartSizes.small) {
+    return { x: 4, y: 28 };
+  }
+
+  if (chartSize === chartSizes.medium) {
+    return { x: 5, y: 31 };
+  }
+
+  return { x: 4, y: 35 };
+};
+
+export const calcRadarPaneSize = (chartSize) => {
+  if (chartSize === chartSizes.small) {
+    return '70%';
+  }
+  if (chartSize === chartSizes.medium) {
+    return '80px';
+  }
+
+  return '85%';
 };

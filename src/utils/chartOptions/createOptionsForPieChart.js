@@ -12,7 +12,10 @@ import {
 import { mapWithIndex } from '../ramdaUtil';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 import { textElementTypes } from '../../constants/styling';
-import { fontStyleForTextElement } from '../stylingUtil';
+import {
+  calcLegendMarginDefault,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -30,7 +33,6 @@ export const createOptionsForPieChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
@@ -96,15 +98,12 @@ export const createOptionsForPieChart = ({
     legend: {
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: fontStyleForTextElement(
-        textElementTypes.legendRegular,
-        chartSize,
-      ),
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: isSmall ? 16 : 24,
+      margin: calcLegendMarginDefault(chartSize),
     },
 
     plotOptions: {
@@ -131,11 +130,7 @@ export const createOptionsForPieChart = ({
               highlightCodes,
             );
           },
-          style: {
-            fontSize: isSmall ? '13px' : '16px',
-            color: '#586179',
-            fontWeight: 'normal',
-          },
+          style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         },
         showInLegend: !hideLegend,
       },

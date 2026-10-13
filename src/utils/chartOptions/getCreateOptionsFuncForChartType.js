@@ -245,8 +245,7 @@ const createChartOptionsFunc =
           y: -20,
         },
         style: {
-          color: '#586179',
-          fontSize: '13px',
+          ...fontStyleForTextElement(textElementTypes.source, chartSize),
           cursor: 'auto',
         },
       }),
@@ -255,10 +254,7 @@ const createChartOptionsFunc =
         align: 'left',
         margin: 25,
         useHTML: true,
-        style: {
-          color: '#586179',
-          fontSize: '13px',
-        },
+        style: fontStyleForTextElement(textElementTypes.source, chartSize),
       }),
       R.assoc('subtitle', {
         text: otherProps.subtitle,

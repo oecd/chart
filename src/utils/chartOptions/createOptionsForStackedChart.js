@@ -10,7 +10,9 @@ import {
   stackingOptions,
 } from '../../constants/chart';
 import {
-  calcMarginTopWithHorizontal,
+  calcLegendMarginForBarAndStacked,
+  calcMarginTopForBarAndStacked,
+  calcYAxisCoordinatesForBarAndStacked,
   fontStyleForTextElement,
 } from '../stylingUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
@@ -234,7 +236,6 @@ export const createOptionsForStackedChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   stacking = stackingOptions.percent.value,
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
@@ -273,14 +274,6 @@ export const createOptionsForStackedChart = ({
     return hideYAxisLabels
       ? { left: '6%', width: '90%' }
       : { left: '9%', width: '87%' };
-  };
-
-  const calcLegendMargin = () => {
-    if (isSmall) {
-      return horizontal ? 10 : 26;
-    }
-
-    return horizontal ? 14 : 34;
   };
 
   const isBaselineACategory = !R.isEmpty(
@@ -322,7 +315,7 @@ export const createOptionsForStackedChart = ({
     chart: {
       type: highChartsChartType,
       marginTop: hideLegend
-        ? calcMarginTopWithHorizontal(title, subtitle, horizontal, isSmall)
+        ? calcMarginTopForBarAndStacked(title, subtitle, horizontal, chartSize)
         : undefined,
       height,
       animation: false,
@@ -357,7 +350,7 @@ export const createOptionsForStackedChart = ({
           }
         : null),
       labels: {
-        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -388,12 +381,12 @@ export const createOptionsForStackedChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
         align: 'left',
-        ...(horizontal ? { x: 4, y: isSmall ? 28 : 35 } : { x: 0, y: -4 }),
+        ...calcYAxisCoordinatesForBarAndStacked(horizontal, chartSize),
       },
       opposite: horizontal,
       reversedStacks: false,
@@ -404,17 +397,14 @@ export const createOptionsForStackedChart = ({
       ...R.prop('seriesLabels', formatters),
       reversed: false,
       itemDistance: 10,
-      itemStyle: fontStyleForTextElement(
-        textElementTypes.legendRegular,
-        chartSize,
-      ),
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       squareSymbol: false,
       symbolRadius: 0,
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMargin(),
+      margin: calcLegendMarginForBarAndStacked(chartSize, horizontal),
     },
 
     plotOptions: {

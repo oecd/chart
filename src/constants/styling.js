@@ -3,8 +3,7 @@ import { chartSizes } from './chart';
 export const textElementTypes = {
   title: 'title',
   subtitle: 'subtitle',
-  legendRegular: 'legendRegular',
-  legendBold: 'legendBold',
+  legend: 'legend',
   source: 'source',
 };
 
@@ -48,7 +47,7 @@ export const fontStyleByTextElementTypes = {
     fontWeight: fontWeights.regular,
     color: fontColors.normal,
   },
-  [textElementTypes.legendRegular]: {
+  [textElementTypes.legend]: {
     fontSize: {
       [chartSizes.small]: '14px',
       [chartSizes.medium]: '15px',
@@ -56,6 +55,17 @@ export const fontStyleByTextElementTypes = {
     },
     lineHeight: '1.4',
     fontFamily: fontFamilies.normal,
+    fontWeight: fontWeights.regular,
+    color: fontColors.normal,
+  },
+  [textElementTypes.source]: {
+    fontSize: {
+      [chartSizes.small]: '12px',
+      [chartSizes.medium]: '14px',
+      [chartSizes.large]: '15px',
+    },
+    lineHeight: '1.3',
+    fontFamily: fontFamilies.condensed,
     fontWeight: fontWeights.regular,
     color: fontColors.normal,
   },

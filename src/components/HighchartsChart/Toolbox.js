@@ -12,7 +12,7 @@ import InfoIcon from '../Icons/InfoIcon';
 import ActionIcon from '../Icons/ActionIcon';
 import { MenuContext, Menu, MenuItem, PopoverContent } from '../floating/Menu';
 import { postJson } from '../../utils/fetchUtil';
-import { apiUrl } from '../../constants/chart';
+import { apiUrl, chartSizes } from '../../constants/chart';
 import { createExportFileName } from '../../utils/chartUtilCommon';
 import { createFooter } from '../../utils/chartUtil';
 
@@ -53,7 +53,7 @@ const Toolbox = ({
   displayActionButton,
   actionButtonLabel,
   onActionButtonClick,
-  isSmall,
+  chartSize,
   exportDisabled = false,
 }) => {
   const downloadCSV = useCallback(() => {
@@ -159,6 +159,8 @@ const Toolbox = ({
     },
   ]);
 
+  const isLarge = chartSize === chartSizes.large;
+
   return (
     <>
       {displayActionButton && (
@@ -174,7 +176,7 @@ const Toolbox = ({
               e.stopPropagation();
             }
           }}
-          style={{ marginLeft: '4px' }}
+          style={{ marginLeft: '6px' }}
         >
           <ActionIcon />
         </div>
@@ -183,12 +185,11 @@ const Toolbox = ({
       {(noteShouldBeDisplayedInTooltip ||
         sourceShouldBeDisplayedInTooltip ||
         !R.isNil(definition)) &&
-        !isSmall && (
+        isLarge && (
           <Menu
             label={<InfoIcon />}
             placement="bottom-end"
             className="cb-tool"
-            isSmall={false}
             tooltipContainerId={tooltipContainerId}
             containsPopover
           >
@@ -215,20 +216,18 @@ const Toolbox = ({
       <Menu
         label={<RootTrigger />}
         className="cb-tool"
-        isSmall={isSmall}
         tooltipContainerId={tooltipContainerId}
-        style={{ marginLeft: isSmall ? '4px' : '8px' }}
+        style={{ marginLeft: '6px' }}
       >
-        <div className={`cb-toolbox ${isSmall ? 'cb-small' : ''}`}>
+        <div className={`cb-toolbox ${!isLarge ? 'cb-small' : ''}`}>
           {(noteShouldBeDisplayedInTooltip ||
             sourceShouldBeDisplayedInTooltip ||
             !R.isNil(definition)) &&
-            isSmall && (
+            !isLarge && (
               <Menu
                 label={<InfoIcon />}
                 placement="left"
                 className="cb-tool"
-                isSmall={isSmall}
                 tooltipContainerId={tooltipContainerId}
                 containsPopover
               >
@@ -300,7 +299,7 @@ Toolbox.propTypes = {
   displayActionButton: PropTypes.bool.isRequired,
   actionButtonLabel: PropTypes.string.isRequired,
   onActionButtonClick: PropTypes.func.isRequired,
-  isSmall: PropTypes.bool.isRequired,
+  chartSize: PropTypes.string.isRequired,
   exportDisabled: PropTypes.bool,
 };
 

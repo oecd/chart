@@ -53,7 +53,6 @@ export const MenuComponent = forwardRef(
     {
       label,
       placement = 'bottom',
-      isSmall,
       containsPopover = false,
       tooltipContainerId,
       className = '',
@@ -92,7 +91,7 @@ export const MenuComponent = forwardRef(
       onOpenChange,
       placement,
       middleware: [
-        offset(isSmall ? 4 : 8),
+        offset(6),
         flip({
           crossAxis: R.includes('-', placement),
           fallbackAxisSideDirection: 'end',
@@ -243,7 +242,6 @@ MenuComponent.propTypes = {
     PropTypes.node,
     PropTypes.string,
   ]).isRequired,
-  isSmall: PropTypes.string.isRequired,
   containsPopover: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
   className: PropTypes.stgring,

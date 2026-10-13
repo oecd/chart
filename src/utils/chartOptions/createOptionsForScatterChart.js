@@ -10,7 +10,11 @@ import {
   sortOrderOptions,
 } from '../../constants/chart';
 import { createDatapoint } from '../chartOptions/createDataPoint';
-import { calcMarginTop, fontStyleForTextElement } from '../stylingUtil';
+import {
+  calcLegendMarginDefault,
+  calcMarginTopDefault,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -56,7 +60,6 @@ export const createOptionsForScatterChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
@@ -207,6 +210,10 @@ export const createOptionsForScatterChart = ({
         ? {
             dataLabels: {
               y: isMinAvgOrMax ? 45 : -20,
+              style: fontStyleForTextElement(
+                textElementTypes.legend,
+                chartSize,
+              ),
             },
           }
         : undefined),
@@ -248,7 +255,7 @@ export const createOptionsForScatterChart = ({
       type: 'scatter',
       marginTop:
         hideLegend && chartType !== chartTypes.symbolMinMax
-          ? calcMarginTop(title, subtitle, isSmall)
+          ? calcMarginTopDefault(title, subtitle, chartSize)
           : undefined,
       ...(symbolMinMaxLayout ? { marginLeft: 12, marginRight: 12 } : null),
       height,
@@ -280,7 +287,7 @@ export const createOptionsForScatterChart = ({
           ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
         ...R.prop('xAxisLabels', formatters),
         ...(hideXAxisLabels || symbolMinMaxLayout ? { enabled: false } : null),
@@ -299,7 +306,7 @@ export const createOptionsForScatterChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels && !symbolMinMaxLayout,
         align: 'left',
@@ -322,17 +329,14 @@ export const createOptionsForScatterChart = ({
       enabled: !hideLegend && !symbolMinMaxLayout,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: fontStyleForTextElement(
-        textElementTypes.legendRegular,
-        chartSize,
-      ),
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       squareSymbol: false,
       symbolRadius: 0,
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: isSmall ? 26 : 34,
+      margin: calcLegendMarginDefault(chartSize),
     },
 
     plotOptions: {

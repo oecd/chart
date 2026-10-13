@@ -5,8 +5,11 @@ import PropTypes from 'prop-types';
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
-import { calcChartSize, calcIsSmall } from '../../utils/stylingUtil';
-import { minChartWidthForControlsDisplayOnRightSide } from '../../constants/chart';
+import { calcChartSize } from '../../utils/stylingUtil';
+import {
+  chartSizes,
+  minChartWidthForControlsDisplayOnRightSide,
+} from '../../constants/chart';
 import ChartSizeContext from '../../contexts/ChartSizeContext';
 
 const ChartWithConfigFixedChartHeight = ({
@@ -48,15 +51,11 @@ const ChartWithConfigFixedChartHeight = ({
     [fullContainerWidth],
   );
 
-  const isSmall = useMemo(
-    () => calcIsSmall(fullContainerWidth, fullContainerHeight),
-    [fullContainerWidth, fullContainerHeight],
-  );
-
   const chartSize = useMemo(
     () => calcChartSize(fullContainerWidth, fullContainerHeight),
     [fullContainerWidth, fullContainerHeight],
   );
+  const isLarge = useMemo(() => chartSize === chartSizes.large, [chartSize]);
 
   return (
     <ChartSizeContext.Provider value={chartSize}>
@@ -88,7 +87,7 @@ const ChartWithConfigFixedChartHeight = ({
           >
             {fullContainerHeight && (
               <div
-                className={`cb-container ${isSmall ? 'cb-small' : ''}`}
+                className={`cb-container ${!isLarge ? 'cb-small' : ''}`}
                 style={{
                   width: chartWithControlsBelowContainerWidth,
                   height: fullContainerHeight,
@@ -106,7 +105,6 @@ const ChartWithConfigFixedChartHeight = ({
                       vars={vars}
                       lang={lang}
                       onDataReady={onDataReady}
-                      isSmall={isSmall}
                       getControlsWithAvailability={getControlsWithAvailability}
                       {...otherProps}
                     />
@@ -131,7 +129,6 @@ const ChartWithConfigFixedChartHeight = ({
                 }
                 onControlChange={setControlIdForWhichDataLoadingIsPending}
                 lang={lang}
-                isSmall={isSmall}
                 isDisplayedOnRightSide
               />
             </div>
@@ -152,7 +149,6 @@ const ChartWithConfigFixedChartHeight = ({
             }
             onControlChange={setControlIdForWhichDataLoadingIsPending}
             lang={lang}
-            isSmall={isSmall}
           />
         )}
     </ChartSizeContext.Provider>

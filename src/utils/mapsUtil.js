@@ -18,7 +18,10 @@ import { numberFormatAbbreviatedForm } from './highchartsUtil';
 import { isNilOrEmpty, mapWithIndex, reduceWithIndex } from './ramdaUtil';
 import map from './world-highres-custom-topo.json';
 import { textElementTypes } from '../constants/styling';
-import { fontStyleForTextElement } from './stylingUtil';
+import {
+  calcLegendMarginDefault,
+  fontStyleForTextElement,
+} from './stylingUtil';
 
 const dottedBorderNames = {
   ETH_SOM: 'ETH_SOM',
@@ -440,7 +443,6 @@ export const createOptionsForMapChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   mapType = mapTypes.normal.value,
   mapColorValueSteps = [],
   mapAutoShade = true,
@@ -636,10 +638,10 @@ export const createOptionsForMapChart = ({
             minColor: createLighterColor(R.head(finalColorPalette), 90),
             maxColor: convertColorToHex(R.head(finalColorPalette)),
             labels: {
-              style: {
-                color: '#586179',
-                fontSize: isSmall ? '13px' : '16px',
-              },
+              style: fontStyleForTextElement(
+                textElementTypes.legend,
+                chartSize,
+              ),
             },
           },
         ]),
@@ -674,11 +676,8 @@ export const createOptionsForMapChart = ({
       itemDistance: 10,
       verticalAlign: 'top',
       x: -7,
-      margin: isSmall ? 16 : 24,
-      itemStyle: fontStyleForTextElement(
-        textElementTypes.legendRegular,
-        chartSize,
-      ),
+      margin: calcLegendMarginDefault(chartSize),
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       squareSymbol: false,
       symbolRadius: mapType === mapTypes.normal.value ? 0 : undefined,
@@ -707,7 +706,7 @@ export const createOptionsForMapChart = ({
         animation: false,
         dataLabels: {
           ...R.prop('dataLabels', formatters),
-          color: '#586179',
+          style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         },
         borderColor: '#bbbbbb',
       },

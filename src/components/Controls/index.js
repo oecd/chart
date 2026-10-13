@@ -1,9 +1,10 @@
-import { useMemo, lazy, Suspense, useCallback } from 'react';
+import { useMemo, lazy, Suspense, useCallback, useContext } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
-import { controlTypes } from '../../constants/chart';
+import { chartSizes, controlTypes } from '../../constants/chart';
 import ControlFallback from '../ControlFallback';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
 
 // dynamic import for code splitting
 const ControlTimeSlider = lazy(() => import('./ControlTimeSlider'));
@@ -25,9 +26,11 @@ const Controls = ({
   controlIdForWhichDataLoadingIsPending,
   onControlChange,
   lang,
-  isSmall,
   isDisplayedOnRightSide = false,
 }) => {
+  const chartSize = useContext(ChartSizeContext);
+  const isLarge = chartSize === chartSizes.large;
+
   const validControls = useMemo(
     () => R.filter((c) => R.has(c.type, controlTypes), controls),
     [controls],
@@ -55,10 +58,12 @@ const Controls = ({
       {isDisplayedOnRightSide ? (
         <div style={{ height: '7px' }} />
       ) : (
-        <div className={`cb-controls-separator ${isSmall ? 'cb-small' : ''}`} />
+        <div
+          className={`cb-controls-separator ${!isLarge ? 'cb-small' : ''}`}
+        />
       )}
       <div
-        className={`cb-controls ${isSmall ? 'cb-small' : ''}`}
+        className={`cb-controls ${!isLarge ? 'cb-small' : ''}`}
         style={{ display: 'flex', flexWrap: 'wrap' }}
       >
         {R.map((c) => {
@@ -94,7 +99,6 @@ Controls.propTypes = {
   controlIdForWhichDataLoadingIsPending: PropTypes.string,
   onControlChange: PropTypes.func.isRequired,
   lang: PropTypes.string.isRequired,
-  isSmall: PropTypes.bool.isRequired,
   isDisplayedOnRightSide: PropTypes.bool,
 };
 

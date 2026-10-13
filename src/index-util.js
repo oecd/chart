@@ -8,6 +8,7 @@ import * as chartUtil from './utils/chartUtil';
 import * as dateUtil from './utils/dateUtil';
 import * as paletteUtil from './utils/paletteUtil';
 import * as stylingUtil from './utils/stylingUtil';
+import * as stylingConstant from './constants/styling';
 import { getCreateOptionsFuncForChartType } from './utils/chartOptions/getCreateOptionsFuncForChartType';
 import { deepMergeUserOptionsWithDefaultOptions } from './utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
 
@@ -29,4 +30,5 @@ export {
   paletteUtil,
   chartOptionsUtil,
   stylingUtil,
+  stylingConstant,
 };

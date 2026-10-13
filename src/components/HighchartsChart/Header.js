@@ -6,6 +6,7 @@ import Toolbox from './Toolbox';
 import ChartSizeContext from '../../contexts/ChartSizeContext';
 import { textElementTypes } from '../../constants/styling';
 import { fontStyleForTextElement } from '../../utils/stylingUtil';
+import { chartSizes } from '../../constants/chart';
 
 const Header = ({
   chartType,
@@ -30,7 +31,6 @@ const Header = ({
   displayActionButton,
   actionButtonLabel,
   onActionButtonClick,
-  isSmall,
   isFontLoaded,
   chartRef,
 }) => {
@@ -40,13 +40,14 @@ const Header = ({
   );
 
   const chartSize = useContext(ChartSizeContext);
+  const isLarge = chartSize === chartSizes.large;
 
   if (R.isEmpty(title) && R.isEmpty(subtitle) && hideToolbox) {
     return null;
   }
 
   return (
-    <div style={{ display: 'flex', paddingBottom: isSmall ? '2px' : '5px' }}>
+    <div style={{ display: 'flex', paddingBottom: !isLarge ? '2px' : '5px' }}>
       <div style={{ flex: '1 1 auto' }}>
         {!R.isEmpty(title) && canTitleAndSubtitleBeDisplayed && (
           <div
@@ -100,7 +101,7 @@ const Header = ({
             displayActionButton={displayActionButton}
             actionButtonLabel={actionButtonLabel}
             onActionButtonClick={onActionButtonClick}
-            isSmall={isSmall}
+            chartSize={chartSize}
             exportDisabled={exportDisabled}
           />
         </div>
@@ -132,7 +133,6 @@ Header.propTypes = {
   displayActionButton: PropTypes.bool.isRequired,
   actionButtonLabel: PropTypes.string.isRequired,
   onActionButtonClick: PropTypes.func.isRequired,
-  isSmall: PropTypes.bool.isRequired,
   isFontLoaded: PropTypes.bool.isRequired,
   chartRef: PropTypes.object.isRequired,
 };

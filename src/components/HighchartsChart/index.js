@@ -59,6 +59,8 @@ import Spinner from '../Spinner';
 import GenericChart from './GenericChart';
 import Header from './Header';
 import ChartSizeContext from '../../contexts/ChartSizeContext';
+import { fontStyleForTextElement } from '../../utils/stylingUtil';
+import { textElementTypes } from '../../constants/styling';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -176,7 +178,6 @@ const HighchartsChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
   tooltipContainerId,
-  isSmall,
   optionsOverride = null,
   debug = false,
   varForDotStatSymbolMinMax = null,
@@ -1144,7 +1145,6 @@ const HighchartsChart = ({
         decimalPoint,
         customTooltip: finalCustomTooltip,
         height: isFullScreen ? screenHeight : chartHeight,
-        isSmall,
         chartSize,
         hideLegend,
         hideXAxisLabels,
@@ -1184,7 +1184,6 @@ const HighchartsChart = ({
     hideLineSymbols,
     highlight,
     isFullScreen,
-    isSmall,
     chartSize,
     pivotValue,
     mapType,
@@ -1296,7 +1295,6 @@ const HighchartsChart = ({
             actionButtonLabel={actionButtonLabel}
             onActionButtonClick={actionButtonClick}
             tooltipContainerId={tooltipContainerId}
-            isSmall={isSmall}
             isFontLoaded={isFontLoaded}
             chartRef={chartRef}
           />
@@ -1328,8 +1326,9 @@ const HighchartsChart = ({
                 width,
                 position: 'fixed',
                 visibility: 'hidden',
+                ...fontStyleForTextElement(textElementTypes.source, chartSize),
               }
-            : {}
+            : fontStyleForTextElement(textElementTypes.source, chartSize)
         }
       >
         <div
@@ -1432,7 +1431,6 @@ HighchartsChart.propTypes = {
   inlineLabels: PropTypes.bool,
   disableLegendInteraction: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
-  isSmall: PropTypes.bool.isRequired,
   debug: PropTypes.bool,
   optionsOverride: PropTypes.object,
   varForDotStatSymbolMinMax: PropTypes.string,

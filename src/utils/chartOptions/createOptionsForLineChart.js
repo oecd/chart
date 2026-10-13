@@ -6,7 +6,12 @@ import {
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
 } from '../../constants/chart';
-import { calcMarginTop, fontStyleForTextElement } from '../stylingUtil';
+import {
+  calcLegendMarginDefault,
+  calcLegendMarginInlineLabels,
+  calcMarginTopDefault,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -45,7 +50,6 @@ export const createOptionsForLineChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
@@ -180,9 +184,17 @@ export const createOptionsForLineChart = ({
               ? {
                   enabled: true,
                   format: seriesName,
-                  ...(isSeriesHighlighted
-                    ? { style: { fontWeight: 'bolder' } }
-                    : null),
+                  style: {
+                    ...fontStyleForTextElement(
+                      textElementTypes.legend,
+                      chartSize,
+                    ),
+                    ...(isSeriesHighlighted
+                      ? {
+                          fontWeight: 'bolder',
+                        }
+                      : null),
+                  },
                 }
               : null,
           marker: {
@@ -232,29 +244,26 @@ export const createOptionsForLineChart = ({
     // legend is enabled but hidden so that Highcharts reserves the space needed for last data points data label (hack)
     () => ({
       enabled: true,
-      margin: isSmall ? -5 : -25,
+      margin: calcLegendMarginInlineLabels(chartSize),
       symbolWidth: 0,
       layout: 'vertical',
       align: 'right',
       verticalAlign: 'middle',
       itemStyle: {
         visibility: 'hidden',
-        ...fontStyleForTextElement(textElementTypes.legendRegular, chartSize),
+        ...fontStyleForTextElement(textElementTypes.legend, chartSize),
       },
     }),
     () => ({
       enabled: !hideLegend,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: fontStyleForTextElement(
-        textElementTypes.legendRegular,
-        chartSize,
-      ),
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: isSmall ? 26 : 34,
+      margin: calcLegendMarginDefault(chartSize),
     }),
   )();
 
@@ -286,7 +295,7 @@ export const createOptionsForLineChart = ({
     chart: {
       marginTop:
         hideLegend || inlineLabels
-          ? calcMarginTop(title, subtitle, isSmall)
+          ? calcMarginTopDefault(title, subtitle, chartSize)
           : undefined,
       height,
       animation: false,
@@ -319,7 +328,7 @@ export const createOptionsForLineChart = ({
         ? { type: 'datetime' }
         : null),
       labels: {
-        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -348,7 +357,7 @@ export const createOptionsForLineChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels,
         align: 'left',
@@ -372,14 +381,13 @@ export const createOptionsForLineChart = ({
               crop: false,
               overflow: 'allow',
               allowOverlap: true,
-              style: {
-                fontSize: isSmall ? '13px' : '16px',
-                fontWeight: 400,
-                color: '#101d40',
-              },
             }
           : {
               ...R.prop('dataLabels', formatters),
+              style: fontStyleForTextElement(
+                textElementTypes.legend,
+                chartSize,
+              ),
             },
         events: {
           mouseOver: inlineLabels
