@@ -79,6 +79,28 @@ export const createOptionsForBarChart = ({
       : { left: '9%', width: '87%' };
   };
 
+<<<<<<< HEAD
+||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
+  const calcLegendMargin = () => {
+    if (isSmall) {
+      return horizontal ? 10 : 26;
+    }
+
+    return horizontal ? 14 : 34;
+  };
+
+=======
+  const calcLegendMargin = () => {
+    const marginForAnnotations = showAnnotationLabels ? 10 : 0;
+
+    if (isSmall) {
+      return (horizontal ? 10 : 26) + marginForAnnotations;
+    }
+
+    return (horizontal ? 14 : 34) + marginForAnnotations;
+  };
+
+>>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
   /** Whether there are multiple series */
   const isGroupedChart = data.series.length > 1;
 
@@ -108,16 +130,38 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+  const annotations = exampleAnnotations;
+  const showAnnotationLabels = annotations.length > 0 && !horizontal;
   const plotBands = createAnnotationPlotBands({
-    annotations: exampleAnnotations,
+    annotations,
     series: data.series,
     categories: data.categories,
     areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
     isSmall: chartSize === chartSizes.small,
-    showLabels: !horizontal,
+    showLabels: showAnnotationLabels,
     labelColor: fontColors.normal,
   });
+
+  const labelFontSize = isSmall ? 13 : 16;
+  const labelFontSizePx = `${labelFontSize}px`;
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend) {
+      marginTop = calcMarginTopWithHorizontal(
+        title,
+        subtitle,
+        horizontal,
+        isSmall,
+      );
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabels) {
+      marginTop += labelFontSize;
+    }
+    return marginTop;
+  })();
 
   return {
     custom: customChartOptions,
@@ -153,7 +197,13 @@ export const createOptionsForBarChart = ({
           ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
+<<<<<<< HEAD
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
+        style: { color: LABEL_COLOR, fontSize: isSmall ? '13px' : '16px' },
+=======
+        style: { color: LABEL_COLOR, fontSize: labelFontSizePx },
+>>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -184,7 +234,13 @@ export const createOptionsForBarChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
+<<<<<<< HEAD
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
+        style: { fontSize: isSmall ? '13px' : '16px', color: LABEL_COLOR },
+=======
+        style: { fontSize: labelFontSizePx, color: LABEL_COLOR },
+>>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
         ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
@@ -199,7 +255,21 @@ export const createOptionsForBarChart = ({
       enabled: !hideLegend,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
+<<<<<<< HEAD
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
+||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
+      itemStyle: {
+        fontWeight: 'normal',
+        color: LABEL_COLOR,
+        fontSize: isSmall ? '13px' : '16px',
+      },
+=======
+      itemStyle: {
+        fontWeight: 'normal',
+        color: LABEL_COLOR,
+        fontSize: labelFontSizePx,
+      },
+>>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
       align: 'left',
       squareSymbol: false,
       symbolRadius: 0,
