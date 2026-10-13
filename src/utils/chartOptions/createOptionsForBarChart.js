@@ -75,11 +75,13 @@ export const createOptionsForBarChart = ({
   };
 
   const calcLegendMargin = () => {
+    const marginForAnnotations = showAnnotationLabels ? 10 : 0;
+
     if (isSmall) {
-      return horizontal ? 10 : 26;
+      return (horizontal ? 10 : 26) + marginForAnnotations;
     }
 
-    return horizontal ? 14 : 34;
+    return (horizontal ? 14 : 34) + marginForAnnotations;
   };
 
   /** Whether there are multiple series */
@@ -111,16 +113,38 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+  const annotations = exampleAnnotations;
+  const showAnnotationLabels = annotations.length > 0 && !horizontal;
   const plotBands = createAnnotationPlotBands({
-    annotations: exampleAnnotations,
+    annotations,
     series: data.series,
     categories: data.categories,
     areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
     isSmall,
-    showLabels: !horizontal,
+    showLabels: showAnnotationLabels,
     labelColor: LABEL_COLOR,
   });
+
+  const labelFontSize = isSmall ? 13 : 16;
+  const labelFontSizePx = `${labelFontSize}px`;
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend) {
+      marginTop = calcMarginTopWithHorizontal(
+        title,
+        subtitle,
+        horizontal,
+        isSmall,
+      );
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabels) {
+      marginTop += labelFontSize;
+    }
+    return marginTop;
+  })();
 
   return {
     custom: customChartOptions,
@@ -130,9 +154,7 @@ export const createOptionsForBarChart = ({
       style: {
         fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
       },
-      marginTop: hideLegend
-        ? calcMarginTopWithHorizontal(title, subtitle, horizontal, isSmall)
-        : undefined,
+      marginTop,
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -159,7 +181,7 @@ export const createOptionsForBarChart = ({
           ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-        style: { color: LABEL_COLOR, fontSize: isSmall ? '13px' : '16px' },
+        style: { color: LABEL_COLOR, fontSize: labelFontSizePx },
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -190,7 +212,7 @@ export const createOptionsForBarChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: LABEL_COLOR },
+        style: { fontSize: labelFontSizePx, color: LABEL_COLOR },
         ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
@@ -208,7 +230,7 @@ export const createOptionsForBarChart = ({
       itemStyle: {
         fontWeight: 'normal',
         color: LABEL_COLOR,
-        fontSize: isSmall ? '13px' : '16px',
+        fontSize: labelFontSizePx,
       },
       align: 'left',
       squareSymbol: false,

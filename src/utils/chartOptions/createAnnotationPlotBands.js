@@ -74,7 +74,7 @@ const getTimeAnnotations = ({ annotations, series, categoriesFrequency }) => {
  * }} options
  * @returns {(Annotation & { from: number; to: number; })[]}
  */
-const getDiscreteAnnotations = (annotations, categories) =>
+const getDiscreteAnnotations = ({ annotations, categories }) =>
   annotations
     .filter(({ type }) => type === 'band')
     .map((annotation) => {
@@ -137,24 +137,41 @@ export const createAnnotationPlotBands = ({
       })
     : getDiscreteAnnotations({ annotations: bandAnnotations, categories });
 
+  const fontSize = isSmall ? 13 : 16;
+  const lineHeight = isSmall ? 1.15 : 1.25;
+  const height = `${fontSize * lineHeight * 2}px`;
+
   return annotationsWithPositions.map(({ annotation, from, to }, index) => {
-    const fontSize = isSmall ? 13 : 16;
     const isEven = index % 2 === 0;
 
     const showLabel = showLabels && annotation.showLabelInline;
 
-    /** @type {XAxisPlotBandsLabelOptions | undefined} */
+    const text = `<span style="
+display: block;
+display: -webkit-box;
+-webkit-box-orient: vertical;
+-webkit-line-clamp: 2;
+overflow: hidden;
+fontSize: ${fontSize}px;
+line-height: ${lineHeight};
+color: ${labelColor};
+white-space: normal;
+">${annotation.label}</span>`;
+
+    /** @type {import('highcharts').XAxisPlotBandsLabelOptions | undefined} */
     const label = showLabel
       ? {
-          text: annotation.label,
+          useHTML: true,
+          text,
           align: 'left',
-          inside: false,
-          x: isEven ? 0 : 5,
-          y: isEven ? fontSize * -0.5 : fontSize + 1,
+          x: 0,
+          // y: 0 is approx. half of the font size on top of the plot band rect
+          y: -(fontSize * lineHeight * 1.5),
           style: {
-            lineClamp: 1,
-            fontSize: `${fontSize}px`,
-            color: labelColor,
+            // Vertically align bottom
+            display: 'flex',
+            'align-items': 'flex-end',
+            height,
           },
         }
       : undefined;
