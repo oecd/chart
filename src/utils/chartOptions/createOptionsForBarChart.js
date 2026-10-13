@@ -81,6 +81,28 @@ export const createOptionsForBarChart = ({
       : { left: '9%', width: '87%' };
   };
 
+<<<<<<< HEAD
+||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
+  const calcLegendMargin = () => {
+    if (isSmall) {
+      return horizontal ? 10 : 26;
+    }
+
+    return horizontal ? 14 : 34;
+  };
+
+=======
+  const calcLegendMargin = () => {
+    const marginForAnnotations = showAnnotationLabels ? 10 : 0;
+
+    if (isSmall) {
+      return (horizontal ? 10 : 26) + marginForAnnotations;
+    }
+
+    return (horizontal ? 14 : 34) + marginForAnnotations;
+  };
+
+>>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
   /** Whether there are multiple series */
   const isGroupedChart = data.series.length > 1;
 
@@ -110,6 +132,7 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+<<<<<<< HEAD
   const seriesLabelFormatters = formatters.seriesLabels;
   const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
 
@@ -122,16 +145,41 @@ export const createOptionsForBarChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+||||||| parent of 80c5b96 (useHTML annotations, positioning, limit width and height (two lines))
+=======
+  const annotations = exampleAnnotations;
+  const showAnnotationLabels = annotations.length > 0 && !horizontal;
+>>>>>>> 80c5b96 (useHTML annotations, positioning, limit width and height (two lines))
   const plotBands = createAnnotationPlotBands({
-    annotations: exampleAnnotations,
+    annotations,
     series: data.series,
     categories: data.categories,
     areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
     isSmall: chartSize === chartSizes.small,
-    showLabels: !horizontal,
+    showLabels: showAnnotationLabels,
     labelColor: fontColors.normal,
   });
+
+  const labelFontSize = isSmall ? 13 : 16;
+  const labelFontSizePx = `${labelFontSize}px`;
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend) {
+      marginTop = calcMarginTopWithHorizontal(
+        title,
+        subtitle,
+        horizontal,
+        isSmall,
+      );
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabels) {
+      marginTop += labelFontSize;
+    }
+    return marginTop;
+  })();
 
   return {
     custom: customChartOptions,
