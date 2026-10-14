@@ -263,7 +263,6 @@ const createChartOptionsFunc =
         style: {
           color: LABEL_COLOR,
           fontSize: '13px',
-          lineHeight: '16px',
         },
       }),
       R.assoc('subtitle', {
