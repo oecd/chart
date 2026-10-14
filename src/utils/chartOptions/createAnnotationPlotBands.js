@@ -184,13 +184,12 @@ white-space: normal;
     } else {
       // Render numerical reference to the caption
       const fontSize = '12px';
-      const marginTop = `${isSmall ? 0 : 2}px`;
       const width = '16px';
       const style = `
+box-sizing: content-box;
 display: block;
 width: ${width};
 height: ${width};
-margin-top: ${marginTop};
 border: 1px solid ${LABEL_COLOR};
 border-radius: 50%;
 `;
