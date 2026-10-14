@@ -9,7 +9,6 @@ import {
   nonHighlightedOpacity,
 } from '../../constants/chart';
 import {
-  fontColors,
   fontFamilies,
   fontWeights,
   textElementTypes,
@@ -29,7 +28,6 @@ import {
 } from '../stylingUtil';
 import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { createDatapoint } from './createDataPoint';
-import { exampleAnnotations } from './exampleAnnotations';
 import { highlightSymbols } from './highlightSymbols';
 import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
@@ -68,6 +66,7 @@ export const createOptionsForLineChart = ({
   disableLegendInteraction = false,
   hideLineSymbols = false,
   chartSize,
+  annotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
@@ -332,14 +331,13 @@ export const createOptionsForLineChart = ({
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
   const plotBands = createAnnotationPlotBands({
-    annotations: exampleAnnotations,
+    annotations,
     series: data.series,
     categories: data.categories,
     areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
     isSmall: chartSize === chartSizes.small,
-    showLabels: false,
-    labelColor: fontColors.normal,
+    showLabelsInline: false,
   });
 
   return {

@@ -12,11 +12,19 @@ export const exampleAnnotations = [
   // Ordinal scale (discrete categories)
   {
     type: 'band',
-    fromCategoryCode: 'Oranges',
-    toCategoryCode: 'Grapes',
+    fromCategoryCode: 'Bananas',
+    toCategoryCode: 'Oranges',
     label:
       'The quick brown fox jumps over the lazy dog. Alle meine Entchen schwimmen auf dem See. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern',
-    showLabelInline: true,
+    showLabelInline: false,
+  },
+  {
+    type: 'band',
+    fromCategoryCode: 'Grapes',
+    toCategoryCode: 'Pineapple',
+    label:
+      'Quand un pingouin prend un goûter, les autres pingouins prennent un goûter, et ça fait beaucoup de goûters pour les pingouins.',
+    showLabelInline: false,
   },
   {
     type: 'band',
@@ -24,7 +32,7 @@ export const exampleAnnotations = [
     toCategoryCode: 'Avocado',
     label:
       'Quand un pingouin prend un goûter, les autres pingouins prennent un goûter, et ça fait beaucoup de goûters pour les pingouins.',
-    showLabelInline: true,
+    showLabelInline: false,
   },
   // Time: yearly
   {
