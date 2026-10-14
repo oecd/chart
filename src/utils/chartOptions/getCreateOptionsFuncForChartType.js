@@ -5,6 +5,12 @@ import {
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   defaultExportSize,
 } from '../../constants/chart';
+import { noDataErrorMessageString } from '../../constants/chartErrorMessages';
+import {
+  fontColors,
+  fontFamilies,
+  textElementTypes,
+} from '../../constants/styling';
 import customChartRenderByChartType from '../../highchartsCustomCode/customChartRenderByChartType';
 import {
   isParsedDataEmpty,
@@ -24,6 +30,8 @@ import {
 } from '../highchartsUtil';
 import { getFinalPaletteColors } from '../paletteUtil';
 import { isNilOrEmpty } from '../ramdaUtil';
+import { fontStyleForTextElement } from '../stylingUtil';
+import { createAnnotationCaption } from './createAnnotationCaption';
 import { createOptionsForBarChart } from './createOptionsForBarChart';
 import { createOptionsForLineChart } from './createOptionsForLineChart';
 import { createOptionsForPieChart } from './createOptionsForPieChart';
@@ -31,17 +39,13 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
+import { exampleAnnotations } from './exampleAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
-import {
-  fontColors,
-  fontFamilies,
-  textElementTypes,
-} from '../../constants/styling';
-import { fontStyleForTextElement } from '../stylingUtil';
-import { noDataErrorMessageString } from '../../constants/chartErrorMessages';
 
 const mapsUtil = import('../mapsUtil');
+
+const LABEL_COLOR = '#586179';
 
 /**
  * @param {Function} createOptionsFuncForChartType
@@ -80,6 +84,7 @@ const createChartOptionsFunc =
     chartSize,
     inlineLabels,
     hideLegend,
+    annotations = exampleAnnotations,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -199,6 +204,7 @@ const createChartOptionsFunc =
       chartSize,
       inlineLabels,
       hideLegend,
+      annotations,
     });
 
     const customChartRender = R.propOr(
@@ -212,6 +218,13 @@ const createChartOptionsFunc =
         customChartRender({ chart, cbType: chartType });
       }
     };
+
+    // Show annotations that are not in the chart itself as captions
+    const annotationCaption = annotations
+      ? createAnnotationCaption(annotations, LABEL_COLOR)
+      : undefined;
+
+    const captionText = `${otherProps.footer}${annotationCaption ? `<br>${annotationCaption}` : ''}`;
 
     return R.compose(
       R.when(
@@ -266,7 +279,7 @@ const createChartOptionsFunc =
         },
       }),
       R.assoc('caption', {
-        text: otherProps.footer,
+        text: captionText,
         align: 'left',
         margin: 25,
         useHTML: true,

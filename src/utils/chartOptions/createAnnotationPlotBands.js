@@ -1,8 +1,9 @@
 import * as R from 'ramda';
 
-const DEFAULT_COLOR = '#F0F4F8';
-const COLOR_A = '#FAF0F0';
-const COLOR_B = '#F0F0FA';
+const LABEL_COLOR = '#586179';
+const BAND_COLOR = '#F0F4F8';
+const BAND_COLOR_A = '#FAF0F0';
+const BAND_COLOR_B = '#F0F0FA';
 
 /**
  * Adds from/to to annotations for time categories.
@@ -24,7 +25,6 @@ const COLOR_B = '#F0F0FA';
  * };
  * isSmall: boolean;
  * showLabels: boolean;
- * labelColor: string;
  * }} options
  * @returns {(Annotation & { from: number; to: number; })[]}
  */
@@ -97,6 +97,12 @@ const getDiscreteAnnotations = ({ annotations, categories }) =>
     .filter((definition) => definition !== undefined);
 
 /**
+ * @param {string} string
+ */
+const escapeHTML = (string) =>
+  string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
  * @param {{
  * annotations?: import('./exampleAnnotations').Annotation[];
  * series: {
@@ -112,8 +118,7 @@ const getDiscreteAnnotations = ({ annotations, categories }) =>
  *   getMiddle: (date: Date, step: number) => Date;
  * };
  * isSmall: boolean;
- * showLabels: boolean;
- * labelColor: string;
+ * showLabelsInline: boolean;
  * }} options
  * @returns {import('highcharts').XAxisPlotBandsOptions[]}
  */
@@ -124,12 +129,11 @@ export const createAnnotationPlotBands = ({
   areCategoriesDates,
   categoriesFrequency,
   isSmall,
-  showLabels,
-  labelColor,
+  showLabelsInline,
 }) => {
   const bandAnnotations = annotations.filter(({ type }) => type === 'band');
 
-  const annotationsWithPositions = areCategoriesDates
+  const positionedAnnotations = areCategoriesDates
     ? getTimeAnnotations({
         annotations: bandAnnotations,
         series,
@@ -137,52 +141,82 @@ export const createAnnotationPlotBands = ({
       })
     : getDiscreteAnnotations({ annotations: bandAnnotations, categories });
 
-  const fontSize = isSmall ? 13 : 16;
-  const lineHeight = isSmall ? 1.15 : 1.25;
-  const height = `${fontSize * lineHeight * 2}px`;
-
-  return annotationsWithPositions.map(({ annotation, from, to }, index) => {
+  return positionedAnnotations.map(({ annotation, from, to }, index) => {
     const isEven = index % 2 === 0;
 
-    const showLabel = showLabels && annotation.showLabelInline;
+    const showLabelInline = showLabelsInline && annotation.showLabelInline;
 
-    const text = `<span style="
+    /** @type {import('highcharts').XAxisPlotBandsLabelOptions | undefined} */
+    let label;
+    if (showLabelInline) {
+      // Render label in the plot band
+      const fontSize = isSmall ? 13 : 16;
+      const fontSizePx = `${fontSize}px`;
+      const lineHeightFactor = isSmall ? 1.15 : 1.25;
+      const height = `${fontSize * lineHeightFactor * 2}px`;
+      const style = `
 display: block;
 display: -webkit-box;
 -webkit-box-orient: vertical;
 -webkit-line-clamp: 2;
 overflow: hidden;
-fontSize: ${fontSize}px;
-line-height: ${lineHeight};
-color: ${labelColor};
 white-space: normal;
-">${annotation.label}</span>`;
-
-    /** @type {import('highcharts').XAxisPlotBandsLabelOptions | undefined} */
-    const label = showLabel
-      ? {
-          useHTML: true,
-          text,
-          align: 'left',
-          x: 0,
-          // y: 0 is approx. half of the font size on top of the plot band rect
-          y: -(fontSize * lineHeight * 1.5),
-          style: {
-            // Vertically align bottom
-            display: 'flex',
-            'align-items': 'flex-end',
-            height,
-          },
-        }
-      : undefined;
+`;
+      const labelText = escapeHTML(annotation.label);
+      const htmlText = `<span style="${style}">${labelText}</span>`;
+      label = {
+        useHTML: true,
+        text: htmlText,
+        align: 'left',
+        x: 0,
+        // y: 0 is approx. half of the font size on top of the plot band rect
+        y: -(fontSize * lineHeightFactor * 1.5),
+        style: {
+          // Vertically align bottom
+          display: 'flex',
+          'align-items': 'flex-end',
+          height,
+          fontSize: fontSizePx,
+          lineHeight: lineHeightFactor,
+          color: LABEL_COLOR,
+        },
+      };
+    } else {
+      // Render numerical reference to the caption
+      const fontSize = isSmall ? 12 : 14;
+      const fontSizePx = `${fontSize}px`;
+      const marginTop = isSmall ? 0 : 2;
+      const marginTopPx = `${marginTop}px`;
+      const lineHeight = isSmall ? 14 : 16;
+      const lineHeightPx = `${lineHeight}px`;
+      const style = `
+display: block;
+min-width: ${lineHeightPx};
+aspect-ratio: 1;
+margin-top: ${marginTopPx};
+border: 1px solid ${LABEL_COLOR};
+border-radius: 50%;
+`;
+      const htmlText = `<span style="${style}">${String(index + 1)}</span>`;
+      label = {
+        useHTML: true,
+        text: htmlText,
+        style: {
+          fontSize: fontSizePx,
+          lineHeight: lineHeightPx,
+          fontWeight: 'bolder',
+          color: LABEL_COLOR,
+        },
+      };
+    }
 
     const color =
       annotation.color ||
-      (annotationsWithPositions.length > 1
+      (positionedAnnotations.length > 1
         ? isEven
-          ? COLOR_A
-          : COLOR_B
-        : DEFAULT_COLOR);
+          ? BAND_COLOR_A
+          : BAND_COLOR_B
+        : BAND_COLOR);
 
     /** @type {import('highcharts').XAxisPlotBandsOptions} */
     const plotBand = {

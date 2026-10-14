@@ -10,7 +10,7 @@ import {
   chartTypes,
   nonHighlightedOpacity,
 } from '../../constants/chart';
-import { fontColors, textElementTypes } from '../../constants/styling';
+import { textElementTypes } from '../../constants/styling';
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
@@ -21,7 +21,6 @@ import {
   fontStyleForTextElement,
 } from '../stylingUtil';
 import { createAnnotationPlotBands } from './createAnnotationPlotBands';
-import { exampleAnnotations } from './exampleAnnotations';
 import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
@@ -56,6 +55,7 @@ export const createOptionsForBarChart = ({
   disableLegendInteraction = false,
   chartSize,
   disableAnimation = false,
+  annotations,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -83,28 +83,6 @@ export const createOptionsForBarChart = ({
       : { left: '9%', width: '87%' };
   };
 
-<<<<<<< HEAD
-||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
-  const calcLegendMargin = () => {
-    if (isSmall) {
-      return horizontal ? 10 : 26;
-    }
-
-    return horizontal ? 14 : 34;
-  };
-
-=======
-  const calcLegendMargin = () => {
-    const marginForAnnotations = showAnnotationLabels ? 10 : 0;
-
-    if (isSmall) {
-      return (horizontal ? 10 : 26) + marginForAnnotations;
-    }
-
-    return (horizontal ? 14 : 34) + marginForAnnotations;
-  };
-
->>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
   /** Whether there are multiple series */
   const isGroupedChart = data.series.length > 1;
 
@@ -134,7 +112,6 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
-<<<<<<< HEAD
   const seriesLabelFormatters = formatters.seriesLabels;
   const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
 
@@ -147,11 +124,9 @@ export const createOptionsForBarChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
-||||||| parent of 80c5b96 (useHTML annotations, positioning, limit width and height (two lines))
-=======
-  const annotations = exampleAnnotations;
-  const showAnnotationLabels = annotations.length > 0 && !horizontal;
->>>>>>> 80c5b96 (useHTML annotations, positioning, limit width and height (two lines))
+  // const showAnnotationLabelsInline = annotations.length > 0 && !horizontal;
+  const showAnnotationLabelsInline = false;
+
   const plotBands = createAnnotationPlotBands({
     annotations,
     series: data.series,
@@ -159,26 +134,27 @@ export const createOptionsForBarChart = ({
     areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
     isSmall: chartSize === chartSizes.small,
-    showLabels: showAnnotationLabels,
-    labelColor: fontColors.normal,
+    showLabelsInline: showAnnotationLabelsInline,
   });
 
-  const labelFontSize = isSmall ? 13 : 16;
-  const labelFontSizePx = `${labelFontSize}px`;
+  const labelStyle = fontStyleForTextElement(
+    textElementTypes.legend,
+    chartSize,
+  );
 
   const marginTop = (() => {
     /** @type {number | undefined} */
     let marginTop;
     if (hideLegend) {
-      marginTop = calcMarginTopWithHorizontal(
+      marginTop = calcMarginTopForBarAndStacked(
         title,
         subtitle,
         horizontal,
-        isSmall,
+        chartSize,
       );
     }
-    if (typeof marginTop === 'number' && showAnnotationLabels) {
-      marginTop += labelFontSize;
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
+      marginTop += parseFloat(labelStyle.fontSize);
     }
     return marginTop;
   })();
@@ -188,9 +164,7 @@ export const createOptionsForBarChart = ({
 
     chart: {
       type: horizontal ? 'bar' : 'column',
-      marginTop: hideLegend
-        ? calcMarginTopForBarAndStacked(title, subtitle, horizontal, chartSize)
-        : undefined,
+      marginTop,
       height,
       animation: disableAnimation ? false : animationConfig,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -206,7 +180,7 @@ export const createOptionsForBarChart = ({
       categories: xAxisCategories,
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+        style: labelStyle,
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
