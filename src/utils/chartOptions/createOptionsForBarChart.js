@@ -20,7 +20,6 @@ import {
   fontStyleForTextElement,
 } from '../stylingUtil';
 import { createAnnotationPlotBands } from './createAnnotationPlotBands';
-import { exampleAnnotations } from './exampleAnnotations';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 /**
@@ -52,6 +51,7 @@ export const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
+  annotations,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -79,28 +79,6 @@ export const createOptionsForBarChart = ({
       : { left: '9%', width: '87%' };
   };
 
-<<<<<<< HEAD
-||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
-  const calcLegendMargin = () => {
-    if (isSmall) {
-      return horizontal ? 10 : 26;
-    }
-
-    return horizontal ? 14 : 34;
-  };
-
-=======
-  const calcLegendMargin = () => {
-    const marginForAnnotations = showAnnotationLabels ? 10 : 0;
-
-    if (isSmall) {
-      return (horizontal ? 10 : 26) + marginForAnnotations;
-    }
-
-    return (horizontal ? 14 : 34) + marginForAnnotations;
-  };
-
->>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
   /** Whether there are multiple series */
   const isGroupedChart = data.series.length > 1;
 
@@ -130,8 +108,8 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
-  const annotations = exampleAnnotations;
-  const showAnnotationLabels = annotations.length > 0 && !horizontal;
+  // const showAnnotationLabelsInline = annotations.length > 0 && !horizontal;
+  const showAnnotationLabelsInline = false;
   const plotBands = createAnnotationPlotBands({
     annotations,
     series: data.series,
@@ -139,26 +117,28 @@ export const createOptionsForBarChart = ({
     areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
     isSmall: chartSize === chartSizes.small,
-    showLabels: showAnnotationLabels,
+    showLabelsInline: showAnnotationLabelsInline,
     labelColor: fontColors.normal,
   });
 
-  const labelFontSize = isSmall ? 13 : 16;
-  const labelFontSizePx = `${labelFontSize}px`;
+  const labelStyle = fontStyleForTextElement(
+    textElementTypes.legend,
+    chartSize,
+  );
 
   const marginTop = (() => {
     /** @type {number | undefined} */
     let marginTop;
     if (hideLegend) {
-      marginTop = calcMarginTopWithHorizontal(
+      marginTop = calcMarginTopForBarAndStacked(
         title,
         subtitle,
         horizontal,
-        isSmall,
+        chartSize,
       );
     }
-    if (typeof marginTop === 'number' && showAnnotationLabels) {
-      marginTop += labelFontSize;
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
+      marginTop += parseFloat(labelStyle.fontSize);
     }
     return marginTop;
   })();
@@ -168,9 +148,7 @@ export const createOptionsForBarChart = ({
 
     chart: {
       type: horizontal ? 'bar' : 'column',
-      marginTop: hideLegend
-        ? calcMarginTopForBarAndStacked(title, subtitle, horizontal, chartSize)
-        : undefined,
+      marginTop,
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -197,13 +175,7 @@ export const createOptionsForBarChart = ({
           ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-<<<<<<< HEAD
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
-||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
-        style: { color: LABEL_COLOR, fontSize: isSmall ? '13px' : '16px' },
-=======
-        style: { color: LABEL_COLOR, fontSize: labelFontSizePx },
->>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
+        style: labelStyle,
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -234,13 +206,7 @@ export const createOptionsForBarChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-<<<<<<< HEAD
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
-||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
-        style: { fontSize: isSmall ? '13px' : '16px', color: LABEL_COLOR },
-=======
-        style: { fontSize: labelFontSizePx, color: LABEL_COLOR },
->>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
         ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
@@ -255,21 +221,7 @@ export const createOptionsForBarChart = ({
       enabled: !hideLegend,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-<<<<<<< HEAD
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
-||||||| parent of e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
-      itemStyle: {
-        fontWeight: 'normal',
-        color: LABEL_COLOR,
-        fontSize: isSmall ? '13px' : '16px',
-      },
-=======
-      itemStyle: {
-        fontWeight: 'normal',
-        color: LABEL_COLOR,
-        fontSize: labelFontSizePx,
-      },
->>>>>>> e982ef9 (useHTML annotations, positioning, limit width and height (two lines))
       align: 'left',
       squareSymbol: false,
       symbolRadius: 0,
