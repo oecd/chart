@@ -21,6 +21,7 @@ import {
 } from '../highchartsUtil';
 import { getFinalPaletteColors } from '../paletteUtil';
 import { isNilOrEmpty } from '../ramdaUtil';
+import { createAnnotationCaption } from './createAnnotationCaption';
 import { createOptionsForBarChart } from './createOptionsForBarChart';
 import { createOptionsForLineChart } from './createOptionsForLineChart';
 import { createOptionsForPieChart } from './createOptionsForPieChart';
@@ -28,10 +29,13 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
+import { exampleAnnotations } from './exampleAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
 
 const mapsUtil = import('../mapsUtil');
+
+const LABEL_COLOR = '#586179';
 
 /**
  * @param {Function} createOptionsFuncForChartType
@@ -67,6 +71,7 @@ const createChartOptionsFunc =
     vars,
     lang,
     forceXAxisToBeTreatedAsCategories,
+    annotations = exampleAnnotations,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -183,6 +188,7 @@ const createChartOptionsFunc =
       categoriesAreDatesOrNumberForDataParsing,
       categoriesFrequency,
       seriesFrequency,
+      annotations,
     });
 
     const customChartRender = R.propOr(
@@ -196,6 +202,13 @@ const createChartOptionsFunc =
         customChartRender({ chart, cbType: chartType });
       }
     };
+
+    // Show annotations that are not in the chart itself as captions
+    const annotationCaption = annotations
+      ? createAnnotationCaption(annotations, LABEL_COLOR)
+      : undefined;
+
+    const captionText = `${otherProps.footer}${annotationCaption ? `<br>${annotationCaption}` : ''}`;
 
     return R.compose(
       R.when(
@@ -237,26 +250,27 @@ const createChartOptionsFunc =
           y: -20,
         },
         style: {
-          color: '#586179',
+          color: LABEL_COLOR,
           fontSize: '13px',
           cursor: 'auto',
         },
       }),
       R.assoc('caption', {
-        text: otherProps.footer,
+        text: captionText,
         align: 'left',
         margin: 25,
         useHTML: true,
         style: {
-          color: '#586179',
+          color: LABEL_COLOR,
           fontSize: '13px',
+          lineHeight: '16px',
         },
       }),
       R.assoc('subtitle', {
         text: otherProps.subtitle,
         align: 'left',
         style: {
-          color: '#586179',
+          color: LABEL_COLOR,
           fontSize: '17px',
         },
       }),

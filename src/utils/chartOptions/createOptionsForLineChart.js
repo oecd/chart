@@ -16,7 +16,6 @@ import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { createDatapoint } from './createDataPoint';
-import { exampleAnnotations } from './exampleAnnotations';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
@@ -54,6 +53,7 @@ export const createOptionsForLineChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
   hideLineSymbols = false,
+  annotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
@@ -281,12 +281,13 @@ export const createOptionsForLineChart = ({
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
   const plotBands = createAnnotationPlotBands({
-    annotations: exampleAnnotations,
+    annotations,
+    series: data.series,
     categories: data.categories,
     areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
     isSmall,
-    showLabels: false,
+    showLabelsInline: false,
     labelColor: LABEL_COLOR,
   });
 

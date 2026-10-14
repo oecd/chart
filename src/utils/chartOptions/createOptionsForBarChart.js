@@ -13,7 +13,6 @@ import { calcMarginTopWithHorizontal } from '../chartUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { createAnnotationPlotBands } from './createAnnotationPlotBands';
-import { exampleAnnotations } from './exampleAnnotations';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 const LABEL_COLOR = '#586179';
@@ -47,6 +46,7 @@ export const createOptionsForBarChart = ({
   categoriesFrequency,
   seriesFrequency,
   disableLegendInteraction = false,
+  annotations,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -75,7 +75,7 @@ export const createOptionsForBarChart = ({
   };
 
   const calcLegendMargin = () => {
-    const marginForAnnotations = showAnnotationLabels ? 10 : 0;
+    const marginForAnnotations = showAnnotationLabelsInline ? 10 : 0;
 
     if (isSmall) {
       return (horizontal ? 10 : 26) + marginForAnnotations;
@@ -113,8 +113,8 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
-  const annotations = exampleAnnotations;
-  const showAnnotationLabels = annotations.length > 0 && !horizontal;
+  // const showAnnotationLabelsInline = annotations.length > 0 && !horizontal;
+  const showAnnotationLabelsInline = false;
   const plotBands = createAnnotationPlotBands({
     annotations,
     series: data.series,
@@ -122,8 +122,7 @@ export const createOptionsForBarChart = ({
     areCategoriesDates: data.areCategoriesDates,
     categoriesFrequency,
     isSmall,
-    showLabels: showAnnotationLabels,
-    labelColor: LABEL_COLOR,
+    showLabelsInline: showAnnotationLabelsInline,
   });
 
   const labelFontSize = isSmall ? 13 : 16;
@@ -140,7 +139,7 @@ export const createOptionsForBarChart = ({
         isSmall,
       );
     }
-    if (typeof marginTop === 'number' && showAnnotationLabels) {
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
       marginTop += labelFontSize;
     }
     return marginTop;
