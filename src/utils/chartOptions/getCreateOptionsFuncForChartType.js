@@ -219,7 +219,10 @@ const createChartOptionsFunc =
       ? createAnnotationCaption(positionedAnnotations, LABEL_COLOR)
       : undefined;
 
-    const captionText = `${otherProps.footer}${annotationCaption ? `<br>${annotationCaption}` : ''}`;
+    const captionText = R.join(
+      '<br>',
+      R.filter(Boolean, [otherProps.footer, annotationCaption]),
+    );
 
     return R.compose(
       R.when(
