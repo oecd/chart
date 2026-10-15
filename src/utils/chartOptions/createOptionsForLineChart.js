@@ -57,6 +57,9 @@ export const createOptionsForLineChart = ({
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
+  const labelFontSize = isSmall ? 13 : 16;
+  const labelFontSizePx = `${labelFontSize}px`;
+
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
 
@@ -225,6 +228,11 @@ export const createOptionsForLineChart = ({
     };
   }, data.series);
 
+  const calcLegendMargin = () => {
+    const marginForAnnotations = showAnnotationLabelsInline ? 10 : 0;
+    return (isSmall ? 26 : 34) + marginForAnnotations;
+  };
+
   const legend = R.ifElse(
     () => inlineLabels,
     // legend is enabled but hidden so that Highcharts reserves the space needed for last data points data label (hack)
@@ -237,7 +245,7 @@ export const createOptionsForLineChart = ({
       verticalAlign: 'middle',
       itemStyle: {
         visibility: 'hidden',
-        fontSize: isSmall ? '13px' : '16px',
+        fontSize: labelFontSize,
         fontWeight: 400,
       },
     }),
@@ -248,13 +256,13 @@ export const createOptionsForLineChart = ({
       itemStyle: {
         fontWeight: 'normal',
         color: LABEL_COLOR,
-        fontSize: isSmall ? '13px' : '16px',
+        fontSize: labelFontSize,
       },
       align: 'left',
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: isSmall ? 26 : 34,
+      margin: calcLegendMargin(),
     }),
   )();
 
@@ -280,11 +288,25 @@ export const createOptionsForLineChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+  // const showAnnotationLabelsInline = positionedAnnotations.length > 0;
+  const showAnnotationLabelsInline = true;
   const plotBands = createAnnotationPlotBands({
     positionedAnnotations,
     isSmall,
-    showLabelsInline: true,
+    showLabelsInline: showAnnotationLabelsInline,
   });
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend || inlineLabels) {
+      marginTop = calcMarginTop(title, subtitle, isSmall);
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
+      marginTop += labelFontSize;
+    }
+    return marginTop;
+  })();
 
   return {
     custom: customChartOptions,
@@ -293,10 +315,7 @@ export const createOptionsForLineChart = ({
       style: {
         fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
       },
-      marginTop:
-        hideLegend || inlineLabels
-          ? calcMarginTop(title, subtitle, isSmall)
-          : undefined,
+      marginTop,
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -328,7 +347,7 @@ export const createOptionsForLineChart = ({
         ? { type: 'datetime' }
         : null),
       labels: {
-        style: { color: LABEL_COLOR, fontSize: isSmall ? '13px' : '16px' },
+        style: { color: LABEL_COLOR, fontSize: labelFontSizePx },
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -358,7 +377,7 @@ export const createOptionsForLineChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: LABEL_COLOR },
+        style: { fontSize: labelFontSizePx, color: LABEL_COLOR },
         ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels,
         align: 'left',
@@ -383,7 +402,7 @@ export const createOptionsForLineChart = ({
               overflow: 'allow',
               allowOverlap: true,
               style: {
-                fontSize: isSmall ? '13px' : '16px',
+                fontSize: labelFontSizePx,
                 fontWeight: 400,
                 color: '#101d40',
               },
@@ -398,9 +417,7 @@ export const createOptionsForLineChart = ({
                 e.target.data.forEach((p) => {
                   p.update(
                     {
-                      dataLabels: {
-                        enabled: true,
-                      },
+                      dataLabels: { enabled: true },
                     },
                     false,
                     false,
@@ -415,9 +432,7 @@ export const createOptionsForLineChart = ({
                 e.target.data.forEach((p) => {
                   p.update(
                     {
-                      dataLabels: {
-                        enabled: false,
-                      },
+                      dataLabels: { enabled: false },
                     },
                     false,
                     false,
