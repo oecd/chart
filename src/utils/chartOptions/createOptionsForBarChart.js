@@ -55,6 +55,11 @@ export const createOptionsForBarChart = ({
 }) => {
   const horizontal = chartType === chartTypes.row;
 
+  const showAnnotationLabelsInline = R.any(
+    R.prop('showLabelInline'),
+    positionedAnnotations,
+  );
+
   const calcXAxisLayout = () => {
     if (horizontal) {
       if (hideXAxisLabels) {
@@ -79,8 +84,9 @@ export const createOptionsForBarChart = ({
       : { left: '9%', width: '87%' };
   };
 
-  /** Whether there are multiple series */
-  const isGroupedChart = data.series.length > 1;
+  const legendMargin =
+    calcLegendMarginForBarAndStacked(chartSize, horizontal) +
+    (showAnnotationLabelsInline ? 10 : 0);
 
   const isBaselineACategory = !R.isEmpty(
     R.intersection(Array.from(categoryCodes), baselineCodes),
@@ -88,6 +94,9 @@ export const createOptionsForBarChart = ({
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
+
+  /** Whether there are multiple series */
+  const isGroupedChart = data.series.length > 1;
 
   /**
    * Whether a category is baseline/highlighted that contains several points
@@ -108,8 +117,6 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
-  // const showAnnotationLabelsInline = positionedAnnotations.length > 0 && !horizontal;
-  const showAnnotationLabelsInline = true;
   const plotBands = createAnnotationPlotBands({
     positionedAnnotations,
     isSmall: chartSize === chartSizes.small,
@@ -223,7 +230,7 @@ export const createOptionsForBarChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginForBarAndStacked(chartSize, horizontal),
+      margin: legendMargin,
     },
 
     plotOptions: {
