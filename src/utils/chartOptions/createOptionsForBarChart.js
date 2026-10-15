@@ -9,7 +9,7 @@ import {
   chartTypes,
   nonHighlightedOpacity,
 } from '../../constants/chart';
-import { fontColors, textElementTypes } from '../../constants/styling';
+import { textElementTypes } from '../../constants/styling';
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
@@ -51,7 +51,7 @@ export const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
-  annotations,
+  positionedAnnotations,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -109,16 +109,11 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
   // const showAnnotationLabelsInline = annotations.length > 0 && !horizontal;
-  const showAnnotationLabelsInline = false;
+  const showAnnotationLabelsInline = true;
   const plotBands = createAnnotationPlotBands({
-    annotations,
-    series: data.series,
-    categories: data.categories,
-    areCategoriesDates: data.areCategoriesDates,
-    categoriesFrequency,
+    positionedAnnotations,
     isSmall: chartSize === chartSizes.small,
     showLabelsInline: showAnnotationLabelsInline,
-    labelColor: fontColors.normal,
   });
 
   const labelStyle = fontStyleForTextElement(

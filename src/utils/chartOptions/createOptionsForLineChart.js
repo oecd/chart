@@ -63,7 +63,7 @@ export const createOptionsForLineChart = ({
   disableLegendInteraction = false,
   hideLineSymbols = false,
   chartSize,
-  annotations,
+  positionedAnnotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
@@ -295,11 +295,7 @@ export const createOptionsForLineChart = ({
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
   const plotBands = createAnnotationPlotBands({
-    annotations,
-    series: data.series,
-    categories: data.categories,
-    areCategoriesDates: data.areCategoriesDates,
-    categoriesFrequency,
+    positionedAnnotations,
     isSmall: chartSize === chartSizes.small,
     showLabelsInline: false,
   });
