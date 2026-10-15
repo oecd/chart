@@ -28,8 +28,7 @@ const useIsFontLoaded = () => {
     checkIsFontLoaded();
   }, []);
 
-  //return isLoaded;
-  return false;
+  return isLoaded;
 };
 
 export default useIsFontLoaded;

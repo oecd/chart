@@ -31,7 +31,6 @@ const Header = ({
   displayActionButton,
   actionButtonLabel,
   onActionButtonClick,
-  isFontLoaded,
   chartRef,
 }) => {
   const isInIframe = useMemo(
@@ -133,7 +132,6 @@ Header.propTypes = {
   displayActionButton: PropTypes.bool.isRequired,
   actionButtonLabel: PropTypes.string.isRequired,
   onActionButtonClick: PropTypes.func.isRequired,
-  isFontLoaded: PropTypes.bool.isRequired,
   chartRef: PropTypes.object.isRequired,
 };
 
