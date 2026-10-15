@@ -46,7 +46,7 @@ export const createOptionsForBarChart = ({
   categoriesFrequency,
   seriesFrequency,
   disableLegendInteraction = false,
-  annotations,
+  positionedAnnotations,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -114,13 +114,9 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
   // const showAnnotationLabelsInline = annotations.length > 0 && !horizontal;
-  const showAnnotationLabelsInline = false;
+  const showAnnotationLabelsInline = true;
   const plotBands = createAnnotationPlotBands({
-    annotations,
-    series: data.series,
-    categories: data.categories,
-    areCategoriesDates: data.areCategoriesDates,
-    categoriesFrequency,
+    positionedAnnotations,
     isSmall,
     showLabelsInline: showAnnotationLabelsInline,
   });
