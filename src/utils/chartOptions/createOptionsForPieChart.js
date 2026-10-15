@@ -11,6 +11,11 @@ import {
 } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import { textElementTypes } from '../../constants/styling';
+import {
+  calcLegendMarginDefault,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -28,11 +33,11 @@ export const createOptionsForPieChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
   disableLegendInteraction = false,
+  chartSize,
 }) => {
   const allSeries = R.map(
     (series) => ({
@@ -79,9 +84,6 @@ export const createOptionsForPieChart = ({
   return {
     chart: {
       type: 'pie',
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -96,16 +98,12 @@ export const createOptionsForPieChart = ({
     legend: {
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: isSmall ? 16 : 24,
+      margin: calcLegendMarginDefault(chartSize),
     },
 
     plotOptions: {
@@ -132,11 +130,7 @@ export const createOptionsForPieChart = ({
               highlightCodes,
             );
           },
-          style: {
-            fontSize: isSmall ? '13px' : '16px',
-            color: '#586179',
-            fontWeight: 'normal',
-          },
+          style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         },
         showInLegend: !hideLegend,
       },

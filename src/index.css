@@ -1,10 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;500&family=Noto+Sans:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;800&family=Noto+Sans:wght@400&display=swap');
 
 .cb-container {
   padding: 22px 24px;
-  font-family: 'Noto Sans Display', Helvetica, sans-serif;
-  color: #101d40;
   background-color: #fff;
+}
+.cb-container.cb-medium {
+  padding: 19px 21px;
 }
 .cb-container.cb-small {
   padding: 16px 18px;
@@ -15,60 +16,39 @@
   margin: 0px;
 }
 
+.cb-header {
+  padding-bottom: 6px;
+}
+.cb-medium .cb-header {
+  padding-bottom: 4px;
+}
+.cb-small .cb-header {
+  padding-bottom: 2px;
+}
+
 .cb-title {
-  font-family: Helvetica, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.764px;
-  font-size: 18px;
-  line-height: 22px;
+  font-family: Helvetica, sans-serif !important;
+  letter-spacing: -1.2px;
 }
 
-.cb-title.cb-font-loaded {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
-  letter-spacing: unset;
-}
-
-.cb-container.cb-small .cb-title {
-  letter-spacing: 0.098px;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 18px;
-}
-
-.cb-container.cb-small .cb-title.cb-font-loaded {
+.cb-font-loaded .cb-title {
+  font-family: 'Noto Sans Display', Helvetica, sans-serif !important;
   letter-spacing: unset;
 }
 
 .cb-subtitle {
-  font-family: Helvetica, sans-serif;
-  letter-spacing: 0.21px;
-  font-weight: 500;
-  font-size: 17px;
-  line-height: 22px;
-  color: #586179;
+  font-family: Helvetica, sans-serif !important;
+  letter-spacing: 0.4px;
 }
 
-.cb-subtitle.cb-font-loaded {
-  font-family: 'Noto Sans Display', Helvetica, sans-serif;
-  letter-spacing: unset;
-}
-
-.cb-container.cb-small .cb-subtitle {
-  letter-spacing: 0.098px;
-  font-size: 15px;
-  line-height: 18px;
-}
-
-.cb-container.cb-small .cb-subtitle.cb-font-loaded {
+.cb-font-loaded .cb-subtitle {
+  font-family: 'Noto Sans', Helvetica, sans-serif !important;
   letter-spacing: unset;
 }
 
 .cb-toolbox {
-  padding: 0px 8px;
+  padding: 0px 6px;
   outline: 0;
-}
-.cb-toolbox.cb-small {
-  padding: 0px 4px;
 }
 
 .cb-tool {
@@ -92,14 +72,16 @@
   outline: none;
 }
 
-.cb-container.cb-small .cb-tool,
-.cb-toolbox.cb-small .cb-tool {
+.cb-medium .cb-tool {
+  width: 42px;
+  height: 42px;
+}
+.cb-small .cb-tool {
   width: 38px;
   height: 38px;
-  margin-bottom: 4px;
 }
 .cb-toolbox .cb-tool {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .cb-tool.cb-disabled {
   cursor: default;
@@ -113,12 +95,10 @@
 }
 
 .cb-floating {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
   font-size: 14px;
   line-height: 18px;
   border: 1px solid #dee3e9;
   border-radius: 4px;
-  color: #586179;
   background-color: #ffffffe6;
   z-index: 701;
 }
@@ -133,37 +113,39 @@
 }
 
 .cb-footer {
-  font-family: Helvetica, sans-serif;
+  font-family: Helvetica, sans-serif !important;
   letter-spacing: 0.44px;
-  font-size: 14px;
-  line-height: 18px;
-  color: #586179;
 }
 
-.cb-footer.cb-font-loaded {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
-  letter-spacing: unset;
-}
-
-.cb-container.cb-small .cb-footer {
-  letter-spacing: 0.34px;
-  font-size: 13px;
-  line-height: 16px;
-}
-
-.cb-container.cb-small .cb-footer.cb-font-loaded {
+.cb-font-loaded .cb-footer {
+  font-family: 'Noto Sans', Helvetica, sans-serif !important;
   letter-spacing: unset;
 }
 
 .cb-footer p {
-  padding-top: 5px;
+  padding-top: 3px;
 }
 .cb-footer p:first-of-type {
-  padding-top: 10px;
+  padding-top: 8px;
+}
+.cb-medium .cb-footer p {
+  padding-top: 2px;
+}
+.cb-medium .cb-footer p:first-of-type {
+  padding-top: 6px;
+}
+.cb-small .cb-footer p {
+  padding-top: 1px;
+}
+.cb-small .cb-footer p:first-of-type {
+  padding-top: 4px;
 }
 
 .cb-controls {
   padding: 10px 16px 16px 16px;
+}
+.cb-controls.cb-medium {
+  padding: 10px 13px 13px 13px;
 }
 .cb-controls.cb-small {
   padding: 10px;
@@ -173,12 +155,14 @@
   background-color: #dee3e9;
   margin: 0px 24px;
 }
+.cb-controls-separator.cb-medium {
+  margin: 0px 21px;
+}
 .cb-controls-separator.cb-small {
   margin: 0px 18px;
 }
 
 .cb-control {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
   font-size: 14px;
   flex: 1;
   padding: 5px 8px;
@@ -186,14 +170,12 @@
   box-sizing: border-box;
 }
 .cb-control-standalone {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
   font-size: 14px;
   flex: 1;
   min-width: 250px;
 }
 
 .cb-control-label {
-  color: #586179;
   display: flex;
   justify-content: flex-start;
   margin-bottom: 4px;
@@ -299,7 +281,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #586179;
   background-color: #ffffff;
   border: 1px solid #dee3e9;
   border-radius: 4px;

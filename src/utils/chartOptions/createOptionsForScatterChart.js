@@ -10,13 +10,18 @@ import {
   sortOrderOptions,
 } from '../../constants/chart';
 import { createDatapoint } from '../chartOptions/createDataPoint';
-import { calcMarginTop } from '../chartUtil';
+import {
+  calcLegendMarginDefault,
+  calcMarginTopDefault,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
   getSeriesColor,
 } from '../chartUtilCommon';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
+import { textElementTypes } from '../../constants/styling';
 
 // Symbol sizes
 const RADIUS = 6;
@@ -55,12 +60,12 @@ export const createOptionsForScatterChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
   sortOrder,
   disableLegendInteraction = false,
+  chartSize,
 }) => {
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
@@ -205,6 +210,10 @@ export const createOptionsForScatterChart = ({
         ? {
             dataLabels: {
               y: isMinAvgOrMax ? 45 : -20,
+              style: fontStyleForTextElement(
+                textElementTypes.legend,
+                chartSize,
+              ),
             },
           }
         : undefined),
@@ -244,12 +253,9 @@ export const createOptionsForScatterChart = ({
   return {
     chart: {
       type: 'scatter',
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       marginTop:
         hideLegend && chartType !== chartTypes.symbolMinMax
-          ? calcMarginTop(title, subtitle, isSmall)
+          ? calcMarginTopDefault(title, subtitle, chartSize)
           : undefined,
       ...(symbolMinMaxLayout ? { marginLeft: 12, marginRight: 12 } : null),
       height,
@@ -281,7 +287,7 @@ export const createOptionsForScatterChart = ({
           ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
         ...R.prop('xAxisLabels', formatters),
         ...(hideXAxisLabels || symbolMinMaxLayout ? { enabled: false } : null),
@@ -300,7 +306,7 @@ export const createOptionsForScatterChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels && !symbolMinMaxLayout,
         align: 'left',
@@ -323,18 +329,14 @@ export const createOptionsForScatterChart = ({
       enabled: !hideLegend && !symbolMinMaxLayout,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       squareSymbol: false,
       symbolRadius: 0,
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: isSmall ? 26 : 34,
+      margin: calcLegendMarginDefault(chartSize),
     },
 
     plotOptions: {

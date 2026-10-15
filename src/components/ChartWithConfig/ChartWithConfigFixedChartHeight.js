@@ -5,8 +5,11 @@ import PropTypes from 'prop-types';
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
-import { calcIsSmall } from '../../utils/chartUtil';
+import { calcChartSize, getSizeCssClass } from '../../utils/stylingUtil';
 import { minChartWidthForControlsDisplayOnRightSide } from '../../constants/chart';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
+import { fontColors, fontFamilies } from '../../constants/styling';
+import useIsFontLoaded from '../../hook/useIsFontLoaded';
 
 const ChartWithConfigFixedChartHeight = ({
   width = null,
@@ -47,13 +50,15 @@ const ChartWithConfigFixedChartHeight = ({
     [fullContainerWidth],
   );
 
-  const isSmall = useMemo(
-    () => calcIsSmall(fullContainerWidth, fullContainerHeight),
+  const chartSize = useMemo(
+    () => calcChartSize(fullContainerWidth, fullContainerHeight),
     [fullContainerWidth, fullContainerHeight],
   );
 
+  const isFontLoaded = useIsFontLoaded();
+
   return (
-    <>
+    <ChartSizeContext.Provider value={chartSize}>
       <div
         ref={fullContainerRef}
         style={{
@@ -82,8 +87,10 @@ const ChartWithConfigFixedChartHeight = ({
           >
             {fullContainerHeight && (
               <div
-                className={`cb-container ${isSmall ? 'cb-small' : ''}`}
+                className={`cb-container ${getSizeCssClass(chartSize)} ${isFontLoaded ? 'cb-font-loaded' : ''}`}
                 style={{
+                  fontFamily: fontFamilies.normal,
+                  color: fontColors.normal,
                   width: chartWithControlsBelowContainerWidth,
                   height: fullContainerHeight,
                   boxSizing: 'border-box',
@@ -100,7 +107,6 @@ const ChartWithConfigFixedChartHeight = ({
                       vars={vars}
                       lang={lang}
                       onDataReady={onDataReady}
-                      isSmall={isSmall}
                       getControlsWithAvailability={getControlsWithAvailability}
                       {...otherProps}
                     />
@@ -125,7 +131,6 @@ const ChartWithConfigFixedChartHeight = ({
                 }
                 onControlChange={setControlIdForWhichDataLoadingIsPending}
                 lang={lang}
-                isSmall={isSmall}
                 isDisplayedOnRightSide
               />
             </div>
@@ -146,10 +151,9 @@ const ChartWithConfigFixedChartHeight = ({
             }
             onControlChange={setControlIdForWhichDataLoadingIsPending}
             lang={lang}
-            isSmall={isSmall}
           />
         )}
-    </>
+    </ChartSizeContext.Provider>
   );
 };
 

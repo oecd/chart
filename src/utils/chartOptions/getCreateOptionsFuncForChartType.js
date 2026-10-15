@@ -33,6 +33,12 @@ import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
+import {
+  fontColors,
+  fontFamilies,
+  textElementTypes,
+} from '../../constants/styling';
+import { fontStyleForTextElement } from '../stylingUtil';
 import { noDataErrorMessageString } from '../../constants/chartErrorMessages';
 
 const mapsUtil = import('../mapsUtil');
@@ -71,6 +77,9 @@ const createChartOptionsFunc =
     vars,
     lang,
     forceXAxisToBeTreatedAsCategories,
+    chartSize,
+    inlineLabels,
+    hideLegend,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -187,6 +196,9 @@ const createChartOptionsFunc =
       categoriesAreDatesOrNumberForDataParsing,
       categoriesFrequency,
       seriesFrequency,
+      chartSize,
+      inlineLabels,
+      hideLegend,
     });
 
     const customChartRender = R.propOr(
@@ -253,8 +265,7 @@ const createChartOptionsFunc =
           y: -20,
         },
         style: {
-          color: '#586179',
-          fontSize: '13px',
+          ...fontStyleForTextElement(textElementTypes.source, chartSize),
           cursor: 'auto',
         },
       }),
@@ -263,28 +274,22 @@ const createChartOptionsFunc =
         align: 'left',
         margin: 25,
         useHTML: true,
-        style: {
-          color: '#586179',
-          fontSize: '13px',
-        },
+        style: fontStyleForTextElement(textElementTypes.source, chartSize),
       }),
       R.assoc('subtitle', {
         text: otherProps.subtitle,
         align: 'left',
-        style: {
-          color: '#586179',
-          fontSize: '17px',
-        },
+        style: fontStyleForTextElement(textElementTypes.subtitle, chartSize),
       }),
       R.assoc('title', {
         text: otherProps.title,
         align: 'left',
-        margin: 20,
-        style: {
-          color: '#101d40',
-          fontWeight: 'bold',
-          fontSize: '18px',
-        },
+        margin: inlineLabels || hideLegend ? 50 : 20,
+        style: fontStyleForTextElement(textElementTypes.title, chartSize),
+      }),
+      R.assocPath(['chart', 'style'], {
+        fontFamily: fontFamilies.normal,
+        color: fontColors.normal,
       }),
     )(options);
   };

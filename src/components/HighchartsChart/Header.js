@@ -1,8 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useContext } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
 import Toolbox from './Toolbox';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
+import { textElementTypes } from '../../constants/styling';
+import { fontStyleForTextElement } from '../../utils/stylingUtil';
 
 const Header = ({
   chartType,
@@ -27,8 +30,6 @@ const Header = ({
   displayActionButton,
   actionButtonLabel,
   onActionButtonClick,
-  isSmall,
-  isFontLoaded,
   chartRef,
 }) => {
   const isInIframe = useMemo(
@@ -36,12 +37,19 @@ const Header = ({
     [],
   );
 
+  const chartSize = useContext(ChartSizeContext);
+
+  if (R.isEmpty(title) && R.isEmpty(subtitle) && hideToolbox) {
+    return null;
+  }
+
   return (
-    <div style={{ display: 'flex', paddingBottom: isSmall ? '2px' : '5px' }}>
+    <div className="cb-header" style={{ display: 'flex' }}>
       <div style={{ flex: '1 1 auto' }}>
         {!R.isEmpty(title) && canTitleAndSubtitleBeDisplayed && (
           <div
-            className={`cb-title ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+            className="cb-title"
+            style={fontStyleForTextElement(textElementTypes.title, chartSize)}
             dangerouslySetInnerHTML={{
               __html: title,
             }}
@@ -49,7 +57,11 @@ const Header = ({
         )}
         {!R.isEmpty(subtitle) && canTitleAndSubtitleBeDisplayed && (
           <div
-            className={`cb-subtitle ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+            className="cb-subtitle"
+            style={fontStyleForTextElement(
+              textElementTypes.subtitle,
+              chartSize,
+            )}
             dangerouslySetInnerHTML={{
               __html: subtitle,
             }}
@@ -86,7 +98,7 @@ const Header = ({
             displayActionButton={displayActionButton}
             actionButtonLabel={actionButtonLabel}
             onActionButtonClick={onActionButtonClick}
-            isSmall={isSmall}
+            chartSize={chartSize}
             exportDisabled={exportDisabled}
           />
         </div>
@@ -118,8 +130,6 @@ Header.propTypes = {
   displayActionButton: PropTypes.bool.isRequired,
   actionButtonLabel: PropTypes.string.isRequired,
   onActionButtonClick: PropTypes.func.isRequired,
-  isSmall: PropTypes.bool.isRequired,
-  isFontLoaded: PropTypes.bool.isRequired,
   chartRef: PropTypes.object.isRequired,
 };
 

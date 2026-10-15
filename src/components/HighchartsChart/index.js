@@ -8,6 +8,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useContext,
   useMemo,
   useRef,
   useState,
@@ -28,7 +29,6 @@ import {
 } from '../../constants/chart';
 import { errorMessages } from '../../constants/chartErrorMessages';
 import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
-import useIsFontLoaded from '../../hook/useIsFontLoaded';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
 import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
@@ -57,6 +57,9 @@ import NullComponent from '../NullComponent';
 import Spinner from '../Spinner';
 import GenericChart from './GenericChart';
 import Header from './Header';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
+import { fontStyleForTextElement } from '../../utils/stylingUtil';
+import { textElementTypes } from '../../constants/styling';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -174,7 +177,6 @@ const HighchartsChart = ({
   inlineLabels = false,
   disableLegendInteraction = false,
   tooltipContainerId,
-  isSmall,
   optionsOverride = null,
   debug = false,
   varForDotStatSymbolMinMax = null,
@@ -923,7 +925,7 @@ const HighchartsChart = ({
     doesTitleOrSubtitleContainVar && isFetching
   );
 
-  const isFontLoaded = useIsFontLoaded();
+  const chartSize = useContext(ChartSizeContext);
 
   const [
     allHeightCalculationsHaveBeenDone,
@@ -1125,7 +1127,7 @@ const HighchartsChart = ({
         decimalPoint,
         customTooltip: finalCustomTooltip,
         height: isFullScreen ? screenHeight : chartHeight,
-        isSmall,
+        chartSize,
         hideLegend,
         hideXAxisLabels,
         hideYAxisLabels,
@@ -1164,7 +1166,7 @@ const HighchartsChart = ({
     hideLineSymbols,
     highlight,
     isFullScreen,
-    isSmall,
+    chartSize,
     pivotValue,
     mapType,
     mapAutoShade,
@@ -1275,8 +1277,6 @@ const HighchartsChart = ({
             actionButtonLabel={actionButtonLabel}
             onActionButtonClick={actionButtonClick}
             tooltipContainerId={tooltipContainerId}
-            isSmall={isSmall}
-            isFontLoaded={isFontLoaded}
             chartRef={chartRef}
           />
         )}
@@ -1300,15 +1300,16 @@ const HighchartsChart = ({
 
       <div
         ref={footerRef}
-        className={`cb-footer ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+        className="cb-footer"
         style={
           R.isNil(footerHeight) || footerHeight === 0
             ? {
                 width,
                 position: 'fixed',
                 visibility: 'hidden',
+                ...fontStyleForTextElement(textElementTypes.source, chartSize),
               }
-            : {}
+            : fontStyleForTextElement(textElementTypes.source, chartSize)
         }
       >
         <div
@@ -1411,7 +1412,6 @@ HighchartsChart.propTypes = {
   inlineLabels: PropTypes.bool,
   disableLegendInteraction: PropTypes.bool,
   tooltipContainerId: PropTypes.string,
-  isSmall: PropTypes.bool.isRequired,
   debug: PropTypes.bool,
   optionsOverride: PropTypes.object,
   varForDotStatSymbolMinMax: PropTypes.string,
