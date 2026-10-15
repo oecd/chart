@@ -66,7 +66,7 @@ export const createOptionsForLineChart = ({
   disableLegendInteraction = false,
   hideLineSymbols = false,
   chartSize,
-  annotations,
+  positionedAnnotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
@@ -331,11 +331,7 @@ export const createOptionsForLineChart = ({
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
   const plotBands = createAnnotationPlotBands({
-    annotations,
-    series: data.series,
-    categories: data.categories,
-    areCategoriesDates: data.areCategoriesDates,
-    categoriesFrequency,
+    positionedAnnotations,
     isSmall: chartSize === chartSizes.small,
     showLabelsInline: false,
   });

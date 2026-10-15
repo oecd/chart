@@ -53,7 +53,7 @@ export const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
-  annotations,
+  positionedAnnotations,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -123,14 +123,10 @@ export const createOptionsForBarChart = ({
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
   // const showAnnotationLabelsInline = annotations.length > 0 && !horizontal;
-  const showAnnotationLabelsInline = false;
+  const showAnnotationLabelsInline = true;
 
   const plotBands = createAnnotationPlotBands({
-    annotations,
-    series: data.series,
-    categories: data.categories,
-    areCategoriesDates: data.areCategoriesDates,
-    categoriesFrequency,
+    positionedAnnotations,
     isSmall: chartSize === chartSizes.small,
     showLabelsInline: showAnnotationLabelsInline,
   });

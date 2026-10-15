@@ -35,6 +35,7 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
+import { createPositionedAnnotations } from './createPositionedAnnotations';
 import { exampleAnnotations } from './exampleAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
@@ -177,6 +178,16 @@ const createChartOptionsFunc =
       ? R.prop(data.seriesDateFomat, frequencies)
       : null;
 
+    const positionedAnnotations =
+      annotations &&
+      createPositionedAnnotations({
+        annotations,
+        series: data.series,
+        categories: data.categories,
+        areCategoriesDates: data.areCategoriesDates,
+        categoriesFrequency,
+      });
+
     const options = createOptionsFuncForChartType({
       ...otherProps,
       data,
@@ -200,7 +211,7 @@ const createChartOptionsFunc =
       chartSize,
       inlineLabels,
       hideLegend,
-      annotations,
+      positionedAnnotations,
     });
 
     const customChartRender = R.propOr(
@@ -216,8 +227,8 @@ const createChartOptionsFunc =
     };
 
     // Show annotations that are not in the chart itself as captions
-    const annotationCaption = annotations
-      ? createAnnotationCaption(annotations, LABEL_COLOR)
+    const annotationCaption = positionedAnnotations
+      ? createAnnotationCaption(positionedAnnotations, LABEL_COLOR)
       : undefined;
 
     const captionText = `${otherProps.footer}${annotationCaption ? `<br>${annotationCaption}` : ''}`;
