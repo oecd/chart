@@ -30,7 +30,6 @@ import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
 import { createPositionedAnnotations } from './createPositionedAnnotations';
-import { exampleAnnotations } from './exampleAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
 
@@ -72,7 +71,7 @@ const createChartOptionsFunc =
     vars,
     lang,
     forceXAxisToBeTreatedAsCategories,
-    annotations = exampleAnnotations,
+    annotations,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -169,15 +168,16 @@ const createChartOptionsFunc =
       ? R.prop(data.seriesDateFomat, frequencies)
       : null;
 
-    const positionedAnnotations =
-      annotations &&
-      createPositionedAnnotations({
-        annotations,
-        series: data.series,
-        categories: data.categories,
-        areCategoriesDates: data.areCategoriesDates,
-        categoriesFrequency,
-      });
+    const positionedAnnotations = annotations
+      ? createPositionedAnnotations({
+          annotations,
+          series: data.series,
+          categories: data.categories,
+          areCategoriesDates: data.areCategoriesDates,
+          categoriesFrequency,
+        })
+      : null;
+    console.log('positionedAnnotations', positionedAnnotations);
 
     const options = createOptionsFuncForChartType({
       ...otherProps,

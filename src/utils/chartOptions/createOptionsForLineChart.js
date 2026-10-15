@@ -60,10 +60,9 @@ export const createOptionsForLineChart = ({
   const labelFontSize = isSmall ? 13 : 16;
   const labelFontSizePx = `${labelFontSize}px`;
 
-  const showAnnotationLabelsInline = R.any(
-    R.prop('showLabelInline'),
-    positionedAnnotations,
-  );
+  const showAnnotationLabelsInline = positionedAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+    : false;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
@@ -293,11 +292,13 @@ export const createOptionsForLineChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
-  const plotBands = createAnnotationPlotBands({
-    positionedAnnotations,
-    isSmall,
-    showLabelsInline: showAnnotationLabelsInline,
-  });
+  const plotBands = positionedAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations,
+        isSmall,
+        showLabelsInline: showAnnotationLabelsInline,
+      })
+    : null;
 
   const marginTop = (() => {
     /** @type {number | undefined} */

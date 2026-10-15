@@ -50,10 +50,9 @@ export const createOptionsForBarChart = ({
 }) => {
   const horizontal = chartType === chartTypes.row;
 
-  const showAnnotationLabelsInline = R.any(
-    R.prop('showLabelInline'),
-    positionedAnnotations,
-  );
+  const showAnnotationLabelsInline = positionedAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+    : false;
 
   const calcXAxisLayout = () => {
     if (horizontal) {
@@ -118,11 +117,13 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
-  const plotBands = createAnnotationPlotBands({
-    positionedAnnotations,
-    isSmall,
-    showLabelsInline: showAnnotationLabelsInline,
-  });
+  const plotBands = positionedAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations,
+        isSmall,
+        showLabelsInline: showAnnotationLabelsInline,
+      })
+    : null;
 
   const labelFontSize = isSmall ? 13 : 16;
   const labelFontSizePx = `${labelFontSize}px`;
