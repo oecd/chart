@@ -178,15 +178,16 @@ const createChartOptionsFunc =
       ? R.prop(data.seriesDateFomat, frequencies)
       : null;
 
-    const positionedAnnotations =
-      annotations &&
-      createPositionedAnnotations({
-        annotations,
-        series: data.series,
-        categories: data.categories,
-        areCategoriesDates: data.areCategoriesDates,
-        categoriesFrequency,
-      });
+    const positionedAnnotations = annotations
+      ? createPositionedAnnotations({
+          annotations,
+          series: data.series,
+          categories: data.categories,
+          areCategoriesDates: data.areCategoriesDates,
+          categoriesFrequency,
+        })
+      : null;
+    console.log('positionedAnnotations', positionedAnnotations);
 
     const options = createOptionsFuncForChartType({
       ...otherProps,
