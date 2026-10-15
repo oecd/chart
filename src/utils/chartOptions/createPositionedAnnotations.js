@@ -5,10 +5,13 @@ import * as R from 'ramda';
  * @typedef {{
  *   data: {
  *     value: number;
- *     metadata: { parsedX: number }
+ *     metadata?: { parsedX: number }
  *   }[]
  * }} Series
  */
+
+/** @type {never[]} */
+const NO_ANNOTATIONS = Object.freeze([]);
 
 /**
  * Adds from/to to annotations for time categories.
@@ -26,16 +29,18 @@ import * as R from 'ramda';
  */
 const getTimeAnnotations = ({ annotations, series, categoriesFrequency }) => {
   const firstSeries = series[0];
-  if (!firstSeries) return [];
+  if (!firstSeries) return NO_ANNOTATIONS;
 
-  const parsedCategories = firstSeries.data.map(
-    (point) => point.metadata.parsedX,
-  );
+  const parsedCategories = R.compose(
+    R.filter(R.isNotNil),
+    R.map((point) => point.metadata?.parsedX),
+  )(firstSeries.data);
+  if (parsedCategories.length === 0) return NO_ANNOTATIONS;
   let firstTimestamp = parsedCategories ? R.head(parsedCategories) : undefined;
   let lastTimestamp = parsedCategories ? R.last(parsedCategories) : undefined;
 
   if (firstTimestamp === undefined || lastTimestamp === undefined) {
-    return [];
+    return NO_ANNOTATIONS;
   }
 
   return annotations
@@ -58,7 +63,7 @@ const getTimeAnnotations = ({ annotations, series, categoriesFrequency }) => {
 
       return { ...annotation, from, to };
     })
-    .filter((definition) => definition !== undefined);
+    .filter(R.isNotNil);
 };
 
 /**
@@ -92,7 +97,7 @@ const getDiscreteAnnotations = ({ annotations, categories }) =>
       to += 0.5;
       return { ...annotation, from, to };
     })
-    .filter((definition) => definition !== undefined);
+    .filter(R.isNotNil);
 
 /**
  * @param {{
