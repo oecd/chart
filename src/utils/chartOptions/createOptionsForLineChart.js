@@ -6,7 +6,12 @@ import {
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
 } from '../../constants/chart';
-import { calcMarginTop } from '../chartUtil';
+import {
+  calcLegendMarginDefault,
+  calcLegendMarginInlineLabels,
+  calcMarginTopDefault,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -17,6 +22,11 @@ import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import {
+  fontFamilies,
+  fontWeights,
+  textElementTypes,
+} from '../../constants/styling';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -44,13 +54,13 @@ export const createOptionsForLineChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
   inlineLabels = false,
   disableLegendInteraction = false,
   hideLineSymbols = false,
+  chartSize,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const seenCategories = new Set();
@@ -178,9 +188,18 @@ export const createOptionsForLineChart = ({
               ? {
                   enabled: true,
                   format: seriesName,
-                  ...(isSeriesHighlighted
-                    ? { style: { fontWeight: 'bolder' } }
-                    : null),
+                  style: {
+                    ...fontStyleForTextElement(
+                      textElementTypes.legend,
+                      chartSize,
+                    ),
+                    ...(isSeriesHighlighted
+                      ? {
+                          fontFamily: fontFamilies.condensed,
+                          fontWeight: fontWeights.extraBold,
+                        }
+                      : null),
+                  },
                 }
               : null,
           marker: {
@@ -230,31 +249,26 @@ export const createOptionsForLineChart = ({
     // legend is enabled but hidden so that Highcharts reserves the space needed for last data points data label (hack)
     () => ({
       enabled: true,
-      margin: isSmall ? -5 : -25,
+      margin: calcLegendMarginInlineLabels(chartSize),
       symbolWidth: 0,
       layout: 'vertical',
       align: 'right',
       verticalAlign: 'middle',
       itemStyle: {
         visibility: 'hidden',
-        fontSize: isSmall ? '13px' : '16px',
-        fontWeight: 400,
+        ...fontStyleForTextElement(textElementTypes.legend, chartSize),
       },
     }),
     () => ({
       enabled: !hideLegend,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: isSmall ? 26 : 34,
+      margin: calcLegendMarginDefault(chartSize),
     }),
   )();
 
@@ -284,12 +298,9 @@ export const createOptionsForLineChart = ({
     custom: customChartOptions,
 
     chart: {
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       marginTop:
         hideLegend || inlineLabels
-          ? calcMarginTop(title, subtitle, isSmall)
+          ? calcMarginTopDefault(title, subtitle, chartSize)
           : undefined,
       height,
       animation: false,
@@ -322,7 +333,7 @@ export const createOptionsForLineChart = ({
         ? { type: 'datetime' }
         : null),
       labels: {
-        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -351,7 +362,7 @@ export const createOptionsForLineChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels,
         align: 'left',
@@ -375,14 +386,13 @@ export const createOptionsForLineChart = ({
               crop: false,
               overflow: 'allow',
               allowOverlap: true,
-              style: {
-                fontSize: isSmall ? '13px' : '16px',
-                fontWeight: 400,
-                color: '#101d40',
-              },
             }
           : {
               ...R.prop('dataLabels', formatters),
+              style: fontStyleForTextElement(
+                textElementTypes.legend,
+                chartSize,
+              ),
             },
         events: {
           mouseOver: inlineLabels

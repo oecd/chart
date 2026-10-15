@@ -17,6 +17,13 @@ import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import { textElementTypes } from '../../constants/styling';
+import {
+  calcLegendMarginDefault,
+  calcMarginBottomForRadar,
+  calcRadarPaneSize,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -41,11 +48,11 @@ export const createOptionsForRadarChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
   disableLegendInteraction = false,
+  chartSize,
 }) => {
   const seenCategories = new Set();
 
@@ -150,14 +157,6 @@ export const createOptionsForRadarChart = ({
     };
   }, data.series);
 
-  const calcPaneSize = () => {
-    if (hideXAxisLabels) {
-      return '100%';
-    }
-
-    return isSmall ? '70%' : '85%';
-  };
-
   // Create a plot band for each category highlight
   // https://www.highcharts.com/docs/chart-concepts/plot-bands-and-plot-lines
   const categories = Array.from(seenCategories);
@@ -202,13 +201,12 @@ export const createOptionsForRadarChart = ({
     chart: {
       polar: true,
       type: 'line',
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       height,
       animation: false,
       margin: hideLegend ? 40 : undefined,
-      marginBottom: !hideLegend && isSmall ? 5 : undefined,
+      marginBottom: !hideLegend
+        ? calcMarginBottomForRadar(chartSize)
+        : undefined,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: { fullscreenClose },
       className: disableLegendInteraction
@@ -221,7 +219,7 @@ export const createOptionsForRadarChart = ({
     pane: {
       startAngle: 0,
       endAngle: 360,
-      size: calcPaneSize(),
+      size: hideXAxisLabels ? '100%' : calcRadarPaneSize(chartSize),
     },
 
     xAxis: {
@@ -237,7 +235,7 @@ export const createOptionsForRadarChart = ({
         data.categories,
       ),
       labels: {
-        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
         formatter: ({ chart, value }) =>
@@ -262,7 +260,7 @@ export const createOptionsForRadarChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...R.prop('yAxisLabels', formatters),
         enabled: !hideYAxisLabels,
       },
@@ -272,16 +270,12 @@ export const createOptionsForRadarChart = ({
       enabled: !hideLegend,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: isSmall ? 16 : 24,
+      margin: calcLegendMarginDefault(chartSize),
     },
 
     plotOptions: {

@@ -10,12 +10,6 @@ const useIsFontLoaded = () => {
         new FontFaceObserver('Noto Sans', {
           weight: 400,
         }).load(),
-        new FontFaceObserver('Noto Sans', {
-          weight: 600,
-        }).load(),
-        new FontFaceObserver('Noto Sans', {
-          weight: 800,
-        }).load(),
         new FontFaceObserver('Noto Sans Display', {
           weight: 400,
         }).load(),

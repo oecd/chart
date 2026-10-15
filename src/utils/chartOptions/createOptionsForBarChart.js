@@ -9,10 +9,16 @@ import {
   nonHighlightedOpacity,
 } from '../../constants/chart';
 import { createDatapoint } from '../chartOptions/createDataPoint';
-import { calcMarginTopWithHorizontal } from '../chartUtil';
+import {
+  calcLegendMarginForBarAndStacked,
+  calcMarginTopForBarAndStacked,
+  calcYAxisCoordinatesForBarAndStacked,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import { textElementTypes } from '../../constants/styling';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -38,11 +44,11 @@ export const createOptionsForBarChart = ({
   fullscreenClose = null,
   isFullScreen = false,
   height,
-  isSmall = false,
   categoriesAreDatesOrNumberForDataParsing,
   categoriesFrequency,
   seriesFrequency,
   disableLegendInteraction = false,
+  chartSize,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -68,14 +74,6 @@ export const createOptionsForBarChart = ({
     return categoriesAreDatesOrNumberForDataParsing
       ? { left: '8%', width: '89%' }
       : { left: '9%', width: '87%' };
-  };
-
-  const calcLegendMargin = () => {
-    if (isSmall) {
-      return horizontal ? 10 : 26;
-    }
-
-    return horizontal ? 14 : 34;
   };
 
   /** Whether there are multiple series */
@@ -112,11 +110,8 @@ export const createOptionsForBarChart = ({
 
     chart: {
       type: horizontal ? 'bar' : 'column',
-      style: {
-        fontFamily: "'Noto Sans Display', Helvetica, sans-serif",
-      },
       marginTop: hideLegend
-        ? calcMarginTopWithHorizontal(title, subtitle, horizontal, isSmall)
+        ? calcMarginTopForBarAndStacked(title, subtitle, horizontal, chartSize)
         : undefined,
       height,
       animation: false,
@@ -144,7 +139,7 @@ export const createOptionsForBarChart = ({
           ),
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-        style: { color: '#586179', fontSize: isSmall ? '13px' : '16px' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -174,13 +169,13 @@ export const createOptionsForBarChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: { fontSize: isSmall ? '13px' : '16px', color: '#586179' },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
 
         align: 'left',
-        ...(horizontal ? { x: 4, y: isSmall ? 28 : 35 } : { x: 0, y: -4 }),
+        ...calcYAxisCoordinatesForBarAndStacked(horizontal, chartSize),
       },
       opposite: horizontal,
     },
@@ -189,18 +184,14 @@ export const createOptionsForBarChart = ({
       enabled: !hideLegend,
       ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
-      itemStyle: {
-        fontWeight: 'normal',
-        color: '#586179',
-        fontSize: isSmall ? '13px' : '16px',
-      },
+      itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
       squareSymbol: false,
       symbolRadius: 0,
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMargin(),
+      margin: calcLegendMarginForBarAndStacked(chartSize, horizontal),
     },
 
     plotOptions: {

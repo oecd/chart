@@ -1,3 +1,5 @@
+import { fontColors } from '../constants/styling';
+
 const getOptionPadding = (isMulti, isStandalone, isDisplayedOnRightSide) => {
   if (isMulti) {
     return '0px';
@@ -11,7 +13,7 @@ const getBasicStylingConfigs = (isStandalone, isDisplayedOnRightSide) => {
     ...theme,
     colors: {
       ...theme.colors,
-      neutral80: '#101D40',
+      neutral80: fontColors.dark,
       primary: '#E0F2FF',
       primary50: '#E0F2FF',
     },
@@ -56,7 +58,7 @@ const getBasicStylingConfigs = (isStandalone, isDisplayedOnRightSide) => {
     option: (provided, state) => ({
       ...provided,
       backgroundColor: getOptionBackgroundColor(state),
-      color: !state.isMulti && state.isSelected ? '#ffffff' : '#101D40',
+      color: !state.isMulti && state.isSelected ? '#ffffff' : fontColors.dark,
       fontSize: '14px',
       padding: getOptionPadding(
         state.isMulti,
