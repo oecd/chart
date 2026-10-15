@@ -7,8 +7,8 @@ import {
   memo,
   Suspense,
   useCallback,
-  useEffect,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -28,9 +28,12 @@ import {
   stackingOptions,
 } from '../../constants/chart';
 import { errorMessages } from '../../constants/chartErrorMessages';
+import { textElementTypes } from '../../constants/styling';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
 import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
 import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
+import { exampleAnnotations } from '../../utils/chartOptions/exampleAnnotations';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
 import {
   createFooter,
@@ -51,15 +54,13 @@ import {
   fetchDotStatData,
   isSdmxJsonEmpty,
 } from '../../utils/sdmxJsonUtil';
+import { fontStyleForTextElement } from '../../utils/stylingUtil';
 import { trackChartError } from '../../utils/trackingUtil';
 import CenteredContainer from '../CenteredContainer';
 import NullComponent from '../NullComponent';
 import Spinner from '../Spinner';
 import GenericChart from './GenericChart';
 import Header from './Header';
-import ChartSizeContext from '../../contexts/ChartSizeContext';
-import { fontStyleForTextElement } from '../../utils/stylingUtil';
-import { textElementTypes } from '../../constants/styling';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -184,6 +185,8 @@ const HighchartsChart = ({
   referenceValueCode = null,
   dataLastUpdateDate = null,
   disableAnimation = false,
+  // TODO: for testing only
+  annotations = exampleAnnotations,
 }) => {
   const ChartForType = getChartForType(chartType);
 
@@ -1143,6 +1146,7 @@ const HighchartsChart = ({
         disableLegendInteraction,
         sortOrder,
         disableAnimation,
+        annotations,
       });
 
       setMergedOptions(
@@ -1422,6 +1426,7 @@ HighchartsChart.propTypes = {
   referenceValueCode: PropTypes.string,
   dataLastUpdateDate: PropTypes.string,
   disableAnimation: PropTypes.bool,
+  annotations: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default memo(HighchartsChart);
