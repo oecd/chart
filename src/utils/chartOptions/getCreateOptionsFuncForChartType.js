@@ -272,7 +272,7 @@ const createChartOptionsFunc =
       R.assoc('caption', {
         text: captionText,
         align: 'left',
-        margin: 25,
+        margin: otherProps.isSmall ? 10 : 25,
         useHTML: true,
         style: {
           color: LABEL_COLOR,
