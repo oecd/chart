@@ -108,7 +108,7 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
-  // const showAnnotationLabelsInline = annotations.length > 0 && !horizontal;
+  // const showAnnotationLabelsInline = positionedAnnotations.length > 0 && !horizontal;
   const showAnnotationLabelsInline = true;
   const plotBands = createAnnotationPlotBands({
     positionedAnnotations,
