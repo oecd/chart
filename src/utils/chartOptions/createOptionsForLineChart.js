@@ -70,6 +70,9 @@ export const createOptionsForLineChart = ({
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
+  const labelFontSize = isSmall ? 13 : 16;
+  const labelFontSizePx = `${labelFontSize}px`;
+
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
 
@@ -330,20 +333,32 @@ export const createOptionsForLineChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  // const showAnnotationLabelsInline = positionedAnnotations.length > 0;
+  const showAnnotationLabelsInline = true;
+
   const plotBands = createAnnotationPlotBands({
     positionedAnnotations,
     isSmall: chartSize === chartSizes.small,
-    showLabelsInline: false,
+    showLabelsInline: showAnnotationLabelsInline,
   });
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend || inlineLabels) {
+      marginTop = calcMarginTopDefault(title, subtitle, chartSize);
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
+      marginTop += labelFontSize;
+    }
+    return marginTop;
+  })();
 
   return {
     custom: customChartOptions,
 
     chart: {
-      marginTop:
-        hideLegend || inlineLabels
-          ? calcMarginTopDefault(title, subtitle, chartSize)
-          : undefined,
+      marginTop,
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -432,9 +447,7 @@ export const createOptionsForLineChart = ({
                 e.target.data.forEach((p) => {
                   p.update(
                     {
-                      dataLabels: {
-                        enabled: true,
-                      },
+                      dataLabels: { enabled: true },
                     },
                     false,
                     false,
@@ -449,9 +462,7 @@ export const createOptionsForLineChart = ({
                 e.target.data.forEach((p) => {
                   p.update(
                     {
-                      dataLabels: {
-                        enabled: false,
-                      },
+                      dataLabels: { enabled: false },
                     },
                     false,
                     false,
