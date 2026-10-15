@@ -124,7 +124,7 @@ export const createOptionsForBarChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
-  // const showAnnotationLabelsInline = annotations.length > 0 && !horizontal;
+  // const showAnnotationLabelsInline = positionedAnnotations.length > 0 && !horizontal;
   const showAnnotationLabelsInline = true;
 
   const plotBands = createAnnotationPlotBands({
