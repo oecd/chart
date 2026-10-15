@@ -75,6 +75,11 @@ export const createOptionsForLineChart = ({
   const labelFontSize = isSmall ? 13 : 16;
   const labelFontSizePx = `${labelFontSize}px`;
 
+  const showAnnotationLabelsInline = R.any(
+    R.prop('showLabelInline'),
+    positionedAnnotations,
+  );
+
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
 
@@ -334,9 +339,6 @@ export const createOptionsForLineChart = ({
   const xAxisCategories = categoriesAreDatesOrNumberForDataParsing
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
-
-  // const showAnnotationLabelsInline = positionedAnnotations.length > 0;
-  const showAnnotationLabelsInline = true;
 
   const plotBands = createAnnotationPlotBands({
     positionedAnnotations,
