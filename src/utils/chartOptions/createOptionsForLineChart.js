@@ -73,10 +73,9 @@ export const createOptionsForLineChart = ({
   const labelFontSize = isSmall ? 13 : 16;
   const labelFontSizePx = `${labelFontSize}px`;
 
-  const showAnnotationLabelsInline = R.any(
-    R.prop('showLabelInline'),
-    positionedAnnotations,
-  );
+  const showAnnotationLabelsInline = positionedAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+    : false;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
@@ -338,11 +337,13 @@ export const createOptionsForLineChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
-  const plotBands = createAnnotationPlotBands({
-    positionedAnnotations,
-    isSmall: chartSize === chartSizes.small,
-    showLabelsInline: showAnnotationLabelsInline,
-  });
+  const plotBands = positionedAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations,
+        isSmall: chartSize === chartSizes.small,
+        showLabelsInline: showAnnotationLabelsInline,
+      })
+    : null;
 
   const marginTop = (() => {
     /** @type {number | undefined} */
