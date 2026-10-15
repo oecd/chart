@@ -6,7 +6,6 @@ import Toolbox from './Toolbox';
 import ChartSizeContext from '../../contexts/ChartSizeContext';
 import { textElementTypes } from '../../constants/styling';
 import { fontStyleForTextElement } from '../../utils/stylingUtil';
-import { chartSizes } from '../../constants/chart';
 
 const Header = ({
   chartType,
@@ -39,14 +38,13 @@ const Header = ({
   );
 
   const chartSize = useContext(ChartSizeContext);
-  const isLarge = chartSize === chartSizes.large;
 
   if (R.isEmpty(title) && R.isEmpty(subtitle) && hideToolbox) {
     return null;
   }
 
   return (
-    <div style={{ display: 'flex', paddingBottom: !isLarge ? '2px' : '5px' }}>
+    <div className="cb-header" style={{ display: 'flex' }}>
       <div style={{ flex: '1 1 auto' }}>
         {!R.isEmpty(title) && canTitleAndSubtitleBeDisplayed && (
           <div

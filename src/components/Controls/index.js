@@ -2,9 +2,10 @@ import { useMemo, lazy, Suspense, useCallback, useContext } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
 
-import { chartSizes, controlTypes } from '../../constants/chart';
+import { controlTypes } from '../../constants/chart';
 import ControlFallback from '../ControlFallback';
 import ChartSizeContext from '../../contexts/ChartSizeContext';
+import { getSizeCssClass } from '../../utils/stylingUtil';
 
 // dynamic import for code splitting
 const ControlTimeSlider = lazy(() => import('./ControlTimeSlider'));
@@ -29,7 +30,6 @@ const Controls = ({
   isDisplayedOnRightSide = false,
 }) => {
   const chartSize = useContext(ChartSizeContext);
-  const isLarge = chartSize === chartSizes.large;
 
   const validControls = useMemo(
     () => R.filter((c) => R.has(c.type, controlTypes), controls),
@@ -53,17 +53,17 @@ const Controls = ({
     [disabledControlIds],
   );
 
+  const sizeCssClass = getSizeCssClass(chartSize);
+
   return R.isEmpty(validControls) ? null : (
     <>
       {isDisplayedOnRightSide ? (
         <div style={{ height: '7px' }} />
       ) : (
-        <div
-          className={`cb-controls-separator ${!isLarge ? 'cb-small' : ''}`}
-        />
+        <div className={`cb-controls-separator ${sizeCssClass}`} />
       )}
       <div
-        className={`cb-controls ${!isLarge ? 'cb-small' : ''}`}
+        className={`cb-controls ${sizeCssClass}`}
         style={{ display: 'flex', flexWrap: 'wrap' }}
       >
         {R.map((c) => {

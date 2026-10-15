@@ -6,9 +6,8 @@ import * as R from 'ramda';
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
-import { calcChartSize } from '../../utils/stylingUtil';
+import { calcChartSize, getSizeCssClass } from '../../utils/stylingUtil';
 import {
-  chartSizes,
   minChartHeightForControlsDisplayBelow,
   minChartWidthForControlsDisplayOnRightSide,
 } from '../../constants/chart';
@@ -80,8 +79,6 @@ const ChartWithConfigNonFixedChartHeight = ({
     () => calcChartSize(fullContainerWidth, fullContainerHeight),
     [fullContainerWidth, fullContainerHeight],
   );
-  const isLarge = useMemo(() => chartSize === chartSizes.large, [chartSize]);
-
   const isFontLoaded = useIsFontLoaded();
 
   return (
@@ -114,7 +111,7 @@ const ChartWithConfigNonFixedChartHeight = ({
           >
             {finalChartHeight && (
               <div
-                className={`cb-container ${!isLarge ? 'cb-small' : ''} ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+                className={`cb-container ${getSizeCssClass(chartSize)} ${isFontLoaded ? 'cb-font-loaded' : ''}`}
                 style={{
                   fontFamily: fontFamilies.normal,
                   color: fontColors.normal,

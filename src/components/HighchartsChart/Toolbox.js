@@ -16,6 +16,7 @@ import { apiUrl, chartSizes } from '../../constants/chart';
 import { createExportFileName } from '../../utils/chartUtilCommon';
 import { createFooter } from '../../utils/chartUtil';
 import { fontColors, fontFamilies } from '../../constants/styling';
+import { getSizeCssClass } from '../../utils/stylingUtil';
 
 const RootTrigger = () => {
   const { isOpen } = useContext(MenuContext);
@@ -224,7 +225,7 @@ const Toolbox = ({
         tooltipContainerId={tooltipContainerId}
         style={{ marginLeft: '6px' }}
       >
-        <div className={`cb-toolbox ${!isLarge ? 'cb-small' : ''}`}>
+        <div className={`cb-toolbox ${getSizeCssClass(chartSize)}`}>
           {(noteShouldBeDisplayedInTooltip ||
             sourceShouldBeDisplayedInTooltip ||
             !R.isNil(definition)) &&

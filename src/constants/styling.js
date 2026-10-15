@@ -13,10 +13,8 @@ export const fontFamilies = {
 };
 
 export const fontColors = {
-  // dark: '#101D40',
-  // normal: '#586179',
-  dark: 'orange',
-  normal: 'green',
+  dark: '#101D40',
+  normal: '#586179',
 };
 
 export const fontWeights = {

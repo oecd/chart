@@ -74,6 +74,8 @@ const createChartOptionsFunc =
     lang,
     forceXAxisToBeTreatedAsCategories,
     chartSize,
+    inlineLabels,
+    hideLegend,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -191,6 +193,8 @@ const createChartOptionsFunc =
       categoriesFrequency,
       seriesFrequency,
       chartSize,
+      inlineLabels,
+      hideLegend,
     });
 
     const customChartRender = R.propOr(
@@ -264,10 +268,10 @@ const createChartOptionsFunc =
       R.assoc('title', {
         text: otherProps.title,
         align: 'left',
-        margin: 20,
+        margin: inlineLabels || hideLegend ? 50 : 20,
         style: fontStyleForTextElement(textElementTypes.title, chartSize),
       }),
-      R.assocPath(['chart', 'style', 'fontFamily'], {
+      R.assocPath(['chart', 'style'], {
         fontFamily: fontFamilies.normal,
         color: fontColors.normal,
       }),

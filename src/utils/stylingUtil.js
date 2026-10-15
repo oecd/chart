@@ -142,3 +142,13 @@ export const calcRadarPaneSize = (chartSize) => {
 
   return '85%';
 };
+
+const sizeCssClassByChartSize = {
+  [chartSizes.small]: 'cb-small',
+  [chartSizes.medium]: 'cb-medium',
+  [chartSizes.large]: '',
+};
+
+export const getSizeCssClass = (chartSize) => {
+  return R.propOr('', chartSize, sizeCssClassByChartSize);
+};

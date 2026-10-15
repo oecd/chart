@@ -5,11 +5,8 @@ import PropTypes from 'prop-types';
 import HighchartsChart from '../HighchartsChart';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import Controls from '../Controls';
-import { calcChartSize } from '../../utils/stylingUtil';
-import {
-  chartSizes,
-  minChartWidthForControlsDisplayOnRightSide,
-} from '../../constants/chart';
+import { calcChartSize, getSizeCssClass } from '../../utils/stylingUtil';
+import { minChartWidthForControlsDisplayOnRightSide } from '../../constants/chart';
 import ChartSizeContext from '../../contexts/ChartSizeContext';
 import { fontColors, fontFamilies } from '../../constants/styling';
 import useIsFontLoaded from '../../hook/useIsFontLoaded';
@@ -57,7 +54,6 @@ const ChartWithConfigFixedChartHeight = ({
     () => calcChartSize(fullContainerWidth, fullContainerHeight),
     [fullContainerWidth, fullContainerHeight],
   );
-  const isLarge = useMemo(() => chartSize === chartSizes.large, [chartSize]);
 
   const isFontLoaded = useIsFontLoaded();
 
@@ -91,7 +87,7 @@ const ChartWithConfigFixedChartHeight = ({
           >
             {fullContainerHeight && (
               <div
-                className={`cb-container ${!isLarge ? 'cb-small' : ''} ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+                className={`cb-container ${getSizeCssClass(chartSize)} ${isFontLoaded ? 'cb-font-loaded' : ''}`}
                 style={{
                   fontFamily: fontFamilies.normal,
                   color: fontColors.normal,
