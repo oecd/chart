@@ -15,6 +15,7 @@ import { postJson } from '../../utils/fetchUtil';
 import { apiUrl, chartSizes } from '../../constants/chart';
 import { createExportFileName } from '../../utils/chartUtilCommon';
 import { createFooter } from '../../utils/chartUtil';
+import { fontColors, fontFamilies } from '../../constants/styling';
 
 const RootTrigger = () => {
   const { isOpen } = useContext(MenuContext);
@@ -196,6 +197,10 @@ const Toolbox = ({
             <PopoverContent tooltipContainerId={tooltipContainerId}>
               <div
                 className="cb-floating cb-tooltip"
+                style={{
+                  fontFamily: fontFamilies.normal,
+                  color: fontColors.normal,
+                }}
                 dangerouslySetInnerHTML={{
                   __html: R.compose(
                     R.join(''),

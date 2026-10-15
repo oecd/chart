@@ -11,6 +11,8 @@ import {
   minChartWidthForControlsDisplayOnRightSide,
 } from '../../constants/chart';
 import ChartSizeContext from '../../contexts/ChartSizeContext';
+import { fontColors, fontFamilies } from '../../constants/styling';
+import useIsFontLoaded from '../../hook/useIsFontLoaded';
 
 const ChartWithConfigFixedChartHeight = ({
   width = null,
@@ -57,6 +59,8 @@ const ChartWithConfigFixedChartHeight = ({
   );
   const isLarge = useMemo(() => chartSize === chartSizes.large, [chartSize]);
 
+  const isFontLoaded = useIsFontLoaded();
+
   return (
     <ChartSizeContext.Provider value={chartSize}>
       <div
@@ -87,8 +91,10 @@ const ChartWithConfigFixedChartHeight = ({
           >
             {fullContainerHeight && (
               <div
-                className={`cb-container ${!isLarge ? 'cb-small' : ''}`}
+                className={`cb-container ${!isLarge ? 'cb-small' : ''} ${isFontLoaded ? 'cb-font-loaded' : ''}`}
                 style={{
+                  fontFamily: fontFamilies.normal,
+                  color: fontColors.normal,
                   width: chartWithControlsBelowContainerWidth,
                   height: fullContainerHeight,
                   boxSizing: 'border-box',

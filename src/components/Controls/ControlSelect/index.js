@@ -19,6 +19,7 @@ import {
   createOptionLabelMultiple,
   createOptionLabelMultipleWithStar,
 } from './SubComponents';
+import { fontColors, fontFamilies } from '../../../constants/styling';
 
 const noOptionsMessage = () => '';
 
@@ -269,9 +270,12 @@ const ControlSelect = ({
   ) : (
     <div
       className={`${isStandalone ? 'cb-control-standalone' : 'cb-control'} ${isDisplayedOnRightSide ? 'cb-control-right-side' : ''}  ${disabled ? 'disabled' : ''}`}
+      style={{ fontFamily: fontFamilies.normal }}
     >
       {!isNilOrEmpty(finalLabel) && !hideTitle && (
-        <div className="cb-control-label">{finalLabel}</div>
+        <div className="cb-control-label" style={{ color: fontColors.normal }}>
+          {finalLabel}
+        </div>
       )}
       <Select
         instanceId={selectInstanceId}

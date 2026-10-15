@@ -22,7 +22,11 @@ import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
-import { textElementTypes } from '../../constants/styling';
+import {
+  fontFamilies,
+  fontWeights,
+  textElementTypes,
+} from '../../constants/styling';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -191,7 +195,8 @@ export const createOptionsForLineChart = ({
                     ),
                     ...(isSeriesHighlighted
                       ? {
-                          fontWeight: 'bolder',
+                          fontFamily: fontFamilies.condensed,
+                          fontWeight: fontWeights.extraBold,
                         }
                       : null),
                   },

@@ -2,8 +2,6 @@
 
 .cb-container {
   padding: 22px 24px;
-  font-family: 'Noto Sans', Helvetica, sans-serif;
-  color: #101d40;
   background-color: #fff;
 }
 .cb-container.cb-small {
@@ -17,42 +15,21 @@
 
 .cb-title {
   font-family: Helvetica, sans-serif !important;
-  letter-spacing: -0.764px;
+  letter-spacing: -1.2px;
 }
 
-.cb-title.cb-font-loaded {
+.cb-font-loaded .cb-title {
   font-family: 'Noto Sans Display', Helvetica, sans-serif !important;
-  letter-spacing: unset;
-}
-
-.cb-container.cb-small .cb-title {
-  letter-spacing: 0.098px;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 18px;
-}
-
-.cb-container.cb-small .cb-title.cb-font-loaded {
   letter-spacing: unset;
 }
 
 .cb-subtitle {
   font-family: Helvetica, sans-serif !important;
-  letter-spacing: 0.21px;
+  letter-spacing: 0.4px;
 }
 
-.cb-subtitle.cb-font-loaded {
+.cb-font-loaded .cb-subtitle {
   font-family: 'Noto Sans', Helvetica, sans-serif !important;
-  letter-spacing: unset;
-}
-
-.cb-container.cb-small .cb-subtitle {
-  letter-spacing: 0.098px;
-  font-size: 15px;
-  line-height: 18px;
-}
-
-.cb-container.cb-small .cb-subtitle.cb-font-loaded {
   letter-spacing: unset;
 }
 
@@ -102,12 +79,10 @@
 }
 
 .cb-floating {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
   font-size: 14px;
   line-height: 18px;
   border: 1px solid #dee3e9;
   border-radius: 4px;
-  color: #586179;
   background-color: #ffffffe6;
   z-index: 701;
 }
@@ -126,16 +101,8 @@
   letter-spacing: 0.44px;
 }
 
-.cb-footer.cb-font-loaded {
+.cb-font-loaded .cb-footer {
   font-family: 'Noto Sans', Helvetica, sans-serif !important;
-  letter-spacing: unset;
-}
-
-.cb-container.cb-small .cb-footer {
-  letter-spacing: 0.34px;
-}
-
-.cb-container.cb-small .cb-footer.cb-font-loaded {
   letter-spacing: unset;
 }
 
@@ -162,7 +129,6 @@
 }
 
 .cb-control {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
   font-size: 14px;
   flex: 1;
   padding: 5px 8px;
@@ -170,14 +136,12 @@
   box-sizing: border-box;
 }
 .cb-control-standalone {
-  font-family: 'Noto Sans', Helvetica, sans-serif;
   font-size: 14px;
   flex: 1;
   min-width: 250px;
 }
 
 .cb-control-label {
-  color: #586179;
   display: flex;
   justify-content: flex-start;
   margin-bottom: 4px;
@@ -283,7 +247,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #586179;
   background-color: #ffffff;
   border: 1px solid #dee3e9;
   border-radius: 4px;

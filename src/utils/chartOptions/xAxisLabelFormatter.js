@@ -1,6 +1,7 @@
 // @ts-check
 import { format } from 'highcharts';
 import * as R from 'ramda';
+import { fontFamilies, fontWeights } from '../../constants/styling';
 
 /**
  * Formats x axis labels, rendering them bold when baseline or highlighted.
@@ -54,7 +55,7 @@ export const xAxisLabelFormatter = (
   // https://www.highcharts.com/docs/chart-concepts/labels-and-string-formatting#html-in-highcharts
   const highlightedValue = isHighlighted
     ? // Highcharts translates the `span` to an SVG `tspan` element
-      `<span style="font-weight: bolder">${formattedValue}</span>`
+      `<span style="font-weight: ${fontWeights.extraBold}; font-family: ${fontFamilies.condensed}">${formattedValue}</span>`
     : formattedValue;
 
   return highlightedValue;

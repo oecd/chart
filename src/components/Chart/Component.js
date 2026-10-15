@@ -10,6 +10,7 @@ import CenteredContainer from '../CenteredContainer';
 import { apiUrl } from '../../constants/chart';
 import { errorMessages } from '../../constants/chartErrorMessages';
 import { isNilOrEmpty } from '../../utils/ramdaUtil';
+import { fontColors, fontFamilies } from '../../constants/styling';
 
 const Chart = ({ chartId, language, ...otherProps }) => {
   const [prevChartId, setPrevChartId] = useState(null);
@@ -158,7 +159,13 @@ const Chart = ({ chartId, language, ...otherProps }) => {
         {chartConfigData.isLoading ? (
           <Spinner />
         ) : (
-          <div className="cb-container">
+          <div
+            className="cb-container"
+            style={{
+              fontFamily: fontFamilies.normal,
+              color: fontColors.normal,
+            }}
+          >
             {R.pathOr(
               errorMessages.generic.getLabel,
               [chartConfigData.chartConfig?.error, 'getLabel'],

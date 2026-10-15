@@ -8,6 +8,7 @@ import {
   frequencies as dateUtilFrequencies,
 } from '../../../utils/dateUtil';
 import { isNilOrEmpty } from '../../../utils/ramdaUtil';
+import { fontColors, fontFamilies } from '../../../constants/styling';
 
 const getFrequency = (dotStatId, frequencies) => {
   if (!dotStatId) {
@@ -416,9 +417,12 @@ const ControlTimeSlider = ({
   return (
     <div
       className={`${isStandalone ? 'cb-control-standalone' : 'cb-control'} ${isDisplayedOnRightSide ? 'cb-control-right-side' : ''}`}
+      style={{ fontFamily: fontFamilies.normal }}
     >
       {!isNilOrEmpty(label) && !hideTitle && (
-        <div className="cb-control-label">{label}</div>
+        <div className="cb-control-label" style={{ color: fontColors.normal }}>
+          {label}
+        </div>
       )}
 
       {R.length(frequencies) > 1 && (
@@ -443,6 +447,7 @@ const ControlTimeSlider = ({
                   );
                 }}
                 className={`cb-frequency-button ${f.frequencyTypeCode === currentFrequency.frequencyTypeCode ? 'cb-frequency-button-selected' : ''} ${R.isEmpty(steps.codes) || disabled ? 'disabled' : ''}`}
+                style={{ color: fontColors.normal }}
                 type="button"
                 disabled={R.isEmpty(steps.codes) || disabled}
               >
@@ -500,6 +505,7 @@ const ControlTimeSlider = ({
       <div
         className="cb-control-label"
         style={{
+          color: fontColors.normal,
           marginTop: '5px',
           marginBottom: '0px',
           justifyContent: 'space-between',

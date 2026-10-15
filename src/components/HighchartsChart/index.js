@@ -29,7 +29,6 @@ import {
 } from '../../constants/chart';
 import { errorMessages } from '../../constants/chartErrorMessages';
 import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
-import useIsFontLoaded from '../../hook/useIsFontLoaded';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
 import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
@@ -926,15 +925,7 @@ const HighchartsChart = ({
     doesTitleOrSubtitleContainVar && isFetching
   );
 
-  const isFontLoaded = useIsFontLoaded();
-
   const chartSize = useContext(ChartSizeContext);
-
-  console.log('*********');
-  console.log(isFontLoaded);
-  console.log(chartSize);
-  console.log(mergedOptions);
-  console.log('*********');
 
   const [
     allHeightCalculationsHaveBeenDone,
@@ -1295,7 +1286,6 @@ const HighchartsChart = ({
             actionButtonLabel={actionButtonLabel}
             onActionButtonClick={actionButtonClick}
             tooltipContainerId={tooltipContainerId}
-            isFontLoaded={isFontLoaded}
             chartRef={chartRef}
           />
         )}
@@ -1319,7 +1309,7 @@ const HighchartsChart = ({
 
       <div
         ref={footerRef}
-        className={`cb-footer ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+        className="cb-footer"
         style={
           R.isNil(footerHeight) || footerHeight === 0
             ? {

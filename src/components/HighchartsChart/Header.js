@@ -51,7 +51,7 @@ const Header = ({
       <div style={{ flex: '1 1 auto' }}>
         {!R.isEmpty(title) && canTitleAndSubtitleBeDisplayed && (
           <div
-            className={`cb-title ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+            className="cb-title"
             style={fontStyleForTextElement(textElementTypes.title, chartSize)}
             dangerouslySetInnerHTML={{
               __html: title,
@@ -60,7 +60,7 @@ const Header = ({
         )}
         {!R.isEmpty(subtitle) && canTitleAndSubtitleBeDisplayed && (
           <div
-            className={`cb-subtitle ${isFontLoaded ? 'cb-font-loaded' : ''}`}
+            className="cb-subtitle"
             style={fontStyleForTextElement(
               textElementTypes.subtitle,
               chartSize,

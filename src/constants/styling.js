@@ -19,7 +19,7 @@ export const fontColors = {
   normal: 'green',
 };
 
-const fontWeights = {
+export const fontWeights = {
   regular: 400,
   extraBold: 800,
 };
