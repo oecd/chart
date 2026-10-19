@@ -160,24 +160,32 @@ export const createOptionsForScatterChart = ({
         : series.label,
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
+        const categoryCodeLowercase = category.code.toLowerCase();
 
         const dataPoint = createDatapoint(
           pointData,
           categoriesAreDatesOrNumberForDataParsing,
         );
 
-        const baselineOrHighlightColor = getBaselineOrHighlightColor(
-          category.code,
-          baselineCodes,
-          highlightCodes,
-          matchingHighlightColors,
-        );
-        const baselineOrHighlightOutlineColor = getBaselineOrHighlightColor(
-          category.code,
-          baselineCodes,
-          highlightCodes,
-          matchingHighlightOutlineColors,
-        );
+        const baselineOrHighlightColor = (() => {
+          // Series baseline overrides category highlight
+          if (isSeriesBaseline) return baselineColor;
+          return getBaselineOrHighlightColor(
+            categoryCodeLowercase,
+            baselineCodes,
+            highlightCodes,
+            matchingHighlightColors,
+          );
+        })();
+        const baselineOrHighlightOutlineColor = (() => {
+          if (isSeriesBaseline) return null;
+          return getBaselineOrHighlightColor(
+            categoryCodeLowercase,
+            baselineCodes,
+            highlightCodes,
+            matchingHighlightOutlineColors,
+          );
+        })();
 
         const pointLineWidth = isCross
           ? null
