@@ -1,12 +1,10 @@
 // @ts-check
 import { format } from 'highcharts';
-import * as R from 'ramda';
 import { fontFamilies, fontWeights } from '../../constants/styling';
 
 /**
  * Formats x axis labels, rendering them bold when baseline or highlighted.
  *
- * @param {import('highcharts').Chart} chart
  * @param {string | number} value
  * @param {string | undefined} xAxisLabelFormat
  * @param {{ code: string; label: string; }[]} categories
@@ -15,7 +13,6 @@ import { fontFamilies, fontWeights } from '../../constants/styling';
  * @returns {string}
  */
 export const xAxisLabelFormatter = (
-  chart,
   value,
   xAxisLabelFormat,
   categories,
@@ -28,11 +25,10 @@ export const xAxisLabelFormatter = (
         xAxisLabelFormat,
         // In pie charts, the formatting string refers to the point name
         { value, name: value },
-        chart,
       )
     : String(value);
 
-  if (R.isEmpty(baselineCodes) && R.isEmpty(highlightCodes)) {
+  if (baselineCodes.length === 0 && highlightCodes.length === 0) {
     return formattedValue;
   }
 

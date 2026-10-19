@@ -238,9 +238,8 @@ export const createOptionsForRadarChart = ({
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
-        formatter: ({ chart, value }) =>
+        formatter: ({ value }) =>
           xAxisLabelFormatter(
-            chart,
             value,
             xAxisLabelFormat,
             data.categories,
