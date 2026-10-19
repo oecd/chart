@@ -337,9 +337,8 @@ export const createOptionsForLineChart = ({
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
-        formatter: ({ chart, value }) =>
+        formatter: ({ value }) =>
           xAxisLabelFormatter(
-            chart,
             value,
             xAxisLabelFormat,
             data.categories,

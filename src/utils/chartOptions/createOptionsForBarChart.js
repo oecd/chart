@@ -143,9 +143,8 @@ export const createOptionsForBarChart = ({
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
-        formatter: ({ chart, value }) =>
+        formatter: ({ value }) =>
           xAxisLabelFormatter(
-            chart,
             value,
             xAxisLabelFormat,
             data.categories,
@@ -173,7 +172,6 @@ export const createOptionsForBarChart = ({
         ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
-
         align: 'left',
         ...calcYAxisCoordinatesForBarAndStacked(horizontal, chartSize),
       },

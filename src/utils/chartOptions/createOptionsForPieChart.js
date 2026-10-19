@@ -122,7 +122,6 @@ export const createOptionsForPieChart = ({
           formatter: function () {
             const { name } = this;
             return xAxisLabelFormatter(
-              this.series.chart,
               name,
               xAxisLabelFormat,
               data.categories,
