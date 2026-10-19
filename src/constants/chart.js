@@ -139,4 +139,4 @@ export const chartSizes = {
 /**
  * Opacity of non-highlighted chart markers in case there are any highlights
  */
-export const nonHighlightedOpacity = 0.7;
+export const nonHighlightedOpacity = 0.5;
