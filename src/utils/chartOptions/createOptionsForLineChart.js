@@ -7,11 +7,10 @@ import {
   nonHighlightedOpacity,
 } from '../../constants/chart';
 import {
-  calcLegendMarginDefault,
-  calcLegendMarginInlineLabels,
-  calcMarginTopDefault,
-  fontStyleForTextElement,
-} from '../stylingUtil';
+  fontFamilies,
+  fontWeights,
+  textElementTypes,
+} from '../../constants/styling';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -19,14 +18,16 @@ import {
 } from '../chartUtilCommon';
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
+import {
+  calcLegendMarginDefault,
+  calcLegendMarginInlineLabels,
+  calcMarginTopDefault,
+  fontStyleForTextElement,
+} from '../stylingUtil';
 import { createDatapoint } from './createDataPoint';
+import { highlightLabelFormatter } from './highlightLabelFormatter';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
-import {
-  fontFamilies,
-  fontWeights,
-  textElementTypes,
-} from '../../constants/styling';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -118,7 +119,10 @@ export const createOptionsForLineChart = ({
       series.data,
     );
 
+    const customSeriesOptions = { seriesCodeLowercase };
+
     return {
+      custom: customSeriesOptions,
       name: seriesName,
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
@@ -185,7 +189,8 @@ export const createOptionsForLineChart = ({
             inlineLabels &&
             pointIndex === lastDataPointWithDataIndex &&
             lastDataPointWithDataIndex !== -1
-              ? {
+              ? // Show inline label on last data point
+                {
                   enabled: true,
                   format: seriesName,
                   style: {
@@ -244,11 +249,28 @@ export const createOptionsForLineChart = ({
     };
   }, data.series);
 
+  const seriesLabelFormatters = formatters.seriesLabels;
+  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
+  /**
+   * Formatter that renders highlighted labels bold
+   * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
+   */
+  const legendLabelFormatter = (series) =>
+    series
+      ? highlightLabelFormatter(
+          series.name,
+          series.options.custom.seriesCodeLowercase,
+          seriesLabelFormat,
+          highlightCodes,
+        )
+      : '';
+
   const legend = R.ifElse(
     () => inlineLabels,
     // legend is enabled but hidden so that Highcharts reserves the space needed for last data points data label (hack)
     () => ({
       enabled: true,
+      labelFormatter: legendLabelFormatter,
       margin: calcLegendMarginInlineLabels(chartSize),
       symbolWidth: 0,
       layout: 'vertical',
@@ -261,7 +283,7 @@ export const createOptionsForLineChart = ({
     }),
     () => ({
       enabled: !hideLegend,
-      ...R.prop('seriesLabels', formatters),
+      labelFormatter: legendLabelFormatter,
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',

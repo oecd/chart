@@ -3,7 +3,7 @@ import { format } from 'highcharts';
 import { fontFamilies, fontWeights } from '../../constants/styling';
 
 /**
- * Formats x axis labels, rendering them bold when baseline or highlighted.
+ * Formats x axis category labels, rendering them bold when baseline or highlighted.
  *
  * @param {string | number} value
  * @param {string | undefined} xAxisLabelFormat
@@ -39,13 +39,15 @@ export const xAxisLabelFormatter = (
   const category = categories.find(
     (candidate) => candidate.label.toLowerCase() === categoryValueLowercase,
   );
-  const categoryCode = category?.code.toLowerCase();
+  if (!category) {
+    return formattedValue;
+  }
+  const categoryCode = category.code.toLowerCase();
 
   // Is the code baseline or highlighted?
   const isHighlighted =
-    categoryCode &&
-    (baselineCodes.includes(categoryCode) ||
-      highlightCodes.includes(categoryCode));
+    baselineCodes.includes(categoryCode) ||
+    highlightCodes.includes(categoryCode);
 
   // Add bold text
   // https://www.highcharts.com/docs/chart-concepts/labels-and-string-formatting#html-in-highcharts
