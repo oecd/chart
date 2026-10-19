@@ -10,6 +10,7 @@ import {
   getSeriesColor,
 } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
+import { highlightLabelFormatter } from './highlightLabelFormatter';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 import { textElementTypes } from '../../constants/styling';
 import {
@@ -46,10 +47,11 @@ export const createOptionsForPieChart = ({
         : series.label,
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
+        const categoryCodeLowercase = category.code.toLowerCase();
 
         const color =
           getBaselineOrHighlightColor(
-            category.code,
+            categoryCodeLowercase,
             baselineCodes,
             highlightCodes,
             matchingHighlightColors,
@@ -57,7 +59,7 @@ export const createOptionsForPieChart = ({
           getSeriesColor({
             colorPalette,
             seriesIndex: pointIndex,
-            seriesCode: category.code,
+            seriesCode: categoryCodeLowercase,
             fixedColorIndexBySeries,
           });
 
@@ -66,12 +68,18 @@ export const createOptionsForPieChart = ({
           categoriesAreDatesOrNumberForDataParsing,
         );
 
+        const customPointOptions = {
+          ...dataPoint.custom,
+          categoryCodeLowercase,
+        };
+
         return {
           name: data.areCategoriesDates
             ? categoriesFrequency.tryParse(category.label).getTime()
             : category.label,
           ...dataPoint,
           color,
+          custom: customPointOptions,
         };
       }, series.data),
     }),
@@ -80,6 +88,9 @@ export const createOptionsForPieChart = ({
 
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
+
+  const seriesLabelFormatters = formatters.seriesLabels;
+  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
 
   return {
     chart: {
@@ -96,7 +107,18 @@ export const createOptionsForPieChart = ({
     },
 
     legend: {
-      ...R.prop('seriesLabels', formatters),
+      /**
+       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Point>}
+       */
+      labelFormatter: (point) =>
+        point
+          ? highlightLabelFormatter(
+              point.name,
+              point.options.custom.categoryCodeLowercase,
+              seriesLabelFormat,
+              highlightCodes,
+            )
+          : '',
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',

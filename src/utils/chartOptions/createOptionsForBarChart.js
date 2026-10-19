@@ -17,6 +17,7 @@ import {
 } from '../stylingUtil';
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
+import { highlightLabelFormatter } from './highlightLabelFormatter';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 import { textElementTypes } from '../../constants/styling';
 
@@ -105,6 +106,9 @@ export const createOptionsForBarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+  const seriesLabelFormatters = formatters.seriesLabels;
+  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
+
   return {
     custom: customChartOptions,
 
@@ -180,7 +184,19 @@ export const createOptionsForBarChart = ({
 
     legend: {
       enabled: !hideLegend,
-      ...R.prop('seriesLabels', formatters),
+      // Do not set labelFormat, it overrides labelFormatter
+      /**
+       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
+       */
+      labelFormatter: (series) =>
+        series
+          ? highlightLabelFormatter(
+              series.name,
+              series.options.custom.seriesCodeLowercase,
+              seriesLabelFormat,
+              highlightCodes,
+            )
+          : '',
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',

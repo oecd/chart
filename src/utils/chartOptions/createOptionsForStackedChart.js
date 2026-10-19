@@ -18,6 +18,7 @@ import {
 import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
+import { highlightLabelFormatter } from './highlightLabelFormatter';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 import { textElementTypes } from '../../constants/styling';
 
@@ -309,6 +310,9 @@ export const createOptionsForStackedChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+  const seriesLabelFormatters = formatters.seriesLabels;
+  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
+
   return {
     custom: customChartOptions,
 
@@ -393,7 +397,18 @@ export const createOptionsForStackedChart = ({
 
     legend: {
       enabled: !hideLegend,
-      ...R.prop('seriesLabels', formatters),
+      /**
+       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
+       */
+      labelFormatter: (series) =>
+        series
+          ? highlightLabelFormatter(
+              series.name,
+              series.options.custom.seriesCodeLowercase,
+              seriesLabelFormat,
+              highlightCodes,
+            )
+          : '',
       reversed: false,
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),

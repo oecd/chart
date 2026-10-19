@@ -15,6 +15,7 @@ import {
 } from '../chartUtilCommon';
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
+import { highlightLabelFormatter } from './highlightLabelFormatter';
 import { highlightSymbols } from './highlightSymbols';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 import { textElementTypes } from '../../constants/styling';
@@ -101,7 +102,10 @@ export const createOptionsForRadarChart = ({
         )
       : null;
 
+    const customSeriesOptions = { seriesCodeLowercase };
+
     return {
+      custom: customSeriesOptions,
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(series.label).getTime()
         : series.label,
@@ -197,6 +201,9 @@ export const createOptionsForRadarChart = ({
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
 
+  const seriesLabelFormatters = formatters.seriesLabels;
+  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
+
   return {
     chart: {
       polar: true,
@@ -267,7 +274,19 @@ export const createOptionsForRadarChart = ({
 
     legend: {
       enabled: !hideLegend,
-      ...R.prop('seriesLabels', formatters),
+      /**
+       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
+       */
+      labelFormatter: (series) =>
+        series
+          ? highlightLabelFormatter(
+              series.name,
+              series.options.custom.seriesCodeLowercase,
+              seriesLabelFormat,
+              highlightCodes,
+            )
+          : '',
+
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',

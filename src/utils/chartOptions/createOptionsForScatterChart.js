@@ -9,19 +9,21 @@ import {
   nonHighlightedOpacity,
   sortOrderOptions,
 } from '../../constants/chart';
+import { textElementTypes } from '../../constants/styling';
 import { createDatapoint } from '../chartOptions/createDataPoint';
-import {
-  calcLegendMarginDefault,
-  calcMarginTopDefault,
-  fontStyleForTextElement,
-} from '../stylingUtil';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
   getSeriesColor,
 } from '../chartUtilCommon';
 import { isNilOrEmpty, mapWithIndex } from '../ramdaUtil';
-import { textElementTypes } from '../../constants/styling';
+import {
+  calcLegendMarginDefault,
+  calcMarginTopDefault,
+  fontStyleForTextElement,
+} from '../stylingUtil';
+import { highlightLabelFormatter } from './highlightLabelFormatter';
+import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 // Symbol sizes
 const RADIUS = 6;
@@ -149,7 +151,10 @@ export const createOptionsForScatterChart = ({
     const symbolRadius = symbolMinMaxLayout ? RADIUS_MIN_MAX : RADIUS;
     const finalRadius = isCross ? symbolRadius - 1 : symbolRadius;
 
+    const customSeriesOptions = { seriesCodeLowercase };
+
     return {
+      custom: customSeriesOptions,
       name: data.areSeriesDates
         ? seriesFrequency.tryParse(series.label).getTime()
         : series.label,
@@ -250,6 +255,12 @@ export const createOptionsForScatterChart = ({
       : { left: '5%', width: '95%' };
   };
 
+  const xAxisLabelFormatters = formatters.xAxisLabels;
+  const xAxisLabelFormat = xAxisLabelFormatters?.format;
+
+  const seriesLabelFormatters = formatters.seriesLabels;
+  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
+
   return {
     chart: {
       type: 'scatter',
@@ -289,7 +300,15 @@ export const createOptionsForScatterChart = ({
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
-        ...R.prop('xAxisLabels', formatters),
+        /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
+        formatter: ({ value }) =>
+          xAxisLabelFormatter(
+            value,
+            xAxisLabelFormat,
+            data.categories,
+            baselineCodes,
+            highlightCodes,
+          ),
         ...(hideXAxisLabels || symbolMinMaxLayout ? { enabled: false } : null),
       },
       gridLineColor: '#c2cbd6',
@@ -327,7 +346,18 @@ export const createOptionsForScatterChart = ({
 
     legend: {
       enabled: !hideLegend && !symbolMinMaxLayout,
-      ...R.prop('seriesLabels', formatters),
+      /**
+       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
+       */
+      labelFormatter: (series) =>
+        series
+          ? highlightLabelFormatter(
+              series.name,
+              series.options.custom.seriesCodeLowercase,
+              seriesLabelFormat,
+              highlightCodes,
+            )
+          : '',
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
