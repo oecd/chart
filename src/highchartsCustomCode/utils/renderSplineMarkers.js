@@ -3,7 +3,6 @@
  * @import { Chart, Point, SVGElement as HighchartsSVGElement, SVGAttributes, CSSObject } from "highcharts"
  */
 import { TinyColor } from '@ctrl/tinycolor';
-import { baselineColor } from '../../constants/chart';
 import { AXIS_MARKER_SIZE } from './axisMarkerSize';
 import {
   getOutlineGap,
@@ -173,9 +172,7 @@ export const renderSplineMarkers = ({ chart }) => {
 
       const x = axisLeft + referencePoint.plotX - markerWidth / 2;
 
-      const highlightColor = customPointOptions.isCategoryBaseline
-        ? baselineColor
-        : customPointOptions.highlightColor;
+      const { highlightColor } = customPointOptions;
 
       return [
         // Top semi-transparent rect behind the lines and points

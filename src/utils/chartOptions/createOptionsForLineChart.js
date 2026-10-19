@@ -2,6 +2,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
@@ -153,20 +154,23 @@ export const createOptionsForLineChart = ({
 
         const finalIsHighlighted = isSeriesHighlighted || isCategoryHighlighted;
 
-        // Category as baseline is not supported here on purpose
-        const highlightColor = finalIsHighlighted
-          ? getListItemAtTurningIndex(
-              finalHighlightIndex,
-              matchingHighlightColors,
-            )
-          : null;
+        const highlightColor = isCategoryBaseline
+          ? baselineColor
+          : finalIsHighlighted
+            ? getListItemAtTurningIndex(
+                finalHighlightIndex,
+                matchingHighlightColors,
+              )
+            : null;
 
-        const highlightOutlineColor = finalIsHighlighted
-          ? getListItemAtTurningIndex(
-              finalHighlightIndex,
-              matchingHighlightOutlineColors,
-            )
-          : null;
+        const lineColor = isCategoryBaseline
+          ? baselineColor
+          : finalIsHighlighted
+            ? getListItemAtTurningIndex(
+                finalHighlightIndex,
+                matchingHighlightOutlineColors,
+              )
+            : null;
 
         const customPointOptions = {
           ...dataPoint.custom,
@@ -185,6 +189,7 @@ export const createOptionsForLineChart = ({
           ...dataPoint,
           /** Custom options used by the highlight render callbacks */
           custom: customPointOptions,
+          color: highlightColor,
           dataLabels:
             inlineLabels &&
             pointIndex === lastDataPointWithDataIndex &&
@@ -212,7 +217,7 @@ export const createOptionsForLineChart = ({
             lineWidth: isCategoryHighlighted
               ? HIGHLIGHTED_SYMBOL_LINE_WIDTH
               : null,
-            lineColor: highlightOutlineColor,
+            lineColor,
             fillColor: highlightColor,
           },
         };
