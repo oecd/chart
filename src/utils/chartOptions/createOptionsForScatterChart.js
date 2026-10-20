@@ -129,13 +129,15 @@ export const createOptionsForScatterChart = ({
     const isCross = symbol === 'cross';
     const lineColor = isCross
       ? null
-      : isSeriesHighlighted
-        ? // Highlighted points get a outline in the darkened highlight color
-          getListItemAtTurningIndex(
-            seriesHighlightIndex,
-            matchingHighlightOutlineColors,
-          )
-        : 'white';
+      : isSeriesBaseline
+        ? baselineColor
+        : isSeriesHighlighted
+          ? // Highlighted points get a outline in the darkened highlight color
+            getListItemAtTurningIndex(
+              seriesHighlightIndex,
+              matchingHighlightOutlineColors,
+            )
+          : 'white';
 
     const seriesLineWidth = isCross
       ? CROSS_LINE_WIDTH
@@ -169,7 +171,7 @@ export const createOptionsForScatterChart = ({
 
         const baselineOrHighlightColor = (() => {
           // Series baseline overrides category highlight
-          if (isSeriesBaseline) return baselineColor;
+          if (isSeriesBaseline) return null;
           return getBaselineOrHighlightColor(
             categoryCodeLowercase,
             baselineCodes,
@@ -178,6 +180,7 @@ export const createOptionsForScatterChart = ({
           );
         })();
         const baselineOrHighlightOutlineColor = (() => {
+          // Series baseline overrides category highlight
           if (isSeriesBaseline) return null;
           return getBaselineOrHighlightColor(
             categoryCodeLowercase,
