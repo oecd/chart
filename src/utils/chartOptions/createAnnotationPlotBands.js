@@ -1,6 +1,14 @@
 // @ts-check
 
-const LABEL_COLOR = '#586179';
+import { chartSizes } from '../../constants/chart';
+import {
+  fontColors,
+  fontFamilies,
+  fontStyleByTextElementTypes,
+  fontWeights,
+  textElementTypes,
+} from '../../constants/styling';
+
 const BAND_COLOR = '#F0F4F8';
 
 /**
@@ -9,19 +17,26 @@ const BAND_COLOR = '#F0F4F8';
 const escapeHTML = (string) =>
   string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+const lineHeightFactor = 1.15;
+const numberOfLines = 2;
+
 /**
  * @param {{
  * positionedAnnotations: import('./annotation').PositionedAnnotation[];
- * isSmall: boolean;
+ * chartSize: keyof typeof chartSizes;
  * showLabelsInline: boolean;
  * }} options
  * @returns {import('highcharts').XAxisPlotBandsOptions[]}
  */
 export const createAnnotationPlotBands = ({
   positionedAnnotations,
-  isSmall,
+  chartSize,
   showLabelsInline,
 }) => {
+  const fontSizePx =
+    fontStyleByTextElementTypes[textElementTypes.legend].fontSize[chartSize];
+  const fontSizeNumber = parseFloat(fontSizePx);
+
   return positionedAnnotations.map((annotation, index) => {
     const { label, showLabelInline, from, to, color } = annotation;
 
@@ -31,15 +46,13 @@ export const createAnnotationPlotBands = ({
     let labelOptions;
     if (finalShowLabelInline) {
       // Render label in the plot band
-      const fontSize = isSmall ? 13 : 16;
-      const fontSizePx = `${fontSize}px`;
-      const lineHeightFactor = isSmall ? 1.15 : 1.25;
-      const height = fontSize * lineHeightFactor * 2;
+
+      const height = fontSizeNumber * lineHeightFactor * numberOfLines;
       const style = `
 display: block;
 display: -webkit-box;
 -webkit-box-orient: vertical;
--webkit-line-clamp: 2;
+-webkit-line-clamp: ${numberOfLines};
 overflow: hidden;
 white-space: normal;
 `;
@@ -50,19 +63,20 @@ white-space: normal;
         align: 'left',
         x: 0,
         // y: 0 is approx. half of the font size on top of the plot band rect
-        y: -(fontSize * lineHeightFactor * 1.5),
+        y: -((numberOfLines - 0.6) * fontSizeNumber * lineHeightFactor),
         style: {
           // Vertically align bottom
           display: 'flex',
           'align-items': 'flex-end',
           height,
+          fontFamily: fontFamilies.condensed,
           fontSize: fontSizePx,
           lineHeight: lineHeightFactor,
-          color: LABEL_COLOR,
+          color: fontColors.normal,
         },
       };
     } else {
-      // Render numerical reference to the caption
+      // Render numerical reference to the caption. Looks like ①, ②, ③ etc.
       const fontSize = '12px';
       const width = 16;
       const widthPx = `${width}px`;
@@ -71,7 +85,7 @@ box-sizing: content-box;
 display: block;
 width: ${widthPx};
 height: ${widthPx};
-border: 1px solid ${LABEL_COLOR};
+border: 1px solid ${fontColors.normal};
 border-radius: 50%;
 `;
       const htmlText = `<span style="${style}">${String(index + 1)}</span>`;
@@ -80,10 +94,11 @@ border-radius: 50%;
         useHTML: true,
         text: htmlText,
         style: {
+          fontFamily: fontFamilies.condensed,
           fontSize: fontSize,
           lineHeight: widthPx,
-          fontWeight: 'bolder',
-          color: LABEL_COLOR,
+          fontWeight: String(fontWeights.extraBold),
+          color: fontColors.normal,
         },
       };
     }

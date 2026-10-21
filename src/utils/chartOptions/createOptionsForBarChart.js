@@ -3,7 +3,6 @@ import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
   baselineColor,
-  chartSizes,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   chartTypes,
@@ -133,7 +132,7 @@ export const createOptionsForBarChart = ({
   const plotBands = positionedAnnotations
     ? createAnnotationPlotBands({
         positionedAnnotations,
-        isSmall: chartSize === chartSizes.small,
+        chartSize,
         showLabelsInline: showAnnotationLabelsInline,
       })
     : null;

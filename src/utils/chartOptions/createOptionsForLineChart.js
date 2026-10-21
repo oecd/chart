@@ -3,7 +3,6 @@ import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
   baselineColor,
-  chartSizes,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
@@ -69,9 +68,6 @@ export const createOptionsForLineChart = ({
   positionedAnnotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
-
-  const labelFontSize = isSmall ? 13 : 16;
-  const labelFontSizePx = `${labelFontSize}px`;
 
   const showAnnotationLabelsInline = positionedAnnotations
     ? R.any(R.prop('showLabelInline'), positionedAnnotations)
@@ -302,7 +298,9 @@ export const createOptionsForLineChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginDefault(chartSize),
+      margin:
+        calcLegendMarginDefault(chartSize) +
+        (showAnnotationLabelsInline ? 10 : 0),
     }),
   )();
 
@@ -340,10 +338,15 @@ export const createOptionsForLineChart = ({
   const plotBands = positionedAnnotations
     ? createAnnotationPlotBands({
         positionedAnnotations,
-        isSmall: chartSize === chartSizes.small,
+        chartSize,
         showLabelsInline: showAnnotationLabelsInline,
       })
     : null;
+
+  const labelStyle = fontStyleForTextElement(
+    textElementTypes.legend,
+    chartSize,
+  );
 
   const marginTop = (() => {
     /** @type {number | undefined} */
@@ -352,7 +355,7 @@ export const createOptionsForLineChart = ({
       marginTop = calcMarginTopDefault(title, subtitle, chartSize);
     }
     if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
-      marginTop += labelFontSize;
+      marginTop += parseFloat(labelStyle.fontSize);
     }
     return marginTop;
   })();
@@ -382,7 +385,7 @@ export const createOptionsForLineChart = ({
         ? { type: 'datetime' }
         : null),
       labels: {
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+        style: labelStyle,
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
