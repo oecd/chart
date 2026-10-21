@@ -4,7 +4,6 @@ import * as R from 'ramda';
 import {
   animationConfig,
   baselineColor,
-  chartSizes,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   chartTypes,
@@ -135,7 +134,7 @@ export const createOptionsForBarChart = ({
   const plotBands = positionedAnnotations
     ? createAnnotationPlotBands({
         positionedAnnotations,
-        isSmall: chartSize === chartSizes.small,
+        chartSize,
         showLabelsInline: showAnnotationLabelsInline,
       })
     : null;
