@@ -183,17 +183,14 @@ white-space: normal;
       };
     } else {
       // Render numerical reference to the caption
-      const fontSize = isSmall ? 12 : 14;
-      const fontSizePx = `${fontSize}px`;
-      const marginTop = isSmall ? 0 : 2;
-      const marginTopPx = `${marginTop}px`;
-      const lineHeight = isSmall ? 14 : 16;
-      const lineHeightPx = `${lineHeight}px`;
+      const fontSize = '12px';
+      const marginTop = `${isSmall ? 0 : 2}px`;
+      const width = '16px';
       const style = `
 display: block;
-min-width: ${lineHeightPx};
-aspect-ratio: 1;
-margin-top: ${marginTopPx};
+width: ${width};
+height: ${width};
+margin-top: ${marginTop};
 border: 1px solid ${LABEL_COLOR};
 border-radius: 50%;
 `;
@@ -202,8 +199,8 @@ border-radius: 50%;
         useHTML: true,
         text: htmlText,
         style: {
-          fontSize: fontSizePx,
-          lineHeight: lineHeightPx,
+          fontSize: fontSize,
+          lineHeight: width,
           fontWeight: 'bolder',
           color: LABEL_COLOR,
         },

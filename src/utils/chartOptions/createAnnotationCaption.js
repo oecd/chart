@@ -14,7 +14,7 @@ export const createAnnotationCaption = (annotations, labelColor) =>
     R.join('<br>'),
     mapWithIndex(
       (annotation, index) =>
-        `<strong style="display: inline-block; min-width: 16px; aspect-ratio: 1; margin-bottom: 1px; vertical-align: middle; text-align: center; border: 1px solid ${labelColor}; border-radius: 50%;">${index + 1}</strong> ${annotation.label}`,
+        `<strong style="display: inline-block; width: 16px; height: 16px; margin: 1px 0; border: 1px solid ${labelColor}; border-radius: 50%; font-size: 12px; line-height: 16px; vertical-align: middle; text-align: center;">${index + 1}</strong> ${annotation.label}`,
     ),
     // TODO: Filter for applicable and visible
     R.filter((annotation) => !annotation.showLabelInline),
