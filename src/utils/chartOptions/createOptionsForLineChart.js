@@ -2,7 +2,6 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
-  chartSizes,
   chartSpacing,
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
@@ -66,9 +65,6 @@ export const createOptionsForLineChart = ({
   positionedAnnotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
-
-  const labelFontSize = isSmall ? 13 : 16;
-  const labelFontSizePx = `${labelFontSize}px`;
 
   const showAnnotationLabelsInline = positionedAnnotations
     ? R.any(R.prop('showLabelInline'), positionedAnnotations)
@@ -251,11 +247,6 @@ export const createOptionsForLineChart = ({
     };
   }, data.series);
 
-  const calcLegendMargin = () => {
-    const marginForAnnotations = showAnnotationLabelsInline ? 10 : 0;
-    return (isSmall ? 26 : 34) + marginForAnnotations;
-  };
-
   const legend = R.ifElse(
     () => inlineLabels,
     // legend is enabled but hidden so that Highcharts reserves the space needed for last data points data label (hack)
@@ -280,7 +271,9 @@ export const createOptionsForLineChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginDefault(chartSize),
+      margin:
+        calcLegendMarginDefault(chartSize) +
+        (showAnnotationLabelsInline ? 10 : 0),
     }),
   )();
 
@@ -309,10 +302,15 @@ export const createOptionsForLineChart = ({
   const plotBands = positionedAnnotations
     ? createAnnotationPlotBands({
         positionedAnnotations,
-        isSmall: chartSize === chartSizes.small,
+        chartSize,
         showLabelsInline: showAnnotationLabelsInline,
       })
     : null;
+
+  const labelStyle = fontStyleForTextElement(
+    textElementTypes.legend,
+    chartSize,
+  );
 
   const marginTop = (() => {
     /** @type {number | undefined} */
@@ -321,7 +319,7 @@ export const createOptionsForLineChart = ({
       marginTop = calcMarginTopDefault(title, subtitle, chartSize);
     }
     if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
-      marginTop += labelFontSize;
+      marginTop += parseFloat(labelStyle.fontSize);
     }
     return marginTop;
   })();
@@ -362,7 +360,7 @@ export const createOptionsForLineChart = ({
         ? { type: 'datetime' }
         : null),
       labels: {
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+        style: labelStyle,
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */

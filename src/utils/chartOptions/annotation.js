@@ -7,6 +7,7 @@
  * toCategoryCode: string;
  * label: string;
  * showLabelInline: boolean;
+ * color?: string;
  * }} Annotation
  */
 
