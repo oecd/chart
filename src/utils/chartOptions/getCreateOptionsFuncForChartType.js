@@ -187,7 +187,6 @@ const createChartOptionsFunc =
           categoriesFrequency,
         })
       : null;
-    console.log('positionedAnnotations', positionedAnnotations);
 
     const options = createOptionsFuncForChartType({
       ...otherProps,
