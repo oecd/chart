@@ -5,7 +5,6 @@ import {
   fontColors,
   fontFamilies,
   fontStyleByTextElementTypes,
-  fontWeights,
   textElementTypes,
 } from '../../constants/styling';
 
@@ -97,7 +96,6 @@ border-radius: 50%;
           fontFamily: fontFamilies.condensed,
           fontSize: fontSize,
           lineHeight: widthPx,
-          fontWeight: String(fontWeights.extraBold),
           color: fontColors.normal,
         },
       };
