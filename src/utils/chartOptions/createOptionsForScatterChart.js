@@ -22,7 +22,8 @@ import {
   calcMarginTopDefault,
   fontStyleForTextElement,
 } from '../stylingUtil';
-import { highlightLabelFormatter } from './highlightLabelFormatter';
+import { legendLabelFormatter } from './legendLabelFormatter';
+import { parseCategories } from './parseCategories';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 // Symbol sizes
@@ -272,6 +273,15 @@ export const createOptionsForScatterChart = ({
   const seriesLabelFormatters = formatters.seriesLabels;
   const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
 
+  const parsedCategories = parseCategories(
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+  );
+  const xAxisCategories = categoriesAreDatesOrNumberForDataParsing
+    ? null
+    : R.map(R.prop('parsedLabel'), parsedCategories);
+
   return {
     chart: {
       type: 'scatter',
@@ -295,18 +305,7 @@ export const createOptionsForScatterChart = ({
     colors: colorPalette,
 
     xAxis: {
-      categories: categoriesAreDatesOrNumberForDataParsing
-        ? null
-        : R.map(
-            R.compose(
-              R.when(
-                () => data.areCategoriesDates,
-                (v) => categoriesFrequency.tryParse(v).getTime(),
-              ),
-              R.prop('label'),
-            ),
-            data.categories,
-          ),
+      categories: xAxisCategories,
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
@@ -316,7 +315,7 @@ export const createOptionsForScatterChart = ({
           xAxisLabelFormatter(
             value,
             xAxisLabelFormat,
-            data.categories,
+            parsedCategories,
             baselineCodes,
             highlightCodes,
           ),
@@ -362,10 +361,11 @@ export const createOptionsForScatterChart = ({
        */
       labelFormatter: (series) =>
         series
-          ? highlightLabelFormatter(
+          ? legendLabelFormatter(
               series.name,
               series.options.custom.seriesCodeLowercase,
               seriesLabelFormat,
+              baselineCodes,
               highlightCodes,
             )
           : '',

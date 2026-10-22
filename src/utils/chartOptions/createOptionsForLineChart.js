@@ -26,8 +26,9 @@ import {
   fontStyleForTextElement,
 } from '../stylingUtil';
 import { createDatapoint } from './createDataPoint';
-import { highlightLabelFormatter } from './highlightLabelFormatter';
 import { highlightSymbols } from './highlightSymbols';
+import { legendLabelFormatter } from './legendLabelFormatter';
+import { parseCategories } from './parseCategories';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 const SYMBOL_RADIUS = 3;
@@ -65,7 +66,6 @@ export const createOptionsForLineChart = ({
   chartSize,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
-  const seenCategories = new Set();
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
@@ -111,10 +111,6 @@ export const createOptionsForLineChart = ({
       'white',
     );
 
-    const seriesName = data.areSeriesDates
-      ? seriesFrequency.tryParse(series.label).getTime()
-      : series.label;
-
     const lastDataPointWithDataIndex = R.findLastIndex(
       (d) => !isNilOrEmpty(d.value),
       series.data,
@@ -124,12 +120,12 @@ export const createOptionsForLineChart = ({
 
     return {
       custom: customSeriesOptions,
-      name: seriesName,
+      name: data.areSeriesDates
+        ? seriesFrequency.tryParse(series.label).getTime()
+        : series.label,
       data: mapWithIndex((pointData, pointIndex) => {
         const category = R.nth(pointIndex, data.categories);
         const categoryCodeLowercase = category.code.toLowerCase();
-
-        seenCategories.add(categoryCodeLowercase);
 
         const dataPoint = createDatapoint(
           pointData,
@@ -197,7 +193,7 @@ export const createOptionsForLineChart = ({
               ? // Show inline label on last data point
                 {
                   enabled: true,
-                  format: seriesName,
+                  format: series.label,
                   style: {
                     ...fontStyleForTextElement(
                       textElementTypes.legend,
@@ -260,12 +256,13 @@ export const createOptionsForLineChart = ({
    * Formatter that renders highlighted labels bold
    * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
    */
-  const legendLabelFormatter = (series) =>
+  const finalLegendLabelFormatter = (series) =>
     series
-      ? highlightLabelFormatter(
+      ? legendLabelFormatter(
           series.name,
           series.options.custom.seriesCodeLowercase,
           seriesLabelFormat,
+          baselineCodes,
           highlightCodes,
         )
       : '';
@@ -275,7 +272,7 @@ export const createOptionsForLineChart = ({
     // legend is enabled but hidden so that Highcharts reserves the space needed for last data points data label (hack)
     () => ({
       enabled: true,
-      labelFormatter: legendLabelFormatter,
+      labelFormatter: finalLegendLabelFormatter,
       margin: calcLegendMarginInlineLabels(chartSize),
       symbolWidth: 0,
       layout: 'vertical',
@@ -288,7 +285,7 @@ export const createOptionsForLineChart = ({
     }),
     () => ({
       enabled: !hideLegend,
-      labelFormatter: legendLabelFormatter,
+      labelFormatter: finalLegendLabelFormatter,
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
@@ -315,11 +312,20 @@ export const createOptionsForLineChart = ({
   const customChartOptions = {
     baselineCodes,
     highlightCategoryCodes,
-    categories: Array.from(seenCategories),
+    categories: data.categories.map((category) => category.code.toLowerCase()),
   };
 
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
+
+  const parsedCategories = parseCategories(
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+  );
+  const xAxisCategories = categoriesAreDatesOrNumberForDataParsing
+    ? null
+    : R.map(R.prop('parsedLabel'), parsedCategories);
 
   return {
     custom: customChartOptions,
@@ -344,18 +350,7 @@ export const createOptionsForLineChart = ({
     colors: [R.head(colorPalette)],
 
     xAxis: {
-      categories: categoriesAreDatesOrNumberForDataParsing
-        ? null
-        : R.map(
-            R.compose(
-              R.when(
-                () => data.areCategoriesDates,
-                (v) => categoriesFrequency.tryParse(v).getTime(),
-              ),
-              R.prop('label'),
-            ),
-            data.categories,
-          ),
+      categories: xAxisCategories,
       ...(categoriesAreDatesOrNumberForDataParsing && data.areCategoriesDates
         ? { type: 'datetime' }
         : null),
@@ -368,7 +363,7 @@ export const createOptionsForLineChart = ({
           xAxisLabelFormatter(
             value,
             xAxisLabelFormat,
-            data.categories,
+            parsedCategories,
             baselineCodes,
             highlightCodes,
           ),

@@ -7,6 +7,7 @@ import {
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
 } from '../../constants/chart';
+import { textElementTypes } from '../../constants/styling';
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import {
   getBaselineOrHighlightColor,
@@ -15,16 +16,16 @@ import {
 } from '../chartUtilCommon';
 import { makeColorReadableOnBackgroundColor } from '../colorUtil';
 import { mapWithIndex } from '../ramdaUtil';
-import { highlightLabelFormatter } from './highlightLabelFormatter';
-import { highlightSymbols } from './highlightSymbols';
-import { xAxisLabelFormatter } from './xAxisLabelFormatter';
-import { textElementTypes } from '../../constants/styling';
 import {
   calcLegendMarginDefault,
   calcMarginBottomForRadar,
   calcRadarPaneSize,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { highlightSymbols } from './highlightSymbols';
+import { legendLabelFormatter } from './legendLabelFormatter';
+import { parseCategories } from './parseCategories';
+import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -204,6 +205,13 @@ export const createOptionsForRadarChart = ({
   const seriesLabelFormatters = formatters.seriesLabels;
   const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
 
+  const parsedCategories = parseCategories(
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+  );
+  const xAxisCategories = R.map(R.prop('parsedLabel'), parsedCategories);
+
   return {
     chart: {
       polar: true,
@@ -231,16 +239,7 @@ export const createOptionsForRadarChart = ({
 
     xAxis: {
       plotBands,
-      categories: R.map(
-        R.compose(
-          R.when(
-            () => data.areCategoriesDates,
-            (v) => categoriesFrequency.tryParse(v).getTime(),
-          ),
-          R.prop('label'),
-        ),
-        data.categories,
-      ),
+      categories: xAxisCategories,
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         ...xAxisLabelFormatters,
@@ -249,7 +248,7 @@ export const createOptionsForRadarChart = ({
           xAxisLabelFormatter(
             value,
             xAxisLabelFormat,
-            data.categories,
+            parsedCategories,
             baselineCodes,
             highlightCodes,
           ),
@@ -279,10 +278,11 @@ export const createOptionsForRadarChart = ({
        */
       labelFormatter: (series) =>
         series
-          ? highlightLabelFormatter(
+          ? legendLabelFormatter(
               series.name,
               series.options.custom.seriesCodeLowercase,
               seriesLabelFormat,
+              baselineCodes,
               highlightCodes,
             )
           : '',

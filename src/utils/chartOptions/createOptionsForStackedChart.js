@@ -9,18 +9,19 @@ import {
   nonHighlightedOpacity,
   stackingOptions,
 } from '../../constants/chart';
+import { textElementTypes } from '../../constants/styling';
+import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
+import { mapWithIndex } from '../ramdaUtil';
 import {
   calcLegendMarginForBarAndStacked,
   calcMarginTopForBarAndStacked,
   calcYAxisCoordinatesForBarAndStacked,
   fontStyleForTextElement,
 } from '../stylingUtil';
-import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
-import { mapWithIndex } from '../ramdaUtil';
 import { createDatapoint } from './createDataPoint';
-import { highlightLabelFormatter } from './highlightLabelFormatter';
+import { legendLabelFormatter } from './legendLabelFormatter';
+import { parseCategories } from './parseCategories';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
-import { textElementTypes } from '../../constants/styling';
 
 /**
  * @param {{
@@ -313,6 +314,16 @@ export const createOptionsForStackedChart = ({
   const seriesLabelFormatters = formatters.seriesLabels;
   const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
 
+  const parsedCategories = parseCategories(
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+  );
+  const xAxisCategories =
+    area && categoriesAreDatesOrNumberForDataParsing
+      ? null
+      : R.map(R.prop('parsedLabel'), parsedCategories);
+
   return {
     custom: customChartOptions,
 
@@ -335,24 +346,8 @@ export const createOptionsForStackedChart = ({
     colors: colorPalette,
 
     xAxis: {
-      categories:
-        area && categoriesAreDatesOrNumberForDataParsing
-          ? null
-          : R.map(
-              R.compose(
-                R.when(
-                  () => data.areCategoriesDates,
-                  (v) => categoriesFrequency.tryParse(v).getTime(),
-                ),
-                R.prop('label'),
-              ),
-              data.categories,
-            ),
-      ...(data.areCategoriesDates
-        ? {
-            type: 'datetime',
-          }
-        : null),
+      categories: xAxisCategories,
+      ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
@@ -362,7 +357,7 @@ export const createOptionsForStackedChart = ({
           xAxisLabelFormatter(
             value,
             xAxisLabelFormat,
-            data.categories,
+            parsedCategories,
             baselineCodes,
             highlightCodes,
           ),
@@ -402,10 +397,11 @@ export const createOptionsForStackedChart = ({
        */
       labelFormatter: (series) =>
         series
-          ? highlightLabelFormatter(
+          ? legendLabelFormatter(
               series.name,
               series.options.custom.seriesCodeLowercase,
               seriesLabelFormat,
+              baselineCodes,
               highlightCodes,
             )
           : '',

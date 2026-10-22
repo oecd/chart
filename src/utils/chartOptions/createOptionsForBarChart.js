@@ -8,18 +8,19 @@ import {
   chartTypes,
   nonHighlightedOpacity,
 } from '../../constants/chart';
+import { textElementTypes } from '../../constants/styling';
 import { createDatapoint } from '../chartOptions/createDataPoint';
+import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
+import { mapWithIndex } from '../ramdaUtil';
 import {
   calcLegendMarginForBarAndStacked,
   calcMarginTopForBarAndStacked,
   calcYAxisCoordinatesForBarAndStacked,
   fontStyleForTextElement,
 } from '../stylingUtil';
-import { getListItemAtTurningIndex, getSeriesColor } from '../chartUtilCommon';
-import { mapWithIndex } from '../ramdaUtil';
-import { highlightLabelFormatter } from './highlightLabelFormatter';
+import { legendLabelFormatter } from './legendLabelFormatter';
+import { parseCategories } from './parseCategories';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
-import { textElementTypes } from '../../constants/styling';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -109,6 +110,15 @@ export const createOptionsForBarChart = ({
   const seriesLabelFormatters = formatters.seriesLabels;
   const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
 
+  const parsedCategories = parseCategories(
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+  );
+  const xAxisCategories = categoriesAreDatesOrNumberForDataParsing
+    ? null
+    : R.map(R.prop('parsedLabel'), parsedCategories);
+
   return {
     custom: customChartOptions,
 
@@ -129,29 +139,18 @@ export const createOptionsForBarChart = ({
     colors: colorPalette,
 
     xAxis: {
-      categories: categoriesAreDatesOrNumberForDataParsing
-        ? null
-        : R.map(
-            R.compose(
-              R.when(
-                () => data.areCategoriesDates,
-                (v) => categoriesFrequency.tryParse(v).getTime(),
-              ),
-              R.prop('label'),
-            ),
-            data.categories,
-          ),
+      categories: xAxisCategories,
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
-        formatter: ({ value }) =>
+        formatter: (context) =>
           xAxisLabelFormatter(
-            value,
+            context.value,
             xAxisLabelFormat,
-            data.categories,
+            parsedCategories,
             baselineCodes,
             highlightCodes,
           ),
@@ -190,10 +189,11 @@ export const createOptionsForBarChart = ({
        */
       labelFormatter: (series) =>
         series
-          ? highlightLabelFormatter(
+          ? legendLabelFormatter(
               series.name,
               series.options.custom.seriesCodeLowercase,
               seriesLabelFormat,
+              baselineCodes,
               highlightCodes,
             )
           : '',
