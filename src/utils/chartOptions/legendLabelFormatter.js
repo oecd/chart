@@ -8,13 +8,15 @@ import { fontFamilies, fontWeights } from '../../constants/styling';
  * @param {string | number} name Visible label
  * @param {string} code Lowercase code
  * @param {string | undefined} labelFormat Format string for Highcharts formatter (https://www.highcharts.com/docs/chart-concepts/templating)
+ * @param {string[]} baselineCodes Lowercase codes of baseline series/categories
  * @param {string[]} highlightCodes Lowercase codes of highlighted series/categories
  * @returns {string}
  */
-export const highlightLabelFormatter = (
+export const legendLabelFormatter = (
   name,
   code,
   labelFormat,
+  baselineCodes,
   highlightCodes,
 ) => {
   // Apply regular formatting with formatting string
@@ -26,8 +28,9 @@ export const highlightLabelFormatter = (
     return formattedValue;
   }
 
-  // Is the code highlighted?
-  const isHighlighted = highlightCodes.includes(code);
+  // Is the code baseline or highlighted?
+  const isHighlighted =
+    baselineCodes.includes(code) || highlightCodes.includes(code);
 
   // Add bold text
   // https://www.highcharts.com/docs/chart-concepts/labels-and-string-formatting#html-in-highcharts

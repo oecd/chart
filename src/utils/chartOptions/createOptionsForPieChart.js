@@ -4,19 +4,20 @@ import {
   chartSpacing,
   chartSpacingFullScreenAndExport,
 } from '../../constants/chart';
+import { textElementTypes } from '../../constants/styling';
 import { createDatapoint } from '../chartOptions/createDataPoint';
 import {
   getBaselineOrHighlightColor,
   getSeriesColor,
 } from '../chartUtilCommon';
 import { mapWithIndex } from '../ramdaUtil';
-import { highlightLabelFormatter } from './highlightLabelFormatter';
-import { xAxisLabelFormatter } from './xAxisLabelFormatter';
-import { textElementTypes } from '../../constants/styling';
 import {
   calcLegendMarginDefault,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { legendLabelFormatter } from './legendLabelFormatter';
+import { parseCategories } from './parseCategories';
+import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -92,6 +93,12 @@ export const createOptionsForPieChart = ({
   const seriesLabelFormatters = formatters.seriesLabels;
   const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
 
+  const parsedCategories = parseCategories(
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+  );
+
   return {
     chart: {
       type: 'pie',
@@ -112,10 +119,11 @@ export const createOptionsForPieChart = ({
        */
       labelFormatter: (point) =>
         point
-          ? highlightLabelFormatter(
+          ? legendLabelFormatter(
               point.name,
               point.options.custom.categoryCodeLowercase,
               seriesLabelFormat,
+              baselineCodes,
               highlightCodes,
             )
           : '',
@@ -138,15 +146,19 @@ export const createOptionsForPieChart = ({
       pie: {
         dataLabels: {
           enabled: !hideXAxisLabels,
-          // We can't use an arrow function `(context) => {}` here. For pie charts,
-          // the `context` param does not carry the point value we need.
-          /** @type {import('highcharts').DataLabelsFormatterCallbackFunction} */
+          /**
+           * This needs to be a function expression.
+           * We can't use an arrow function `(context) => {}` here. For pie charts,
+           * the `context` param does not carry the point value.
+           * @see https://api.highcharts.com/highcharts/plotOptions.pie.dataLabels.formatter
+           * @type {import('highcharts').DataLabelsFormatterCallbackFunction}
+           */
           formatter: function () {
             const { name } = this;
             return xAxisLabelFormatter(
               name,
               xAxisLabelFormat,
-              data.categories,
+              parsedCategories,
               baselineCodes,
               highlightCodes,
             );

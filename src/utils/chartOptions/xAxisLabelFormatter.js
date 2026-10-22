@@ -7,7 +7,7 @@ import { fontFamilies, fontWeights } from '../../constants/styling';
  *
  * @param {string | number} value
  * @param {string | undefined} xAxisLabelFormat
- * @param {{ code: string; label: string; }[]} categories
+ * @param {{ code: string; label: string; parsedLabel: string | number; }[]} parsedCategories
  * @param {string[]} baselineCodes
  * @param {string[]} highlightCodes
  * @returns {string}
@@ -15,10 +15,11 @@ import { fontFamilies, fontWeights } from '../../constants/styling';
 export const xAxisLabelFormatter = (
   value,
   xAxisLabelFormat,
-  categories,
+  parsedCategories,
   baselineCodes,
   highlightCodes,
 ) => {
+  // console.log('xAxisLabelFormatter ___oecdCode', value.___oecdCode);
   // Apply regular formatting with formatting string
   const formattedValue = xAxisLabelFormat
     ? format(
@@ -33,11 +34,9 @@ export const xAxisLabelFormatter = (
   }
 
   // Find category code
-  const categoryValueLowercase = String(
-    typeof value === 'number' ? formattedValue : value,
-  ).toLowerCase();
-  const category = categories.find(
-    (candidate) => candidate.label.toLowerCase() === categoryValueLowercase,
+  const category = parsedCategories.find(
+    ({ parsedLabel }) =>
+      (typeof parsedLabel === 'number' ? parsedLabel : parsedLabel) === value,
   );
   if (!category) {
     return formattedValue;
