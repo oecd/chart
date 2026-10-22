@@ -1,6 +1,7 @@
 // @ts-check
 import * as R from 'ramda';
 import {
+  chartSizes,
   chartTypes,
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   defaultExportSize,
@@ -283,7 +284,7 @@ const createChartOptionsFunc =
       R.assoc('caption', {
         text: captionText,
         align: 'left',
-        margin: otherProps.isSmall ? 10 : 25,
+        margin: chartSize === chartSizes.small ? 10 : 25,
         useHTML: true,
         style: fontStyleForTextElement(textElementTypes.source, chartSize),
       }),
