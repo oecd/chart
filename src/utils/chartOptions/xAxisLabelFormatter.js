@@ -19,7 +19,6 @@ export const xAxisLabelFormatter = (
   baselineCodes,
   highlightCodes,
 ) => {
-  // console.log('xAxisLabelFormatter ___oecdCode', value.___oecdCode);
   // Apply regular formatting with formatting string
   const formattedValue = xAxisLabelFormat
     ? format(
