@@ -11,7 +11,7 @@ import { mapWithIndex } from '../ramdaUtil';
  */
 export const createAnnotationCaption = (annotations, labelColor) =>
   R.compose(
-    R.join('<br>'),
+    R.join('\n'),
     mapWithIndex(
       (annotation, index) =>
         `<div><span style="box-sizing: content-box; display: inline-block; width: 16px; height: 16px; margin: 1px 0; border: 1px solid ${labelColor}; border-radius: 50%; font-size: 12px; line-height: 16px; vertical-align: middle; text-align: center">${index + 1}</span> ${annotation.label}</div>`,
