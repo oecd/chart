@@ -1159,6 +1159,7 @@ const HighchartsChart = ({
       setMergedOptions(null);
     }
   }, [
+    annotations,
     baseline,
     chartHeight,
     chartType,

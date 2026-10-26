@@ -1,6 +1,5 @@
 // @ts-check
 
-import { chartSizes } from '../../constants/chart';
 import {
   fontColors,
   fontFamilies,
@@ -22,7 +21,7 @@ const numberOfLines = 2;
 /**
  * @param {{
  * positionedAnnotations: import('./annotation').PositionedAnnotation[];
- * chartSize: keyof typeof chartSizes;
+ * chartSize: keyof typeof import('../../constants/chart').chartSizes;
  * showLabelsInline: boolean;
  * }} options
  * @returns {import('highcharts').XAxisPlotBandsOptions[]}
