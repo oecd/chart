@@ -236,10 +236,7 @@ const createChartOptionsFunc =
       ? createAnnotationCaption(positionedAnnotations, LABEL_COLOR)
       : undefined;
 
-    const captionText = R.join(
-      '<br>',
-      R.filter(Boolean, [otherProps.footer, annotationCaption]),
-    );
+    const captionText = `${otherProps.footer}${annotationCaption}`;
 
     return R.compose(
       R.when(
@@ -298,7 +295,10 @@ const createChartOptionsFunc =
         align: 'left',
         margin: chartSize === chartSizes.small ? 10 : 25,
         useHTML: true,
-        style: fontStyleForTextElement(textElementTypes.source, chartSize),
+        style: {
+          ...fontStyleForTextElement(textElementTypes.source, chartSize),
+          backgroundColor: 'white',
+        },
       }),
       R.assoc('subtitle', {
         text: otherProps.subtitle,
