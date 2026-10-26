@@ -31,6 +31,8 @@ export const createAnnotationPlotBands = ({
   chartSize,
   showLabelsInline,
 }) => {
+  if (positionedAnnotations.length === 0) return [];
+
   const fontSizePx =
     fontStyleByTextElementTypes[textElementTypes.legend].fontSize[chartSize];
   const fontSizeNumber = parseFloat(fontSizePx);
