@@ -7,9 +7,12 @@ import {
   textElementTypes,
 } from '../../constants/styling';
 
+/** Default band fill color */
 const BAND_COLOR = '#F0F4F8';
 
 /**
+ * Ignore HTML in annotation labels.
+ * Note: Highcharts performs its own sanitization on the passed HTML.
  * @param {string} string
  */
 const escapeHTML = (string) =>
@@ -19,6 +22,82 @@ const lineHeightFactor = 1.15;
 const numberOfLines = 2;
 
 /**
+ * Renders the label on top of the plot band
+ *
+ * @param {string} label
+ * @param {keyof typeof import('../../constants/chart').chartSizes} chartSize
+ * @returns {import('highcharts').XAxisPlotBandsLabelOptions}
+ */
+const getInlineLabelOptions = (label, chartSize) => {
+  const fontSizePx =
+    fontStyleByTextElementTypes[textElementTypes.legend].fontSize[chartSize];
+  const fontSizeNumber = parseFloat(fontSizePx);
+
+  const height = fontSizeNumber * lineHeightFactor * numberOfLines;
+  const style = `
+display: block;
+display: -webkit-box;
+-webkit-box-orient: vertical;
+-webkit-line-clamp: ${numberOfLines};
+overflow: hidden;
+white-space: normal;
+background-color: white;
+`;
+  return {
+    useHTML: true,
+    text: `<span style="${style}">${escapeHTML(label)}</span>`,
+    align: 'left',
+    x: 0,
+    // y: 0 is approx. half of the font size on top of the plot band rect
+    y: -((numberOfLines - 0.6) * fontSizeNumber * lineHeightFactor),
+    style: {
+      // Vertically align bottom
+      display: 'flex',
+      'align-items': 'flex-end',
+      height,
+      fontFamily: fontFamilies.condensed,
+      fontSize: fontSizePx,
+      lineHeight: lineHeightFactor,
+      color: fontColors.normal,
+    },
+  };
+};
+
+/**
+ * Renders a numerical reference to the caption. Looks like ①, ②, ③ etc.
+ *
+ * @param {string} label
+ * @returns {import('highcharts').XAxisPlotBandsLabelOptions}
+ */
+const getReferenceLabelOptions = (label) => {
+  const fontSize = '12px';
+  const width = 16;
+  const widthPx = `${width}px`;
+  const style = `
+box-sizing: content-box;
+display: block;
+width: ${widthPx};
+height: ${widthPx};
+border: 1px solid ${fontColors.normal};
+border-radius: 50%;
+background-color: white;
+`;
+  return {
+    useHTML: true,
+    text: `<span style="${style}">${label}</span>`,
+    y: width - 1,
+    style: {
+      fontFamily: fontFamilies.condensed,
+      fontSize: fontSize,
+      lineHeight: widthPx,
+      color: fontColors.normal,
+    },
+  };
+};
+
+/**
+ * Returns Highcharts plot bands for the given annotations.
+ *
  * @param {{
  * positionedAnnotations: import('./annotation').PositionedAnnotation[];
  * chartSize: keyof typeof import('../../constants/chart').chartSizes;
@@ -33,84 +112,19 @@ export const createAnnotationPlotBands = ({
 }) => {
   if (positionedAnnotations.length === 0) return [];
 
-  const fontSizePx =
-    fontStyleByTextElementTypes[textElementTypes.legend].fontSize[chartSize];
-  const fontSizeNumber = parseFloat(fontSizePx);
-
   return positionedAnnotations.map((annotation, index) => {
     const { label, showLabelInline, from, to, color } = annotation;
 
-    const finalShowLabelInline = showLabelsInline && showLabelInline;
-
-    /** @type {import('highcharts').XAxisPlotBandsLabelOptions | undefined} */
-    let labelOptions;
-    if (finalShowLabelInline) {
-      // Render label on top of the plot band
-
-      const height = fontSizeNumber * lineHeightFactor * numberOfLines;
-      const style = `
-display: block;
-display: -webkit-box;
--webkit-box-orient: vertical;
--webkit-line-clamp: ${numberOfLines};
-overflow: hidden;
-white-space: normal;
-background-color: white;
-`;
-      const htmlText = `<span style="${style}">${escapeHTML(label)}</span>`;
-      labelOptions = {
-        useHTML: true,
-        text: htmlText,
-        align: 'left',
-        x: 0,
-        // y: 0 is approx. half of the font size on top of the plot band rect
-        y: -((numberOfLines - 0.6) * fontSizeNumber * lineHeightFactor),
-        style: {
-          // Vertically align bottom
-          display: 'flex',
-          'align-items': 'flex-end',
-          height,
-          fontFamily: fontFamilies.condensed,
-          fontSize: fontSizePx,
-          lineHeight: lineHeightFactor,
-          color: fontColors.normal,
-        },
-      };
-    } else {
-      // Render numerical reference to the caption. Looks like ①, ②, ③ etc.
-      const fontSize = '12px';
-      const width = 16;
-      const widthPx = `${width}px`;
-      const style = `
-box-sizing: content-box;
-display: block;
-width: ${widthPx};
-height: ${widthPx};
-border: 1px solid ${fontColors.normal};
-border-radius: 50%;
-background-color: white;
-`;
-      const htmlText = `<span style="${style}">${String(index + 1)}</span>`;
-      labelOptions = {
-        y: width - 1,
-        useHTML: true,
-        text: htmlText,
-        style: {
-          fontFamily: fontFamilies.condensed,
-          fontSize: fontSize,
-          lineHeight: widthPx,
-          color: fontColors.normal,
-        },
-      };
-    }
-
-    const finalColor = color || BAND_COLOR;
+    const labelOptions =
+      showLabelsInline && showLabelInline
+        ? getInlineLabelOptions(label, chartSize)
+        : getReferenceLabelOptions(String(index + 1));
 
     /** @type {import('highcharts').XAxisPlotBandsOptions} */
     const plotBand = {
       from,
       to,
-      color: finalColor,
+      color: color || BAND_COLOR,
       label: labelOptions,
     };
     return plotBand;
