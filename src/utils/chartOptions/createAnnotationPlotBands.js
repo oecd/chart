@@ -43,7 +43,7 @@ export const createAnnotationPlotBands = ({
     /** @type {import('highcharts').XAxisPlotBandsLabelOptions | undefined} */
     let labelOptions;
     if (finalShowLabelInline) {
-      // Render label in the plot band
+      // Render label on top of the plot band
 
       const height = fontSizeNumber * lineHeightFactor * numberOfLines;
       const style = `
@@ -53,6 +53,7 @@ display: -webkit-box;
 -webkit-line-clamp: ${numberOfLines};
 overflow: hidden;
 white-space: normal;
+background-color: white;
 `;
       const htmlText = `<span style="${style}">${escapeHTML(label)}</span>`;
       labelOptions = {
