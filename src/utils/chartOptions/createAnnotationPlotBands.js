@@ -85,6 +85,7 @@ width: ${widthPx};
 height: ${widthPx};
 border: 1px solid ${fontColors.normal};
 border-radius: 50%;
+background-color: white;
 `;
       const htmlText = `<span style="${style}">${String(index + 1)}</span>`;
       labelOptions = {
