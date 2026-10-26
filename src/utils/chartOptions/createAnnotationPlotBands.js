@@ -64,20 +64,20 @@ background-color: white;
 };
 
 /**
- * Renders a numerical reference to the caption. Looks like ①, ②, ③ etc.
+ * Renders a numerical reference to the caption. Number in a circle that looks like ①, ②, ③ etc.
  *
  * @param {string} label
  * @returns {import('highcharts').XAxisPlotBandsLabelOptions}
  */
 const getReferenceLabelOptions = (label) => {
   const fontSize = '12px';
-  const width = 16;
-  const widthPx = `${width}px`;
+  const diameter = 16;
+  const diameterPx = `${diameter}px`;
   const style = `
 box-sizing: content-box;
 display: block;
-width: ${widthPx};
-height: ${widthPx};
+width: ${diameterPx};
+height: ${diameterPx};
 border: 1px solid ${fontColors.normal};
 border-radius: 50%;
 background-color: white;
@@ -85,11 +85,11 @@ background-color: white;
   return {
     useHTML: true,
     text: `<span style="${style}">${label}</span>`,
-    y: width - 1,
+    y: -(diameter / 2 + 1),
     style: {
       fontFamily: fontFamilies.condensed,
       fontSize: fontSize,
-      lineHeight: widthPx,
+      lineHeight: diameterPx,
       color: fontColors.normal,
     },
   };
