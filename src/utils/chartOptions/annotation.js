@@ -2,7 +2,7 @@
 
 /**
  * @typedef {{
- * type: 'band',
+ * type: 'band';
  * fromCategoryCode: string;
  * toCategoryCode: string;
  * label: string;
