@@ -18,6 +18,7 @@ import {
   calcYAxisCoordinatesForBarAndStacked,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
@@ -51,8 +52,13 @@ export const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
+  positionedAnnotations,
 }) => {
   const horizontal = chartType === chartTypes.row;
+
+  const showAnnotationLabelsInline = positionedAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+    : false;
 
   const calcXAxisLayout = () => {
     if (horizontal) {
@@ -78,8 +84,9 @@ export const createOptionsForBarChart = ({
       : { left: '9%', width: '87%' };
   };
 
-  /** Whether there are multiple series */
-  const isGroupedChart = data.series.length > 1;
+  const legendMargin =
+    calcLegendMarginForBarAndStacked(chartSize, horizontal) +
+    (showAnnotationLabelsInline ? 10 : 0);
 
   const isBaselineACategory = !R.isEmpty(
     R.intersection(Array.from(categoryCodes), baselineCodes),
@@ -87,6 +94,9 @@ export const createOptionsForBarChart = ({
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
+
+  /** Whether there are multiple series */
+  const isGroupedChart = data.series.length > 1;
 
   /**
    * Whether a category is baseline/highlighted that contains several points
@@ -119,14 +129,42 @@ export const createOptionsForBarChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const plotBands = positionedAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations,
+        chartSize,
+        showLabelsInline: showAnnotationLabelsInline,
+      })
+    : null;
+
+  const labelStyle = fontStyleForTextElement(
+    textElementTypes.legend,
+    chartSize,
+  );
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend) {
+      marginTop = calcMarginTopForBarAndStacked(
+        title,
+        subtitle,
+        horizontal,
+        chartSize,
+      );
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
+      marginTop += parseFloat(labelStyle.fontSize);
+    }
+    return marginTop;
+  })();
+
   return {
     custom: customChartOptions,
 
     chart: {
       type: horizontal ? 'bar' : 'column',
-      marginTop: hideLegend
-        ? calcMarginTopForBarAndStacked(title, subtitle, horizontal, chartSize)
-        : undefined,
+      marginTop,
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -142,7 +180,7 @@ export const createOptionsForBarChart = ({
       categories: xAxisCategories,
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+        style: labelStyle,
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -162,6 +200,7 @@ export const createOptionsForBarChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
@@ -205,7 +244,7 @@ export const createOptionsForBarChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginForBarAndStacked(chartSize, horizontal),
+      margin: legendMargin,
     },
 
     plotOptions: {

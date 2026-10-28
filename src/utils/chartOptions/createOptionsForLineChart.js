@@ -25,6 +25,7 @@ import {
   calcMarginTopDefault,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { createDatapoint } from './createDataPoint';
 import { highlightSymbols } from './highlightSymbols';
 import { legendLabelFormatter } from './legendLabelFormatter';
@@ -64,8 +65,13 @@ export const createOptionsForLineChart = ({
   disableLegendInteraction = false,
   hideLineSymbols = false,
   chartSize,
+  positionedAnnotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
+
+  const showAnnotationLabelsInline = positionedAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+    : false;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
@@ -292,7 +298,9 @@ export const createOptionsForLineChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginDefault(chartSize),
+      margin:
+        calcLegendMarginDefault(chartSize) +
+        (showAnnotationLabelsInline ? 10 : 0),
     }),
   )();
 
@@ -327,14 +335,36 @@ export const createOptionsForLineChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const plotBands = positionedAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations,
+        chartSize,
+        showLabelsInline: showAnnotationLabelsInline,
+      })
+    : null;
+
+  const labelStyle = fontStyleForTextElement(
+    textElementTypes.legend,
+    chartSize,
+  );
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend || inlineLabels) {
+      marginTop = calcMarginTopDefault(title, subtitle, chartSize);
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
+      marginTop += parseFloat(labelStyle.fontSize);
+    }
+    return marginTop;
+  })();
+
   return {
     custom: customChartOptions,
 
     chart: {
-      marginTop:
-        hideLegend || inlineLabels
-          ? calcMarginTopDefault(title, subtitle, chartSize)
-          : undefined,
+      marginTop,
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -355,7 +385,7 @@ export const createOptionsForLineChart = ({
         ? { type: 'datetime' }
         : null),
       labels: {
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+        style: labelStyle,
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -373,6 +403,7 @@ export const createOptionsForLineChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
@@ -422,9 +453,7 @@ export const createOptionsForLineChart = ({
                 e.target.data.forEach((p) => {
                   p.update(
                     {
-                      dataLabels: {
-                        enabled: true,
-                      },
+                      dataLabels: { enabled: true },
                     },
                     false,
                     false,
@@ -439,9 +468,7 @@ export const createOptionsForLineChart = ({
                 e.target.data.forEach((p) => {
                   p.update(
                     {
-                      dataLabels: {
-                        enabled: false,
-                      },
+                      dataLabels: { enabled: false },
                     },
                     false,
                     false,

@@ -1,10 +1,16 @@
 // @ts-check
 import * as R from 'ramda';
 import {
+  chartSizes,
   chartTypes,
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   defaultExportSize,
 } from '../../constants/chart';
+import {
+  fontColors,
+  fontFamilies,
+  textElementTypes,
+} from '../../constants/styling';
 import customChartRenderByChartType from '../../highchartsCustomCode/customChartRenderByChartType';
 import { replaceBasicVarsNameByVarsValue } from '../chartUtil';
 import {
@@ -21,6 +27,7 @@ import {
 } from '../highchartsUtil';
 import { getFinalPaletteColors } from '../paletteUtil';
 import { isNilOrEmpty } from '../ramdaUtil';
+import { fontStyleForTextElement } from '../stylingUtil';
 import { createOptionsForBarChart } from './createOptionsForBarChart';
 import { createOptionsForLineChart } from './createOptionsForLineChart';
 import { createOptionsForPieChart } from './createOptionsForPieChart';
@@ -28,14 +35,10 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
+import { createPositionedBandAnnotations } from './createPositionedBandAnnotations';
+import { exampleAnnotations } from './exampleAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
-import {
-  fontColors,
-  fontFamilies,
-  textElementTypes,
-} from '../../constants/styling';
-import { fontStyleForTextElement } from '../stylingUtil';
 
 const mapsUtil = import('../mapsUtil');
 
@@ -76,6 +79,7 @@ const createChartOptionsFunc =
     chartSize,
     inlineLabels,
     hideLegend,
+    annotations = exampleAnnotations,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -172,6 +176,16 @@ const createChartOptionsFunc =
       ? R.prop(data.seriesDateFomat, frequencies)
       : null;
 
+    const positionedAnnotations = annotations
+      ? createPositionedBandAnnotations({
+          annotations,
+          series: data.series,
+          categories: data.categories,
+          areCategoriesDates: data.areCategoriesDates,
+          categoriesFrequency,
+        })
+      : null;
+
     const options = createOptionsFuncForChartType({
       ...otherProps,
       data,
@@ -195,6 +209,7 @@ const createChartOptionsFunc =
       chartSize,
       inlineLabels,
       hideLegend,
+      positionedAnnotations,
     });
 
     const customChartRender = R.propOr(
@@ -256,7 +271,7 @@ const createChartOptionsFunc =
       R.assoc('caption', {
         text: otherProps.footer,
         align: 'left',
-        margin: 25,
+        margin: chartSize === chartSizes.small ? 10 : 25,
         useHTML: true,
         style: fontStyleForTextElement(textElementTypes.source, chartSize),
       }),

@@ -7,8 +7,8 @@ import {
   memo,
   Suspense,
   useCallback,
-  useEffect,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -28,9 +28,13 @@ import {
   stackingOptions,
 } from '../../constants/chart';
 import { errorMessages } from '../../constants/chartErrorMessages';
+import { textElementTypes } from '../../constants/styling';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
 import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
+import { createAnnotationFooter } from '../../utils/chartOptions/createAnnotationFooter';
 import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
+import { exampleAnnotations } from '../../utils/chartOptions/exampleAnnotations';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
 import {
   createFooter,
@@ -51,15 +55,13 @@ import {
   fetchDotStatData,
   isSdmxJsonEmpty,
 } from '../../utils/sdmxJsonUtil';
+import { fontStyleForTextElement } from '../../utils/stylingUtil';
 import { trackChartError } from '../../utils/trackingUtil';
 import CenteredContainer from '../CenteredContainer';
 import NullComponent from '../NullComponent';
 import Spinner from '../Spinner';
 import GenericChart from './GenericChart';
 import Header from './Header';
-import ChartSizeContext from '../../contexts/ChartSizeContext';
-import { fontStyleForTextElement } from '../../utils/stylingUtil';
-import { textElementTypes } from '../../constants/styling';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -183,6 +185,8 @@ const HighchartsChart = ({
   calcAvgValue = null,
   referenceValueCode = null,
   dataLastUpdateDate = null,
+  // TODO: for testing only
+  annotations = exampleAnnotations,
 }) => {
   const ChartForType = getChartForType(chartType);
 
@@ -1058,6 +1062,11 @@ const HighchartsChart = ({
     useMemoForArrayOrObject(mapColorValueSteps);
   const optionsOverrideInternal = useMemoForArrayOrObject(optionsOverride);
 
+  const annotationsForFooter = useMemo(
+    () => (annotations ? createAnnotationFooter(annotations) : ''),
+    [annotations],
+  );
+
   // create merged chart options (default + optionsOverride)
   // this must be done a minimum amount of time because it causes Highcharts chart rerender which is costly
   useEffect(() => {
@@ -1109,6 +1118,7 @@ const HighchartsChart = ({
           ? createFooter({
               source: parsedSource,
               note: parsedNote,
+              annotations: annotationsForFooter,
             })
           : '',
         colorPalette: colorPaletteInternal,
@@ -1150,6 +1160,7 @@ const HighchartsChart = ({
         inlineLabels,
         disableLegendInteraction,
         sortOrder,
+        annotations,
       });
 
       setMergedOptions(
@@ -1162,6 +1173,8 @@ const HighchartsChart = ({
       setMergedOptions(null);
     }
   }, [
+    annotations,
+    annotationsForFooter,
     baseline,
     chartHeight,
     chartType,
@@ -1327,7 +1340,7 @@ const HighchartsChart = ({
               R.join(''),
               R.when(() => !displaySourceAsTooltip, R.append(parsedSource)),
               R.when(() => !displayNoteAsTooltip, R.append(parsedNote)),
-            )([]),
+            )([annotationsForFooter]),
           }}
         />
       </div>
@@ -1427,6 +1440,7 @@ HighchartsChart.propTypes = {
   calcAvgValue: PropTypes.bool,
   referenceValueCode: PropTypes.string,
   dataLastUpdateDate: PropTypes.string,
+  annotations: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default memo(HighchartsChart);
