@@ -8,7 +8,11 @@
  * label: string;
  * showLabelInline: boolean;
  * color?: string;
- * }} Annotation
+ * }} BandAnnotation
+ */
+
+/**
+ * @typedef {BandAnnotation} Annotation
  */
 
 /**

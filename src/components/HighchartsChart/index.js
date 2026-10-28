@@ -32,6 +32,7 @@ import { textElementTypes } from '../../constants/styling';
 import ChartSizeContext from '../../contexts/ChartSizeContext';
 import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
+import { createAnnotationFooter } from '../../utils/chartOptions/createAnnotationFooter';
 import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
 import { exampleAnnotations } from '../../utils/chartOptions/exampleAnnotations';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
@@ -1062,6 +1063,11 @@ const HighchartsChart = ({
     useMemoForArrayOrObject(mapColorValueSteps);
   const optionsOverrideInternal = useMemoForArrayOrObject(optionsOverride);
 
+  const annotationsForFooter = useMemo(
+    () => (annotations ? createAnnotationFooter(annotations) : ''),
+    [annotations],
+  );
+
   // create merged chart options (default + optionsOverride)
   // this must be done a minimum amount of time because it causes Highcharts chart rerender which is costly
   useEffect(() => {
@@ -1104,6 +1110,7 @@ const HighchartsChart = ({
           ? createFooter({
               source: parsedSource,
               note: parsedNote,
+              annotations: annotationsForFooter,
             })
           : '',
         colorPalette: colorPaletteInternal,
@@ -1160,6 +1167,7 @@ const HighchartsChart = ({
     }
   }, [
     annotations,
+    annotationsForFooter,
     baseline,
     chartHeight,
     chartType,
@@ -1326,7 +1334,7 @@ const HighchartsChart = ({
               R.join(''),
               R.when(() => !displaySourceAsTooltip, R.append(parsedSource)),
               R.when(() => !displayNoteAsTooltip, R.append(parsedNote)),
-            )([]),
+            )([annotationsForFooter]),
           }}
         />
       </div>
