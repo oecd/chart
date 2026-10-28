@@ -10,7 +10,7 @@ import * as R from 'ramda';
  * }} Series
  */
 
-/** @type {never[]} */
+/** @type {readonly never[]} */
 const NO_ANNOTATIONS = Object.freeze([]);
 
 /**
@@ -27,7 +27,11 @@ const NO_ANNOTATIONS = Object.freeze([]);
  * }} options
  * @returns {import('./annotation').PositionedAnnotation[]}
  */
-const getTimeAnnotations = ({ annotations, series, categoriesFrequency }) => {
+const getTimeBandAnnotations = ({
+  annotations,
+  series,
+  categoriesFrequency,
+}) => {
   const firstSeries = series[0];
   if (!firstSeries) return NO_ANNOTATIONS;
 
@@ -44,7 +48,6 @@ const getTimeAnnotations = ({ annotations, series, categoriesFrequency }) => {
   }
 
   return annotations
-    .filter(({ type }) => type === 'band')
     .map((annotation) => {
       let from = -1;
       let to = -1;
@@ -71,14 +74,13 @@ const getTimeAnnotations = ({ annotations, series, categoriesFrequency }) => {
  * Plot bands are defined with indices.
  *
  * @param {{
- * annotations: import('./annotation').Annotation[];
+ * annotations: import('./annotation').BandAnnotation[];
  * categories: { code: string }[];
  * }} options
  * @returns {import('./annotation').PositionedAnnotation[]}
  */
-const getDiscreteAnnotations = ({ annotations, categories }) =>
+const getDiscreteBandAnnotations = ({ annotations, categories }) =>
   annotations
-    .filter(({ type }) => type === 'band')
     .map((annotation) => {
       let from = -1;
       let to = -1;
@@ -101,7 +103,7 @@ const getDiscreteAnnotations = ({ annotations, categories }) =>
 
 /**
  * @param {{
- * annotations: import('./annotation').Annotation[];
+ * annotations: import('./annotation').BandAnnotation[];
  * series: {
  *   data: {
  *     value: number;
@@ -117,7 +119,7 @@ const getDiscreteAnnotations = ({ annotations, categories }) =>
  * }} options
  * @returns {import('./annotation').PositionedAnnotation[]}
  */
-export const createPositionedAnnotations = ({
+export const createPositionedBandAnnotations = ({
   annotations,
   series,
   categories,
@@ -127,10 +129,10 @@ export const createPositionedAnnotations = ({
   const bandAnnotations = annotations.filter(({ type }) => type === 'band');
 
   return areCategoriesDates && categoriesFrequency
-    ? getTimeAnnotations({
+    ? getTimeBandAnnotations({
         annotations: bandAnnotations,
         series,
         categoriesFrequency,
       })
-    : getDiscreteAnnotations({ annotations: bandAnnotations, categories });
+    : getDiscreteBandAnnotations({ annotations: bandAnnotations, categories });
 };

@@ -28,7 +28,6 @@ import {
 import { getFinalPaletteColors } from '../paletteUtil';
 import { isNilOrEmpty } from '../ramdaUtil';
 import { fontStyleForTextElement } from '../stylingUtil';
-import { createAnnotationCaption } from './createAnnotationCaption';
 import { createOptionsForBarChart } from './createOptionsForBarChart';
 import { createOptionsForLineChart } from './createOptionsForLineChart';
 import { createOptionsForPieChart } from './createOptionsForPieChart';
@@ -36,14 +35,12 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
-import { createPositionedAnnotations } from './createPositionedAnnotations';
+import { createPositionedBandAnnotations } from './createPositionedBandAnnotations';
 import { exampleAnnotations } from './exampleAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
 
 const mapsUtil = import('../mapsUtil');
-
-const LABEL_COLOR = '#586179';
 
 /**
  * @param {Function} createOptionsFuncForChartType
@@ -180,7 +177,7 @@ const createChartOptionsFunc =
       : null;
 
     const positionedAnnotations = annotations
-      ? createPositionedAnnotations({
+      ? createPositionedBandAnnotations({
           annotations,
           series: data.series,
           categories: data.categories,
@@ -227,13 +224,6 @@ const createChartOptionsFunc =
       }
     };
 
-    // Show annotations that are not in the chart itself as captions
-    const annotationCaption = positionedAnnotations
-      ? createAnnotationCaption(positionedAnnotations, LABEL_COLOR)
-      : undefined;
-
-    const captionText = `${otherProps.footer}${annotationCaption}`;
-
     return R.compose(
       R.when(
         () => !R.isNil(customChartRender),
@@ -279,14 +269,11 @@ const createChartOptionsFunc =
         },
       }),
       R.assoc('caption', {
-        text: captionText,
+        text: otherProps.footer,
         align: 'left',
         margin: chartSize === chartSizes.small ? 10 : 25,
         useHTML: true,
-        style: {
-          ...fontStyleForTextElement(textElementTypes.source, chartSize),
-          backgroundColor: 'white',
-        },
+        style: fontStyleForTextElement(textElementTypes.source, chartSize),
       }),
       R.assoc('subtitle', {
         text: otherProps.subtitle,
