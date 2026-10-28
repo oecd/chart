@@ -15,8 +15,11 @@ const GenericErrorMessage = () => (
   />
 );
 
+export const noDataErrorMessageString =
+  'No data available for the current selection.';
+
 const NoDataErrorMessage = () => (
-  <ErrorMessage message="No data available for the current selection." />
+  <ErrorMessage message={noDataErrorMessageString} />
 );
 
 const EmbargoErrorMessage = () => <ErrorMessage message="Not yet available." />;

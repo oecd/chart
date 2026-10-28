@@ -44,6 +44,7 @@ import {
 } from './sankeyUtil';
 import customChartRenderByChartType from '../highchartsCustomCode/customChartRenderByChartType';
 import { addColorAlpha, makeColorReadableOnBackgroundColor } from './colorUtil';
+import { noDataErrorMessageString } from '../constants/chartErrorMessages';
 
 const mapsUtil = import('./mapsUtil');
 
@@ -1789,6 +1790,9 @@ const createOptionsForSankeyChart = ({
   };
 };
 
+export const isParsedDataEmpty = (parsedData) =>
+  R.isEmpty(parsedData?.categories) || R.isEmpty(parsedData?.series);
+
 const createChartOptionsFunc =
   (createOptionsFuncForChartType) =>
   ({
@@ -1938,7 +1942,19 @@ const createChartOptionsFunc =
         decimalPoint,
         thousandsSep: thousandsSeparator,
         numericSymbols,
+        noData: noDataErrorMessageString,
       }),
+      R.assoc('noData', {
+        style: {
+          color: '#101d40',
+          fontSize: '16px',
+          fontWeight: 'normal',
+        },
+      }),
+      R.when(
+        () => isParsedDataEmpty(otherProps.data),
+        R.assocPath(['legend', 'enabled'], false),
+      ),
       R.assoc('tooltip', {
         ...R.prop('tooltip', formatters),
         ...(isNilOrEmpty(customTooltip) ||
@@ -2057,6 +2073,3 @@ export const createFooter = ({ source, note, stripLinks = false }) =>
     R.join(''),
     R.reject(isNilOrEmpty),
   )([note, source]);
-
-export const isParsedDataEmpty = (parsedData) =>
-  R.isEmpty(parsedData?.categories) || R.isEmpty(parsedData?.series);

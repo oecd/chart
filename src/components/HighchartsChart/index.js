@@ -1062,19 +1062,10 @@ const HighchartsChart = ({
         return;
       }
 
-      if (parsedData?.dotStatResponseWasEmpty === true) {
-        setErrorMessage(errorMessages.noData.getLabel());
-        setParsedData({
-          ...emptyData,
-          codeLabelMapping: parsedData.codeLabelMapping,
-          varsThatCauseNewPreParsedDataFetch:
-            parsedData.varsThatCauseNewPreParsedDataFetch,
-        });
-
-        return;
-      }
-
-      if (isParsedDataEmpty(parsedData)) {
+      if (
+        parsedData?.dotStatResponseWasEmpty === true ||
+        isParsedDataEmpty(parsedData)
+      ) {
         setErrorMessage(errorMessages.noData.getLabel());
         return;
       }
