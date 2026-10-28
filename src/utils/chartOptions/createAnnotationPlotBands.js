@@ -25,14 +25,11 @@ const numberOfLines = 2;
  * Renders the label on top of the plot band
  *
  * @param {string} label
- * @param {keyof typeof import('../../constants/chart').chartSizes} chartSize
+ * @param {string} fontSizePx
+ * @param {number} fontSizeNumber
  * @returns {import('highcharts').XAxisPlotBandsLabelOptions}
  */
-const getInlineLabelOptions = (label, chartSize) => {
-  const fontSizePx =
-    fontStyleByTextElementTypes[textElementTypes.legend].fontSize[chartSize];
-  const fontSizeNumber = parseFloat(fontSizePx);
-
+const getInlineLabelOptions = (label, fontSizePx, fontSizeNumber) => {
   const height = fontSizeNumber * lineHeightFactor * numberOfLines;
   const style = `
 display: block;
@@ -70,6 +67,7 @@ background-color: white;
  * @returns {import('highcharts').XAxisPlotBandsLabelOptions}
  */
 const getReferenceLabelOptions = (label) => {
+  // Fixed font and circle size
   const fontSize = '12px';
   const diameter = 16;
   const diameterPx = `${diameter}px`;
@@ -112,13 +110,20 @@ export const createAnnotationPlotBands = ({
 }) => {
   if (positionedAnnotations.length === 0) return [];
 
-  return positionedAnnotations.map((annotation, index) => {
+  const fontSizePxInline =
+    fontStyleByTextElementTypes[textElementTypes.legend].fontSize[chartSize];
+  const fontSizeNumberInline = parseFloat(fontSizePxInline);
+
+  let referenceIndex = 0;
+  return positionedAnnotations.map((annotation) => {
     const { label, showLabelInline, from, to, color } = annotation;
 
     const labelOptions =
       showLabelsInline && showLabelInline
-        ? getInlineLabelOptions(label, chartSize)
-        : getReferenceLabelOptions(String(index + 1));
+        ? // Inline annotation
+          getInlineLabelOptions(label, fontSizePxInline, fontSizeNumberInline)
+        : // Referenced annotation
+          getReferenceLabelOptions(String(++referenceIndex));
 
     /** @type {import('highcharts').XAxisPlotBandsOptions} */
     const plotBand = {
