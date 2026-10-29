@@ -228,7 +228,7 @@ const createChartOptionsFunc =
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
       }),
       R.when(
-        () => isParsedDataEmpty(otherProps.data),
+        () => isParsedDataEmpty(data),
         R.assocPath(['legend', 'enabled'], false),
       ),
       R.assoc('tooltip', {
