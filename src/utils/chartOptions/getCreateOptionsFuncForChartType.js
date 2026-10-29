@@ -225,11 +225,7 @@ const createChartOptionsFunc =
         noData: noDataErrorMessageString,
       }),
       R.assoc('noData', {
-        style: {
-          color: '#101d40',
-          fontSize: '16px',
-          fontWeight: 'normal',
-        },
+        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
       }),
       R.when(
         () => isParsedDataEmpty(otherProps.data),

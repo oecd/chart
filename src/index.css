@@ -3,12 +3,15 @@
 .cb-container {
   padding: 22px 24px;
   background-color: #fff;
+  font-size: 16px;
 }
 .cb-container.cb-medium {
   padding: 19px 21px;
+  font-size: 15px;
 }
 .cb-container.cb-small {
   padding: 16px 18px;
+  font-size: 14px;
 }
 
 .cb-container p,

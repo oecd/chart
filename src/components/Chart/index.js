@@ -8,9 +8,24 @@ import { possibleVariables, isCastableToNumber } from '../../utils/configUtil';
 import CenteredContainer from '../CenteredContainer';
 import ChartErrorBoundary from '../ChartErrorBoundary';
 import { errorMessages } from '../../constants/chartErrorMessages';
+import { fontColors, fontFamilies } from '../../constants/styling';
 
 const textPropIsEqualToTrue = (textProp) =>
   textProp === true || textProp === 'true' || textProp === '';
+
+const fallbackErrorMessage = (
+  <CenteredContainer>
+    <div
+      className="cb-container"
+      style={{
+        fontFamily: fontFamilies.normal,
+        color: fontColors.normal,
+      }}
+    >
+      {errorMessages.generic.getLabel()}
+    </div>
+  </CenteredContainer>
+);
 
 const Chart = ({
   width = null,
@@ -87,13 +102,7 @@ const Chart = ({
 
   if (lazyLoad === false || lazyLoad === 'false') {
     return (
-      <ChartErrorBoundary
-        fallback={
-          <CenteredContainer>
-            {errorMessages.generic.getLabel()}
-          </CenteredContainer>
-        }
-      >
+      <ChartErrorBoundary fallback={fallbackErrorMessage}>
         <Component
           width={finalWidth}
           height={finalHeight}
@@ -116,13 +125,7 @@ const Chart = ({
   }
 
   return (
-    <ChartErrorBoundary
-      fallback={
-        <CenteredContainer>
-          {errorMessages.generic.getLabel()}
-        </CenteredContainer>
-      }
-    >
+    <ChartErrorBoundary fallback={fallbackErrorMessage}>
       <LazyLoadComponent
         placeholder={
           <div
