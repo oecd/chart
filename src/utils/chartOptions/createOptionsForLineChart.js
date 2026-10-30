@@ -342,6 +342,7 @@ export const createOptionsForLineChart = ({
         positionedAnnotations,
         chartSize,
         showLabelsInline: showAnnotationLabelsInline,
+        position: 'top',
       })
     : null;
 
