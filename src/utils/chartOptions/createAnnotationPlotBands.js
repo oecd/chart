@@ -61,12 +61,14 @@ background-color: white;
 };
 
 /**
- * Renders a numerical reference to the caption. Number in a circle that looks like ①, ②, ③ etc.
+ * Renders a numerical reference to the annotation text footer.
+ * Number in a circle that looks like ①, ②, ③ etc.
  *
  * @param {string} label
+ * @param {'top' | 'right'} position
  * @returns {import('highcharts').XAxisPlotBandsLabelOptions}
  */
-const getReferenceLabelOptions = (label) => {
+const getReferenceLabelOptions = (label, position) => {
   // Fixed font and circle size
   const fontSize = '12px';
   const diameter = 16;
@@ -79,10 +81,14 @@ height: ${diameterPx};
 border: 1px solid ${fontColors.normal};
 border-radius: 50%;
 background-color: white;
+text-align: center;
 `;
+  const isRight = position === 'right';
   return {
+    align: isRight ? 'right' : 'center',
     useHTML: true,
-    text: `<span style="${style}">${label}</span>`,
+    text: `<span style="${style}">${escapeHTML(label)}</span>`,
+    x: isRight ? -2 : undefined,
     y: -(diameter / 2 + 1),
     style: {
       fontFamily: fontFamilies.condensed,
@@ -100,6 +106,7 @@ background-color: white;
  * positionedAnnotations: import('./annotation').PositionedAnnotation[];
  * chartSize: keyof typeof import('../../constants/chart').chartSizes;
  * showLabelsInline: boolean;
+ * position: 'top' | 'right'
  * }} options
  * @returns {import('highcharts').XAxisPlotBandsOptions[]}
  */
@@ -107,6 +114,7 @@ export const createAnnotationPlotBands = ({
   positionedAnnotations,
   chartSize,
   showLabelsInline,
+  position,
 }) => {
   if (positionedAnnotations.length === 0) return [];
 
@@ -122,8 +130,8 @@ export const createAnnotationPlotBands = ({
       showLabelsInline && showLabelInline
         ? // Inline annotation
           getInlineLabelOptions(label, fontSizePxInline, fontSizeNumberInline)
-        : // Referenced annotation
-          getReferenceLabelOptions(String(++referenceIndex));
+        : // Reference annotation in footer
+          getReferenceLabelOptions(String(++referenceIndex), position);
 
     /** @type {import('highcharts').XAxisPlotBandsOptions} */
     const plotBand = {

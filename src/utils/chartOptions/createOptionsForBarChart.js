@@ -56,9 +56,11 @@ export const createOptionsForBarChart = ({
 }) => {
   const horizontal = chartType === chartTypes.row;
 
-  const showAnnotationLabelsInline = positionedAnnotations
-    ? R.any(R.prop('showLabelInline'), positionedAnnotations)
-    : false;
+  const showAnnotationLabelsInline =
+    !horizontal &&
+    (positionedAnnotations
+      ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+      : false);
 
   const calcXAxisLayout = () => {
     if (horizontal) {
@@ -134,6 +136,7 @@ export const createOptionsForBarChart = ({
         positionedAnnotations,
         chartSize,
         showLabelsInline: showAnnotationLabelsInline,
+        position: horizontal ? 'right' : 'top',
       })
     : null;
 
