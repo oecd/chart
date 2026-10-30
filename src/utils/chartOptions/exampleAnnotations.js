@@ -1,10 +1,11 @@
 // @ts-check
 
 /**
+ * Example annotations
  * @type {import("./annotation").Annotation[]}
  */
 export const exampleAnnotations = [
-  // Ordinal scale (discrete categories)
+  // Categorical categories
   {
     type: 'band',
     fromCategoryCode: 'Bananas',
@@ -28,6 +29,16 @@ export const exampleAnnotations = [
       'Avocado ↔ Avocado Quand un pingouin prend un goûter, les autres pingouins prennent un goûter, et ça fait beaucoup de goûters pour les pingouins.',
     showLabelInline: false,
   },
+
+  // Numerical categories
+  {
+    type: 'band',
+    fromCategoryCode: 27,
+    toCategoryCode: 28,
+    label: '27 ↔ 28',
+    showLabelInline: true,
+  },
+
   // Time: yearly
   {
     type: 'band',
@@ -50,6 +61,7 @@ export const exampleAnnotations = [
     label: '2024 ↔ 2052 The quick brown fox jumps over the lazy dog.',
     showLabelInline: true,
   },
+
   // Time: monthly
   {
     type: 'band',
@@ -65,6 +77,7 @@ export const exampleAnnotations = [
     label: '2020-05 ↔ 2020-06 The quick brown fox jumps over the lazy dog.',
     showLabelInline: true,
   },
+
   // Time: quarterly
   {
     type: 'band',
@@ -80,6 +93,7 @@ export const exampleAnnotations = [
     label: '2021-Q2 ↔ 2022-Q3 The quick brown fox jumps over the lazy dog.',
     showLabelInline: true,
   },
+
   // Time: quinquennial
   /*
   {

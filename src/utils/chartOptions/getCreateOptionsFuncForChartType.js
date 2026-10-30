@@ -181,6 +181,7 @@ const createChartOptionsFunc =
           annotations,
           series: data.series,
           categories: data.categories,
+          areCategoriesNumbers: data.areCategoriesNumbers,
           areCategoriesDates: data.areCategoriesDates,
           categoriesFrequency,
         })

@@ -48,10 +48,11 @@ background-color: white;
     // y: 0 is approx. half of the font size on top of the plot band rect
     y: -((numberOfLines - 0.6) * fontSizeNumber * lineHeightFactor),
     style: {
-      // Vertically align bottom
+      // @ts-ignore This needs to be a string with unit, the Highcharts types are wrong
+      height: `${height}px`,
       display: 'flex',
+      // Vertically align bottom
       'align-items': 'flex-end',
-      height,
       fontFamily: fontFamilies.condensed,
       fontSize: fontSizePx,
       lineHeight: lineHeightFactor,

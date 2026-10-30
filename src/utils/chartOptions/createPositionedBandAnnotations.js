@@ -10,8 +10,69 @@ import * as R from 'ramda';
  * }} Series
  */
 
-/** @type {readonly never[]} */
-const NO_ANNOTATIONS = Object.freeze([]);
+/** @type {never[]} */
+const NO_ANNOTATIONS = [];
+
+/**
+ * Adds from/to to annotations for numerical categories
+ * (when areCategoriesNumbers is true).
+ * Plot bands are defined with the numerical category code.
+ *
+ * @param {{
+ * annotations: import('./annotation').BandAnnotation[];
+ * }} options
+ * @returns {import('./annotation').PositionedAnnotation[]}
+ */
+const getContinuousBandAnnotations = ({ annotations }) =>
+  annotations
+    .map((annotation) => {
+      const { fromCategoryCode, toCategoryCode } = annotation;
+      if (!(
+        typeof fromCategoryCode === 'number' &&
+        typeof toCategoryCode === 'number'
+      )) {
+        return;
+      }
+      // Pass-through numerical category code
+      return {
+        ...annotation,
+        from: fromCategoryCode,
+        to: toCategoryCode,
+      };
+    })
+    .filter(R.isNotNil);
+
+/**
+ * Adds from/to to annotations for qualitative categories.
+ * Plot bands are defined with indices.
+ *
+ * @param {{
+ * annotations: import('./annotation').BandAnnotation[];
+ * categories: { code: string }[];
+ * }} options
+ * @returns {import('./annotation').PositionedAnnotation[]}
+ */
+const getQualitativeBandAnnotations = ({ annotations, categories }) =>
+  annotations
+    .map((annotation) => {
+      let from = -1;
+      let to = -1;
+      from = R.findIndex(
+        R.compose(R.equals(annotation.fromCategoryCode), R.prop('code')),
+        categories,
+      );
+      if (from === -1) return;
+      to = R.findIndex(
+        R.compose(R.equals(annotation.toCategoryCode), R.prop('code')),
+        categories,
+      );
+      if (to === -1) return;
+      // Start/end one half before/after the categories so they are enclosed with padding
+      from -= 0.5;
+      to += 0.5;
+      return { ...annotation, from, to };
+    })
+    .filter(R.isNotNil);
 
 /**
  * Adds from/to to annotations for time categories.
@@ -35,6 +96,9 @@ const getTimeBandAnnotations = ({
   const firstSeries = series[0];
   if (!firstSeries) return NO_ANNOTATIONS;
 
+  // data.categories contains the unparsed categories like "2020-01-06".
+  // We need the timestamps from the points here.
+  /** @type {number[]} */
   const parsedCategories = R.compose(
     R.filter(R.isNotNil),
     R.map((point) => point.metadata?.parsedX),
@@ -70,38 +134,6 @@ const getTimeBandAnnotations = ({
 };
 
 /**
- * Adds from/to to annotations for discrete categories.
- * Plot bands are defined with indices.
- *
- * @param {{
- * annotations: import('./annotation').BandAnnotation[];
- * categories: { code: string }[];
- * }} options
- * @returns {import('./annotation').PositionedAnnotation[]}
- */
-const getDiscreteBandAnnotations = ({ annotations, categories }) =>
-  annotations
-    .map((annotation) => {
-      let from = -1;
-      let to = -1;
-      from = R.findIndex(
-        R.compose(R.equals(annotation.fromCategoryCode), R.prop('code')),
-        categories,
-      );
-      if (from === -1) return;
-      to = R.findIndex(
-        R.compose(R.equals(annotation.toCategoryCode), R.prop('code')),
-        categories,
-      );
-      if (to === -1) return;
-      // Start/end one half before/after the categories so they are enclosed with padding
-      from -= 0.5;
-      to += 0.5;
-      return { ...annotation, from, to };
-    })
-    .filter(R.isNotNil);
-
-/**
  * @param {{
  * annotations: import('./annotation').BandAnnotation[];
  * series: {
@@ -111,6 +143,7 @@ const getDiscreteBandAnnotations = ({ annotations, categories }) =>
  *   }[]
  * }[];
  * categories: { code: string }[];
+ * areCategoriesNumbers: boolean;
  * areCategoriesDates: boolean;
  * categoriesFrequency: {
  *   tryParse: (str: string) => Date | false;
@@ -123,16 +156,26 @@ export const createPositionedBandAnnotations = ({
   annotations,
   series,
   categories,
+  areCategoriesNumbers,
   areCategoriesDates,
   categoriesFrequency,
 }) => {
   const bandAnnotations = annotations.filter(({ type }) => type === 'band');
 
-  return areCategoriesDates && categoriesFrequency
-    ? getTimeBandAnnotations({
-        annotations: bandAnnotations,
-        series,
-        categoriesFrequency,
-      })
-    : getDiscreteBandAnnotations({ annotations: bandAnnotations, categories });
+  if (areCategoriesNumbers) {
+    return getContinuousBandAnnotations({ annotations: bandAnnotations });
+  }
+
+  if (areCategoriesDates && categoriesFrequency) {
+    return getTimeBandAnnotations({
+      annotations: bandAnnotations,
+      series,
+      categoriesFrequency,
+    });
+  }
+
+  return getQualitativeBandAnnotations({
+    annotations: bandAnnotations,
+    categories,
+  });
 };

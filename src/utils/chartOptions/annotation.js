@@ -3,8 +3,8 @@
 /**
  * @typedef {{
  * type: 'band';
- * fromCategoryCode: string;
- * toCategoryCode: string;
+ * fromCategoryCode: string | number;
+ * toCategoryCode: string | number;
  * label: string;
  * showLabelInline: boolean;
  * color?: string;
