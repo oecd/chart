@@ -58,12 +58,6 @@ export const createOptionsForBarChart = ({
 }) => {
   const horizontal = chartType === chartTypes.row;
 
-  const showAnnotationLabelsInline =
-    !horizontal &&
-    (positionedAnnotations
-      ? R.any(R.prop('showLabelInline'), positionedAnnotations)
-      : false);
-
   const calcXAxisLayout = () => {
     if (horizontal) {
       if (hideXAxisLabels) {
@@ -87,10 +81,6 @@ export const createOptionsForBarChart = ({
       ? { left: '8%', width: '89%' }
       : { left: '9%', width: '87%' };
   };
-
-  const legendMargin =
-    calcLegendMarginForBarAndStacked(chartSize, horizontal) +
-    (showAnnotationLabelsInline ? 10 : 0);
 
   const isBaselineACategory = !R.isEmpty(
     R.intersection(Array.from(categoryCodes), baselineCodes),
@@ -133,16 +123,17 @@ export const createOptionsForBarChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
-  const plotBands = positionedAnnotations
-    ? createAnnotationPlotBands({
-        positionedAnnotations,
-        chartSize,
-        showLabelsInline: showAnnotationLabelsInline,
-        position: horizontal ? 'right' : 'top',
-      })
-    : null;
+  const showAnnotationLabelsInline =
+    !horizontal &&
+    (positionedAnnotations
+      ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+      : false);
 
-  const labelStyle = fontStyleForTextElement(
+  const legendMargin =
+    calcLegendMarginForBarAndStacked(chartSize, horizontal) +
+    (showAnnotationLabelsInline ? 10 : 0);
+
+  const legendStyle = fontStyleForTextElement(
     textElementTypes.legend,
     chartSize,
   );
@@ -159,10 +150,19 @@ export const createOptionsForBarChart = ({
       );
     }
     if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
-      marginTop += parseFloat(labelStyle.fontSize);
+      marginTop += parseFloat(legendStyle.fontSize);
     }
     return marginTop;
   })();
+
+  const plotBands = positionedAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations,
+        chartSize,
+        showLabelsInline: showAnnotationLabelsInline,
+        position: horizontal ? 'right' : 'top',
+      })
+    : null;
 
   return {
     custom: customChartOptions,
@@ -185,7 +185,7 @@ export const createOptionsForBarChart = ({
       categories: xAxisCategories,
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-        style: labelStyle,
+        style: legendStyle,
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -215,7 +215,7 @@ export const createOptionsForBarChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+        style: legendStyle,
         ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),

@@ -23,8 +23,8 @@ const NO_ANNOTATIONS = [];
  * }} options
  * @returns {import('./annotation').PositionedAnnotation[]}
  */
-const getContinuousBandAnnotations = ({ annotations }) =>
-  annotations
+const getContinuousBandAnnotations = ({ annotations }) => {
+  return annotations
     .map((annotation) => {
       const { fromCategoryCode, toCategoryCode } = annotation;
       if (!(
@@ -41,6 +41,7 @@ const getContinuousBandAnnotations = ({ annotations }) =>
       };
     })
     .filter(R.isNotNil);
+};
 
 /**
  * Adds from/to to annotations for qualitative categories.
@@ -52,8 +53,8 @@ const getContinuousBandAnnotations = ({ annotations }) =>
  * }} options
  * @returns {import('./annotation').PositionedAnnotation[]}
  */
-const getQualitativeBandAnnotations = ({ annotations, categories }) =>
-  annotations
+const getQualitativeBandAnnotations = ({ annotations, categories }) => {
+  return annotations
     .map((annotation) => {
       let from = -1;
       let to = -1;
@@ -73,6 +74,7 @@ const getQualitativeBandAnnotations = ({ annotations, categories }) =>
       return { ...annotation, from, to };
     })
     .filter(R.isNotNil);
+};
 
 /**
  * Adds from/to to annotations for time categories.
