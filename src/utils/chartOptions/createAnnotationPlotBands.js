@@ -90,7 +90,7 @@ text-align: center;
     useHTML: true,
     text: `<span style="${style}">${escapeHTML(label)}</span>`,
     x: isRight ? -2 : undefined,
-    y: -(diameter / 2 + 1),
+    y: isRight ? 2.5 : -(diameter / 2 + 1),
     style: {
       fontFamily: fontFamilies.condensed,
       fontSize: fontSize,
