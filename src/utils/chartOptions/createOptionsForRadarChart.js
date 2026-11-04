@@ -23,6 +23,7 @@ import {
   calcRadarPaneSize,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { highlightSymbols } from './highlightSymbols';
 import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
@@ -31,6 +32,57 @@ import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
 const HIGHLIGHTED_SYMBOL_LINE_WIDTH = 1.5;
+
+/**
+ * Create a plot band for each category highlight
+ * @see https://www.highcharts.com/docs/chart-concepts/plot-bands-and-plot-lines
+ * @param {{
+ * categories: { code: string }[];
+ * baselineCodes: string[];
+ * highlightCodes: string[];
+ * matchingHighlightColors: string[];
+ * }} options
+ * @returns {import('highcharts').XAxisPlotBandsOptions[]}
+ */
+const getHighlightPlotBands = ({
+  categories,
+  baselineCodes,
+  highlightCodes,
+  matchingHighlightColors,
+}) =>
+  categories
+    .map(({ code }, index) => {
+      const categoryCodeLowercase = code.toLowerCase();
+      const isBaseline = baselineCodes.includes(categoryCodeLowercase);
+
+      const highlightIndex = highlightCodes.indexOf(categoryCodeLowercase);
+      const isHighlighted = highlightIndex !== -1;
+
+      if (!(isBaseline || isHighlighted)) return;
+      const color = isBaseline
+        ? baselineColor
+        : getListItemAtTurningIndex(highlightIndex, matchingHighlightColors);
+
+      const from = index - 0.5;
+      const to = from + 1;
+      // Two plot bands are needed to highlight the first segment
+      // because `from: 0` is actually in the middle of the first segment,
+      // on the line on which the points sit, and we cannot set `from: -0.5`
+      if (index === 0) {
+        const from2 = categories.length - 0.5;
+        const to2 = categories.length;
+        /** @type {import('highcharts').XAxisPlotBandsOptions} */
+        const firstHalf = { color, from: from2, to: to2, zIndex: 2 };
+        /** @type {import('highcharts').XAxisPlotBandsOptions} */
+        const secondHalf = { color, from, to };
+        return [firstHalf, secondHalf];
+      }
+      /** @type {import('highcharts').XAxisPlotBandsOptions} */
+      const plotBand = { color, from, to };
+      return plotBand;
+    })
+    .flat()
+    .filter((plotBand) => plotBand !== undefined);
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -57,6 +109,7 @@ export const createOptionsForRadarChart = ({
   disableLegendInteraction = false,
   chartSize,
   disableAnimation = false,
+  positionedAnnotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
@@ -161,42 +214,12 @@ export const createOptionsForRadarChart = ({
     };
   }, data.series);
 
-  // Create a plot band for each category highlight
-  // https://www.highcharts.com/docs/chart-concepts/plot-bands-and-plot-lines
-  /** @type {import('highcharts').XAxisPlotBandsOptions[]} */
-  const plotBands = data.categories
-    .map(({ code }, index) => {
-      const categoryCodeLowercase = code.toLowerCase();
-      const isBaseline = baselineCodes.includes(categoryCodeLowercase);
-
-      const highlightIndex = highlightCodes.indexOf(categoryCodeLowercase);
-      const isHighlighted = highlightIndex !== -1;
-
-      if (!(isBaseline || isHighlighted)) return;
-      const color = isBaseline
-        ? baselineColor
-        : getListItemAtTurningIndex(highlightIndex, matchingHighlightColors);
-
-      const from = index - 0.5;
-      const to = from + 1;
-      // Two plot bands are needed to highlight the first segment
-      // because `from: 0` is actually in the middle of the first segment,
-      // on the line on which the points sit, and we cannot set `from: -0.5`
-      if (index === 0) {
-        const from2 = data.categories.length - 0.5;
-        const to2 = data.categories.length;
-        /** @type {import('highcharts').XAxisPlotBandsOptions} */
-        const firstHalf = { color, from: from2, to: to2, zIndex: 2 };
-        /** @type {import('highcharts').XAxisPlotBandsOptions} */
-        const secondHalf = { color, from, to };
-        return [firstHalf, secondHalf];
-      }
-      /** @type {import('highcharts').XAxisPlotBandsOptions} */
-      const plotBand = { color, from, to };
-      return plotBand;
-    })
-    .flat()
-    .filter((plotBand) => plotBand !== undefined);
+  const highlightPlotBands = getHighlightPlotBands({
+    categories: data.categories,
+    baselineCodes,
+    highlightCodes,
+    matchingHighlightColors,
+  });
 
   const xAxisLabelFormatters = formatters.xAxisLabels;
   const xAxisLabelFormat = xAxisLabelFormatters?.format;
@@ -210,6 +233,17 @@ export const createOptionsForRadarChart = ({
     categoriesFrequency,
   );
   const xAxisCategories = R.map(R.prop('parsedLabel'), parsedCategories);
+
+  const annotationPlotBands = positionedAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations,
+        chartSize,
+        showLabelsInline: false,
+        position: 'top',
+      })
+    : [];
+
+  const plotBands = R.concat(highlightPlotBands, annotationPlotBands);
 
   return {
     chart: {
