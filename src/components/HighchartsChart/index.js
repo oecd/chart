@@ -1067,10 +1067,10 @@ const HighchartsChart = ({
   const applicableAnnotations = useMemo(() => {
     if (!parsedData) return [];
     const categoryCodes = new Set(R.map(R.prop('code'), parsedData.categories));
-    return R.filter(
-      (annotation) => categoryCodes.has(annotation.fromCategoryCode),
-      annotations,
-    );
+    return R.compose(
+      R.sortBy(R.prop('fromCategoryCode')),
+      R.filter((annotation) => categoryCodes.has(annotation.fromCategoryCode)),
+    )(annotations);
   }, [parsedData, annotations]);
 
   const annotationsForFooter = useMemo(
