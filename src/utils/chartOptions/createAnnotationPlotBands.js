@@ -10,6 +10,13 @@ import {
 /** Default band fill color */
 const BAND_COLOR = '#F0F4F8';
 
+const referenceFontSize = '12px';
+const referenceDiameter = 16;
+const referenceDiameterPx = `${referenceDiameter}px`;
+const referenceBorder = 1;
+export const referenceOuterSize = referenceDiameter + referenceBorder * 2;
+export const referenceGap = 3;
+
 /**
  * Ignore HTML in annotation labels.
  * Note: Highcharts performs its own sanitization on the passed HTML.
@@ -71,15 +78,12 @@ background-color: white;
  */
 const getReferenceLabelOptions = (label, position) => {
   // Fixed font and circle size
-  const fontSize = '12px';
-  const diameter = 16;
-  const diameterPx = `${diameter}px`;
   const style = `
 box-sizing: content-box;
 display: block;
-width: ${diameterPx};
-height: ${diameterPx};
-border: 1px solid ${fontColors.normal};
+width: ${referenceDiameterPx};
+height: ${referenceDiameterPx};
+border: ${referenceBorder}px solid ${fontColors.normal};
 border-radius: 50%;
 background-color: white;
 text-align: center;
@@ -89,12 +93,12 @@ text-align: center;
     align: isRight ? 'right' : 'center',
     useHTML: true,
     text: `<span style="${style}">${escapeHTML(label)}</span>`,
-    x: isRight ? -2 : undefined,
-    y: isRight ? 2.5 : -(diameter / 2 + 1),
+    x: isRight ? referenceOuterSize + referenceGap : undefined,
+    y: isRight ? 3 : -(referenceOuterSize / 2),
     style: {
       fontFamily: fontFamilies.condensed,
-      fontSize: fontSize,
-      lineHeight: diameterPx,
+      fontSize: referenceFontSize,
+      lineHeight: referenceDiameterPx,
       color: fontColors.normal,
     },
   };
