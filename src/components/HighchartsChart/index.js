@@ -48,7 +48,7 @@ import {
   emptyData,
 } from '../../utils/csvUtil';
 import { fetchJson } from '../../utils/fetchUtil';
-import { isNilOrEmpty } from '../../utils/ramdaUtil';
+import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 import {
   createDataFromSdmxJson,
   createDotStatUrl,
@@ -1064,18 +1064,29 @@ const HighchartsChart = ({
   const optionsOverrideInternal = useMemoForArrayOrObject(optionsOverride);
 
   // Filter annotations for those categories actually in the data
-  const applicableAnnotations = useMemo(() => {
+  const sortedApplicableAnnotations = useMemo(() => {
     if (!parsedData) return [];
-    const categoryCodes = new Set(R.map(R.prop('code'), parsedData.categories));
+    const categoryCodeToIndex = new Map(
+      mapWithIndex(({ code }, index) => [code, index], parsedData.categories),
+    );
     return R.compose(
-      R.sortBy(R.prop('fromCategoryCode')),
-      R.filter((annotation) => categoryCodes.has(annotation.fromCategoryCode)),
+      R.sortBy(
+        parsedData.areCategoriesDates
+          ? // Sort by category itself
+            R.prop('fromCategoryCode')
+          : // Sort by category index so the annotations have the same order as the categories
+            (annotation) =>
+              categoryCodeToIndex.get(annotation.fromCategoryCode),
+      ),
+      R.filter((annotation) =>
+        categoryCodeToIndex.has(annotation.fromCategoryCode),
+      ),
     )(annotations);
   }, [parsedData, annotations]);
 
   const annotationsForFooter = useMemo(
-    () => createAnnotationFooter(applicableAnnotations),
-    [applicableAnnotations],
+    () => createAnnotationFooter(sortedApplicableAnnotations),
+    [sortedApplicableAnnotations],
   );
 
   // create merged chart options (default + optionsOverride)
@@ -1163,7 +1174,7 @@ const HighchartsChart = ({
         disableLegendInteraction,
         sortOrder,
         disableAnimation,
-        annotations: applicableAnnotations,
+        annotations: sortedApplicableAnnotations,
       });
 
       setMergedOptions(
@@ -1176,7 +1187,7 @@ const HighchartsChart = ({
       setMergedOptions(null);
     }
   }, [
-    applicableAnnotations,
+    sortedApplicableAnnotations,
     annotationsForFooter,
     baseline,
     chartHeight,
