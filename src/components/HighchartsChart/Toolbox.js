@@ -1,22 +1,22 @@
-import { useCallback, useContext } from 'react';
 import PropTypes from 'prop-types';
+import { useCallback, useContext } from 'react';
 
 import * as R from 'ramda';
 
+import { apiUrl, chartSizes } from '../../constants/chart';
+import { fontColors, fontFamilies } from '../../constants/styling';
+import { createFooter } from '../../utils/chartUtil';
+import { createExportFileName } from '../../utils/chartUtilCommon';
+import { postJson } from '../../utils/fetchUtil';
+import { getSizeCssClass } from '../../utils/stylingUtil';
+import ActionIcon from '../Icons/ActionIcon';
 import CsvIcon from '../Icons/CsvIcon';
 import DotsIcon from '../Icons/DotsIcon';
-import PngIcon from '../Icons/PngIcon';
-import SvgIcon from '../Icons/SvgIcon';
 import ExpandIcon from '../Icons/ExpandIcon';
 import InfoIcon from '../Icons/InfoIcon';
-import ActionIcon from '../Icons/ActionIcon';
-import { MenuContext, Menu, MenuItem, PopoverContent } from '../floating/Menu';
-import { postJson } from '../../utils/fetchUtil';
-import { apiUrl, chartSizes } from '../../constants/chart';
-import { createExportFileName } from '../../utils/chartUtilCommon';
-import { createFooter } from '../../utils/chartUtil';
-import { fontColors, fontFamilies } from '../../constants/styling';
-import { getSizeCssClass } from '../../utils/stylingUtil';
+import PngIcon from '../Icons/PngIcon';
+import SvgIcon from '../Icons/SvgIcon';
+import { Menu, MenuContext, MenuItem, PopoverContent } from '../floating/Menu';
 
 const RootTrigger = () => {
   const { isOpen } = useContext(MenuContext);
@@ -48,9 +48,11 @@ const Toolbox = ({
   definition,
   note,
   source,
+  annotationsForFooter,
   displayNoteAsTooltip,
   noteShouldBeDisplayedInTooltip,
   sourceShouldBeDisplayedInTooltip,
+  annotationsShouldBeDisplayedInTooltip,
   tooltipContainerId,
   displayActionButton,
   actionButtonLabel,
@@ -244,6 +246,10 @@ const Toolbox = ({
                       __html: R.compose(
                         R.join(''),
                         R.when(
+                          () => annotationsShouldBeDisplayedInTooltip,
+                          R.append(annotationsForFooter),
+                        ),
+                        R.when(
                           () => sourceShouldBeDisplayedInTooltip,
                           R.append(source),
                         ),
@@ -298,9 +304,11 @@ Toolbox.propTypes = {
   definition: PropTypes.string,
   note: PropTypes.string,
   source: PropTypes.string,
+  annotationsForFooter: PropTypes.string,
   displayNoteAsTooltip: PropTypes.bool.isRequired,
   noteShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   sourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
+  annotationsShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   tooltipContainerId: PropTypes.string,
   displayActionButton: PropTypes.bool.isRequired,
   actionButtonLabel: PropTypes.string.isRequired,

@@ -161,6 +161,7 @@ const HighchartsChart = ({
   mapCountryDimension = '',
   displayNoteAsTooltip = false,
   displaySourceAsTooltip = false,
+  displayAnnotationsAsTooltip = false,
   displayActionButton = false,
   actionButtonLabel = '',
   onExpandChart = null,
@@ -1089,6 +1090,9 @@ const HighchartsChart = ({
     [sortedApplicableAnnotations],
   );
 
+  const annotationsShouldBeDisplayedInTooltip =
+    annotationsForFooter && (footerHeight === 0 || displayAnnotationsAsTooltip);
+
   // create merged chart options (default + optionsOverride)
   // this must be done a minimum amount of time because it causes Highcharts chart rerender which is costly
   useEffect(() => {
@@ -1300,10 +1304,14 @@ const HighchartsChart = ({
             lang={lang}
             note={parsedNote}
             source={parsedSource}
+            annotationsForFooter={annotationsForFooter}
             canTitleAndSubtitleBeDisplayed={canTitleAndSubtitleBeDisplayed}
             displayNoteAsTooltip={displayNoteAsTooltip}
             noteShouldBeDisplayedInTooltip={noteShouldBeDisplayedInTooltip}
             sourceShouldBeDisplayedInTooltip={sourceShouldBeDisplayedInTooltip}
+            annotationsShouldBeDisplayedInTooltip={
+              annotationsShouldBeDisplayedInTooltip
+            }
             hideToolbox={hideToolbox}
             exportDisabled={!chartCanBedisplayed}
             onDownloadData={onDownloadData}
@@ -1353,9 +1361,13 @@ const HighchartsChart = ({
           dangerouslySetInnerHTML={{
             __html: R.compose(
               R.join(''),
+              R.when(
+                () => !displayAnnotationsAsTooltip,
+                R.append(annotationsForFooter),
+              ),
               R.when(() => !displaySourceAsTooltip, R.append(parsedSource)),
               R.when(() => !displayNoteAsTooltip, R.append(parsedNote)),
-            )([annotationsForFooter]),
+            )([]),
           }}
         />
       </div>
@@ -1431,6 +1443,7 @@ HighchartsChart.propTypes = {
   mapCountryDimension: PropTypes.string,
   displayNoteAsTooltip: PropTypes.bool,
   displaySourceAsTooltip: PropTypes.bool,
+  displayAnnotationsAsTooltip: PropTypes.bool,
   displayActionButton: PropTypes.bool,
   actionButtonLabel: PropTypes.string,
   onExpandChart: PropTypes.func,
