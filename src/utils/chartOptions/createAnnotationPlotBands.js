@@ -25,7 +25,7 @@ export const referenceGap = 3;
 const escapeHTML = (string) =>
   string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-const lineHeightFactor = 1.15;
+const lineHeightFactor = 1.25;
 const numberOfLines = 2;
 
 /**
@@ -124,7 +124,7 @@ export const createAnnotationPlotBands = ({
   if (positionedAnnotations.length === 0) return [];
 
   const fontSizePxInline =
-    fontStyleByTextElementTypes[textElementTypes.legend].fontSize[chartSize];
+    fontStyleByTextElementTypes[textElementTypes.source].fontSize[chartSize];
   const fontSizeNumberInline = parseFloat(fontSizePxInline);
 
   let referenceIndex = 0;
