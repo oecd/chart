@@ -70,13 +70,13 @@ background-color: white;
 
 /**
  * Renders a numerical reference to the annotation text footer.
- * Number in a circle that looks like ①, ②, ③ etc.
+ * Number in a circle that looks like Ⓐ, Ⓑ, Ⓒ etc.
  *
- * @param {string} label
+ * @param {number} index
  * @param {'top' | 'right'} position
  * @returns {import('highcharts').XAxisPlotBandsLabelOptions}
  */
-const getReferenceLabelOptions = (label, position) => {
+const getReferenceLabelOptions = (index, position) => {
   // Fixed font and circle size
   const style = `
 box-sizing: content-box;
@@ -88,11 +88,13 @@ border-radius: 50%;
 background-color: white;
 text-align: center;
 `;
+  // Uppercase Latin alphabet
+  const referenceLetter = String.fromCodePoint(65 + (index % 24));
   const isRight = position === 'right';
   return {
     align: isRight ? 'right' : 'center',
     useHTML: true,
-    text: `<span style="${style}">${escapeHTML(label)}</span>`,
+    text: `<span style="${style}">${escapeHTML(referenceLetter)}</span>`,
     x: isRight ? referenceOuterSize + referenceGap : undefined,
     y: isRight ? 3 : -(referenceOuterSize / 2),
     style: {
@@ -136,7 +138,7 @@ export const createAnnotationPlotBands = ({
         ? // Inline annotation
           getInlineLabelOptions(label, fontSizePxInline, fontSizeNumberInline)
         : // Reference annotation in footer
-          getReferenceLabelOptions(String(++referenceIndex), position);
+          getReferenceLabelOptions(referenceIndex++, position);
 
     /** @type {import('highcharts').XAxisPlotBandsOptions} */
     const plotBand = {
