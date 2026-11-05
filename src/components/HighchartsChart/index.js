@@ -1071,16 +1071,20 @@ const HighchartsChart = ({
       mapWithIndex(({ code }, index) => [code, index], parsedData.categories),
     );
     return R.compose(
+      // Sort annotations so alphabetical references appear left-to-right (A, B, C etc.)
       R.sortBy(
         parsedData.areCategoriesDates
-          ? // Sort by category itself
+          ? // Date: Sort by string representation (e.g. "2020-Q4")
             R.prop('fromCategoryCode')
-          : // Sort by category index so the annotations have the same order as the categories
+          : // String: Sort by index so the annotation order equals the category order
             (annotation) =>
               categoryCodeToIndex.get(annotation.fromCategoryCode),
       ),
-      R.filter((annotation) =>
-        categoryCodeToIndex.has(annotation.fromCategoryCode),
+      // Make sure both categories appear in the data
+      R.filter(
+        (annotation) =>
+          categoryCodeToIndex.has(annotation.fromCategoryCode) &&
+          categoryCodeToIndex.has(annotation.toCategoryCode),
       ),
     )(annotations);
   }, [parsedData, annotations]);
