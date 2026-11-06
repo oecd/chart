@@ -7,8 +7,8 @@ import {
   memo,
   Suspense,
   useCallback,
-  useEffect,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -28,9 +28,13 @@ import {
   stackingOptions,
 } from '../../constants/chart';
 import { errorMessages } from '../../constants/chartErrorMessages';
+import { textElementTypes } from '../../constants/styling';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
 import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
+import { createAnnotationFooter } from '../../utils/chartOptions/createAnnotationFooter';
 import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
+import { exampleAnnotations } from '../../utils/chartOptions/exampleAnnotations';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
 import {
   createFooter,
@@ -44,22 +48,20 @@ import {
   emptyData,
 } from '../../utils/csvUtil';
 import { fetchJson } from '../../utils/fetchUtil';
-import { isNilOrEmpty } from '../../utils/ramdaUtil';
+import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 import {
   createDataFromSdmxJson,
   createDotStatUrl,
   fetchDotStatData,
   isSdmxJsonEmpty,
 } from '../../utils/sdmxJsonUtil';
+import { fontStyleForTextElement } from '../../utils/stylingUtil';
 import { trackChartError } from '../../utils/trackingUtil';
 import CenteredContainer from '../CenteredContainer';
 import NullComponent from '../NullComponent';
 import Spinner from '../Spinner';
 import GenericChart from './GenericChart';
 import Header from './Header';
-import ChartSizeContext from '../../contexts/ChartSizeContext';
-import { fontStyleForTextElement } from '../../utils/stylingUtil';
-import { textElementTypes } from '../../constants/styling';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -159,6 +161,7 @@ const HighchartsChart = ({
   mapCountryDimension = '',
   displayNoteAsTooltip = false,
   displaySourceAsTooltip = false,
+  displayAnnotationsAsTooltip = false,
   displayActionButton = false,
   actionButtonLabel = '',
   onExpandChart = null,
@@ -183,6 +186,8 @@ const HighchartsChart = ({
   calcAvgValue = null,
   referenceValueCode = null,
   dataLastUpdateDate = null,
+  // TODO: for testing only
+  annotations = exampleAnnotations,
 }) => {
   const ChartForType = getChartForType(chartType);
 
@@ -1058,6 +1063,34 @@ const HighchartsChart = ({
     useMemoForArrayOrObject(mapColorValueSteps);
   const optionsOverrideInternal = useMemoForArrayOrObject(optionsOverride);
 
+  // Filter annotations for those categories actually in the data
+  const sortedApplicableAnnotations = useMemo(() => {
+    if (!parsedData) return [];
+    const categoryCodeToIndex = new Map(
+      mapWithIndex(({ code }, index) => [code, index], parsedData.categories),
+    );
+    // Sort annotations so alphabetical references appear left-to-right (A, B, C etc.)
+    return R.sortBy(
+      parsedData.areCategoriesDates
+        ? // Date: Sort by string representation (e.g. "2020-Q4")
+          ({ categoryCode, fromCategoryCode }) =>
+            categoryCode ?? fromCategoryCode
+        : // String: Sort by index so the annotation order equals the category order
+          ({ categoryCode, fromCategoryCode }) =>
+            categoryCodeToIndex.get(categoryCode ?? fromCategoryCode),
+      annotations,
+    );
+  }, [parsedData, annotations]);
+  console.log('sortedApplicableAnnotations', sortedApplicableAnnotations);
+
+  const annotationsForFooter = useMemo(
+    () => createAnnotationFooter(sortedApplicableAnnotations),
+    [sortedApplicableAnnotations],
+  );
+
+  const annotationsShouldBeDisplayedInTooltip =
+    annotationsForFooter && (footerHeight === 0 || displayAnnotationsAsTooltip);
+
   // create merged chart options (default + optionsOverride)
   // this must be done a minimum amount of time because it causes Highcharts chart rerender which is costly
   useEffect(() => {
@@ -1100,6 +1133,7 @@ const HighchartsChart = ({
           ? createFooter({
               source: parsedSource,
               note: parsedNote,
+              annotations: annotationsForFooter,
             })
           : '',
         colorPalette: colorPaletteInternal,
@@ -1141,6 +1175,7 @@ const HighchartsChart = ({
         inlineLabels,
         disableLegendInteraction,
         sortOrder,
+        annotations: sortedApplicableAnnotations,
       });
 
       setMergedOptions(
@@ -1153,6 +1188,8 @@ const HighchartsChart = ({
       setMergedOptions(null);
     }
   }, [
+    sortedApplicableAnnotations,
+    annotationsForFooter,
     baseline,
     chartHeight,
     chartType,
@@ -1263,10 +1300,14 @@ const HighchartsChart = ({
             lang={lang}
             note={parsedNote}
             source={parsedSource}
+            annotationsForFooter={annotationsForFooter}
             canTitleAndSubtitleBeDisplayed={canTitleAndSubtitleBeDisplayed}
             displayNoteAsTooltip={displayNoteAsTooltip}
             noteShouldBeDisplayedInTooltip={noteShouldBeDisplayedInTooltip}
             sourceShouldBeDisplayedInTooltip={sourceShouldBeDisplayedInTooltip}
+            annotationsShouldBeDisplayedInTooltip={
+              annotationsShouldBeDisplayedInTooltip
+            }
             hideToolbox={hideToolbox}
             exportDisabled={!chartCanBedisplayed}
             onDownloadData={onDownloadData}
@@ -1316,6 +1357,10 @@ const HighchartsChart = ({
           dangerouslySetInnerHTML={{
             __html: R.compose(
               R.join(''),
+              R.when(
+                () => !displayAnnotationsAsTooltip,
+                R.append(annotationsForFooter),
+              ),
               R.when(() => !displaySourceAsTooltip, R.append(parsedSource)),
               R.when(() => !displayNoteAsTooltip, R.append(parsedNote)),
             )([]),
@@ -1394,6 +1439,7 @@ HighchartsChart.propTypes = {
   mapCountryDimension: PropTypes.string,
   displayNoteAsTooltip: PropTypes.bool,
   displaySourceAsTooltip: PropTypes.bool,
+  displayAnnotationsAsTooltip: PropTypes.bool,
   displayActionButton: PropTypes.bool,
   actionButtonLabel: PropTypes.string,
   onExpandChart: PropTypes.func,
@@ -1418,6 +1464,7 @@ HighchartsChart.propTypes = {
   calcAvgValue: PropTypes.bool,
   referenceValueCode: PropTypes.string,
   dataLastUpdateDate: PropTypes.string,
+  annotations: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default memo(HighchartsChart);

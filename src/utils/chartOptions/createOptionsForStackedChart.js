@@ -18,6 +18,11 @@ import {
   calcYAxisCoordinatesForBarAndStacked,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import {
+  createAnnotationPlotBands,
+  referenceGap,
+  referenceOuterSize,
+} from './createAnnotationPlotBands';
 import { createDatapoint } from './createDataPoint';
 import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
@@ -244,6 +249,7 @@ export const createOptionsForStackedChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
+  positionedAnnotations,
 }) => {
   const horizontal = chartType === chartTypes.stackedRow;
   const area = chartType === chartTypes.stackedArea;
@@ -324,14 +330,62 @@ export const createOptionsForStackedChart = ({
       ? null
       : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const showAnnotationLabelsInline =
+    !horizontal &&
+    (positionedAnnotations
+      ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+      : false);
+
+  const legendMargin =
+    calcLegendMarginForBarAndStacked(chartSize, horizontal) +
+    (showAnnotationLabelsInline ? 10 : 0);
+
+  const legendStyle = fontStyleForTextElement(
+    textElementTypes.legend,
+    chartSize,
+  );
+
+  const plotBands = positionedAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations,
+        chartSize,
+        showLabelsInline: showAnnotationLabelsInline,
+        position: horizontal ? 'right' : 'top',
+      })
+    : null;
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend) {
+      marginTop = calcMarginTopForBarAndStacked(
+        title,
+        subtitle,
+        horizontal,
+        chartSize,
+      );
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
+      marginTop += parseFloat(legendStyle.fontSize);
+    }
+    return marginTop;
+  })();
+
+  const marginRight =
+    horizontal &&
+    plotBands &&
+    plotBands.length > 0 &&
+    !showAnnotationLabelsInline
+      ? referenceOuterSize + referenceGap
+      : 0;
+
   return {
     custom: customChartOptions,
 
     chart: {
       type: highChartsChartType,
-      marginTop: hideLegend
-        ? calcMarginTopForBarAndStacked(title, subtitle, horizontal, chartSize)
-        : undefined,
+      marginTop,
+      marginRight,
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -369,6 +423,7 @@ export const createOptionsForStackedChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
@@ -414,7 +469,7 @@ export const createOptionsForStackedChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginForBarAndStacked(chartSize, horizontal),
+      margin: legendMargin,
     },
 
     plotOptions: {

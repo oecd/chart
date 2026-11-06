@@ -18,6 +18,11 @@ import {
   calcYAxisCoordinatesForBarAndStacked,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import {
+  createAnnotationPlotBands,
+  referenceGap,
+  referenceOuterSize,
+} from './createAnnotationPlotBands';
 import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
@@ -51,6 +56,8 @@ export const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
+  positionedBandAnnotations,
+  positionedPointAnnotations,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -78,15 +85,15 @@ export const createOptionsForBarChart = ({
       : { left: '9%', width: '87%' };
   };
 
-  /** Whether there are multiple series */
-  const isGroupedChart = data.series.length > 1;
-
   const isBaselineACategory = !R.isEmpty(
     R.intersection(Array.from(categoryCodes), baselineCodes),
   );
 
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
   const anyCategoryHighlighted = highlightCategoryCodes.length > 0;
+
+  /** Whether there are multiple series */
+  const isGroupedChart = data.series.length > 1;
 
   /**
    * Whether a category is baseline/highlighted that contains several points
@@ -119,14 +126,64 @@ export const createOptionsForBarChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const showAnnotationLabelsInline =
+    !horizontal &&
+    (positionedBandAnnotations
+      ? R.any(R.prop('showLabelInline'), positionedBandAnnotations)
+      : false);
+
+  const legendMargin =
+    calcLegendMarginForBarAndStacked(chartSize, horizontal) +
+    (showAnnotationLabelsInline ? 10 : 0);
+
+  const legendStyle = fontStyleForTextElement(
+    textElementTypes.legend,
+    chartSize,
+  );
+
+  const plotBands = positionedBandAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations: positionedBandAnnotations,
+        chartSize,
+        showLabelsInline: showAnnotationLabelsInline,
+        position: horizontal ? 'right' : 'top',
+      })
+    : null;
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend) {
+      marginTop = calcMarginTopForBarAndStacked(
+        title,
+        subtitle,
+        horizontal,
+        chartSize,
+      );
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
+      marginTop += parseFloat(legendStyle.fontSize);
+    }
+    return marginTop;
+  })();
+
+  const marginRight =
+    horizontal &&
+    plotBands &&
+    plotBands.length > 0 &&
+    !showAnnotationLabelsInline
+      ? referenceOuterSize + referenceGap
+      : 0;
+
   return {
+    annotations: positionedPointAnnotations,
+
     custom: customChartOptions,
 
     chart: {
       type: horizontal ? 'bar' : 'column',
-      marginTop: hideLegend
-        ? calcMarginTopForBarAndStacked(title, subtitle, horizontal, chartSize)
-        : undefined,
+      marginTop,
+      marginRight,
       height,
       animation: false,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -142,7 +199,7 @@ export const createOptionsForBarChart = ({
       categories: xAxisCategories,
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+        style: legendStyle,
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -162,6 +219,7 @@ export const createOptionsForBarChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
@@ -171,7 +229,7 @@ export const createOptionsForBarChart = ({
       gridLineColor: '#c2cbd6',
       lineColor: '#c2cbd6',
       labels: {
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+        style: legendStyle,
         ...R.prop('yAxisLabels', formatters),
         enabled:
           (!horizontal && !hideYAxisLabels) || (horizontal && !hideXAxisLabels),
@@ -205,7 +263,7 @@ export const createOptionsForBarChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginForBarAndStacked(chartSize, horizontal),
+      margin: legendMargin,
     },
 
     plotOptions: {
