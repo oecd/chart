@@ -40,7 +40,7 @@ import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
 import { createPositionedBandAnnotations } from './createPositionedBandAnnotations';
-import { exampleAnnotations } from './exampleAnnotations';
+import { createPositionedPointAnnotations } from './createPositionedPointAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
 
@@ -83,7 +83,7 @@ const createChartOptionsFunc =
     chartSize,
     inlineLabels,
     hideLegend,
-    annotations = exampleAnnotations,
+    annotations,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -180,15 +180,29 @@ const createChartOptionsFunc =
       ? R.prop(data.seriesDateFomat, frequencies)
       : null;
 
-    const positionedAnnotations = annotations
+    // TODO: Move into a function createPositionedAnnotation
+    const groupedAnnotations = R.groupBy(R.prop('type'), annotations);
+
+    const bandAnnotations = groupedAnnotations.band;
+    const pointAnnotations = groupedAnnotations.point;
+
+    const positionedBandAnnotations = bandAnnotations
       ? createPositionedBandAnnotations({
           annotations,
+          annotations: bandAnnotations,
           series: data.series,
           categories: data.categories,
-          areCategoriesNumbers: data.areCategoriesNumbers,
           areCategoriesDates: data.areCategoriesDates,
           categoriesFrequency,
         })
+      : null;
+
+    const positionedPointAnnotations = pointAnnotations
+      ? createPositionedPointAnnotations(
+          pointAnnotations,
+          data,
+          categoriesFrequency,
+        )
       : null;
 
     const options = createOptionsFuncForChartType({
@@ -214,7 +228,8 @@ const createChartOptionsFunc =
       chartSize,
       inlineLabels,
       hideLegend,
-      positionedAnnotations,
+      positionedBandAnnotations,
+      positionedPointAnnotations,
     });
 
     const customChartRender = R.propOr(

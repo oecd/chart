@@ -1070,27 +1070,19 @@ const HighchartsChart = ({
     const categoryCodeToIndex = new Map(
       mapWithIndex(({ code }, index) => [code, index], parsedData.categories),
     );
-    return R.compose(
-      // Sort annotations so alphabetical references appear left-to-right (A, B, C etc.)
-      R.sortBy(
-        parsedData.areCategoriesDates
-          ? // Date: Sort by string representation (e.g. "2020-Q4")
-            R.prop('fromCategoryCode')
-          : // String: Sort by index so the annotation order equals the category order
-            (annotation) =>
-              categoryCodeToIndex.get(annotation.fromCategoryCode),
-      ),
-      // Make sure the categories appear in the data so that the annotations in the footer
-      // are those that actually appear in the chart.
-      R.filter(
-        (annotation) =>
-          // TODO: Problem: this does not work for continuous data, i.e. dates and numbers-
-          // It would filter out annotations that could be displayed in the chart.
-          categoryCodeToIndex.has(annotation.fromCategoryCode) &&
-          categoryCodeToIndex.has(annotation.toCategoryCode),
-      ),
-    )(annotations);
+    // Sort annotations so alphabetical references appear left-to-right (A, B, C etc.)
+    return R.sortBy(
+      parsedData.areCategoriesDates
+        ? // Date: Sort by string representation (e.g. "2020-Q4")
+          ({ categoryCode, fromCategoryCode }) =>
+            categoryCode ?? fromCategoryCode
+        : // String: Sort by index so the annotation order equals the category order
+          ({ categoryCode, fromCategoryCode }) =>
+            categoryCodeToIndex.get(categoryCode ?? fromCategoryCode),
+      annotations,
+    );
   }, [parsedData, annotations]);
+  console.log('sortedApplicableAnnotations', sortedApplicableAnnotations);
 
   const annotationsForFooter = useMemo(
     () => createAnnotationFooter(sortedApplicableAnnotations),
@@ -1374,7 +1366,7 @@ const HighchartsChart = ({
               ),
               R.when(() => !displaySourceAsTooltip, R.append(parsedSource)),
               R.when(() => !displayNoteAsTooltip, R.append(parsedNote)),
-            )([]),
+            )([annotationsForFooter]),
           }}
         />
       </div>

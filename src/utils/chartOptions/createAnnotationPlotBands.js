@@ -6,6 +6,7 @@ import {
   fontStyleByTextElementTypes,
   textElementTypes,
 } from '../../constants/styling';
+import { getReferenceLetter } from './getReferenceLetter';
 
 /** Default band fill color */
 const BAND_COLOR = '#F0F4F8';
@@ -89,7 +90,7 @@ background-color: white;
 text-align: center;
 `;
   // Uppercase Latin alphabet
-  const referenceLetter = String.fromCodePoint(65 + (index % 24));
+  const referenceLetter = getReferenceLetter(index);
   const isRight = position === 'right';
   return {
     align: isRight ? 'right' : 'center',
@@ -110,7 +111,7 @@ text-align: center;
  * Returns Highcharts plot bands for the given annotations.
  *
  * @param {{
- * positionedAnnotations: import('./annotation').PositionedAnnotation[];
+ * positionedAnnotations: import('./annotation').PositionedBandAnnotation[];
  * chartSize: keyof typeof import('../../constants/chart').chartSizes;
  * showLabelsInline: boolean;
  * position: 'top' | 'right'

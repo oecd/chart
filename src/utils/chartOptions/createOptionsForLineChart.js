@@ -67,12 +67,13 @@ export const createOptionsForLineChart = ({
   hideLineSymbols = false,
   chartSize,
   disableAnimation = false,
-  positionedAnnotations,
+  positionedBandAnnotations,
+  positionedPointAnnotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
-  const showAnnotationLabelsInline = positionedAnnotations
-    ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+  const showAnnotationLabelsInline = positionedBandAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedBandAnnotations)
     : false;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
@@ -337,9 +338,9 @@ export const createOptionsForLineChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
-  const plotBands = positionedAnnotations
+  const plotBands = positionedBandAnnotations
     ? createAnnotationPlotBands({
-        positionedAnnotations,
+        positionedAnnotations: positionedBandAnnotations,
         chartSize,
         showLabelsInline: showAnnotationLabelsInline,
         position: 'top',
@@ -364,6 +365,8 @@ export const createOptionsForLineChart = ({
   })();
 
   return {
+    annotations: positionedPointAnnotations,
+
     custom: customChartOptions,
 
     chart: {

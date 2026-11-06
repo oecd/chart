@@ -21,7 +21,7 @@ const NO_ANNOTATIONS = [];
  * @param {{
  * annotations: import('./annotation').BandAnnotation[];
  * }} options
- * @returns {import('./annotation').PositionedAnnotation[]}
+ * @returns {import('./annotation').PositionedBandAnnotation[]}
  */
 const getContinuousBandAnnotations = ({ annotations }) => {
   return annotations
@@ -51,7 +51,7 @@ const getContinuousBandAnnotations = ({ annotations }) => {
  * annotations: import('./annotation').BandAnnotation[];
  * categories: { code: string }[];
  * }} options
- * @returns {import('./annotation').PositionedAnnotation[]}
+ * @returns {import('./annotation').PositionedBandAnnotation[]}
  */
 const getQualitativeBandAnnotations = ({ annotations, categories }) => {
   return annotations
@@ -81,14 +81,14 @@ const getQualitativeBandAnnotations = ({ annotations, categories }) => {
  * Plot bands are defined with time stamps.
  *
  * @param {{
- * annotations: import('./annotation').Annotation[];
+ * annotations: import('./annotation').BandAnnotation[];
  * series: Series[];
  * categoriesFrequency: {
  *   tryParse: (str: string) => Date | false;
  *   getMiddle: (date: Date, step: number) => Date;
  * };
  * }} options
- * @returns {import('./annotation').PositionedAnnotation[]}
+ * @returns {import('./annotation').PositionedBandAnnotation[]}
  */
 const getTimeBandAnnotations = ({
   annotations,
@@ -143,7 +143,7 @@ const getTimeBandAnnotations = ({
  *   getMiddle: (date: Date, step: number) => Date;
  * } | null;
  * }} options
- * @returns {import('./annotation').PositionedAnnotation[]}
+ * @returns {import('./annotation').PositionedBandAnnotation[]}
  */
 export const createPositionedBandAnnotations = ({
   annotations,

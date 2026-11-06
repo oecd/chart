@@ -58,7 +58,8 @@ export const createOptionsForBarChart = ({
   disableLegendInteraction = false,
   chartSize,
   disableAnimation = false,
-  positionedAnnotations,
+  positionedBandAnnotations,
+  positionedPointAnnotations,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -129,8 +130,8 @@ export const createOptionsForBarChart = ({
 
   const showAnnotationLabelsInline =
     !horizontal &&
-    (positionedAnnotations
-      ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+    (positionedBandAnnotations
+      ? R.any(R.prop('showLabelInline'), positionedBandAnnotations)
       : false);
 
   const legendMargin =
@@ -142,9 +143,9 @@ export const createOptionsForBarChart = ({
     chartSize,
   );
 
-  const plotBands = positionedAnnotations
+  const plotBands = positionedBandAnnotations
     ? createAnnotationPlotBands({
-        positionedAnnotations,
+        positionedAnnotations: positionedBandAnnotations,
         chartSize,
         showLabelsInline: showAnnotationLabelsInline,
         position: horizontal ? 'right' : 'top',
@@ -177,6 +178,8 @@ export const createOptionsForBarChart = ({
       : 0;
 
   return {
+    annotations: positionedPointAnnotations,
+
     custom: customChartOptions,
 
     chart: {
