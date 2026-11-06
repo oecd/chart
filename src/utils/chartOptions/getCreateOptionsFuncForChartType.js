@@ -39,8 +39,7 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
-import { createPositionedBandAnnotations } from './createPositionedBandAnnotations';
-import { createPositionedPointAnnotations } from './createPositionedPointAnnotations';
+import { createPositionedAnnotations } from './createPositionedAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
 
@@ -180,30 +179,8 @@ const createChartOptionsFunc =
       ? R.prop(data.seriesDateFomat, frequencies)
       : null;
 
-    // TODO: Move into a function createPositionedAnnotation
-    const groupedAnnotations = R.groupBy(R.prop('type'), annotations);
-
-    const bandAnnotations = groupedAnnotations.band;
-    const pointAnnotations = groupedAnnotations.point;
-
-    const positionedBandAnnotations = bandAnnotations
-      ? createPositionedBandAnnotations({
-          annotations,
-          annotations: bandAnnotations,
-          series: data.series,
-          categories: data.categories,
-          areCategoriesDates: data.areCategoriesDates,
-          categoriesFrequency,
-        })
-      : null;
-
-    const positionedPointAnnotations = pointAnnotations
-      ? createPositionedPointAnnotations(
-          pointAnnotations,
-          data,
-          categoriesFrequency,
-        )
-      : null;
+    const { positionedBandAnnotations, positionedPointAnnotations } =
+      createPositionedAnnotations({ data, annotations, categoriesFrequency });
 
     const options = createOptionsFuncForChartType({
       ...otherProps,

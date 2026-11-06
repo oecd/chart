@@ -1,15 +1,6 @@
 // @ts-check
 import * as R from 'ramda';
 
-/**
- * @typedef {{
- *   data: {
- *     value: number;
- *     metadata?: { parsedX: number }
- *   }[]
- * }} Series
- */
-
 /** @type {never[]} */
 const NO_ANNOTATIONS = [];
 
@@ -82,7 +73,6 @@ const getQualitativeBandAnnotations = ({ annotations, categories }) => {
  *
  * @param {{
  * annotations: import('./annotation').BandAnnotation[];
- * series: Series[];
  * categoriesFrequency: {
  *   tryParse: (str: string) => Date | false;
  *   getMiddle: (date: Date, step: number) => Date;
@@ -90,14 +80,7 @@ const getQualitativeBandAnnotations = ({ annotations, categories }) => {
  * }} options
  * @returns {import('./annotation').PositionedBandAnnotation[]}
  */
-const getTimeBandAnnotations = ({
-  annotations,
-  series,
-  categoriesFrequency,
-}) => {
-  const firstSeries = series[0];
-  if (!firstSeries) return NO_ANNOTATIONS;
-
+const getTimeBandAnnotations = ({ annotations, categoriesFrequency }) => {
   return annotations
     .map((annotation) => {
       const { fromCategoryCode, toCategoryCode } = annotation;
@@ -129,12 +112,6 @@ const getTimeBandAnnotations = ({
 /**
  * @param {{
  * annotations: import('./annotation').BandAnnotation[];
- * series: {
- *   data: {
- *     value: number;
- *     metadata: { parsedX: number }
- *   }[]
- * }[];
  * categories: { code: string }[];
  * areCategoriesNumbers: boolean;
  * areCategoriesDates: boolean;
@@ -147,7 +124,6 @@ const getTimeBandAnnotations = ({
  */
 export const createPositionedBandAnnotations = ({
   annotations,
-  series,
   categories,
   areCategoriesNumbers,
   areCategoriesDates,
@@ -162,7 +138,6 @@ export const createPositionedBandAnnotations = ({
   if (areCategoriesDates && categoriesFrequency) {
     return getTimeBandAnnotations({
       annotations: bandAnnotations,
-      series,
       categoriesFrequency,
     });
   }
