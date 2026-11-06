@@ -98,34 +98,25 @@ const getTimeBandAnnotations = ({
   const firstSeries = series[0];
   if (!firstSeries) return NO_ANNOTATIONS;
 
-  // data.categories contains the unparsed categories like "2020-01-06".
-  // We need the timestamps from the points here.
-  /** @type {number[]} */
-  const parsedCategories = R.compose(
-    R.filter(R.isNotNil),
-    R.map((point) => point.metadata?.parsedX),
-  )(firstSeries.data);
-  if (parsedCategories.length === 0) return NO_ANNOTATIONS;
-  let firstTimestamp = parsedCategories ? R.head(parsedCategories) : undefined;
-  let lastTimestamp = parsedCategories ? R.last(parsedCategories) : undefined;
-
-  if (firstTimestamp === undefined || lastTimestamp === undefined) {
-    return NO_ANNOTATIONS;
-  }
-
   return annotations
     .map((annotation) => {
+      const { fromCategoryCode, toCategoryCode } = annotation;
+      if (
+        typeof fromCategoryCode === 'number' ||
+        typeof toCategoryCode === 'number'
+      ) {
+        return;
+      }
+
       let from = -1;
       let to = -1;
 
-      const fromDate = categoriesFrequency.tryParse(
-        annotation.fromCategoryCode,
-      );
+      const fromDate = categoriesFrequency.tryParse(fromCategoryCode);
       if (!fromDate) return;
       // Start one half before the from date
       from = categoriesFrequency.getMiddle(fromDate, -1).getTime();
 
-      const toDate = categoriesFrequency.tryParse(annotation.toCategoryCode);
+      const toDate = categoriesFrequency.tryParse(toCategoryCode);
       if (!toDate) return;
       // End one half after the to date
       to = categoriesFrequency.getMiddle(toDate, 1).getTime();
