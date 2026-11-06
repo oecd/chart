@@ -1366,7 +1366,7 @@ const HighchartsChart = ({
               ),
               R.when(() => !displaySourceAsTooltip, R.append(parsedSource)),
               R.when(() => !displayNoteAsTooltip, R.append(parsedNote)),
-            )([annotationsForFooter]),
+            )([]),
           }}
         />
       </div>
