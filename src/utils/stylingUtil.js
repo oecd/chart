@@ -137,7 +137,7 @@ export const calcRadarPaneSize = (chartSize) => {
     return '70%';
   }
   if (chartSize === chartSizes.medium) {
-    return '80px';
+    return '75%';
   }
 
   return '85%';
