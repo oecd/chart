@@ -1,6 +1,7 @@
 // @ts-check
 import * as R from 'ramda';
 import {
+  animationConfig,
   chartSpacing,
   chartSpacingFullScreenAndExport,
 } from '../../constants/chart';
@@ -40,6 +41,7 @@ export const createOptionsForPieChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
+  disableAnimation = false,
 }) => {
   const allSeries = R.map(
     (series) => ({
@@ -103,7 +105,7 @@ export const createOptionsForPieChart = ({
     chart: {
       type: 'pie',
       height,
-      animation: false,
+      animation: disableAnimation ? false : animationConfig,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       marginLeft: 10,
       marginRight: 10,
@@ -138,7 +140,7 @@ export const createOptionsForPieChart = ({
 
     plotOptions: {
       series: {
-        animation: false,
+        animation: disableAnimation ? false : animationConfig,
         borderWidth: 0.3,
         borderColor: '#ffffff',
         borderRadius: 0,

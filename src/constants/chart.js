@@ -140,3 +140,7 @@ export const chartSizes = {
  * Opacity of non-highlighted chart markers in case there are any highlights
  */
 export const nonHighlightedOpacity = 0.5;
+
+export const animationConfig = {
+  duration: 800,
+};

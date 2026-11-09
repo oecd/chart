@@ -2,6 +2,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  animationConfig,
   baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
@@ -244,6 +245,7 @@ export const createOptionsForStackedChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
+  disableAnimation = false,
 }) => {
   const horizontal = chartType === chartTypes.stackedRow;
   const area = chartType === chartTypes.stackedArea;
@@ -333,7 +335,7 @@ export const createOptionsForStackedChart = ({
         ? calcMarginTopForBarAndStacked(title, subtitle, horizontal, chartSize)
         : undefined,
       height,
-      animation: false,
+      animation: disableAnimation ? false : animationConfig,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
@@ -419,7 +421,7 @@ export const createOptionsForStackedChart = ({
 
     plotOptions: {
       series: {
-        animation: false,
+        animation: disableAnimation ? false : animationConfig,
         stacking: stacking || stackingOptions.percent.value,
         pointPadding: 0.1,
         groupPadding: 0.1,

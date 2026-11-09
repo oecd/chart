@@ -1,5 +1,6 @@
 import * as R from 'ramda';
 import {
+  animationConfig,
   baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
@@ -453,6 +454,7 @@ export const createOptionsForMapChart = ({
   decimalPoint,
   seriesFrequency,
   chartSize,
+  disableAnimation = false,
 }) => {
   const createMapDatapoint = (d) =>
     mapType === mapTypes.normal.value
@@ -621,7 +623,7 @@ export const createOptionsForMapChart = ({
     chart: {
       map: finalMap,
       height,
-      animation: false,
+      animation: disableAnimation ? false : animationConfig,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: { fullscreenClose },
     },
@@ -703,7 +705,7 @@ export const createOptionsForMapChart = ({
         },
       },
       series: {
-        animation: false,
+        animation: disableAnimation ? false : animationConfig,
         dataLabels: {
           ...R.prop('dataLabels', formatters),
           style: fontStyleForTextElement(textElementTypes.legend, chartSize),

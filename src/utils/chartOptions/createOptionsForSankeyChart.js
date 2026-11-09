@@ -1,6 +1,7 @@
 // @ts-check
 import * as R from 'ramda';
 import {
+  animationConfig,
   chartSpacing,
   chartSpacingFullScreenAndExport,
 } from '../../constants/chart';
@@ -28,6 +29,7 @@ export const createOptionsForSankeyChart = ({
   isFullScreen = false,
   height,
   chartSize,
+  disableAnimation = false,
 }) => {
   const series = R.compose(
     ({ data: seriesData, columnByNode }) => {
@@ -71,7 +73,7 @@ export const createOptionsForSankeyChart = ({
     chart: {
       marginTop: calcMarginTopDefault(title, subtitle, chartSize),
       height,
-      animation: false,
+      animation: disableAnimation ? false : animationConfig,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
@@ -82,7 +84,7 @@ export const createOptionsForSankeyChart = ({
 
     plotOptions: {
       series: {
-        animation: false,
+        animation: disableAnimation ? false : animationConfig,
       },
       sankey: {
         dataLabels: {

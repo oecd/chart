@@ -2,6 +2,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  animationConfig,
   baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
@@ -69,6 +70,7 @@ export const createOptionsForScatterChart = ({
   sortOrder,
   disableLegendInteraction = false,
   chartSize,
+  disableAnimation = false,
 }) => {
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
@@ -291,7 +293,7 @@ export const createOptionsForScatterChart = ({
           : undefined,
       ...(symbolMinMaxLayout ? { marginLeft: 12, marginRight: 12 } : null),
       height,
-      animation: false,
+      animation: disableAnimation ? false : animationConfig,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
@@ -382,7 +384,7 @@ export const createOptionsForScatterChart = ({
 
     plotOptions: {
       series: {
-        animation: false,
+        animation: disableAnimation ? false : animationConfig,
         dataLabels: {
           ...(symbolMinMaxLayout ? { enabled: true } : null),
           ...R.prop('dataLabels', formatters),

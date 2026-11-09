@@ -183,6 +183,7 @@ const HighchartsChart = ({
   calcAvgValue = null,
   referenceValueCode = null,
   dataLastUpdateDate = null,
+  disableAnimation = false,
 }) => {
   const ChartForType = getChartForType(chartType);
 
@@ -1141,6 +1142,7 @@ const HighchartsChart = ({
         inlineLabels,
         disableLegendInteraction,
         sortOrder,
+        disableAnimation,
       });
 
       setMergedOptions(
@@ -1208,6 +1210,7 @@ const HighchartsChart = ({
     disableLegendInteraction,
     id,
     sortOrder,
+    disableAnimation,
   ]);
 
   useEffect(() => {
@@ -1418,6 +1421,7 @@ HighchartsChart.propTypes = {
   calcAvgValue: PropTypes.bool,
   referenceValueCode: PropTypes.string,
   dataLastUpdateDate: PropTypes.string,
+  disableAnimation: PropTypes.bool,
 };
 
 export default memo(HighchartsChart);

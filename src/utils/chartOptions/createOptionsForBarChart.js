@@ -2,6 +2,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  animationConfig,
   baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
@@ -51,6 +52,7 @@ export const createOptionsForBarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
+  disableAnimation = false,
 }) => {
   const horizontal = chartType === chartTypes.row;
 
@@ -128,7 +130,7 @@ export const createOptionsForBarChart = ({
         ? calcMarginTopForBarAndStacked(title, subtitle, horizontal, chartSize)
         : undefined,
       height,
-      animation: false,
+      animation: disableAnimation ? false : animationConfig,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: { fullscreenClose },
       className: disableLegendInteraction
@@ -210,7 +212,7 @@ export const createOptionsForBarChart = ({
 
     plotOptions: {
       series: {
-        animation: false,
+        animation: disableAnimation ? false : animationConfig,
         pointPadding: 0.1,
         groupPadding: 0.1,
         borderWidth: 0.3,

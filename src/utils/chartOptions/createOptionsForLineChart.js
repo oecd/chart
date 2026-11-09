@@ -2,6 +2,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  animationConfig,
   baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
@@ -64,6 +65,7 @@ export const createOptionsForLineChart = ({
   disableLegendInteraction = false,
   hideLineSymbols = false,
   chartSize,
+  disableAnimation = false,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
@@ -336,7 +338,7 @@ export const createOptionsForLineChart = ({
           ? calcMarginTopDefault(title, subtitle, chartSize)
           : undefined,
       height,
-      animation: false,
+      animation: disableAnimation ? false : animationConfig,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
       events: {
         fullscreenClose,
@@ -396,7 +398,7 @@ export const createOptionsForLineChart = ({
 
     plotOptions: {
       series: {
-        animation: false,
+        animation: disableAnimation ? false : animationConfig,
         dataLabels: inlineLabels
           ? {
               enabled: false,

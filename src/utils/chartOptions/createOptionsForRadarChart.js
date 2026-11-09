@@ -2,6 +2,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import {
+  animationConfig,
   baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
@@ -55,6 +56,7 @@ export const createOptionsForRadarChart = ({
   seriesFrequency,
   disableLegendInteraction = false,
   chartSize,
+  disableAnimation = false,
 }) => {
   const seenCategories = new Set();
 
@@ -136,6 +138,7 @@ export const createOptionsForRadarChart = ({
       }, series.data),
       type: 'line',
       lineWidth: 2.5,
+      animation: disableAnimation ? false : animationConfig,
       marker: {
         symbol: isSeriesHighlighted
           ? getListItemAtTurningIndex(seriesHighlightIndex, highlightSymbols)
@@ -217,7 +220,7 @@ export const createOptionsForRadarChart = ({
       polar: true,
       type: 'line',
       height,
-      animation: false,
+      animation: disableAnimation ? false : animationConfig,
       margin: hideLegend ? 40 : undefined,
       marginBottom: !hideLegend
         ? calcMarginBottomForRadar(chartSize)
@@ -298,7 +301,7 @@ export const createOptionsForRadarChart = ({
 
     plotOptions: {
       series: {
-        animation: false,
+        animation: disableAnimation ? false : animationConfig,
         pointPadding: 0,
         groupPadding: 0,
         dataLabels: {
