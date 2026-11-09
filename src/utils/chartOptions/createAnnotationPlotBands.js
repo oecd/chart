@@ -7,6 +7,7 @@ import {
   textElementTypes,
 } from '../../constants/styling';
 import { getReferenceLetter } from './getReferenceLetter';
+import { referenceCssStyles } from './referenceSymbolStyles';
 
 /** Default band fill color */
 const BAND_COLOR = '#F0F4F8';
@@ -97,7 +98,7 @@ pointer-events: none;
   return {
     align: isRight ? 'right' : 'center',
     useHTML: true,
-    text: `<span style="${style}">${escapeHTML(referenceLetter)}</span>`,
+    text: `<span style="${referenceCssStyles()}">${escapeHTML(referenceLetter)}</span>`,
     x: isRight ? referenceOuterSize + referenceGap : undefined,
     y: isRight ? 3 : -(referenceOuterSize / 2),
     style: {

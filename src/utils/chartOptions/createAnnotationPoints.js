@@ -1,24 +1,7 @@
 //  @ts-check
 import { getReferenceLetter } from "./getReferenceLetter";
+import { referenceCssStyles } from "./referenceSymbolStyles";
 
-const diameter = 16;
-const diameterPx = `${diameter}px`;
-const fontColors = {
-  dark: '#101D40',
-  normal: '#586179',
-};
-
-const style = `
-display: block;
-width: ${diameterPx};
-height: ${diameterPx};
-border: 1px solid ${fontColors.dark};
-border-radius: 50%;
-background-color: white;
-text-align: center;
-color: ${fontColors.dark};
-box-sizing: content-box;
-`;
 
 /**
  * 
@@ -36,12 +19,11 @@ export const createAnnotationPoints = (positionedPointAnnotations) => {
       shape: 'rect',
       backgroundColor: 'transparent',
       borderWidth: 0,
-      borderColor: 'black',
       padding: 0,
       distance: 0,
       verticalAlign: 'middle',
 
-      text: `<span style="${style}">${referenceLetter}</span>`,
+      text: `<span style="${referenceCssStyles()}">${referenceLetter}</span>`,
     };
   });
 };
