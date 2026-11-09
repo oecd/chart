@@ -1,3 +1,4 @@
+//  @ts-check
 import { getReferenceLetter } from "./getReferenceLetter";
 
 const diameter = 16;
@@ -19,6 +20,11 @@ color: ${fontColors.dark};
 box-sizing: content-box;
 `;
 
+/**
+ * 
+ * @param {import('./annotation').PositionedPointAnnotation[]} positionedPointAnnotations 
+ * @returns {import('./annotation').PositionedPointAnnotation[]}
+ */
 export const createAnnotationPoints = (positionedPointAnnotations) => {
   return positionedPointAnnotations.map((annotation, index) => {
     const referenceLetter = getReferenceLetter(index);

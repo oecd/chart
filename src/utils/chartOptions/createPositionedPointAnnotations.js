@@ -1,6 +1,14 @@
+// @ts-check
+
 import * as R from 'ramda';
 import { chartTypes } from '../../constants/chart';
 
+
+/**
+ * @template T
+ * @param {T[][]} lists
+ * @returns {T[][]}
+ */
 const zip = (lists) => {
   const length = Math.min(...lists.map((list) => list.length));
   let result = [];
@@ -10,6 +18,26 @@ const zip = (lists) => {
   return result;
 };
 
+
+/**
+ * 
+ * @param {import('./annotation').PointAnnotation[]} annotations 
+ * @param {{
+ *   series: {
+ *     code: string;
+ *     data: {
+ *         value: string
+ *     }[]
+ *   }[];
+ *   categories: { code: string }[];
+ * }} data
+ * @param {{
+ *   tryParse: (str: string) => Date | false;
+ * }} categoriesFrequency
+ * @param {boolean} areCategoriesDates 
+ * @param {import('../../constants/chart').chartTypes} chartType 
+ * @returns 
+ */
 export const createPositionedPointAnnotations = (
   annotations,
   data,

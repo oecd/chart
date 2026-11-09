@@ -4,3 +4,4 @@ dist-browser
 coverage
 .env
 .npmrc
+src/utils/chartOptions/exampleAnnotations.js
