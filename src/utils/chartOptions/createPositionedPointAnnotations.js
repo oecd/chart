@@ -1,4 +1,5 @@
 import * as R from 'ramda';
+import { chartTypes } from '../../constants/chart';
 
 const zip = (lists) => {
   const length = Math.min(...lists.map((list) => list.length));
@@ -14,6 +15,7 @@ export const createPositionedPointAnnotations = (
   data,
   categoriesFrequency,
   areCategoriesDates,
+  chartType,
 ) => {
   let allSeries = R.pluck('data', data.series);
   let zippedSeries = zip(allSeries);
@@ -33,8 +35,9 @@ export const createPositionedPointAnnotations = (
       );
       if (!seriesForAnnotation) return;
 
-      // let yValue = seriesForAnnotation.data[categoryIndex].value;
-      let yValue = maxValuePerIndex[categoryIndex];
+      let yValue = chartType === chartTypes.bar
+        ? maxValuePerIndex[categoryIndex]
+        : seriesForAnnotation.data[categoryIndex].value;
 
       let category = data.categories[categoryIndex];
       let timestamp = areCategoriesDates
