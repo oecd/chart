@@ -45,7 +45,12 @@ export const createPositionedAnnotations = ({
     : null;
 
   const positionedPointAnnotations = point
-    ? createPositionedPointAnnotations(point, data, categoriesFrequency)
+    ? createPositionedPointAnnotations(
+        point,
+        data,
+        categoriesFrequency,
+        data.areCategoriesDates,
+      )
     : null;
 
   return { positionedBandAnnotations, positionedPointAnnotations };
