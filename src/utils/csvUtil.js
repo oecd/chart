@@ -521,7 +521,7 @@ export const handleAreCategoriesAndSeriesDates =
         return {
           ...data,
           areCategoriesDates: true,
-          categoriesDateFomat: dateFormatForCategories,
+          categoriesDateFormat: dateFormatForCategories,
           ...seriesInfo,
         };
       }
@@ -550,7 +550,7 @@ export const handleAreCategoriesAndSeriesDates =
         ...data,
         data: newData,
         areCategoriesDates: true,
-        categoriesDateFomat: dateFormatForCategories,
+        categoriesDateFormat: dateFormatForCategories,
         ...seriesInfo,
       };
     }

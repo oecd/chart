@@ -155,7 +155,7 @@ const createChartOptionsFunc =
       decimalPoint,
       areCategoriesNumbers: data.areCategoriesNumbers,
       areCategoriesDates: data.areCategoriesDates,
-      categoriesDateFomat: data.categoriesDateFomat,
+      categoriesDateFormat: data.categoriesDateFormat,
       areSeriesNumbers: data.areSeriesNumbers,
       areSeriesDates: data.areSeriesDates,
       seriesDateFomat: data.seriesDateFomat,
@@ -172,7 +172,7 @@ const createChartOptionsFunc =
       );
 
     const categoriesFrequency = data.areCategoriesDates
-      ? R.prop(data.categoriesDateFomat, frequencies)
+      ? R.prop(data.categoriesDateFormat, frequencies)
       : null;
 
     const seriesFrequency = data.areSeriesDates
