@@ -3,7 +3,6 @@
 import * as R from 'ramda';
 import { chartTypes } from '../../constants/chart';
 
-
 /**
  * @template T
  * @param {T[][]} lists
@@ -18,11 +17,12 @@ const zip = (lists) => {
   return result;
 };
 
-
 /**
- * 
- * @param {import('./annotation').PointAnnotation[]} annotations 
+ *
+ * @param {import('./annotation').PointAnnotation[]} annotations
  * @param {{
+ * annotations: import('./annotation').IndexedPointAnnotation[];
+ * data: {
  *   series: {
  *     code: string;
  *     data: {
@@ -34,9 +34,9 @@ const zip = (lists) => {
  * @param {{
  *   tryParse: (str: string) => Date | false;
  * }} categoriesFrequency
- * @param {boolean} areCategoriesDates 
- * @param {import('../../constants/chart').chartTypes} chartType 
- * @returns 
+ * @param {boolean} areCategoriesDates
+ * @param {import('../../constants/chart').chartTypes} chartType
+ * @returns
  */
 export const createPositionedPointAnnotations = (
   annotations,
@@ -63,9 +63,10 @@ export const createPositionedPointAnnotations = (
       );
       if (!seriesForAnnotation) return;
 
-      let yValue = chartType === chartTypes.bar
-        ? maxValuePerIndex[categoryIndex]
-        : seriesForAnnotation.data[categoryIndex].value;
+      let yValue =
+        chartType === chartTypes.bar
+          ? maxValuePerIndex[categoryIndex]
+          : seriesForAnnotation.data[categoryIndex].value;
 
       let category = data.categories[categoryIndex];
       let timestamp = areCategoriesDates

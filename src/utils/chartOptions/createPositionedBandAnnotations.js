@@ -1,16 +1,13 @@
 // @ts-check
 import * as R from 'ramda';
 
-/** @type {never[]} */
-const NO_ANNOTATIONS = [];
-
 /**
  * Adds from/to to annotations for numerical categories
  * (when areCategoriesNumbers is true).
  * Plot bands are defined with the numerical category code.
  *
  * @param {{
- * annotations: import('./annotation').BandAnnotation[];
+ * annotations: (import('./annotation').IndexedBandAnnotation)[];
  * }} options
  * @returns {import('./annotation').PositionedBandAnnotation[]}
  */
@@ -39,7 +36,7 @@ const getContinuousBandAnnotations = ({ annotations }) => {
  * Plot bands are defined with indices.
  *
  * @param {{
- * annotations: import('./annotation').BandAnnotation[];
+ * annotations: (import('./annotation').IndexedBandAnnotation)[];
  * categories: { code: string }[];
  * }} options
  * @returns {import('./annotation').PositionedBandAnnotation[]}
@@ -72,7 +69,7 @@ const getQualitativeBandAnnotations = ({ annotations, categories }) => {
  * Plot bands are defined with time stamps.
  *
  * @param {{
- * annotations: import('./annotation').BandAnnotation[];
+ * annotations: (import('./annotation').IndexedBandAnnotation)[];
  * categoriesFrequency: {
  *   tryParse: (str: string) => Date | false;
  *   getMiddle: (date: Date, step: number) => Date;
@@ -111,7 +108,7 @@ const getTimeBandAnnotations = ({ annotations, categoriesFrequency }) => {
 
 /**
  * @param {{
- * annotations: import('./annotation').BandAnnotation[];
+ * annotations: (import('./annotation').IndexedBandAnnotation)[];
  * categories: { code: string }[];
  * areCategoriesNumbers: boolean;
  * areCategoriesDates: boolean;

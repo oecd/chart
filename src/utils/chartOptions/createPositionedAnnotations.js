@@ -32,7 +32,18 @@ export const createPositionedAnnotations = ({
       positionedPointAnnotations: [],
     };
 
-  const groupedAnnotations = R.groupBy(R.prop('type'), annotations);
+  // Add an index so that the numbering of the reference symbols
+  // is equal in plot and footer.
+  const referencedAnnotations = annotations.filter(
+    (annotation) => !annotation.showLabelInline,
+  );
+  const indexedAnnotations = annotations.map((annotation) => ({
+    ...annotation,
+    referenceIndex: referencedAnnotations.indexOf(annotation),
+  }));
+  console.log('indexedAnnotations', indexedAnnotations);
+
+  const groupedAnnotations = R.groupBy(R.prop('type'), indexedAnnotations);
   const { band, point } = groupedAnnotations;
 
   const positionedBandAnnotations = band

@@ -1,20 +1,17 @@
 //  @ts-check
-import { getReferenceLetter } from "./getReferenceLetter";
-import { referenceCssStyles } from "./referenceSymbolStyles";
-
+import { getReferenceLetter } from './getReferenceLetter';
+import { referenceCssStyles } from './referenceSymbolStyles';
 
 /**
- * 
- * @param {import('./annotation').PositionedPointAnnotation[]} positionedPointAnnotations 
+ *
+ * @param {import('./annotation').PositionedPointAnnotation[]} positionedPointAnnotations
  * @returns {import('./annotation').PositionedPointAnnotation[]}
  */
 export const createAnnotationPoints = (positionedPointAnnotations) => {
   return positionedPointAnnotations.map((annotation) => {
-    const referenceLetter = getReferenceLetter(annotation.index);
-
-    return {
-      ...annotation,
-
+    const referenceLetter = getReferenceLetter(annotation.referenceIndex);
+    /** @type {import('highcharts').AnnotationsLabelsOptions} */
+    const highchartsAnnotation = {
       useHTML: true,
       shape: 'rect',
       backgroundColor: 'transparent',
@@ -25,5 +22,6 @@ export const createAnnotationPoints = (positionedPointAnnotations) => {
 
       text: `<span style="${referenceCssStyles()}">${referenceLetter}</span>`,
     };
+    return highchartsAnnotation;
   });
 };
