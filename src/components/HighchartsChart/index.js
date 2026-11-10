@@ -36,7 +36,6 @@ import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
 import { createAnnotationFooter } from '../../utils/chartOptions/createAnnotationFooter';
 import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
 import { exampleAnnotations } from '../../utils/chartOptions/exampleAnnotations';
-import { filterAndSortAnnotations } from '../../utils/chartOptions/filterAndSortAnnotations';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
 import {
   createFooter,
@@ -50,7 +49,7 @@ import {
   emptyData,
 } from '../../utils/csvUtil';
 import { fetchJson } from '../../utils/fetchUtil';
-import { isNilOrEmpty } from '../../utils/ramdaUtil';
+import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
 import {
   createDataFromSdmxJson,
   createDotStatUrl,
@@ -1067,14 +1066,41 @@ const HighchartsChart = ({
   const optionsOverrideInternal = useMemoForArrayOrObject(optionsOverride);
 
   // Filter annotations for those categories actually in the data
-  const sortedApplicableAnnotations = useMemo(
-    () => filterAndSortAnnotations(parsedData, annotations),
-    [parsedData, annotations],
+  const sortedApplicableAnnotations = useMemo(() => {
+    if (!parsedData) return [];
+    const categoryCodeToIndex = new Map(
+      mapWithIndex(({ code }, index) => [code, index], parsedData.categories),
+    );
+    // Sort annotations so alphabetical references appear left-to-right (A, B, C etc.)
+    return R.sortBy(
+      parsedData.areCategoriesDates
+        ? // Date: Sort by string representation (e.g. "2020-Q4")
+          ({ categoryCode, fromCategoryCode }) =>
+            categoryCode ?? fromCategoryCode
+        : // String: Sort by index so the annotation order equals the category order
+          ({ categoryCode, fromCategoryCode }) =>
+            categoryCodeToIndex.get(categoryCode ?? fromCategoryCode),
+      annotations,
+    );
+  }, [parsedData, annotations]);
+  // console.log('sortedApplicableAnnotations', sortedApplicableAnnotations);
+
+  // Create a common index for all annotations, so that the numbering of the
+  // reference symbols is equal in plot and footer.
+  const indexedAnnotations = useMemo(
+    () =>
+      sortedApplicableAnnotations.map((annotation, index) => {
+        return {
+          ...annotation,
+          index,
+        };
+      }),
+    [sortedApplicableAnnotations],
   );
 
   const annotationsForFooter = useMemo(
-    () => createAnnotationFooter(sortedApplicableAnnotations),
-    [sortedApplicableAnnotations],
+    () => createAnnotationFooter(indexedAnnotations),
+    [indexedAnnotations],
   );
 
   const annotationsShouldBeDisplayedInTooltip =
@@ -1165,7 +1191,7 @@ const HighchartsChart = ({
         disableLegendInteraction,
         sortOrder,
         disableAnimation,
-        annotations: sortedApplicableAnnotations,
+        annotations: indexedAnnotations,
       });
 
       setMergedOptions(
@@ -1178,7 +1204,7 @@ const HighchartsChart = ({
       setMergedOptions(null);
     }
   }, [
-    sortedApplicableAnnotations,
+    indexedAnnotations,
     annotationsForFooter,
     baseline,
     chartHeight,

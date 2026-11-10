@@ -9,8 +9,8 @@ import { referenceCssStyles } from "./referenceSymbolStyles";
  * @returns {import('./annotation').PositionedPointAnnotation[]}
  */
 export const createAnnotationPoints = (positionedPointAnnotations) => {
-  return positionedPointAnnotations.map((annotation, index) => {
-    const referenceLetter = getReferenceLetter(index);
+  return positionedPointAnnotations.map((annotation) => {
+    const referenceLetter = getReferenceLetter(annotation.index);
 
     return {
       ...annotation,

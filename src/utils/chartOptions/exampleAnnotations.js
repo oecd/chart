@@ -29,13 +29,13 @@ export const exampleAnnotations = [
   },
 
   // // Categorical categories
-  // {
-  //   type: 'band',
-  //   fromCategoryCode: 'Bananas',
-  //   toCategoryCode: 'Oranges',
-  //   label: 'Banana ↔ Oranges The quick brown fox jumps over the lazy dog.',
-  //   showLabelInline: false,
-  // },
+  {
+    type: 'band',
+    fromCategoryCode: 'Bananas',
+    toCategoryCode: 'Oranges',
+    label: 'Banana ↔ Oranges The quick brown fox jumps over the lazy dog.',
+    showLabelInline: false,
+  },
   // {
   //   type: 'band',
   //   fromCategoryCode: 'Grapes',

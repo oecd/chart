@@ -8,8 +8,9 @@
  * label: string;
  * showLabelInline?: boolean;
  * color?: string;
+ * index: number;
  * }} PointAnnotation
- */
+*/
 
 /**
  * @typedef {{
@@ -19,6 +20,7 @@
  * label: string;
  * showLabelInline: boolean;
  * color?: string;
+ * index: number;
  * }} BandAnnotation
  */
 
