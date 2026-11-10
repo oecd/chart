@@ -47,6 +47,7 @@ display: -webkit-box;
 overflow: hidden;
 white-space: normal;
 background-color: white;
+pointer-events: none;
 `;
   return {
     useHTML: true,
@@ -88,6 +89,7 @@ border: ${referenceBorder}px solid ${fontColors.normal};
 border-radius: 50%;
 background-color: white;
 text-align: center;
+pointer-events: none;
 `;
   // Uppercase Latin alphabet
   const referenceLetter = getReferenceLetter(index);
