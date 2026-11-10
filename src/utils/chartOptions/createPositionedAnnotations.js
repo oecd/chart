@@ -34,8 +34,8 @@ export const createPositionedAnnotations = ({
 
   // Add an index so that the numbering of the reference symbols
   // is equal in plot and footer.
-  const referencedAnnotations = annotations.filter(
-    (annotation) => !annotation.showLabelInline,
+  const referencedAnnotations = annotations.filter((annotation) =>
+    annotation.type === 'band' ? !annotation.showLabelInline : true,
   );
   const indexedAnnotations = annotations.map((annotation) => ({
     ...annotation,

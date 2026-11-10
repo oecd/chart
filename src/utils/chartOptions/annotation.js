@@ -6,7 +6,6 @@
  * seriesCode: string;
  * categoryCode: string;
  * label: string;
- * showLabelInline?: boolean;
  * color?: string;
  * index: number;
  * }} PointAnnotation

@@ -126,21 +126,19 @@ export const createPositionedBandAnnotations = ({
   areCategoriesDates,
   categoriesFrequency,
 }) => {
-  const bandAnnotations = annotations.filter(({ type }) => type === 'band');
-
   if (areCategoriesNumbers) {
-    return getContinuousBandAnnotations({ annotations: bandAnnotations });
+    return getContinuousBandAnnotations({ annotations });
   }
 
   if (areCategoriesDates && categoriesFrequency) {
     return getTimeBandAnnotations({
-      annotations: bandAnnotations,
+      annotations,
       categoriesFrequency,
     });
   }
 
   return getQualitativeBandAnnotations({
-    annotations: bandAnnotations,
+    annotations,
     categories,
   });
 };
