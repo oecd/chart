@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react-hooks/static-components */
 import Highcharts from 'highcharts/es-modules/masters/highcharts.src';
 import PropTypes from 'prop-types';
@@ -36,6 +35,7 @@ import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
 import { createAnnotationFooter } from '../../utils/chartOptions/createAnnotationFooter';
 import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
 import { exampleAnnotations } from '../../utils/chartOptions/exampleAnnotations';
+import { filterAndSortAnnotations } from '../../utils/chartOptions/filterAndSortAnnotations';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
 import {
   createFooter,
@@ -49,7 +49,7 @@ import {
   emptyData,
 } from '../../utils/csvUtil';
 import { fetchJson } from '../../utils/fetchUtil';
-import { isNilOrEmpty, mapWithIndex } from '../../utils/ramdaUtil';
+import { isNilOrEmpty } from '../../utils/ramdaUtil';
 import {
   createDataFromSdmxJson,
   createDotStatUrl,
@@ -939,10 +939,25 @@ const HighchartsChart = ({
     setAllHeightCalculationsHaveBeenDone,
   ] = useState(false);
 
+  // Filter annotations for those categories actually in the data
+  const sortedApplicableAnnotations = useMemo(
+    () => filterAndSortAnnotations(parsedData, annotations),
+    [parsedData, annotations],
+  );
+
+  const annotationsForFooter = useMemo(() => {
+    return createAnnotationFooter(sortedApplicableAnnotations);
+  }, [sortedApplicableAnnotations]);
+
+  const annotationsShouldBeDisplayedInTooltip =
+    annotationsForFooter && (footerHeight === 0 || displayAnnotationsAsTooltip);
+
   // height calculations
   useEffect(() => {
     const isThereEnoughSpaceForFooter =
-      displayNoteAsTooltip && displaySourceAsTooltip
+      displayNoteAsTooltip &&
+      displaySourceAsTooltip &&
+      displayAnnotationsAsTooltip
         ? false
         : height - footerRef.current.clientHeight >=
           minChartHeightForFooterDisplay;
@@ -967,10 +982,12 @@ const HighchartsChart = ({
     height,
     parsedTitle,
     parsedSubtitle,
+    annotationsForFooter,
     note,
     source,
     displayNoteAsTooltip,
     displaySourceAsTooltip,
+    displayAnnotationsAsTooltip,
   ]);
 
   const chartCanBedisplayed =
@@ -1065,47 +1082,6 @@ const HighchartsChart = ({
     useMemoForArrayOrObject(mapColorValueSteps);
   const optionsOverrideInternal = useMemoForArrayOrObject(optionsOverride);
 
-  // Filter annotations for those categories actually in the data
-  const sortedApplicableAnnotations = useMemo(() => {
-    if (!parsedData) return [];
-    const categoryCodeToIndex = new Map(
-      mapWithIndex(({ code }, index) => [code, index], parsedData.categories),
-    );
-    // Sort annotations so alphabetical references appear left-to-right (A, B, C etc.)
-    return R.sortBy(
-      parsedData.areCategoriesDates
-        ? // Date: Sort by string representation (e.g. "2020-Q4")
-          ({ categoryCode, fromCategoryCode }) =>
-            categoryCode ?? fromCategoryCode
-        : // String: Sort by index so the annotation order equals the category order
-          ({ categoryCode, fromCategoryCode }) =>
-            categoryCodeToIndex.get(categoryCode ?? fromCategoryCode),
-      annotations,
-    );
-  }, [parsedData, annotations]);
-  // console.log('sortedApplicableAnnotations', sortedApplicableAnnotations);
-
-  // Create a common index for all annotations, so that the numbering of the
-  // reference symbols is equal in plot and footer.
-  const indexedAnnotations = useMemo(
-    () =>
-      sortedApplicableAnnotations.map((annotation, index) => {
-        return {
-          ...annotation,
-          index,
-        };
-      }),
-    [sortedApplicableAnnotations],
-  );
-
-  const annotationsForFooter = useMemo(
-    () => createAnnotationFooter(indexedAnnotations),
-    [indexedAnnotations],
-  );
-
-  const annotationsShouldBeDisplayedInTooltip =
-    annotationsForFooter && (footerHeight === 0 || displayAnnotationsAsTooltip);
-
   // create merged chart options (default + optionsOverride)
   // this must be done a minimum amount of time because it causes Highcharts chart rerender which is costly
   useEffect(() => {
@@ -1191,7 +1167,7 @@ const HighchartsChart = ({
         disableLegendInteraction,
         sortOrder,
         disableAnimation,
-        annotations: indexedAnnotations,
+        annotations: sortedApplicableAnnotations,
       });
 
       setMergedOptions(
