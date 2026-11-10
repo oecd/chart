@@ -41,7 +41,6 @@ export const createPositionedAnnotations = ({
     ...annotation,
     referenceIndex: referencedAnnotations.indexOf(annotation),
   }));
-  console.log('indexedAnnotations', indexedAnnotations);
 
   const groupedAnnotations = R.groupBy(R.prop('type'), indexedAnnotations);
   const { band, point } = groupedAnnotations;
