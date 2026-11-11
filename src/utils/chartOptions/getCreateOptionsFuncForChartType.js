@@ -215,9 +215,41 @@ const createChartOptionsFunc =
       customChartRenderByChartType,
     );
 
-    const customChartRenderWithCbType = ({ target: chart }) => {
-      if (customChartRender) {
+    /**
+     * Rreference to the chart so it is available in the animation complete callback
+     * @type {import('highcharts').Chart}
+     */
+    let chart;
+
+    /**
+     * @param {{ target: import('highcharts').Chart }} [event]
+     */
+    const customChartRenderWithCbType = (event) => {
+      if (event) {
+        // Save reference to the Highcharts chart object
+        chart = event.target;
+      }
+      if (chart && chart.renderer && customChartRender) {
         customChartRender({ chart, cbType: chartType });
+      }
+    };
+
+    /** @type {boolean} */
+    let renderedAfterAnimation = false;
+
+    /**
+     * Callback that runs when Highcharts has completed the animation
+     */
+    const animationComplete = () => {
+      if (
+        customChartRender &&
+        chart &&
+        // The chart object might be destroyed, than it is empty
+        chart.renderer &&
+        !renderedAfterAnimation
+      ) {
+        customChartRender({ chart, cbType: chartType });
+        renderedAfterAnimation = true;
       }
     };
 
@@ -225,6 +257,14 @@ const createChartOptionsFunc =
       R.when(
         () => !R.isNil(customChartRender),
         R.assocPath(['chart', 'events', 'render'], customChartRenderWithCbType),
+      ),
+      // Animation complete callback: Call render callback again once
+      // after the animation completed
+      R.when(
+        (options2) =>
+          customChartRender &&
+          R.path(['plotOptions', 'series', 'animation'], options2) !== false,
+        R.assocPath(['chart', 'animation', 'complete'], animationComplete),
       ),
       R.assoc('lang', {
         decimalPoint,

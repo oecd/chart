@@ -43,7 +43,6 @@ export const renderCategoryGroupOutline = (chart) => {
   /** @type {boolean} */
   const isCategoryGroupHighlighted =
     customChartOptions.isCategoryGroupHighlighted;
-
   if (!isCategoryGroupHighlighted) return NO_ELEMENTS;
 
   /** @type {string[]} */
@@ -62,6 +61,23 @@ export const renderCategoryGroupOutline = (chart) => {
   if (!firstSeries) return NO_ELEMENTS;
   const seriesType = firstSeries.type;
 
+  // Get the transformations from the series <g>.
+  // We cannot just append the element to the series <g> to borrow its
+  // transformations since it has a clip mask that would cut off the outline.
+  const firstSeriesGroup = firstSeries.group;
+
+  // Skip adding elements while Highcharts is animating the scale
+  if (
+    Math.abs(firstSeriesGroup.scaleX) <= 0.01 ||
+    Math.abs(firstSeriesGroup.scaleY) <= 0.01
+  ) {
+    return NO_ELEMENTS;
+  }
+
+  // Get the transformations from the series <g>.
+  // We cannot just append the element to the series <g> since it has a clip mask.
+  const seriesTransform = firstSeriesGroup.element.getAttribute('transform');
+
   const pointsByCategory = groupPointsByCategory(
     relevantSeries,
     baselineCodes.concat(highlightCategoryCodes),
@@ -73,10 +89,6 @@ export const renderCategoryGroupOutline = (chart) => {
     rectByCategory = new Map();
     RECTS_BY_CATEGORY_BY_CHART.set(chart, rectByCategory);
   }
-
-  // Get the transformations from the series <g>.
-  // We cannot just append the element to the series <g> since it has a clip mask.
-  const seriesTransform = firstSeries.group.element.getAttribute('transform');
 
   // Draw a rectangle around the bounding box of all points of a category
   const elements = Array.from(boundingRects).map(([category, { x1, x2 }]) => {
