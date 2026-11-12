@@ -32,9 +32,10 @@ const RECTS_BY_CATEGORY_BY_CHART = new WeakMap();
  * `isCategoryGroupHighlighted`.`
  *
  * @param {Chart} chart
+ * @param {boolean} animate
  * @returns {HighchartsSVGElement[]}
  */
-export const renderCategoryGroupOutline = (chart) => {
+export const renderCategoryGroupOutline = (chart, animate) => {
   const customChartOptions = chart.options.custom;
 
   const chartUsesPercentStacking =
@@ -100,6 +101,9 @@ export const renderCategoryGroupOutline = (chart) => {
         // Append to the top-level <g> that holds all series <g>.
         // This element does not have a transform applied.
         .add(chart.seriesGroup);
+      if (animate) {
+        rect.attr({ opacity: 0 }).animate({ opacity: 1 }, { duration: 250 });
+      }
       rectByCategory.set(category, rect);
     }
 
