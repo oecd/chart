@@ -13,9 +13,9 @@ import { referenceCssStyles } from './referenceSymbolStyles';
 export const createAnnotationFooter = (annotations) =>
   R.compose(
     R.join('\n'),
-    mapWithIndex((annotation) => {
+    mapWithIndex((annotation, index) => {
       // Uppercase Latin alphabet
-      const referenceLetter = getReferenceLetter(annotation.index);
+      const referenceLetter = getReferenceLetter(index);
       return `<p><span style="${referenceCssStyles('inline-block')}">${
         referenceLetter
       }</span> ${annotation.label}</p>`;

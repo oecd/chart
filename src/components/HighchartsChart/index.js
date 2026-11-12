@@ -1180,8 +1180,6 @@ const HighchartsChart = ({
       setMergedOptions(null);
     }
   }, [
-    indexedAnnotations,
-    annotationsForFooter,
     baseline,
     chartHeight,
     chartType,
@@ -1237,6 +1235,8 @@ const HighchartsChart = ({
     disableLegendInteraction,
     id,
     sortOrder,
+    sortedApplicableAnnotations,
+    annotationsForFooter,
     disableAnimation,
   ]);
 
