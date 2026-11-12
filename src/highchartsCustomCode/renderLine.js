@@ -11,9 +11,10 @@ import { renderSplineMarkers } from './utils/renderSplineMarkers';
  *
  * @param {{
  * chart: Chart & { oecd_highlightElements: HighchartsSVGElement[] };
+ * disableAnimation: boolean;
  * }} options
  */
-export const renderLine = ({ chart }) => {
+export const renderLine = ({ chart, disableAnimation }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
 
@@ -21,7 +22,7 @@ export const renderLine = ({ chart }) => {
    * SVG elements created for highlighting
    * @type {HighchartsSVGElement[]}
    */
-  const elements = renderSplineMarkers({ chart });
+  const elements = renderSplineMarkers({ chart, disableAnimation });
 
   if (chart.oecd_highlightElements) {
     // Clean up old shapes

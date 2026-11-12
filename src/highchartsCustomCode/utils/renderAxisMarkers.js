@@ -4,6 +4,7 @@
  */
 
 import { baselineColor } from '../../constants/chart';
+import { fadeIn } from './animation';
 import { AXIS_MARKER_SIZE } from './axisMarkerSize';
 import {
   getBoundingRectsByCategory,
@@ -41,6 +42,7 @@ const AXIS_MARKERS = new WeakMap();
  * referencePoint: Point;
  * parent: HighchartsSVGElement;
  * attributes: SVGAttributes;
+ * disableAnimation: boolean;
  * }} options
  * @returns {HighchartsSVGElement}
  */
@@ -49,6 +51,7 @@ const renderAxisMarkerRect = ({
   referencePoint,
   parent,
   attributes,
+  disableAnimation,
 }) => {
   let axisMarker;
   if (referencePoint) {
@@ -71,6 +74,7 @@ const renderAxisMarkerRect = ({
       // We cannot simply add the rect to the point's parent <g> since it has
       // a clip mask that would cut it off.
       .add(parent);
+    fadeIn(axisMarker, disableAnimation);
 
     if (referencePoint) {
       AXIS_MARKERS.set(referencePoint, axisMarker);
@@ -140,10 +144,15 @@ const getAttributesColumnBar = ({
  * @param {{
  * chart: Chart;
  * relevantSeries: Series[];
+ * disableAnimation: boolean;
  * }} options
  * @returns {HighchartsSVGElement[]}
  */
-const renderCategoryGroupAxisMarkers = ({ chart, relevantSeries }) => {
+const renderCategoryGroupAxisMarkers = ({
+  chart,
+  relevantSeries,
+  disableAnimation,
+}) => {
   const customChartOptions = chart.options.custom;
 
   /** @type {string[]} */
@@ -153,9 +162,18 @@ const renderCategoryGroupAxisMarkers = ({ chart, relevantSeries }) => {
 
   const firstSeries = relevantSeries[0];
   if (!firstSeries) return NO_ELEMENTS;
-  const seriesType = firstSeries.type;
+  const firstSeriesGroup = firstSeries.group;
+  // Skip adding elements while Highcharts is animating the scale
+  if (
+    Math.abs(firstSeriesGroup.scaleX) <= 0.01 ||
+    Math.abs(firstSeriesGroup.scaleY) <= 0.01
+  ) {
+    return NO_ELEMENTS;
+  }
+
   // Get the transforms from the series <g>
-  const seriesTransform = firstSeries.group.element.getAttribute('transform');
+  const seriesTransform = firstSeriesGroup.element.getAttribute('transform');
+  const seriesType = firstSeries.type;
 
   const pointsByCategory = groupPointsByCategory(
     relevantSeries,
@@ -206,6 +224,7 @@ const renderCategoryGroupAxisMarkers = ({ chart, relevantSeries }) => {
         // The latter has a clip mask that would cut off the marker.
         parent: chart.seriesGroup,
         attributes,
+        disableAnimation,
       });
     })
     .filter((element) => element !== undefined);
@@ -215,10 +234,11 @@ const renderCategoryGroupAxisMarkers = ({ chart, relevantSeries }) => {
  * @param {{
  * chart: Chart;
  * relevantSeries: Series[];
+ * disableAnimation: boolean;
  * }} options
  * @returns {HighchartsSVGElement[]}
  */
-const renderNormalAxisMarkers = ({ chart, relevantSeries }) =>
+const renderNormalAxisMarkers = ({ chart, relevantSeries, disableAnimation }) =>
   relevantSeries
     .map((series) => {
       // Create <g> for the axis markers of this series
@@ -233,6 +253,12 @@ const renderNormalAxisMarkers = ({ chart, relevantSeries }) =>
         AXIS_MARKER_GROUPS.set(series, group);
       }
 
+      if (
+        Math.abs(seriesGroup.scaleX) <= 0.01 ||
+        Math.abs(seriesGroup.scaleY) <= 0.01
+      ) {
+        return NO_ELEMENTS;
+      }
       // Get the transformations from the series <g>.
       // We cannot just append the element to the series <g> since it has a clip mask.
       const seriesTransform = series.group.element.getAttribute('transform');
@@ -275,6 +301,7 @@ const renderNormalAxisMarkers = ({ chart, relevantSeries }) =>
           referencePoint: point,
           parent: group,
           attributes,
+          disableAnimation,
         });
       });
 
@@ -289,9 +316,10 @@ const renderNormalAxisMarkers = ({ chart, relevantSeries }) =>
  * Renders axis markers for a chart
  *
  * @param {Chart} chart
+ * @param {boolean} disableAnimation
  * @returns {HighchartsSVGElement[]}
  */
-export const renderAxisMarkers = (chart) => {
+export const renderAxisMarkers = (chart, disableAnimation) => {
   const relevantSeries = chart.series.filter(
     ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
   );
@@ -305,11 +333,13 @@ export const renderAxisMarkers = (chart) => {
     return renderCategoryGroupAxisMarkers({
       chart,
       relevantSeries,
+      disableAnimation,
     });
   }
 
   return renderNormalAxisMarkers({
     chart,
     relevantSeries,
+    disableAnimation,
   });
 };

@@ -3,6 +3,8 @@
  * @import { Chart, Series, Point, SVGElement as HighchartsSVGElement, SVGAttributes } from "highcharts"
  */
 
+import { fadeIn } from './animation';
+
 /**
  * Connects a Highcharts Point with a Highcharts SVG element
  * without creating a strong reference to the point.
@@ -121,6 +123,7 @@ const renderLegendInset = ({ chart, series, isHighlighted, strokeWidth }) => {
  * isHighlighted: boolean;
  * transform: string | null;
  * strokeWidth: number;
+ * disableAnimation: boolean;
  * }} options
  * @returns {HighchartsSVGElement | undefined}
  */
@@ -130,6 +133,7 @@ const renderHighlightInset = ({
   isHighlighted,
   transform,
   strokeWidth,
+  disableAnimation,
 }) => {
   let rect = POINT_INSET_RECTS.get(point);
 
@@ -165,6 +169,7 @@ const renderHighlightInset = ({
       // This element does not have a transform applied.
       .add(chart.seriesGroup)
       .toFront();
+    fadeIn(rect, disableAnimation);
 
     POINT_INSET_RECTS.set(point, rect);
   }
@@ -173,10 +178,16 @@ const renderHighlightInset = ({
 };
 
 /**
+ * In stacked bar/column charts, renders inset rectangles into the bars/columns
+ * of highlighted series.
+ *
+ * Returns the active elements rendered for highlighting.
+ *
  * @param {Chart} chart
+ * @param {boolean} disableAnimation
  * @returns {HighchartsSVGElement[]}
  */
-export const renderHighlightInsets = (chart) => {
+export const renderHighlightInsets = (chart, disableAnimation) => {
   const relevantSeries = chart.series.filter(
     ({ type, visible }) => visible && (type === 'bar' || type === 'column'),
   );
@@ -203,6 +214,16 @@ export const renderHighlightInsets = (chart) => {
         seriesElements.push(legendInset);
       }
 
+      /** @type {HighchartsSVGElement} */
+      const seriesGroup = series.group;
+      // Skip adding elements while Highcharts is animating the scale
+      if (
+        Math.abs(seriesGroup.scaleX) <= 0.01 ||
+        Math.abs(seriesGroup.scaleY) <= 0.01
+      ) {
+        return seriesElements;
+      }
+
       // Get the transformations from the series <g>.
       // We cannot just append the element to the series <g> since it has a clip mask.
       const seriesTransform = series.group.element.getAttribute('transform');
@@ -215,6 +236,7 @@ export const renderHighlightInsets = (chart) => {
             isHighlighted: finalIsHighlighted,
             transform: seriesTransform,
             strokeWidth,
+            disableAnimation,
           }),
         )
         .filter((element) => element !== undefined);
