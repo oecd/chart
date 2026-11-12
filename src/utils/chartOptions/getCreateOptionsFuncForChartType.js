@@ -1,10 +1,17 @@
 // @ts-check
 import * as R from 'ramda';
 import {
+  chartSizes,
   chartTypes,
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   defaultExportSize,
 } from '../../constants/chart';
+import { noDataErrorMessageString } from '../../constants/chartErrorMessages';
+import {
+  fontColors,
+  fontFamilies,
+  textElementTypes,
+} from '../../constants/styling';
 import customChartRenderByChartType from '../../highchartsCustomCode/customChartRenderByChartType';
 import {
   isParsedDataEmpty,
@@ -24,6 +31,7 @@ import {
 } from '../highchartsUtil';
 import { getFinalPaletteColors } from '../paletteUtil';
 import { isNilOrEmpty } from '../ramdaUtil';
+import { fontStyleForTextElement } from '../stylingUtil';
 import { createOptionsForBarChart } from './createOptionsForBarChart';
 import { createOptionsForLineChart } from './createOptionsForLineChart';
 import { createOptionsForPieChart } from './createOptionsForPieChart';
@@ -31,15 +39,9 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
+import { createPositionedAnnotations } from './createPositionedAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
-import {
-  fontColors,
-  fontFamilies,
-  textElementTypes,
-} from '../../constants/styling';
-import { fontStyleForTextElement } from '../stylingUtil';
-import { noDataErrorMessageString } from '../../constants/chartErrorMessages';
 
 const mapsUtil = import('../mapsUtil');
 
@@ -80,6 +82,7 @@ const createChartOptionsFunc =
     chartSize,
     inlineLabels,
     hideLegend,
+    annotations,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -152,7 +155,7 @@ const createChartOptionsFunc =
       decimalPoint,
       areCategoriesNumbers: data.areCategoriesNumbers,
       areCategoriesDates: data.areCategoriesDates,
-      categoriesDateFomat: data.categoriesDateFomat,
+      categoriesDateFormat: data.categoriesDateFormat,
       areSeriesNumbers: data.areSeriesNumbers,
       areSeriesDates: data.areSeriesDates,
       seriesDateFomat: data.seriesDateFomat,
@@ -169,12 +172,15 @@ const createChartOptionsFunc =
       );
 
     const categoriesFrequency = data.areCategoriesDates
-      ? R.prop(data.categoriesDateFomat, frequencies)
+      ? R.prop(data.categoriesDateFormat, frequencies)
       : null;
 
     const seriesFrequency = data.areSeriesDates
       ? R.prop(data.seriesDateFomat, frequencies)
       : null;
+
+    const { positionedBandAnnotations, positionedPointAnnotations } =
+      createPositionedAnnotations({ data, annotations, categoriesFrequency });
 
     const options = createOptionsFuncForChartType({
       ...otherProps,
@@ -199,6 +205,8 @@ const createChartOptionsFunc =
       chartSize,
       inlineLabels,
       hideLegend,
+      positionedBandAnnotations,
+      positionedPointAnnotations,
     });
 
     const customChartRender = R.propOr(
@@ -207,9 +215,41 @@ const createChartOptionsFunc =
       customChartRenderByChartType,
     );
 
-    const customChartRenderWithCbType = ({ target: chart }) => {
-      if (customChartRender) {
+    /**
+     * Rreference to the chart so it is available in the animation complete callback
+     * @type {import('highcharts').Chart}
+     */
+    let chart;
+
+    /**
+     * @param {{ target: import('highcharts').Chart }} [event]
+     */
+    const customChartRenderWithCbType = (event) => {
+      if (event) {
+        // Save reference to the Highcharts chart object
+        chart = event.target;
+      }
+      if (chart && chart.renderer && customChartRender) {
         customChartRender({ chart, cbType: chartType });
+      }
+    };
+
+    /** @type {boolean} */
+    let renderedAfterAnimation = false;
+
+    /**
+     * Callback that runs when Highcharts has completed the animation
+     */
+    const animationComplete = () => {
+      if (
+        customChartRender &&
+        chart &&
+        // The chart object might be destroyed, than it is empty
+        chart.renderer &&
+        !renderedAfterAnimation
+      ) {
+        customChartRender({ chart, cbType: chartType });
+        renderedAfterAnimation = true;
       }
     };
 
@@ -217,6 +257,14 @@ const createChartOptionsFunc =
       R.when(
         () => !R.isNil(customChartRender),
         R.assocPath(['chart', 'events', 'render'], customChartRenderWithCbType),
+      ),
+      // Animation complete callback: Call render callback again once
+      // after the animation completed
+      R.when(
+        (options2) =>
+          customChartRender &&
+          R.path(['plotOptions', 'series', 'animation'], options2) !== false,
+        R.assocPath(['chart', 'animation', 'complete'], animationComplete),
       ),
       R.assoc('lang', {
         decimalPoint,
@@ -268,7 +316,7 @@ const createChartOptionsFunc =
       R.assoc('caption', {
         text: otherProps.footer,
         align: 'left',
-        margin: 25,
+        margin: chartSize === chartSizes.small ? 10 : 25,
         useHTML: true,
         style: fontStyleForTextElement(textElementTypes.source, chartSize),
       }),

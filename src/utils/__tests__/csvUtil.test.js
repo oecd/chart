@@ -828,7 +828,7 @@ VAR2,Variable 2 CL
 
       expect(result).toEqual({
         areCategoriesDates: true,
-        categoriesDateFomat: frequencyTypes.quarterly.value,
+        categoriesDateFormat: frequencyTypes.quarterly.value,
         areSeriesDates: true,
         seriesDateFomat: frequencyTypes.yearly.value,
         data: [
@@ -900,7 +900,7 @@ VAR2,Variable 2 CL
 
       expect(resultForce).toEqual({
         areCategoriesDates: true,
-        categoriesDateFomat: frequencyTypes.quarterly.value,
+        categoriesDateFormat: frequencyTypes.quarterly.value,
         areSeriesDates: true,
         seriesDateFomat: frequencyTypes.yearly.value,
         data: data.data,
@@ -915,7 +915,7 @@ VAR2,Variable 2 CL
 
       expect(resultIncompatibleChartType).toEqual({
         areCategoriesDates: true,
-        categoriesDateFomat: frequencyTypes.quarterly.value,
+        categoriesDateFormat: frequencyTypes.quarterly.value,
         areSeriesDates: true,
         seriesDateFomat: frequencyTypes.yearly.value,
         data: data.data,

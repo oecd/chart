@@ -26,11 +26,13 @@ import {
   calcMarginTopDefault,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { createDatapoint } from './createDataPoint';
 import { highlightSymbols } from './highlightSymbols';
 import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
 import { xAxisLabelFormatter } from './xAxisLabelFormatter';
+import { createAnnotationPoints } from './createAnnotationPoints';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -66,8 +68,14 @@ export const createOptionsForLineChart = ({
   hideLineSymbols = false,
   chartSize,
   disableAnimation = false,
+  positionedBandAnnotations,
+  positionedPointAnnotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
+
+  const showAnnotationLabelsInline = positionedBandAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedBandAnnotations)
+    : false;
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
@@ -294,7 +302,9 @@ export const createOptionsForLineChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginDefault(chartSize),
+      margin:
+        calcLegendMarginDefault(chartSize) +
+        (showAnnotationLabelsInline ? 15 : 0),
     }),
   )();
 
@@ -329,14 +339,48 @@ export const createOptionsForLineChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const plotBands = positionedBandAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations: positionedBandAnnotations,
+        chartSize,
+        showLabelsInline: showAnnotationLabelsInline,
+        position: 'top',
+      })
+    : null;
+
+  const annotationPoints = positionedPointAnnotations
+    ? createAnnotationPoints(positionedPointAnnotations)
+    : null;
+  console.log('annotationPoints', annotationPoints);
+  
+
+  const labelStyle = fontStyleForTextElement(
+    textElementTypes.legend,
+    chartSize,
+  );
+
+  const marginTop = (() => {
+    /** @type {number | undefined} */
+    let marginTop;
+    if (hideLegend || inlineLabels) {
+      marginTop = calcMarginTopDefault(title, subtitle, chartSize);
+    }
+    if (typeof marginTop === 'number' && showAnnotationLabelsInline) {
+      marginTop += parseFloat(labelStyle.fontSize);
+    }
+    return marginTop;
+  })();
+
   return {
+    annotations: [{
+      draggable: '', 
+      labels: annotationPoints,
+    }],
+
     custom: customChartOptions,
 
     chart: {
-      marginTop:
-        hideLegend || inlineLabels
-          ? calcMarginTopDefault(title, subtitle, chartSize)
-          : undefined,
+      marginTop,
       height,
       animation: disableAnimation ? false : animationConfig,
       spacing: isFullScreen ? chartSpacingFullScreenAndExport : chartSpacing,
@@ -357,7 +401,7 @@ export const createOptionsForLineChart = ({
         ? { type: 'datetime' }
         : null),
       labels: {
-        style: fontStyleForTextElement(textElementTypes.legend, chartSize),
+        style: labelStyle,
         autoRotation: [-90, -45, 0],
         ...xAxisLabelFormatters,
         /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
@@ -375,6 +419,7 @@ export const createOptionsForLineChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
@@ -424,9 +469,7 @@ export const createOptionsForLineChart = ({
                 e.target.data.forEach((p) => {
                   p.update(
                     {
-                      dataLabels: {
-                        enabled: true,
-                      },
+                      dataLabels: { enabled: true },
                     },
                     false,
                     false,
@@ -441,9 +484,7 @@ export const createOptionsForLineChart = ({
                 e.target.data.forEach((p) => {
                   p.update(
                     {
-                      dataLabels: {
-                        enabled: false,
-                      },
+                      dataLabels: { enabled: false },
                     },
                     false,
                     false,

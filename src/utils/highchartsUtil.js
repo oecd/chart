@@ -103,7 +103,7 @@ export const createFormatters = ({
   decimalPoint,
   areCategoriesNumbers,
   areCategoriesDates,
-  categoriesDateFomat,
+  categoriesDateFormat,
   areSeriesNumbers,
   areSeriesDates,
   seriesDateFomat,
@@ -165,7 +165,7 @@ export const createFormatters = ({
   };
 
   const categoriesFrequency = areCategoriesDates
-    ? R.prop(categoriesDateFomat, frequencies)
+    ? R.prop(categoriesDateFormat, frequencies)
     : null;
 
   const seriesFrequency = areSeriesDates

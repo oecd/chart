@@ -20,6 +20,8 @@ export const renderBarAndColumn = ({ chart }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
 
+  const animate = chart.options.plotOptions?.series?.animation !== false;
+
   /**
    * SVG elements created for highlighting
    * @type {HighchartsSVGElement[]}
@@ -29,7 +31,7 @@ export const renderBarAndColumn = ({ chart }) => {
   // Render highlight shapes for all active series. Aggregate the shapes in a Set.
   elements.push(...renderAxisMarkers(chart));
   elements.push(...renderHighlightOutlines(chart));
-  elements.push(...renderCategoryGroupOutline(chart));
+  elements.push(...renderCategoryGroupOutline(chart, animate));
   elements.push(...renderHighlightInsets(chart));
 
   if (chart.oecd_highlightElements) {
