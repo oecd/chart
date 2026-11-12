@@ -14,9 +14,10 @@ import { renderHighlightOutlines } from './utils/renderHighlightOutlines';
  *
  * @param {{
  * chart: Chart & { oecd_highlightElements: HighchartsSVGElement[] };
+ * disableAnimation: boolean;
  * }} options
  */
-export const renderBarAndColumn = ({ chart }) => {
+export const renderBarAndColumn = ({ chart, disableAnimation }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
 
@@ -27,10 +28,10 @@ export const renderBarAndColumn = ({ chart }) => {
   const elements = [];
 
   // Render highlight shapes for all active series. Aggregate the shapes in a Set.
-  elements.push(...renderAxisMarkers(chart));
-  elements.push(...renderHighlightOutlines(chart));
-  elements.push(...renderCategoryGroupOutline(chart));
-  elements.push(...renderHighlightInsets(chart));
+  elements.push(...renderAxisMarkers(chart, disableAnimation));
+  elements.push(...renderHighlightOutlines(chart, disableAnimation));
+  elements.push(...renderCategoryGroupOutline(chart, disableAnimation));
+  elements.push(...renderHighlightInsets(chart, disableAnimation));
 
   if (chart.oecd_highlightElements) {
     // Clean up old shapes

@@ -4,6 +4,7 @@
  */
 import { TinyColor } from '@ctrl/tinycolor';
 import { baselineColor } from '../../constants/chart';
+import { fadeIn } from './animation';
 import {
   getBoundingRectsByCategory,
   groupPointsByCategory,
@@ -32,9 +33,10 @@ const RECTS_BY_CATEGORY_BY_CHART = new WeakMap();
  * `isCategoryGroupHighlighted`.`
  *
  * @param {Chart} chart
+ * @param {boolean} disableAnimation
  * @returns {HighchartsSVGElement[]}
  */
-export const renderCategoryGroupOutline = (chart) => {
+export const renderCategoryGroupOutline = (chart, disableAnimation) => {
   const customChartOptions = chart.options.custom;
 
   const chartUsesPercentStacking =
@@ -62,6 +64,18 @@ export const renderCategoryGroupOutline = (chart) => {
   if (!firstSeries) return NO_ELEMENTS;
   const seriesType = firstSeries.type;
 
+  // Get the transformations from the series <g>.
+  // We cannot just append the element to the series <g> since it has a clip mask.
+  const firstSeriesGroup = firstSeries.group;
+  // Skip adding elements while Highcharts is animating the scale
+  if (
+    Math.abs(firstSeriesGroup.scaleX) <= 0.01 ||
+    Math.abs(firstSeriesGroup.scaleY) <= 0.01
+  ) {
+    return NO_ELEMENTS;
+  }
+  const seriesTransform = firstSeriesGroup.element.getAttribute('transform');
+
   const pointsByCategory = groupPointsByCategory(
     relevantSeries,
     baselineCodes.concat(highlightCategoryCodes),
@@ -74,20 +88,19 @@ export const renderCategoryGroupOutline = (chart) => {
     RECTS_BY_CATEGORY_BY_CHART.set(chart, rectByCategory);
   }
 
-  // Get the transformations from the series <g>.
-  // We cannot just append the element to the series <g> since it has a clip mask.
-  const seriesTransform = firstSeries.group.element.getAttribute('transform');
-
   // Draw a rectangle around the bounding box of all points of a category
   const elements = Array.from(boundingRects).map(([category, { x1, x2 }]) => {
     let rect = rectByCategory.get(category);
     if (!(rect && rect.element)) {
       rect = chart.renderer
-        .rect({ class: 'oecd-highlightCategoryGroup' })
-        .css({ pointerEvents: 'none' })
+        .rect({
+          class: 'oecd-highlightCategoryGroup',
+          'pointer-events': 'none',
+        })
         // Append to the top-level <g> that holds all series <g>.
         // This element does not have a transform applied.
         .add(chart.seriesGroup);
+      fadeIn(rect, disableAnimation);
       rectByCategory.set(category, rect);
     }
 
