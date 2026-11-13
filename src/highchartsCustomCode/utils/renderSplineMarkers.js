@@ -3,8 +3,8 @@
  * @import { Chart, Point, SVGElement as HighchartsSVGElement, SVGAttributes, CSSObject } from "highcharts"
  */
 import { TinyColor } from '@ctrl/tinycolor';
-import { fadeIn } from './animation';
 import { AXIS_MARKER_SIZE } from './axisMarkerSize';
+import { fadeIn } from './highlightAnimation';
 import {
   getOutlineGap,
   getOutlineWidth,

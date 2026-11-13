@@ -1,4 +1,5 @@
 // @ts-check
+import { removeEvent } from 'highcharts';
 import * as R from 'ramda';
 import {
   chartTypes,
@@ -216,15 +217,18 @@ const createChartOptionsFunc =
     let chart;
 
     /**
-     * @param {{ target: import('highcharts').Chart }} [event]
+     * @param {{ target: import('highcharts').Chart }} event
      */
-    const customChartRenderWithCbType = (event) => {
-      if (event) {
-        // Save reference to the Highcharts chart object
-        chart = event.target;
-      }
-      if (chart && chart.renderer && customChartRender) {
-        customChartRender({ chart, cbType: chartType, disableAnimation });
+    const renderCallback = ({ target }) => {
+      if (disableAnimation) {
+        customChartRender({
+          chart: target,
+          cbType: chartType,
+          disableAnimation,
+        });
+      } else {
+        // Save reference to the Highcharts chart object, call the render callback after animation
+        chart = target;
       }
     };
 
@@ -234,29 +238,33 @@ const createChartOptionsFunc =
     /**
      * Callback that runs when Highcharts has completed the animation
      */
-    const animationComplete = () => {
+    const afterAnimate = () => {
       if (
+        !renderedAfterAnimation &&
         customChartRender &&
+        // The chart object might be destroyed by now. It is an empty object then.
         chart &&
-        // The chart object might be destroyed, than it is empty
-        chart.renderer &&
-        !renderedAfterAnimation
+        chart.renderer
       ) {
-        customChartRender({ chart, cbType: chartType, disableAnimation });
         renderedAfterAnimation = true;
+        customChartRender({ chart, cbType: chartType, disableAnimation });
+        removeEvent(chart, 'complete', afterAnimate);
       }
     };
 
     return R.compose(
       R.when(
         () => !R.isNil(customChartRender),
-        R.assocPath(['chart', 'events', 'render'], customChartRenderWithCbType),
+        R.assocPath(['chart', 'events', 'render'], renderCallback),
       ),
       // Animation complete callback: Call render callback again once
       // after the animation completed
       R.when(
-        (options2) => customChartRender && !disableAnimation,
-        R.assocPath(['chart', 'animation', 'complete'], animationComplete),
+        () => customChartRender && !disableAnimation,
+        R.assocPath(
+          ['plotOptions', 'series', 'events', 'afterAnimate'],
+          afterAnimate,
+        ),
       ),
       R.assoc('lang', {
         decimalPoint,
