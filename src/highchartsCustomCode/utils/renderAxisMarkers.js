@@ -162,17 +162,9 @@ const renderCategoryGroupAxisMarkers = ({
 
   const firstSeries = relevantSeries[0];
   if (!firstSeries) return NO_ELEMENTS;
-  const firstSeriesGroup = firstSeries.group;
-  // Skip adding elements while Highcharts is animating the scale
-  if (
-    Math.abs(firstSeriesGroup.scaleX) <= 0.01 ||
-    Math.abs(firstSeriesGroup.scaleY) <= 0.01
-  ) {
-    return NO_ELEMENTS;
-  }
 
   // Get the transforms from the series <g>
-  const seriesTransform = firstSeriesGroup.element.getAttribute('transform');
+  const seriesTransform = firstSeries.group.element.getAttribute('transform');
   const seriesType = firstSeries.type;
 
   const pointsByCategory = groupPointsByCategory(
@@ -253,18 +245,9 @@ const renderNormalAxisMarkers = ({ chart, relevantSeries, disableAnimation }) =>
         AXIS_MARKER_GROUPS.set(series, group);
       }
 
-      const seriesGroup = series.group;
-
-      // Skip adding elements while Highcharts is animating the scale
-      if (
-        Math.abs(seriesGroup.scaleX) <= 0.01 ||
-        Math.abs(seriesGroup.scaleY) <= 0.01
-      ) {
-        return NO_ELEMENTS;
-      }
       // Get the transformations from the series <g>.
       // We cannot just append the element to the series <g> since it has a clip mask.
-      const seriesTransform = seriesGroup.element.getAttribute('transform');
+      const seriesTransform = series.group.element.getAttribute('transform');
       group.attr({ transform: seriesTransform });
 
       const elements = series.points.map((point) => {

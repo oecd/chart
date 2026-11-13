@@ -214,16 +214,6 @@ export const renderHighlightInsets = (chart, disableAnimation) => {
         seriesElements.push(legendInset);
       }
 
-      /** @type {HighchartsSVGElement} */
-      const seriesGroup = series.group;
-      // Skip adding elements while Highcharts is animating the scale
-      if (
-        Math.abs(seriesGroup.scaleX) <= 0.01 ||
-        Math.abs(seriesGroup.scaleY) <= 0.01
-      ) {
-        return seriesElements;
-      }
-
       // Get the transformations from the series <g>.
       // We cannot just append the element to the series <g> since it has a clip mask.
       const seriesTransform = series.group.element.getAttribute('transform');

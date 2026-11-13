@@ -66,15 +66,7 @@ export const renderCategoryGroupOutline = (chart, disableAnimation) => {
 
   // Get the transformations from the series <g>.
   // We cannot just append the element to the series <g> since it has a clip mask.
-  const firstSeriesGroup = firstSeries.group;
-  // Skip adding elements while Highcharts is animating the scale
-  if (
-    Math.abs(firstSeriesGroup.scaleX) <= 0.01 ||
-    Math.abs(firstSeriesGroup.scaleY) <= 0.01
-  ) {
-    return NO_ELEMENTS;
-  }
-  const seriesTransform = firstSeriesGroup.element.getAttribute('transform');
+  const seriesTransform = firstSeries.group.element.getAttribute('transform');
 
   const pointsByCategory = groupPointsByCategory(
     relevantSeries,
