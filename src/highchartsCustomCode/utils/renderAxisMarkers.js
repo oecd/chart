@@ -4,12 +4,12 @@
  */
 
 import { baselineColor } from '../../constants/chart';
-import { fadeIn } from './animation';
 import { AXIS_MARKER_SIZE } from './axisMarkerSize';
 import {
   getBoundingRectsByCategory,
   groupPointsByCategory,
 } from './getBoundingRectsByCategory';
+import { fadeIn } from './highlightAnimation';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 

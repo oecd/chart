@@ -6,7 +6,7 @@ import { TinyColor } from '@ctrl/tinycolor';
 import * as R from 'ramda';
 import { chartTypes, nonHighlightedOpacity } from '../constants/chart';
 import { mapWithIndex } from '../utils/ramdaUtil';
-import { fadeIn } from './utils/animation';
+import { fadeIn } from './utils/highlightAnimation';
 
 /**
  * Connects a Highcharts Series object with a Highcharts SVG element

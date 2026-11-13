@@ -141,6 +141,8 @@ export const chartSizes = {
  */
 export const nonHighlightedOpacity = 0.5;
 
+export const highlightAnimationDuration = 250;
+
 export const animationConfig = {
   duration: 800,
 };

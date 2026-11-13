@@ -4,11 +4,11 @@
  */
 import { TinyColor } from '@ctrl/tinycolor';
 import { baselineColor } from '../../constants/chart';
-import { fadeIn } from './animation';
 import {
   getBoundingRectsByCategory,
   groupPointsByCategory,
 } from './getBoundingRectsByCategory';
+import { fadeIn } from './highlightAnimation';
 import {
   getOutlineGap,
   getOutlineWidth,

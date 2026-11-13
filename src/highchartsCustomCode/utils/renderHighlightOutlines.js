@@ -4,7 +4,7 @@
  */
 
 import { baselineColor } from '../../constants/chart';
-import { fadeIn } from './animation';
+import { fadeIn } from './highlightAnimation';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 

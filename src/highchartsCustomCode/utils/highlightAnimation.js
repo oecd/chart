@@ -1,4 +1,4 @@
-const ANIMATION_DURATION = 250;
+import { highlightAnimationDuration } from '../../constants/chart';
 
 /**
  * Fades in a Highcharts SVG element.
@@ -8,5 +8,5 @@ export const fadeIn = (element, disableAnimation) => {
   if (disableAnimation) return;
   element
     .attr('opacity', 0)
-    .animate({ opacity: 1 }, { duration: ANIMATION_DURATION });
+    .animate({ opacity: 1 }, { duration: highlightAnimationDuration });
 };

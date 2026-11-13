@@ -3,7 +3,7 @@
  * @import { Chart, Series, Point, SVGElement as HighchartsSVGElement, SVGAttributes } from "highcharts"
  */
 
-import { fadeIn } from './animation';
+import { fadeIn } from './highlightAnimation';
 
 /**
  * Connects a Highcharts Point with a Highcharts SVG element
