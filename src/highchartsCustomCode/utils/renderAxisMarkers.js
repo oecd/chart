@@ -254,6 +254,8 @@ const renderNormalAxisMarkers = ({ chart, relevantSeries, disableAnimation }) =>
       }
 
       const seriesGroup = series.group;
+
+      // Skip adding elements while Highcharts is animating the scale
       if (
         Math.abs(seriesGroup.scaleX) <= 0.01 ||
         Math.abs(seriesGroup.scaleY) <= 0.01
