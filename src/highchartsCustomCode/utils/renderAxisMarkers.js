@@ -253,6 +253,7 @@ const renderNormalAxisMarkers = ({ chart, relevantSeries, disableAnimation }) =>
         AXIS_MARKER_GROUPS.set(series, group);
       }
 
+      const seriesGroup = series.group;
       if (
         Math.abs(seriesGroup.scaleX) <= 0.01 ||
         Math.abs(seriesGroup.scaleY) <= 0.01
@@ -261,7 +262,7 @@ const renderNormalAxisMarkers = ({ chart, relevantSeries, disableAnimation }) =>
       }
       // Get the transformations from the series <g>.
       // We cannot just append the element to the series <g> since it has a clip mask.
-      const seriesTransform = series.group.element.getAttribute('transform');
+      const seriesTransform = seriesGroup.element.getAttribute('transform');
       group.attr({ transform: seriesTransform });
 
       const elements = series.points.map((point) => {
