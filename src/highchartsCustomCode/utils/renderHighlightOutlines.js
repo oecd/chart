@@ -4,6 +4,7 @@
  */
 
 import { baselineColor } from '../../constants/chart';
+import { fadeIn } from './highlightAnimation';
 import { getOutlineGap, getOutlineWidth } from './highlightOutline';
 import { NO_ELEMENTS } from './noElements';
 
@@ -18,13 +19,20 @@ const OUTLINE_RECTS = new WeakMap();
 
 /**
  * Renders an outline rect around the bars/columns of highlighted points.
- *
- * @param {Chart} chart
- * @param {Series} series
- * @param {Point} point
+ * @param {{
+ * chart: Chart;
+ * series: Series;
+ * point: Point;
+ * disableAnimation: boolean;
+ * }} options
  * @returns {HighchartsSVGElement | undefined}
  */
-const renderHighlightOutlineForPoint = (chart, series, point) => {
+const renderHighlightOutlineForPoint = ({
+  chart,
+  series,
+  point,
+  disableAnimation,
+}) => {
   const customPointOptions = point.options.custom;
   if (!customPointOptions) return;
 
@@ -61,12 +69,14 @@ const renderHighlightOutlineForPoint = (chart, series, point) => {
 
   if (!(outline && outline.element)) {
     outline = chart.renderer
-      .rect({ class: 'oecd-highlightOutline' })
-      .css({ pointerEvents: 'none' })
+      .rect({
+        class: 'oecd-highlightOutline',
+        'pointer-events': 'none',
+      })
       // Append to the top-level <g> that holds all series <g>.
       // This element does not have a transform applied.
       .add(chart.seriesGroup);
-
+    fadeIn(outline, disableAnimation);
     OUTLINE_RECTS.set(point, outline);
   }
 
@@ -92,9 +102,10 @@ const renderHighlightOutlineForPoint = (chart, series, point) => {
  * Returns the active elements.
  *
  * @param {Chart} chart
+ * @param {boolean} disableAnimation
  * @returns {HighchartsSVGElement[]} Active elements
  */
-export const renderHighlightOutlines = (chart) => {
+export const renderHighlightOutlines = (chart, disableAnimation) => {
   const customChartOptions = chart.options.custom;
 
   /** @type {boolean} */
@@ -113,7 +124,12 @@ export const renderHighlightOutlines = (chart) => {
   return relevantSeries
     .map((series) =>
       series.points.map((point) =>
-        renderHighlightOutlineForPoint(chart, series, point),
+        renderHighlightOutlineForPoint({
+          chart,
+          series,
+          point,
+          disableAnimation,
+        }),
       ),
     )
     .flat()

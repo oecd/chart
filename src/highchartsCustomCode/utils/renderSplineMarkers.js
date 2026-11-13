@@ -4,6 +4,7 @@
  */
 import { TinyColor } from '@ctrl/tinycolor';
 import { AXIS_MARKER_SIZE } from './axisMarkerSize';
+import { fadeIn } from './highlightAnimation';
 import {
   getOutlineGap,
   getOutlineWidth,
@@ -42,10 +43,18 @@ const AXIS_MARKERS = new WeakMap();
  * referencePoint: Point;
  * attributes: SVGAttributes;
  * style?: CSSObject;
+ * disableAnimation: boolean;
  * }} options
  * @returns {HighchartsSVGElement}
  */
-const renderMarker = ({ chart, cache, referencePoint, attributes, style }) => {
+const renderSplineMarker = ({
+  chart,
+  cache,
+  referencePoint,
+  attributes,
+  style,
+  disableAnimation,
+}) => {
   let marker = cache.get(referencePoint);
 
   if (marker && marker.element) {
@@ -60,6 +69,7 @@ const renderMarker = ({ chart, cache, referencePoint, attributes, style }) => {
       // Append to the top-level <g> that holds all series <g>.
       // This element does  not have a transform applied.
       .add(chart.seriesGroup);
+    fadeIn(marker, disableAnimation);
 
     if (referencePoint) {
       cache.set(referencePoint, marker);
@@ -73,11 +83,12 @@ const renderMarker = ({ chart, cache, referencePoint, attributes, style }) => {
  * Line chart (spline series): Render x axis markers (category markers)
  *
  * @param {{
- *  chart: Chart;
+ * chart: Chart;
+ * disableAnimation: boolean;
  * }} options
  * @returns {HighchartsSVGElement[]}
  */
-export const renderSplineMarkers = ({ chart }) => {
+export const renderSplineMarkers = ({ chart, disableAnimation }) => {
   const relevantSeries = chart.series.filter(
     ({ type, visible }) => visible && type === 'spline',
   );
@@ -177,7 +188,7 @@ export const renderSplineMarkers = ({ chart }) => {
       return [
         // Top semi-transparent rect behind the lines and points
         // spanning the whole plot height
-        renderMarker({
+        renderSplineMarker({
           chart,
           cache: PLOT_AREA_MARKERS,
           referencePoint,
@@ -197,9 +208,10 @@ export const renderSplineMarkers = ({ chart }) => {
             zIndex: 1,
           },
           style: { 'mix-blend-mode': 'color' },
+          disableAnimation,
         }),
         // Bottom rect below the x axis line (axis marker)
-        renderMarker({
+        renderSplineMarker({
           chart,
           cache: AXIS_MARKERS,
           referencePoint,
@@ -214,6 +226,7 @@ export const renderSplineMarkers = ({ chart }) => {
             // Move below lines and point dots
             zIndex: -1,
           },
+          disableAnimation,
         }),
       ];
     })

@@ -5,6 +5,12 @@ import {
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   defaultExportSize,
 } from '../../constants/chart';
+import { noDataErrorMessageString } from '../../constants/chartErrorMessages';
+import {
+  fontColors,
+  fontFamilies,
+  textElementTypes,
+} from '../../constants/styling';
 import customChartRenderByChartType from '../../highchartsCustomCode/customChartRenderByChartType';
 import {
   isParsedDataEmpty,
@@ -24,6 +30,7 @@ import {
 } from '../highchartsUtil';
 import { getFinalPaletteColors } from '../paletteUtil';
 import { isNilOrEmpty } from '../ramdaUtil';
+import { fontStyleForTextElement } from '../stylingUtil';
 import { createOptionsForBarChart } from './createOptionsForBarChart';
 import { createOptionsForLineChart } from './createOptionsForLineChart';
 import { createOptionsForPieChart } from './createOptionsForPieChart';
@@ -33,13 +40,6 @@ import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
-import {
-  fontColors,
-  fontFamilies,
-  textElementTypes,
-} from '../../constants/styling';
-import { fontStyleForTextElement } from '../stylingUtil';
-import { noDataErrorMessageString } from '../../constants/chartErrorMessages';
 
 const mapsUtil = import('../mapsUtil');
 
@@ -80,6 +80,7 @@ const createChartOptionsFunc =
     chartSize,
     inlineLabels,
     hideLegend,
+    disableAnimation,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -199,6 +200,7 @@ const createChartOptionsFunc =
       chartSize,
       inlineLabels,
       hideLegend,
+      disableAnimation,
     });
 
     const customChartRender = R.propOr(
@@ -207,16 +209,60 @@ const createChartOptionsFunc =
       customChartRenderByChartType,
     );
 
-    const customChartRenderWithCbType = ({ target: chart }) => {
-      if (customChartRender) {
-        customChartRender({ chart, cbType: chartType });
+    /**
+     * Reference to the chart so it is available in the animation complete callback
+     * @type {import('highcharts').Chart}
+     */
+    let chart;
+
+    /**
+     * @param {{ target: import('highcharts').Chart }} event
+     */
+    const renderCallback = ({ target }) => {
+      if (disableAnimation) {
+        customChartRender({
+          chart: target,
+          cbType: chartType,
+          disableAnimation,
+        });
+      } else {
+        // Save reference to the Highcharts chart object, call the render callback after animation
+        chart = target;
+      }
+    };
+
+    /** @type {boolean} */
+    let renderedAfterAnimation = false;
+
+    /**
+     * Callback that runs when Highcharts has completed the animation
+     */
+    const afterAnimate = () => {
+      if (
+        !renderedAfterAnimation &&
+        customChartRender &&
+        // The chart object might be destroyed by now. It is an empty object then.
+        chart &&
+        chart.renderer
+      ) {
+        renderedAfterAnimation = true;
+        customChartRender({ chart, cbType: chartType, disableAnimation });
       }
     };
 
     return R.compose(
       R.when(
         () => !R.isNil(customChartRender),
-        R.assocPath(['chart', 'events', 'render'], customChartRenderWithCbType),
+        R.assocPath(['chart', 'events', 'render'], renderCallback),
+      ),
+      // Animation complete callback: Call render callback again once
+      // after the animation completed
+      R.when(
+        () => customChartRender && !disableAnimation,
+        R.assocPath(
+          ['plotOptions', 'series', 'events', 'afterAnimate'],
+          afterAnimate,
+        ),
       ),
       R.assoc('lang', {
         decimalPoint,

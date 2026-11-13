@@ -13,9 +13,10 @@ import { renderHighlightInsets } from './utils/renderHighlightInsets';
  *
  * @param {{
  * chart: Chart & { oecd_highlightElements: HighchartsSVGElement[] };
+ * disableAnimation: boolean;
  * }} options
  */
-export const renderStackedBarAndColumn = ({ chart }) => {
+export const renderStackedBarAndColumn = ({ chart, disableAnimation }) => {
   const customChartOptions = chart.options.custom;
   if (!customChartOptions) return;
 
@@ -25,9 +26,9 @@ export const renderStackedBarAndColumn = ({ chart }) => {
    */
   const elements = [];
 
-  elements.push(...renderCategoryGroupOutline(chart));
-  elements.push(...renderAxisMarkers(chart));
-  elements.push(...renderHighlightInsets(chart));
+  elements.push(...renderCategoryGroupOutline(chart, disableAnimation));
+  elements.push(...renderAxisMarkers(chart, disableAnimation));
+  elements.push(...renderHighlightInsets(chart, disableAnimation));
 
   if (chart.oecd_highlightElements) {
     // Clean up old shapes
