@@ -1,5 +1,4 @@
 // @ts-check
-import { removeEvent } from 'highcharts';
 import * as R from 'ramda';
 import {
   chartTypes,
@@ -248,7 +247,6 @@ const createChartOptionsFunc =
       ) {
         renderedAfterAnimation = true;
         customChartRender({ chart, cbType: chartType, disableAnimation });
-        removeEvent(chart, 'complete', afterAnimate);
       }
     };
 
