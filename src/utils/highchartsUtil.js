@@ -6,6 +6,7 @@ import { chartTypes, decimalPointTypes } from '../constants/chart';
 import { isCastableToNumber, roundNumber } from './configUtil';
 import { isNilOrEmpty } from './ramdaUtil';
 import { frequencies } from './dateUtil';
+import { fontFamilies, fontWeights } from '../constants/styling';
 
 export const thousandsSeparator = ' ';
 export const numericSymbols = ['k', 'M', 'G', 'T', 'P', 'E'];
@@ -91,6 +92,11 @@ export const numberFormatAbbreviatedForm = (
   return `${numberFormat(newNumber, decimals, decimalPoint, finalPrefix, finalSuffix)}${R.nth(relevantIndex, numericSymbols)}`;
 };
 
+const wrapWithIsBoldDetection = (format) =>
+  isNilOrEmpty(format)
+    ? format
+    : `{#if (isBold)}<span style="font-weight: ${fontWeights.extraBold}; font-family: ${fontFamilies.condensed}">${format}</span>{else}${format}{/if}`;
+
 export const createFormatters = ({
   chartType,
   mapColorValueSteps,
@@ -107,6 +113,7 @@ export const createFormatters = ({
   areSeriesNumbers,
   areSeriesDates,
   seriesDateFomat,
+  inlineLabels,
   lang,
   customTooltip,
 }) => {
@@ -154,16 +161,6 @@ export const createFormatters = ({
     !isNilOrEmpty(mapColorValueSteps) &&
     R.all(R.compose(R.equals(2), R.length), mapColorValueSteps);
 
-  const dataLabels = {
-    format:
-      '{#if (ne null point.y)}' +
-      `${chartType === chartTypes.symbolMinMax ? '{series.name}: ' : ''}${finalPrefix}{rtz (point.y:,.${finalMaxNumberOrDecimal}f)}${finalSuffix}` +
-      '{else}' +
-      `{#if (ne null point.value)}${finalPrefix}{rtz (point.value:,.${finalMaxNumberOrDecimal}f)}${finalSuffix}` +
-      `{else}${finalPrefix}{rtz (point.z:,.${finalMaxNumberOrDecimal}f)}${finalSuffix}` +
-      '{/if}{/if}',
-  };
-
   const categoriesFrequency = areCategoriesDates
     ? R.prop(categoriesDateFomat, frequencies)
     : null;
@@ -172,42 +169,63 @@ export const createFormatters = ({
     ? R.prop(seriesDateFomat, frequencies)
     : null;
 
+  const symbolMinMaxSeriesFormat = R.ifElse(
+    R.equals(chartTypes.symbolMinMax),
+    () => {
+      if (seriesFrequency) {
+        return seriesFrequency.getHighchartsFormat('series.name', lang);
+      }
+      if (areSeriesNumbers) {
+        return getNumericFormat(
+          'series.name',
+          finalMaxNumberOrDecimal,
+          finalPrefix,
+          finalSuffix,
+        );
+      }
+
+      return '{series.name}';
+    },
+    R.always(''),
+  )(chartType);
+
+  const dataLabels = {
+    format:
+      '{#if (ne null point.y)}' +
+      `${chartType === chartTypes.symbolMinMax ? `${symbolMinMaxSeriesFormat}: ` : ''}${finalPrefix}{rtz (point.y:,.${finalMaxNumberOrDecimal}f)}${finalSuffix}` +
+      '{else}' +
+      `{#if (ne null point.value)}${finalPrefix}{rtz (point.value:,.${finalMaxNumberOrDecimal}f)}${finalSuffix}` +
+      `{else}${finalPrefix}{rtz (point.z:,.${finalMaxNumberOrDecimal}f)}${finalSuffix}` +
+      '{/if}{/if}',
+  };
+
   const xAxisLabels = R.cond([
-    [
-      () => chartType === chartTypes.pie && areCategoriesNumbers,
-      () => ({
-        format: getNumericFormat(
-          'name',
-          finalMaxNumberOrDecimalXAxis,
-          finalPrefixXAxis,
-          finalSuffixXAxis,
-        ),
-      }),
-    ],
-    [
-      () => chartType === chartTypes.pie && areCategoriesDates,
-      () => ({
-        format: categoriesFrequency.getHighchartsFormat('name', lang),
-      }),
-    ],
     [
       () => categoriesFrequency,
       () => ({
-        format: categoriesFrequency.getHighchartsFormat('value', lang),
+        format: categoriesFrequency.getHighchartsFormat(
+          chartType === chartTypes.pie ? 'name' : 'value',
+          lang,
+        ),
       }),
     ],
     [
       () => areCategoriesNumbers,
       () => ({
         format: getNumericFormat(
-          'value',
+          chartType === chartTypes.pie ? 'name' : 'value',
           finalMaxNumberOrDecimalXAxis,
           finalPrefixXAxis,
           finalSuffixXAxis,
         ),
       }),
     ],
-    [R.T, () => ({})],
+    [
+      R.T,
+      () => ({
+        format: chartType === chartTypes.pie ? '{name}' : '{value}',
+      }),
+    ],
   ])();
 
   const seriesLabels = R.cond([
@@ -233,8 +251,42 @@ export const createFormatters = ({
         ),
       }),
     ],
-    [R.T, () => ({})],
+    [
+      R.T,
+      () => ({
+        labelFormat: '{name}',
+      }),
+    ],
   ])();
+
+  const dataLabelForInlineLabels =
+    chartType === chartTypes.line && inlineLabels
+      ? R.cond([
+          [
+            () => seriesFrequency,
+            () => ({
+              format: seriesFrequency.getHighchartsFormat('series.name', lang),
+            }),
+          ],
+          [
+            () => areSeriesNumbers,
+            () => ({
+              format: getNumericFormat(
+                'series.name',
+                finalMaxNumberOrDecimal,
+                finalPrefix,
+                finalSuffix,
+              ),
+            }),
+          ],
+          [
+            R.T,
+            () => ({
+              format: '{series.name}',
+            }),
+          ],
+        ])()
+      : {};
 
   const yAxisLabels = {
     format: getNumericFormat(
@@ -362,5 +414,15 @@ export const createFormatters = ({
         },
       };
 
-  return { dataLabels, tooltip, xAxisLabels, yAxisLabels, seriesLabels };
+  return {
+    dataLabels,
+    tooltip,
+    xAxisLabels: R.map(wrapWithIsBoldDetection, xAxisLabels),
+    yAxisLabels,
+    seriesLabels: R.map(wrapWithIsBoldDetection, seriesLabels),
+    dataLabelForInlineLabels: R.map(
+      wrapWithIsBoldDetection,
+      dataLabelForInlineLabels,
+    ),
+  };
 };

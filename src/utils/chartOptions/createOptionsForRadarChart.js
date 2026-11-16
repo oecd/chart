@@ -24,9 +24,7 @@ import {
   fontStyleForTextElement,
 } from '../stylingUtil';
 import { highlightSymbols } from './highlightSymbols';
-import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
-import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -40,6 +38,7 @@ export const createOptionsForRadarChart = ({
   baselineCodes,
   highlightCodes,
   highlightSeriesCodes,
+  highlightCategoryCodes,
   formatters = {},
   colorPalette,
   fixedColorIndexBySeries = null,
@@ -97,6 +96,7 @@ export const createOptionsForRadarChart = ({
     );
 
     const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
+    const isSeriesBaseline = baselineCodes.includes(seriesCodeLowercase);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
     const seriesMarkerLineColor = isSeriesHighlighted
       ? getListItemAtTurningIndex(
@@ -105,7 +105,11 @@ export const createOptionsForRadarChart = ({
         )
       : null;
 
-    const customSeriesOptions = { seriesCodeLowercase };
+    const customSeriesOptions = {
+      seriesCodeLowercase,
+      isBaseline: isSeriesBaseline,
+      isHighlighted: isSeriesHighlighted,
+    };
 
     return {
       custom: customSeriesOptions,
@@ -202,12 +206,6 @@ export const createOptionsForRadarChart = ({
     .flat()
     .filter((plotBand) => plotBand !== undefined);
 
-  const xAxisLabelFormatters = formatters.xAxisLabels;
-  const xAxisLabelFormat = xAxisLabelFormatters?.format;
-
-  const seriesLabelFormatters = formatters.seriesLabels;
-  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
-
   const parsedCategories = parseCategories(
     data.categories,
     data.areCategoriesDates,
@@ -215,7 +213,15 @@ export const createOptionsForRadarChart = ({
   );
   const xAxisCategories = R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const customChartOptions = {
+    baselineCodes,
+    highlightCategoryCodes,
+    parsedCategories,
+    areCategoriesDates: data.areCategoriesDates,
+  };
+
   return {
+    custom: customChartOptions,
     chart: {
       polar: true,
       type: 'line',
@@ -241,20 +247,12 @@ export const createOptionsForRadarChart = ({
     },
 
     xAxis: {
+      custom: { isXAxis: true },
       plotBands,
       categories: xAxisCategories,
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
-        ...xAxisLabelFormatters,
-        /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
-        formatter: ({ value }) =>
-          xAxisLabelFormatter(
-            value,
-            xAxisLabelFormat,
-            parsedCategories,
-            baselineCodes,
-            highlightCodes,
-          ),
+        ...R.prop('xAxisLabels', formatters),
         enabled: !hideXAxisLabels,
       },
       gridLineColor: '#c2cbd6',
@@ -276,20 +274,7 @@ export const createOptionsForRadarChart = ({
 
     legend: {
       enabled: !hideLegend,
-      /**
-       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
-       */
-      labelFormatter: (series) =>
-        series
-          ? legendLabelFormatter(
-              series.name,
-              series.options.custom.seriesCodeLowercase,
-              seriesLabelFormat,
-              baselineCodes,
-              highlightCodes,
-            )
-          : '',
-
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',

@@ -19,9 +19,7 @@ import {
   calcYAxisCoordinatesForBarAndStacked,
   fontStyleForTextElement,
 } from '../stylingUtil';
-import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
-import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -97,6 +95,12 @@ export const createOptionsForBarChart = ({
   const isCategoryGroupHighlighted =
     isGroupedChart && (isBaselineACategory || anyCategoryHighlighted);
 
+  const parsedCategories = parseCategories(
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+  );
+
   /** Custom chart options used by the baseline/highlight render callbacks */
   const customChartOptions = {
     baselineCodes,
@@ -104,19 +108,10 @@ export const createOptionsForBarChart = ({
     highlightCategoryCodes,
     highlightColors: matchingHighlightColors,
     isCategoryGroupHighlighted,
+    parsedCategories,
+    areCategoriesDates: data.areCategoriesDates,
   };
 
-  const xAxisLabelFormatters = formatters.xAxisLabels;
-  const xAxisLabelFormat = xAxisLabelFormatters?.format;
-
-  const seriesLabelFormatters = formatters.seriesLabels;
-  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
-
-  const parsedCategories = parseCategories(
-    data.categories,
-    data.areCategoriesDates,
-    categoriesFrequency,
-  );
   const xAxisCategories = categoriesAreDatesOrNumberForDataParsing
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
@@ -141,21 +136,13 @@ export const createOptionsForBarChart = ({
     colors: colorPalette,
 
     xAxis: {
+      custom: { isXAxis: true },
       categories: xAxisCategories,
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
-        ...xAxisLabelFormatters,
-        /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
-        formatter: (context) =>
-          xAxisLabelFormatter(
-            context.value,
-            xAxisLabelFormat,
-            parsedCategories,
-            baselineCodes,
-            highlightCodes,
-          ),
+        ...R.prop('xAxisLabels', formatters),
         ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
           ? { enabled: false }
           : null),
@@ -185,20 +172,7 @@ export const createOptionsForBarChart = ({
 
     legend: {
       enabled: !hideLegend,
-      // Do not set labelFormat, it overrides labelFormatter
-      /**
-       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
-       */
-      labelFormatter: (series) =>
-        series
-          ? legendLabelFormatter(
-              series.name,
-              series.options.custom.seriesCodeLowercase,
-              seriesLabelFormat,
-              baselineCodes,
-              highlightCodes,
-            )
-          : '',
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',

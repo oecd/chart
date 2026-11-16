@@ -20,9 +20,7 @@ import {
   fontStyleForTextElement,
 } from '../stylingUtil';
 import { createDatapoint } from './createDataPoint';
-import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
-import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 /**
  * @param {{
@@ -301,6 +299,12 @@ export const createOptionsForStackedChart = ({
     highlightCategoryCodes,
   });
 
+  const parsedCategories = parseCategories(
+    data.categories,
+    data.areCategoriesDates,
+    categoriesFrequency,
+  );
+
   /** Custom chart options used by the baseline/highlight render callbacks */
   const customChartOptions = {
     baselineCodes,
@@ -308,19 +312,10 @@ export const createOptionsForStackedChart = ({
     highlightCategoryCodes,
     highlightColors: matchingHighlightColors,
     isCategoryGroupHighlighted,
+    parsedCategories,
+    areCategoriesDates: data.areCategoriesDates,
   };
 
-  const xAxisLabelFormatters = formatters.xAxisLabels;
-  const xAxisLabelFormat = xAxisLabelFormatters?.format;
-
-  const seriesLabelFormatters = formatters.seriesLabels;
-  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
-
-  const parsedCategories = parseCategories(
-    data.categories,
-    data.areCategoriesDates,
-    categoriesFrequency,
-  );
   const xAxisCategories =
     area && categoriesAreDatesOrNumberForDataParsing
       ? null
@@ -348,21 +343,13 @@ export const createOptionsForStackedChart = ({
     colors: colorPalette,
 
     xAxis: {
+      custom: { isXAxis: true },
       categories: xAxisCategories,
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
-        ...xAxisLabelFormatters,
-        /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
-        formatter: ({ value }) =>
-          xAxisLabelFormatter(
-            value,
-            xAxisLabelFormat,
-            parsedCategories,
-            baselineCodes,
-            highlightCodes,
-          ),
+        ...R.prop('xAxisLabels', formatters),
         ...((hideXAxisLabels && !horizontal) || (hideYAxisLabels && horizontal)
           ? { enabled: false }
           : null),
@@ -394,19 +381,7 @@ export const createOptionsForStackedChart = ({
 
     legend: {
       enabled: !hideLegend,
-      /**
-       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
-       */
-      labelFormatter: (series) =>
-        series
-          ? legendLabelFormatter(
-              series.name,
-              series.options.custom.seriesCodeLowercase,
-              seriesLabelFormat,
-              baselineCodes,
-              highlightCodes,
-            )
-          : '',
+      ...R.prop('seriesLabels', formatters),
       reversed: false,
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),

@@ -16,9 +16,6 @@ import {
   calcLegendMarginDefault,
   fontStyleForTextElement,
 } from '../stylingUtil';
-import { legendLabelFormatter } from './legendLabelFormatter';
-import { parseCategories } from './parseCategories';
-import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -74,6 +71,8 @@ export const createOptionsForPieChart = ({
         const customPointOptions = {
           ...dataPoint.custom,
           categoryCodeLowercase,
+          isHighlighted: highlightCodes.includes(categoryCodeLowercase),
+          isBaseline: baselineCodes.includes(categoryCodeLowercase),
         };
 
         return {
@@ -87,18 +86,6 @@ export const createOptionsForPieChart = ({
       }, series.data),
     }),
     R.isEmpty(data.series) ? [] : [R.head(data.series)],
-  );
-
-  const xAxisLabelFormatters = formatters.xAxisLabels;
-  const xAxisLabelFormat = xAxisLabelFormatters?.format;
-
-  const seriesLabelFormatters = formatters.seriesLabels;
-  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
-
-  const parsedCategories = parseCategories(
-    data.categories,
-    data.areCategoriesDates,
-    categoriesFrequency,
   );
 
   return {
@@ -116,19 +103,7 @@ export const createOptionsForPieChart = ({
     },
 
     legend: {
-      /**
-       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Point>}
-       */
-      labelFormatter: (point) =>
-        point
-          ? legendLabelFormatter(
-              point.name,
-              point.options.custom.categoryCodeLowercase,
-              seriesLabelFormat,
-              baselineCodes,
-              highlightCodes,
-            )
-          : '',
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
@@ -148,23 +123,7 @@ export const createOptionsForPieChart = ({
       pie: {
         dataLabels: {
           enabled: !hideXAxisLabels,
-          /**
-           * This needs to be a function expression.
-           * We can't use an arrow function `(context) => {}` here. For pie charts,
-           * the `context` param does not carry the point value.
-           * @see https://api.highcharts.com/highcharts/plotOptions.pie.dataLabels.formatter
-           * @type {import('highcharts').DataLabelsFormatterCallbackFunction}
-           */
-          formatter: function () {
-            const { name } = this;
-            return xAxisLabelFormatter(
-              name,
-              xAxisLabelFormat,
-              parsedCategories,
-              baselineCodes,
-              highlightCodes,
-            );
-          },
+          ...R.prop('xAxisLabels', formatters),
           style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         },
         showInLegend: !hideLegend,
