@@ -1,3 +1,5 @@
+import * as R from 'ramda';
+
 import { numericSymbols } from '../utils/highchartsUtil';
 
 const customizeHighcharts = (Highcharts) => {
@@ -88,6 +90,52 @@ const customizeHighcharts = (Highcharts) => {
       }
 
       return parseFloat(valueAsString);
+    };
+
+    Highcharts.Templating.helpers.isBold = function () {
+      const context = this;
+
+      const custom = R.pathOr(
+        R.path(['options', 'custom'], context),
+        ['axis', 'options', 'custom'],
+        context,
+      );
+
+      if (!custom) {
+        return false;
+      }
+
+      if (custom.isXAxis) {
+        const chartCustom = R.path(['chart', 'options', 'custom'], context);
+        if (!chartCustom) {
+          return false;
+        }
+
+        const value = R.compose(
+          R.toLower,
+          (v) => `${v}`,
+          R.propOr('', 'value'),
+        )(context);
+
+        if (chartCustom.areCategoriesDates) {
+          const category = R.find(
+            R.compose((label) => value === `${label}`, R.prop('parsedLabel')),
+            chartCustom.parsedCategories,
+          );
+
+          return category
+            ? R.includes(category.code, chartCustom.highlightCategoryCodes) ||
+                R.includes(category.code, chartCustom.baselineCodes)
+            : false;
+        }
+
+        return (
+          R.includes(value, chartCustom.highlightCategoryCodes) ||
+          R.includes(value, chartCustom.baselineCodes)
+        );
+      }
+
+      return custom.isHighlighted || custom.isBaseline;
     };
 
     Highcharts.SVGRenderer.prototype.symbols.cross = (x, y, w, h) => [

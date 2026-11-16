@@ -8,11 +8,7 @@ import {
   chartSpacingFullScreenAndExport,
   nonHighlightedOpacity,
 } from '../../constants/chart';
-import {
-  fontFamilies,
-  fontWeights,
-  textElementTypes,
-} from '../../constants/styling';
+import { textElementTypes } from '../../constants/styling';
 import {
   getBaselineOrHighlightColor,
   getListItemAtTurningIndex,
@@ -28,9 +24,7 @@ import {
 } from '../stylingUtil';
 import { createDatapoint } from './createDataPoint';
 import { highlightSymbols } from './highlightSymbols';
-import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
-import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -71,7 +65,7 @@ export const createOptionsForLineChart = ({
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
-
+    const isSeriesBaseline = baselineCodes.includes(seriesCodeLowercase);
     const seriesHighlightIndex = highlightCodes.indexOf(seriesCodeLowercase);
     const isSeriesHighlighted = seriesHighlightIndex !== -1;
 
@@ -118,7 +112,11 @@ export const createOptionsForLineChart = ({
       series.data,
     );
 
-    const customSeriesOptions = { seriesCodeLowercase };
+    const customSeriesOptions = {
+      seriesCodeLowercase,
+      isBaseline: isSeriesBaseline,
+      isHighlighted: isSeriesHighlighted,
+    };
 
     return {
       custom: customSeriesOptions,
@@ -178,6 +176,7 @@ export const createOptionsForLineChart = ({
           isCategoryBaseline,
           // Highlight
           isHighlighted: finalIsHighlighted,
+          isBaseline: isSeriesBaseline,
           isSeriesHighlighted,
           isCategoryHighlighted,
           highlightColor,
@@ -195,19 +194,18 @@ export const createOptionsForLineChart = ({
               ? // Show inline label on last data point
                 {
                   enabled: true,
-                  format: series.label,
-                  style: {
-                    ...fontStyleForTextElement(
-                      textElementTypes.legend,
-                      chartSize,
-                    ),
-                    ...(isSeriesHighlighted
-                      ? {
-                          fontFamily: fontFamilies.condensed,
-                          fontWeight: fontWeights.extraBold,
-                        }
-                      : null),
-                  },
+                  align: 'left',
+                  verticalAlign: 'middle',
+                  x: 10,
+                  y: 1,
+                  crop: false,
+                  overflow: 'allow',
+                  allowOverlap: true,
+                  ...R.prop('dataLabelForInlineLabels', formatters),
+                  style: fontStyleForTextElement(
+                    textElementTypes.legend,
+                    chartSize,
+                  ),
                 }
               : null,
           marker: {
@@ -238,43 +236,29 @@ export const createOptionsForLineChart = ({
         },
       },
       color: seriesColor,
-      dataLabels: {
-        style: inlineLabels
-          ? {}
-          : {
+
+      dataLabels: inlineLabels
+        ? null
+        : {
+            ...R.prop('dataLabels', formatters),
+            style: {
+              ...fontStyleForTextElement(textElementTypes.legend, chartSize),
               color: dataLabelColor,
               textShadow:
                 '0px -1px 3px white, 1px 0px 3px white, 0px 1px 3px white, -1px 0px 3px white, -1px -1px 3px white, 1px -1px 3px white, 1px 1px 3px white, -1px 1px 3px white',
               textOutline: 'none',
             },
-      },
+          },
       ...(isSeriesHighlighted ? { zIndex: 1 } : null),
     };
   }, data.series);
-
-  const seriesLabelFormatters = formatters.seriesLabels;
-  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
-  /**
-   * Formatter that renders highlighted labels bold
-   * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
-   */
-  const finalLegendLabelFormatter = (series) =>
-    series
-      ? legendLabelFormatter(
-          series.name,
-          series.options.custom.seriesCodeLowercase,
-          seriesLabelFormat,
-          baselineCodes,
-          highlightCodes,
-        )
-      : '';
 
   const legend = R.ifElse(
     () => inlineLabels,
     // legend is enabled but hidden so that Highcharts reserves the space needed for last data points data label (hack)
     () => ({
       enabled: true,
-      labelFormatter: finalLegendLabelFormatter,
+      ...R.prop('seriesLabels', formatters),
       margin: calcLegendMarginInlineLabels(chartSize),
       symbolWidth: 0,
       layout: 'vertical',
@@ -287,7 +271,7 @@ export const createOptionsForLineChart = ({
     }),
     () => ({
       enabled: !hideLegend,
-      labelFormatter: finalLegendLabelFormatter,
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',
@@ -310,21 +294,22 @@ export const createOptionsForLineChart = ({
       : { left: '5%', width: '95%' };
   };
 
-  /** Custom chart options used by the baseline/highlight render callbacks */
-  const customChartOptions = {
-    baselineCodes,
-    highlightCategoryCodes,
-    categories: data.categories.map((category) => category.code.toLowerCase()),
-  };
-
-  const xAxisLabelFormatters = formatters.xAxisLabels;
-  const xAxisLabelFormat = xAxisLabelFormatters?.format;
-
   const parsedCategories = parseCategories(
     data.categories,
     data.areCategoriesDates,
     categoriesFrequency,
   );
+
+  /** Custom chart options used by the baseline/highlight render callbacks */
+  const customChartOptions = {
+    highlightCodes,
+    baselineCodes,
+    highlightCategoryCodes,
+    categories: data.categories.map((category) => category.code.toLowerCase()),
+    parsedCategories,
+    areCategoriesDates: data.areCategoriesDates,
+  };
+
   const xAxisCategories = categoriesAreDatesOrNumberForDataParsing
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
@@ -352,6 +337,7 @@ export const createOptionsForLineChart = ({
     colors: [R.head(colorPalette)],
 
     xAxis: {
+      custom: { isXAxis: true },
       categories: xAxisCategories,
       ...(categoriesAreDatesOrNumberForDataParsing && data.areCategoriesDates
         ? { type: 'datetime' }
@@ -359,16 +345,7 @@ export const createOptionsForLineChart = ({
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
-        ...xAxisLabelFormatters,
-        /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
-        formatter: ({ value }) =>
-          xAxisLabelFormatter(
-            value,
-            xAxisLabelFormat,
-            parsedCategories,
-            baselineCodes,
-            highlightCodes,
-          ),
+        ...R.prop('xAxisLabels', formatters),
         ...(hideXAxisLabels ? { enabled: false } : null),
       },
       gridLineColor: '#c2cbd6',
@@ -399,24 +376,7 @@ export const createOptionsForLineChart = ({
     plotOptions: {
       series: {
         animation: disableAnimation ? false : animationConfig,
-        dataLabels: inlineLabels
-          ? {
-              enabled: false,
-              align: 'left',
-              verticalAlign: 'middle',
-              x: 10,
-              y: 1,
-              crop: false,
-              overflow: 'allow',
-              allowOverlap: true,
-            }
-          : {
-              ...R.prop('dataLabels', formatters),
-              style: fontStyleForTextElement(
-                textElementTypes.legend,
-                chartSize,
-              ),
-            },
+
         events: {
           mouseOver: inlineLabels
             ? null

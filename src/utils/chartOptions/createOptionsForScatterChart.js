@@ -23,9 +23,7 @@ import {
   calcMarginTopDefault,
   fontStyleForTextElement,
 } from '../stylingUtil';
-import { legendLabelFormatter } from './legendLabelFormatter';
 import { parseCategories } from './parseCategories';
-import { xAxisLabelFormatter } from './xAxisLabelFormatter';
 
 // Symbol sizes
 const RADIUS = 6;
@@ -51,6 +49,7 @@ export const createOptionsForScatterChart = ({
   data,
   baselineCodes,
   highlightCodes,
+  highlightCategoryCodes,
   formatters = {},
   title = '',
   subtitle = '',
@@ -156,7 +155,11 @@ export const createOptionsForScatterChart = ({
     const symbolRadius = symbolMinMaxLayout ? RADIUS_MIN_MAX : RADIUS;
     const finalRadius = isCross ? symbolRadius - 1 : symbolRadius;
 
-    const customSeriesOptions = { seriesCodeLowercase };
+    const customSeriesOptions = {
+      seriesCodeLowercase,
+      isBaseline: isSeriesBaseline,
+      isHighlighted: isSeriesHighlighted,
+    };
 
     return {
       custom: customSeriesOptions,
@@ -269,12 +272,6 @@ export const createOptionsForScatterChart = ({
       : { left: '5%', width: '95%' };
   };
 
-  const xAxisLabelFormatters = formatters.xAxisLabels;
-  const xAxisLabelFormat = xAxisLabelFormatters?.format;
-
-  const seriesLabelFormatters = formatters.seriesLabels;
-  const seriesLabelFormat = seriesLabelFormatters?.labelFormat;
-
   const parsedCategories = parseCategories(
     data.categories,
     data.areCategoriesDates,
@@ -285,6 +282,13 @@ export const createOptionsForScatterChart = ({
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
   return {
+    custom: {
+      baselineCodes,
+      highlightCategoryCodes,
+      parsedCategories,
+      areCategoriesDates: data.areCategoriesDates,
+    },
+
     chart: {
       type: 'scatter',
       marginTop:
@@ -307,20 +311,13 @@ export const createOptionsForScatterChart = ({
     colors: colorPalette,
 
     xAxis: {
+      custom: { isXAxis: true },
       categories: xAxisCategories,
       ...(data.areCategoriesDates ? { type: 'datetime' } : null),
       labels: {
         style: fontStyleForTextElement(textElementTypes.legend, chartSize),
         autoRotation: [-90, -45, 0],
-        /** @type {import('highcharts').AxisLabelsFormatterCallbackFunction} */
-        formatter: ({ value }) =>
-          xAxisLabelFormatter(
-            value,
-            xAxisLabelFormat,
-            parsedCategories,
-            baselineCodes,
-            highlightCodes,
-          ),
+        ...R.prop('xAxisLabels', formatters),
         ...(hideXAxisLabels || symbolMinMaxLayout ? { enabled: false } : null),
       },
       gridLineColor: '#c2cbd6',
@@ -358,19 +355,7 @@ export const createOptionsForScatterChart = ({
 
     legend: {
       enabled: !hideLegend && !symbolMinMaxLayout,
-      /**
-       * @type {import('highcharts').FormatterCallbackFunction<import('highcharts').Series>}
-       */
-      labelFormatter: (series) =>
-        series
-          ? legendLabelFormatter(
-              series.name,
-              series.options.custom.seriesCodeLowercase,
-              seriesLabelFormat,
-              baselineCodes,
-              highlightCodes,
-            )
-          : '',
+      ...R.prop('seriesLabels', formatters),
       itemDistance: 10,
       itemStyle: fontStyleForTextElement(textElementTypes.legend, chartSize),
       align: 'left',

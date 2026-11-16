@@ -12,7 +12,11 @@ import {
   createFromToPoints,
   rejectInvalidFromToPoints,
 } from '../sankeyUtil';
-import { textElementTypes } from '../../constants/styling';
+import {
+  fontFamilies,
+  fontWeights,
+  textElementTypes,
+} from '../../constants/styling';
 
 /**
  * @param {import("./getBaselineAndHighlightCodes").BaselineAndHighlightCodes} options
@@ -51,7 +55,14 @@ export const createOptionsForSankeyChart = ({
           color,
           ...(R.isNil(baselineOrHighlightColor)
             ? {}
-            : { dataLabels: { style: { fontWeight: 800 } } }),
+            : {
+                dataLabels: {
+                  style: {
+                    fontFamily: fontFamilies.condensed,
+                    fontWeight: fontWeights.extraBold,
+                  },
+                },
+              }),
         };
       }, R.toPairs(columnByNode));
       return { data: seriesData, nodes };

@@ -156,6 +156,7 @@ const createChartOptionsFunc =
       areSeriesNumbers: data.areSeriesNumbers,
       areSeriesDates: data.areSeriesDates,
       seriesDateFomat: data.seriesDateFomat,
+      inlineLabels,
       lang,
       customTooltip,
     });
