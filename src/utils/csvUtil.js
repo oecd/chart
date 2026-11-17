@@ -697,8 +697,8 @@ export const extractMinAvgMaxAndFilterOnFirstColumn =
         () => {
           if (
             R.includes(R.toUpper(referenceValueCode), [
-              R.toUpper(R.head(minRow || [''])),
-              R.toUpper(R.head(maxRow || [''])),
+              R.toUpper(`${R.head(minRow || [''])}`),
+              R.toUpper(`${R.head(maxRow || [''])}`),
             ])
           ) {
             return null;
@@ -708,6 +708,7 @@ export const extractMinAvgMaxAndFilterOnFirstColumn =
             R.compose(
               R.equals(R.toUpper(referenceValueCode)),
               R.toUpper,
+              String,
               R.head,
             ),
             rows,
