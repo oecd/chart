@@ -215,6 +215,9 @@ const createChartOptionsFunc =
      */
     let chart;
 
+    /** @type {boolean} */
+    let renderedAfterAnimation = false;
+
     /**
      * @param {{ target: import('highcharts').Chart }} event
      */
@@ -228,11 +231,16 @@ const createChartOptionsFunc =
       } else {
         // Save reference to the Highcharts chart object, call the render callback after animation
         chart = target;
+
+        if (renderedAfterAnimation) {
+          customChartRender({
+            chart: target,
+            cbType: chartType,
+            disableAnimation: false,
+          });
+        }
       }
     };
-
-    /** @type {boolean} */
-    let renderedAfterAnimation = false;
 
     /**
      * Callback that runs when Highcharts has completed the animation
