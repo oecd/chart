@@ -35,7 +35,13 @@ const positioningForChartType = {
     x: distance,
     y: 0,
   },
-  default: {
+  [chartTypes.stackedBar]: {
+    align: 'center',
+    verticalAlign: 'bottom',
+    x: 0,
+    y: -1 * distance,
+  },
+  'default': {
     align: 'left',
     verticalAlign: 'middle',
     x: 0,

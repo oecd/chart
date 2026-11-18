@@ -26,6 +26,27 @@ const maximaPerCategory = (lists) => {
 
 /**
  * @param {{
+ *   category: string;
+ * value: number | null;
+ * }[][]} lists 
+ * @returns {Map<string, number>}
+ */
+const totalsPerCategory = (lists) => {
+  /** @type Map<string, number> */
+  const sums = new Map();
+  for (const list of lists) {
+    for (const {category, value} of list) {
+      const total = sums.get(category) ?? 0;
+      if (value !== null) {
+        sums.set(category, total + value);
+      }
+    }
+  }
+  return sums
+}
+
+/**
+ * @param {{
  * annotations: import('./annotation').IndexedPointAnnotation[];
  * data: {
  *   series: { code: string; data: { value: number | null }[] }[];
@@ -60,6 +81,7 @@ export const createPositionedPointAnnotations = ({
   );
 
   const maxima = maximaPerCategory(listOfSeriesWithCategories);
+  const totals = totalsPerCategory(listOfSeriesWithCategories);
 
   const positionedAnnotations = annotations
     .map((annotation) => {
@@ -75,10 +97,14 @@ export const createPositionedPointAnnotations = ({
       );
       if (!seriesForAnnotation) return;
 
-      let yValue =
-        chartType === chartTypes.bar || chartType === chartTypes.row
-          ? (maxima.get(annotation.categoryCode) ?? 0)
-          : (seriesForAnnotation.data[categoryIndex].value ?? 0);
+      let yValue;
+      if (chartType === chartTypes.bar || chartType === chartTypes.row) {
+        yValue = maxima.get(annotation.categoryCode) ?? 0;
+      } else if (chartType === chartTypes.stackedBar) {
+        yValue = totals.get(annotation.categoryCode) ?? 0; 
+      } else {
+        yValue = seriesForAnnotation.data[categoryIndex].value ?? 0;
+      }
 
       let xValue;
       const category = data.categories[categoryIndex];

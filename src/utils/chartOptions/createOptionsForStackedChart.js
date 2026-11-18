@@ -26,6 +26,7 @@ import {
 } from './createAnnotationPlotBands';
 import { createDatapoint } from './createDataPoint';
 import { parseCategories } from './parseCategories';
+import { createAnnotationPointsForChartType } from './createAnnotationPointsForChartType';
 
 /**
  * @param {{
@@ -350,6 +351,8 @@ export const createOptionsForStackedChart = ({
     position: horizontal ? 'right' : 'top',
   });
 
+  const annotationPoints = createAnnotationPointsForChartType(positionedPointAnnotations, chartType);
+
   const marginTop = (() => {
     /** @type {number | undefined} */
     let marginTop;
@@ -378,17 +381,7 @@ export const createOptionsForStackedChart = ({
   
 
   return {
-    annotations: [{
-      labels: [{
-        text: "foo",
-        point: {
-          x: 1,
-          y: 1,
-          xAxis: 0,
-          yAxis: 0,
-        }
-      }]
-    }],
+    annotations: annotationPoints,
     
     custom: customChartOptions,
 

@@ -62,8 +62,6 @@ export const createOptionsForBarChart = ({
 }) => {
   const horizontal = chartType === chartTypes.row;
 
-  console.log('data', data); //DEBUG
-
   const calcXAxisLayout = () => {
     if (horizontal) {
       if (hideXAxisLabels) {
