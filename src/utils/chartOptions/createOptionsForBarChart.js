@@ -125,10 +125,7 @@ export const createOptionsForBarChart = ({
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
   const showAnnotationLabelsInline =
-    !horizontal &&
-    (positionedBandAnnotations
-      ? R.any(R.prop('showLabelInline'), positionedBandAnnotations)
-      : false);
+    !horizontal && R.any(R.prop('showLabelInline'), positionedBandAnnotations);
 
   const legendMargin =
     calcLegendMarginForBarAndStacked(chartSize, horizontal) +

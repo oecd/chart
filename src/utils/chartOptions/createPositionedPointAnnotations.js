@@ -25,31 +25,25 @@ const maximaPerCategory = (lists) => {
 };
 
 /**
- *
- * @param {import('./annotation').IndexedPointAnnotation[]} annotations
  * @param {{
- *   series: {
- *     code: string;
- *     data: {
- *         value: number | null
- *     }[]
- *   }[];
+ * annotations: import('./annotation').IndexedPointAnnotation[];
+ * data: {
+ *   series: { code: string; data: { value: number | null }[] }[];
  *   categories: { code: string }[];
- * }} data
- * @param {{
- *   tryParse: (str: string) => Date | false;
- * } | null } categoriesFrequency
- * @param {boolean} areCategoriesDates
- * @param {'Line' | 'Bar'} chartType
+ * };
+ * categoriesFrequency: { tryParse: (str: string) => Date | false } | null;
+ * areCategoriesDates: boolean;
+ * chartType: keyof typeof chartTypes;
+ *}} options
  * @returns {import('./annotation').PositionedPointAnnotation[]}
  */
-export const createPositionedPointAnnotations = (
+export const createPositionedPointAnnotations = ({
   annotations,
   data,
   categoriesFrequency,
   areCategoriesDates,
   chartType,
-) => {
+}) => {
   const listOfSeries = R.pluck('data', data.series);
 
   /** @type {{category: string; value: number | null}[][]} */
@@ -90,8 +84,8 @@ export const createPositionedPointAnnotations = (
       const category = data.categories[categoryIndex];
       if (areCategoriesDates) {
         const date = categoriesFrequency?.tryParse(category.code);
-        if (!date) return; // schließt false und undefined aus → date ist Date
-        xValue = date.getTime(); // number (Millisekunden seit 1970)
+        if (!date) return;
+        xValue = date.getTime();
       } else {
         xValue = categoryIndex;
       }

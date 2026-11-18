@@ -4,22 +4,25 @@ import { createPositionedBandAnnotations } from './createPositionedBandAnnotatio
 import { createPositionedPointAnnotations } from './createPositionedPointAnnotations';
 
 /**
+ * Adds positions for Highcharts to the annotations.
+ *
  * @param {{
  * data: {
- *   series: unknown[];
+ *   series: { code: string; data: { value: number | null }[] }[];
  *   categories: { code: string }[];
  *   areCategoriesDates: boolean;
+ *   areCategoriesNumbers: boolean;
  * };
  * annotations: import('./annotation').Annotation[];
  * categoriesFrequency: {
  *   tryParse: (str: string) => Date | false;
  *   getMiddle: (date: Date, step: number) => Date;
  * } | null;
- * chartType: 'Line' | 'Bar';
+ * chartType: keyof typeof import('../../constants/chart').chartTypes;
  * }} options
  * @return {{
- * positionedBandAnnotations: import('./annotation').PositionedBandAnnotation[] | null;
- * positionedPointAnnotations: import('./annotation').PositionedPointAnnotation[] | null;
+ * positionedBandAnnotations: import('./annotation').PositionedBandAnnotation[];
+ * positionedPointAnnotations: import('./annotation').PositionedPointAnnotation[];
  * }}
  */
 export const createPositionedAnnotations = ({
@@ -28,11 +31,12 @@ export const createPositionedAnnotations = ({
   categoriesFrequency,
   chartType,
 }) => {
-  if (data.series.length === 0)
+  if (data.series.length === 0) {
     return {
       positionedBandAnnotations: [],
       positionedPointAnnotations: [],
     };
+  }
 
   // Add an index so that the numbering of the reference symbols
   // is equal in plot and footer.
@@ -45,27 +49,34 @@ export const createPositionedAnnotations = ({
   }));
 
   const groupedAnnotations = R.groupBy(R.prop('type'), indexedAnnotations);
-  const { band, point } = groupedAnnotations;
+  const bandAnnotations =
+    /** @type {import('./annotation').IndexedBandAnnotation[] | undefined} */ (
+      groupedAnnotations.band
+    );
+  const pointAnnotations =
+    /** @type {import('./annotation').IndexedPointAnnotation[] | undefined} */ (
+      groupedAnnotations.point
+    );
 
-  const positionedBandAnnotations = band
+  const positionedBandAnnotations = bandAnnotations
     ? createPositionedBandAnnotations({
-        annotations: band,
+        annotations: bandAnnotations,
         categories: data.categories,
         areCategoriesNumbers: data.areCategoriesNumbers,
         areCategoriesDates: data.areCategoriesDates,
         categoriesFrequency,
       })
-    : null;
+    : [];
 
-  const positionedPointAnnotations = point
-    ? createPositionedPointAnnotations(
-        point,
+  const positionedPointAnnotations = pointAnnotations
+    ? createPositionedPointAnnotations({
+        annotations: pointAnnotations,
         data,
         categoriesFrequency,
-        data.areCategoriesDates,
+        areCategoriesDates: data.areCategoriesDates,
         chartType,
-      )
-    : null;
+      })
+    : [];
 
   return { positionedBandAnnotations, positionedPointAnnotations };
 };

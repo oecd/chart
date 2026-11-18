@@ -67,9 +67,10 @@ export const createOptionsForLineChart = ({
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
 
-  const showAnnotationLabelsInline = positionedBandAnnotations
-    ? R.any(R.prop('showLabelInline'), positionedBandAnnotations)
-    : false;
+  const showAnnotationLabelsInline = R.any(
+    R.prop('showLabelInline'),
+    positionedBandAnnotations,
+  );
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
