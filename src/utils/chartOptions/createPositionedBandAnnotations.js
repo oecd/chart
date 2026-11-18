@@ -15,17 +15,10 @@ const getContinuousBandAnnotations = ({ annotations }) => {
   return annotations
     .map((annotation) => {
       const { fromCategoryCode, toCategoryCode } = annotation;
-      if (!(
-        typeof fromCategoryCode === 'number' &&
-        typeof toCategoryCode === 'number'
-      )) {
-        return;
-      }
-      // Pass-through numerical category code
       return {
         ...annotation,
-        from: fromCategoryCode,
-        to: toCategoryCode,
+        from: parseFloat(fromCategoryCode),
+        to: parseFloat(toCategoryCode),
       };
     })
     .filter(R.isNotNil);

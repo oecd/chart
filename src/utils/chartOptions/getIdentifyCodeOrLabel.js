@@ -17,7 +17,6 @@ const getLowercaseCode = R.compose(R.toLower, R.prop('code'));
  * @param {{ code: string; label: string; }[]} categories
  */
 export const getIdentifyCodeOrLabel = (series, categories) => {
-  // TODO: How to deal with numerical series/categories?
   const seriesCodes = new Set(R.map(getLowercaseCode, series));
   const seriesCodesByLabel = new Map(R.map(getCodeAndLabelLowercase, series));
   const categoryCodes = new Set(R.map(getLowercaseCode, categories));

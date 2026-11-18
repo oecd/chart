@@ -51,6 +51,7 @@ export const createPositionedAnnotations = ({
     ? createPositionedBandAnnotations({
         annotations: band,
         categories: data.categories,
+        areCategoriesNumbers: data.areCategoriesNumbers,
         areCategoriesDates: data.areCategoriesDates,
         categoriesFrequency,
       })
