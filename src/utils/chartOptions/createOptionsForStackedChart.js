@@ -249,7 +249,8 @@ export const createOptionsForStackedChart = ({
   disableLegendInteraction = false,
   chartSize,
   disableAnimation = false,
-  positionedAnnotations,
+  positionedBandAnnotations,
+  positionedPointAnnotations
 }) => {
   const horizontal = chartType === chartTypes.stackedRow;
   const area = chartType === chartTypes.stackedArea;
@@ -329,8 +330,8 @@ export const createOptionsForStackedChart = ({
 
   const showAnnotationLabelsInline =
     !horizontal &&
-    (positionedAnnotations
-      ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+    (positionedBandAnnotations
+      ? R.any(R.prop('showLabelInline'), positionedBandAnnotations)
       : false);
 
   const legendMargin =
@@ -342,9 +343,9 @@ export const createOptionsForStackedChart = ({
     chartSize,
   );
 
-  const plotBands = positionedAnnotations
+  const plotBands = positionedBandAnnotations
     ? createAnnotationPlotBands({
-        positionedAnnotations,
+        positionedBandAnnotations,
         chartSize,
         showLabelsInline: showAnnotationLabelsInline,
         position: horizontal ? 'right' : 'top',
@@ -376,7 +377,21 @@ export const createOptionsForStackedChart = ({
       ? referenceOuterSize + referenceGap
       : 0;
 
+  
+
   return {
+    annotations: [{
+      labels: [{
+        text: "foo",
+        point: {
+          x: 1,
+          y: 1,
+          xAxis: 0,
+          yAxis: 0,
+        }
+      }]
+    }],
+    
     custom: customChartOptions,
 
     chart: {

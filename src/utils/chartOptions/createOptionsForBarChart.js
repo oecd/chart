@@ -62,6 +62,8 @@ export const createOptionsForBarChart = ({
 }) => {
   const horizontal = chartType === chartTypes.row;
 
+  console.log('data', data); //DEBUG
+
   const calcXAxisLayout = () => {
     if (horizontal) {
       if (hideXAxisLabels) {
@@ -137,7 +139,7 @@ export const createOptionsForBarChart = ({
   );
 
   const plotBands = createAnnotationPlotBands({
-    positionedAnnotations: positionedBandAnnotations,
+    positionedBandAnnotations: positionedBandAnnotations,
     chartSize,
     showLabelsInline: showAnnotationLabelsInline,
     position: horizontal ? 'right' : 'top',

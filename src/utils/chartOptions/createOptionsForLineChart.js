@@ -327,7 +327,7 @@ export const createOptionsForLineChart = ({
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
   const plotBands = createAnnotationPlotBands({
-    positionedAnnotations: positionedBandAnnotations,
+    positionedBandAnnotations: positionedBandAnnotations,
     chartSize,
     showLabelsInline: showAnnotationLabelsInline,
     position: 'top',

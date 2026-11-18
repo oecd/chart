@@ -289,7 +289,7 @@ export const createOptionsForScatterChart = ({
 
   const plotBands = positionedAnnotations
     ? createAnnotationPlotBands({
-        positionedAnnotations,
+        positionedBandAnnotations: positionedAnnotations,
         chartSize,
         showLabelsInline: showAnnotationLabelsInline,
         position: 'top',

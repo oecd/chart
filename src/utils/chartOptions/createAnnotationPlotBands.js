@@ -102,7 +102,7 @@ const getReferenceLabelOptions = (index, position) => {
  * Returns Highcharts plot bands for the given annotations.
  *
  * @param {{
- * positionedAnnotations: import('./annotation').PositionedBandAnnotation[];
+ * positionedBandAnnotations: import('./annotation').PositionedBandAnnotation[];
  * chartSize: keyof typeof import('../../constants/chart').chartSizes;
  * showLabelsInline: boolean;
  * position: 'top' | 'right'
@@ -110,18 +110,18 @@ const getReferenceLabelOptions = (index, position) => {
  * @returns {import('highcharts').XAxisPlotBandsOptions[]}
  */
 export const createAnnotationPlotBands = ({
-  positionedAnnotations,
+  positionedBandAnnotations: positionedBandAnnotations,
   chartSize,
   showLabelsInline,
   position,
 }) => {
-  if (positionedAnnotations.length === 0) return [];
+  if (positionedBandAnnotations.length === 0) return [];
 
   const fontSizePxInline =
     fontStyleByTextElementTypes[textElementTypes.source].fontSize[chartSize];
   const fontSizeNumberInline = parseFloat(fontSizePxInline);
 
-  return positionedAnnotations.map((annotation) => {
+  return positionedBandAnnotations.map((annotation) => {
     const { label, showLabelInline, from, to, color } = annotation;
 
     const labelOptions =
