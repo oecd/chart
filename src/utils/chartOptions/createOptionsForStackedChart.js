@@ -343,14 +343,12 @@ export const createOptionsForStackedChart = ({
     chartSize,
   );
 
-  const plotBands = positionedBandAnnotations
-    ? createAnnotationPlotBands({
-        positionedBandAnnotations,
-        chartSize,
-        showLabelsInline: showAnnotationLabelsInline,
-        position: horizontal ? 'right' : 'top',
-      })
-    : null;
+  const plotBands = createAnnotationPlotBands({
+    positionedBandAnnotations: positionedBandAnnotations,
+    chartSize,
+    showLabelsInline: showAnnotationLabelsInline,
+    position: horizontal ? 'right' : 'top',
+  });
 
   const marginTop = (() => {
     /** @type {number | undefined} */
