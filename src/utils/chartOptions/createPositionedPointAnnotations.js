@@ -76,7 +76,7 @@ export const createPositionedPointAnnotations = ({
       if (!seriesForAnnotation) return;
 
       let yValue =
-        chartType === chartTypes.bar
+        chartType === chartTypes.bar || chartType === chartTypes.row
           ? (maxima.get(annotation.categoryCode) ?? 0)
           : (seriesForAnnotation.data[categoryIndex].value ?? 0);
 
