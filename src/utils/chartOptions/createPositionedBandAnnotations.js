@@ -17,6 +17,7 @@ const getContinuousBandAnnotations = ({ annotations }) => {
       const { fromCategoryCode, toCategoryCode } = annotation;
       return {
         ...annotation,
+        // TODO: add/subtract a half step
         from: parseFloat(fromCategoryCode),
         to: parseFloat(toCategoryCode),
       };
@@ -78,25 +79,16 @@ const getTimeBandAnnotations = ({ annotations, categoriesFrequency }) => {
   return annotations
     .map((annotation) => {
       const { fromCategoryCode, toCategoryCode } = annotation;
-      if (
-        typeof fromCategoryCode === 'number' ||
-        typeof toCategoryCode === 'number'
-      ) {
-        return;
-      }
-
-      let from = -1;
-      let to = -1;
 
       const fromDate = categoriesFrequency.tryParse(fromCategoryCode);
       if (!fromDate) return;
       // Start one half before the from date
-      from = categoriesFrequency.getMiddle(fromDate, -1).getTime();
+      const from = categoriesFrequency.getMiddle(fromDate, -1).getTime();
 
       const toDate = categoriesFrequency.tryParse(toCategoryCode);
       if (!toDate) return;
       // End one half after the to date
-      to = categoriesFrequency.getMiddle(toDate, 1).getTime();
+      const to = categoriesFrequency.getMiddle(toDate, 1).getTime();
 
       return { ...annotation, from, to };
     })
