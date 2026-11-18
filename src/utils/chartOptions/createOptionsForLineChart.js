@@ -6,6 +6,7 @@ import {
   baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
+  chartTypes,
   nonHighlightedOpacity,
 } from '../../constants/chart';
 import { textElementTypes } from '../../constants/styling';
@@ -23,7 +24,7 @@ import {
   fontStyleForTextElement,
 } from '../stylingUtil';
 import { createAnnotationPlotBands } from './createAnnotationPlotBands';
-import { createAnnotationPointsWithOptions } from './createAnnotationPointsWithOptions';
+import { createAnnotationPointsForChartType } from './createAnnotationPointsForChartType';
 import { createDatapoint } from './createDataPoint';
 import { highlightSymbols } from './highlightSymbols';
 import { parseCategories } from './parseCategories';
@@ -332,9 +333,7 @@ export const createOptionsForLineChart = ({
     position: 'top',
   });
 
-  const annotationPoints = createAnnotationPointsWithOptions(
-    positionedPointAnnotations,
-  );
+  const annotationPoints = createAnnotationPointsForChartType(positionedPointAnnotations, chartTypes.line);
 
   const labelStyle = fontStyleForTextElement(
     textElementTypes.legend,

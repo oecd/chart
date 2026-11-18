@@ -24,7 +24,7 @@ import {
   referenceGap,
   referenceOuterSize,
 } from './createAnnotationPlotBands';
-import { createAnnotationPointsWithOptions } from './createAnnotationPointsWithOptions';
+import { createAnnotationPointsForChartType } from './createAnnotationPointsForChartType';
 import { parseCategories } from './parseCategories';
 
 /**
@@ -143,9 +143,7 @@ export const createOptionsForBarChart = ({
     position: horizontal ? 'right' : 'top',
   });
 
-  const annotationPoints = createAnnotationPointsWithOptions(
-    positionedPointAnnotations,
-  );
+  const annotationPoints = createAnnotationPointsForChartType(positionedPointAnnotations, chartType)
 
   const marginTop = (() => {
     /** @type {number | undefined} */
