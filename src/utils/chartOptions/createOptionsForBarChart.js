@@ -136,18 +136,16 @@ export const createOptionsForBarChart = ({
     chartSize,
   );
 
-  const plotBands = positionedBandAnnotations
-    ? createAnnotationPlotBands({
-        positionedAnnotations: positionedBandAnnotations,
-        chartSize,
-        showLabelsInline: showAnnotationLabelsInline,
-        position: horizontal ? 'right' : 'top',
-      })
-    : null;
+  const plotBands = createAnnotationPlotBands({
+    positionedAnnotations: positionedBandAnnotations,
+    chartSize,
+    showLabelsInline: showAnnotationLabelsInline,
+    position: horizontal ? 'right' : 'top',
+  });
 
-  const annotationPoints = positionedPointAnnotations
-    ? createAnnotationPointsWithOptions(positionedPointAnnotations)
-    : null;
+  const annotationPoints = createAnnotationPointsWithOptions(
+    positionedPointAnnotations,
+  );
 
   const marginTop = (() => {
     /** @type {number | undefined} */

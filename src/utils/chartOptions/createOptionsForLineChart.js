@@ -325,18 +325,16 @@ export const createOptionsForLineChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
-  const plotBands = positionedBandAnnotations
-    ? createAnnotationPlotBands({
-        positionedAnnotations: positionedBandAnnotations,
-        chartSize,
-        showLabelsInline: showAnnotationLabelsInline,
-        position: 'top',
-      })
-    : null;
+  const plotBands = createAnnotationPlotBands({
+    positionedAnnotations: positionedBandAnnotations,
+    chartSize,
+    showLabelsInline: showAnnotationLabelsInline,
+    position: 'top',
+  });
 
-  const annotationPoints = positionedPointAnnotations
-    ? createAnnotationPointsWithOptions(positionedPointAnnotations)
-    : null;
+  const annotationPoints = createAnnotationPointsWithOptions(
+    positionedPointAnnotations,
+  );
 
   const labelStyle = fontStyleForTextElement(
     textElementTypes.legend,
