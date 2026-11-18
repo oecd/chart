@@ -117,9 +117,8 @@ export const renderHighlightOutlines = (chart, disableAnimation) => {
   const relevantSeries = chart.series.filter(
     ({ visible, type }) => visible && (type === 'bar' || type === 'column'),
   );
-  const seriesCount = relevantSeries.length;
 
-  if (seriesCount === 0) return NO_ELEMENTS;
+  if (relevantSeries.length === 0) return NO_ELEMENTS;
 
   return relevantSeries
     .map((series) =>

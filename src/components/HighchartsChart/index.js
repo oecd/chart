@@ -7,8 +7,8 @@ import {
   memo,
   Suspense,
   useCallback,
-  useEffect,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -28,10 +28,16 @@ import {
   stackingOptions,
 } from '../../constants/chart';
 import { errorMessages } from '../../constants/chartErrorMessages';
+import { textElementTypes } from '../../constants/styling';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
 import customizeHighcharts from '../../highchartsCustomCode/customizeHighcharts';
 import useMemoForArrayOrObject from '../../hook/useMemoForArrayOrObject';
+import { createAnnotationFooter } from '../../utils/chartOptions/createAnnotationFooter';
 import { deepMergeUserOptionsWithDefaultOptions } from '../../utils/chartOptions/deepMergeUserOptionsWithDefaultOptions';
+import { exampleAnnotations } from '../../utils/chartOptions/exampleAnnotations';
+import { filterAndSortAnnotations } from '../../utils/chartOptions/filterAndSortAnnotations';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
+import { normalizeAnnotationCodes } from '../../utils/chartOptions/normalizeAnnotationCodes';
 import {
   createFooter,
   doesStringContainVar,
@@ -51,15 +57,13 @@ import {
   fetchDotStatData,
   isSdmxJsonEmpty,
 } from '../../utils/sdmxJsonUtil';
+import { fontStyleForTextElement } from '../../utils/stylingUtil';
 import { trackChartError } from '../../utils/trackingUtil';
 import CenteredContainer from '../CenteredContainer';
 import NullComponent from '../NullComponent';
 import Spinner from '../Spinner';
 import GenericChart from './GenericChart';
 import Header from './Header';
-import ChartSizeContext from '../../contexts/ChartSizeContext';
-import { fontStyleForTextElement } from '../../utils/stylingUtil';
-import { textElementTypes } from '../../constants/styling';
 
 // dynamic import for code splitting
 const MapChart = lazy(() => import('./MapChart'));
@@ -159,6 +163,7 @@ const HighchartsChart = ({
   mapCountryDimension = '',
   displayNoteAsTooltip = false,
   displaySourceAsTooltip = false,
+  displayAnnotationsAsTooltip = false,
   displayActionButton = false,
   actionButtonLabel = '',
   onExpandChart = null,
@@ -184,7 +189,15 @@ const HighchartsChart = ({
   referenceValueCode = null,
   dataLastUpdateDate = null,
   disableAnimation = false,
+  annotations,
 }) => {
+  // TESTING
+  const usedAnnotations = useMemo(() => {
+    return !annotations || annotations.length === 0
+      ? exampleAnnotations
+      : annotations;
+  }, [annotations]);
+
   const ChartForType = getChartForType(chartType);
 
   const chartRef = useRef(null);
@@ -933,10 +946,30 @@ const HighchartsChart = ({
     setAllHeightCalculationsHaveBeenDone,
   ] = useState(false);
 
+  const annotationsWithCodes = useMemo(() => {
+    let x = normalizeAnnotationCodes(usedAnnotations, parsedData);
+    return x;
+  }, [parsedData, usedAnnotations]);
+
+  // Filter annotations for those categories actually in the data
+  const sortedApplicableAnnotations = useMemo(
+    () => filterAndSortAnnotations(parsedData, annotationsWithCodes),
+    [parsedData, annotationsWithCodes],
+  );
+
+  const annotationsForFooter = useMemo(() => {
+    return createAnnotationFooter(sortedApplicableAnnotations);
+  }, [sortedApplicableAnnotations]);
+
+  const annotationsShouldBeDisplayedInTooltip =
+    annotationsForFooter && (footerHeight === 0 || displayAnnotationsAsTooltip);
+
   // height calculations
   useEffect(() => {
     const isThereEnoughSpaceForFooter =
-      displayNoteAsTooltip && displaySourceAsTooltip
+      displayNoteAsTooltip &&
+      displaySourceAsTooltip &&
+      displayAnnotationsAsTooltip
         ? false
         : height - footerRef.current.clientHeight >=
           minChartHeightForFooterDisplay;
@@ -961,10 +994,12 @@ const HighchartsChart = ({
     height,
     parsedTitle,
     parsedSubtitle,
+    annotationsForFooter,
     note,
     source,
     displayNoteAsTooltip,
     displaySourceAsTooltip,
+    displayAnnotationsAsTooltip,
   ]);
 
   const chartCanBedisplayed =
@@ -1101,6 +1136,7 @@ const HighchartsChart = ({
           ? createFooter({
               source: parsedSource,
               note: parsedNote,
+              annotations: annotationsForFooter,
             })
           : '',
         colorPalette: colorPaletteInternal,
@@ -1143,6 +1179,7 @@ const HighchartsChart = ({
         disableLegendInteraction,
         sortOrder,
         disableAnimation,
+        annotations: sortedApplicableAnnotations,
       });
 
       setMergedOptions(
@@ -1210,6 +1247,8 @@ const HighchartsChart = ({
     disableLegendInteraction,
     id,
     sortOrder,
+    sortedApplicableAnnotations,
+    annotationsForFooter,
     disableAnimation,
   ]);
 
@@ -1266,10 +1305,14 @@ const HighchartsChart = ({
             lang={lang}
             note={parsedNote}
             source={parsedSource}
+            annotationsForFooter={annotationsForFooter}
             canTitleAndSubtitleBeDisplayed={canTitleAndSubtitleBeDisplayed}
             displayNoteAsTooltip={displayNoteAsTooltip}
             noteShouldBeDisplayedInTooltip={noteShouldBeDisplayedInTooltip}
             sourceShouldBeDisplayedInTooltip={sourceShouldBeDisplayedInTooltip}
+            annotationsShouldBeDisplayedInTooltip={
+              annotationsShouldBeDisplayedInTooltip
+            }
             hideToolbox={hideToolbox}
             exportDisabled={!chartCanBedisplayed}
             onDownloadData={onDownloadData}
@@ -1319,6 +1362,10 @@ const HighchartsChart = ({
           dangerouslySetInnerHTML={{
             __html: R.compose(
               R.join(''),
+              R.when(
+                () => !displayAnnotationsAsTooltip,
+                R.append(annotationsForFooter),
+              ),
               R.when(() => !displaySourceAsTooltip, R.append(parsedSource)),
               R.when(() => !displayNoteAsTooltip, R.append(parsedNote)),
             )([]),
@@ -1397,6 +1444,7 @@ HighchartsChart.propTypes = {
   mapCountryDimension: PropTypes.string,
   displayNoteAsTooltip: PropTypes.bool,
   displaySourceAsTooltip: PropTypes.bool,
+  displayAnnotationsAsTooltip: PropTypes.bool,
   displayActionButton: PropTypes.bool,
   actionButtonLabel: PropTypes.string,
   onExpandChart: PropTypes.func,
@@ -1422,6 +1470,7 @@ HighchartsChart.propTypes = {
   referenceValueCode: PropTypes.string,
   dataLastUpdateDate: PropTypes.string,
   disableAnimation: PropTypes.bool,
+  annotations: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default memo(HighchartsChart);

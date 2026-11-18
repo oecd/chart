@@ -23,6 +23,7 @@ import {
   calcMarginTopDefault,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { parseCategories } from './parseCategories';
 
 // Symbol sizes
@@ -70,6 +71,7 @@ export const createOptionsForScatterChart = ({
   disableLegendInteraction = false,
   chartSize,
   disableAnimation = false,
+  positionedAnnotations,
 }) => {
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
@@ -281,6 +283,19 @@ export const createOptionsForScatterChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const showAnnotationLabelsInline = positionedAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+    : false;
+
+  const plotBands = positionedAnnotations
+    ? createAnnotationPlotBands({
+        positionedAnnotations,
+        chartSize,
+        showLabelsInline: showAnnotationLabelsInline,
+        position: 'top',
+      })
+    : null;
+
   return {
     custom: {
       baselineCodes,
@@ -324,6 +339,7 @@ export const createOptionsForScatterChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
@@ -364,7 +380,9 @@ export const createOptionsForScatterChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginDefault(chartSize),
+      margin:
+        calcLegendMarginDefault(chartSize) +
+        (showAnnotationLabelsInline ? 15 : 0),
     },
 
     plotOptions: {
