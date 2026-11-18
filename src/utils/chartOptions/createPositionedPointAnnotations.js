@@ -33,7 +33,7 @@ const maximaPerCategory = (lists) => {
  * };
  * categoriesFrequency: { tryParse: (str: string) => Date | false } | null;
  * areCategoriesDates: boolean;
- * chartType: keyof typeof chartTypes;
+ * chartType: typeof chartTypes[keyof typeof chartTypes];
  *}} options
  * @returns {import('./annotation').PositionedPointAnnotation[]}
  */
