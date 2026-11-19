@@ -1,11 +1,11 @@
-import { useMemo, useContext } from 'react';
 import PropTypes from 'prop-types';
 import * as R from 'ramda';
+import { useContext, useMemo } from 'react';
 
-import Toolbox from './Toolbox';
-import ChartSizeContext from '../../contexts/ChartSizeContext';
 import { textElementTypes } from '../../constants/styling';
+import ChartSizeContext from '../../contexts/ChartSizeContext';
 import { fontStyleForTextElement } from '../../utils/stylingUtil';
+import Toolbox from './Toolbox';
 
 const Header = ({
   chartType,
@@ -15,11 +15,13 @@ const Header = ({
   definition = null,
   note = null,
   source = null,
+  annotationsForFooter = null,
   lang,
   canTitleAndSubtitleBeDisplayed,
   displayNoteAsTooltip,
   noteShouldBeDisplayedInTooltip,
   sourceShouldBeDisplayedInTooltip,
+  annotationsShouldBeDisplayedInTooltip,
   hideToolbox,
   exportDisabled,
   onDownloadData = null,
@@ -90,10 +92,14 @@ const Header = ({
             definition={definition}
             note={note}
             source={source}
+            annotationsForFooter={annotationsForFooter}
             lang={lang}
             displayNoteAsTooltip={displayNoteAsTooltip}
             noteShouldBeDisplayedInTooltip={noteShouldBeDisplayedInTooltip}
             sourceShouldBeDisplayedInTooltip={sourceShouldBeDisplayedInTooltip}
+            annotationsShouldBeDisplayedInTooltip={
+              annotationsShouldBeDisplayedInTooltip
+            }
             tooltipContainerId={tooltipContainerId}
             displayActionButton={displayActionButton}
             actionButtonLabel={actionButtonLabel}
@@ -115,11 +121,13 @@ Header.propTypes = {
   definition: PropTypes.string,
   note: PropTypes.string,
   source: PropTypes.string,
+  annotationsForFooter: PropTypes.string,
   lang: PropTypes.string.isRequired,
   canTitleAndSubtitleBeDisplayed: PropTypes.bool.isRequired,
   displayNoteAsTooltip: PropTypes.bool.isRequired,
   noteShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   sourceShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
+  annotationsShouldBeDisplayedInTooltip: PropTypes.bool.isRequired,
   hideToolbox: PropTypes.bool.isRequired,
   exportDisabled: PropTypes.bool.isRequired,
   onDownloadData: PropTypes.func,

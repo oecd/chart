@@ -1,6 +1,7 @@
+// @ts-check
 /*global process*/
 
-export const chartTypes = {
+export const chartTypes = /** @type {const} */ ({
   line: 'Line',
   bar: 'Bar',
   row: 'Row',
@@ -14,7 +15,7 @@ export const chartTypes = {
   radar: 'Radar',
   pie: 'Pie',
   sankey: 'Sankey',
-};
+});
 
 export const chartTypesForWhichXAxisIsAlwaysTreatedAsCategories = [
   chartTypes.map,

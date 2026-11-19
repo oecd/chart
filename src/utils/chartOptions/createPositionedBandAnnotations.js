@@ -1,0 +1,133 @@
+// @ts-check
+import * as R from 'ramda';
+
+/**
+ * Adds from/to to annotations for numerical categories
+ * (when areCategoriesNumbers is true).
+ * Plot bands are defined with the numerical category code.
+ *
+ * @param {{
+ * annotations: (import('./annotation').IndexedBandAnnotation)[];
+ * }} options
+ * @returns {import('./annotation').PositionedBandAnnotation[]}
+ */
+const getContinuousBandAnnotations = ({ annotations }) => {
+  return annotations
+    .map((annotation) => {
+      const { fromCategoryCode, toCategoryCode } = annotation;
+      return {
+        ...annotation,
+        // TODO: add/subtract a half step
+        from: parseFloat(fromCategoryCode),
+        to: parseFloat(toCategoryCode),
+      };
+    })
+    .filter(R.isNotNil);
+};
+
+/**
+ * Adds from/to to annotations for qualitative categories.
+ * Plot bands are defined with indices.
+ *
+ * @param {{
+ * annotations: (import('./annotation').IndexedBandAnnotation)[];
+ * categories: { code: string }[];
+ * }} options
+ * @returns {import('./annotation').PositionedBandAnnotation[]}
+ */
+const getQualitativeBandAnnotations = ({ annotations, categories }) => {
+  const normalizedCategoryCodes = (() => {
+    return R.pluck('code', categories).map(R.toLower);
+  })();
+
+  return annotations
+    .map((annotation) => {
+      let from = -1;
+      let to = -1;
+      from = R.findIndex(
+        R.equals(annotation.fromCategoryCode),
+        normalizedCategoryCodes,
+      );
+      if (from === -1) return;
+      to = R.findIndex(
+        R.equals(annotation.toCategoryCode),
+        normalizedCategoryCodes,
+      );
+      if (to === -1) return;
+      // Start/end one half before/after the categories so they are enclosed with padding
+      from -= 0.5;
+      to += 0.5;
+      return { ...annotation, from, to };
+    })
+    .filter(R.isNotNil);
+};
+
+/**
+ * Adds from/to to annotations for time categories.
+ * Plot bands are defined with time stamps.
+ *
+ * @param {{
+ * annotations: (import('./annotation').IndexedBandAnnotation)[];
+ * categoriesFrequency: {
+ *   tryParse: (str: string) => Date | false;
+ *   getMiddle: (date: Date, step: number) => Date;
+ * };
+ * }} options
+ * @returns {import('./annotation').PositionedBandAnnotation[]}
+ */
+const getTimeBandAnnotations = ({ annotations, categoriesFrequency }) => {
+  return annotations
+    .map((annotation) => {
+      const { fromCategoryCode, toCategoryCode } = annotation;
+
+      const fromDate = categoriesFrequency.tryParse(fromCategoryCode);
+      if (!fromDate) return;
+      // Start one half before the from date
+      const from = categoriesFrequency.getMiddle(fromDate, -1).getTime();
+
+      const toDate = categoriesFrequency.tryParse(toCategoryCode);
+      if (!toDate) return;
+      // End one half after the to date
+      const to = categoriesFrequency.getMiddle(toDate, 1).getTime();
+
+      return { ...annotation, from, to };
+    })
+    .filter(R.isNotNil);
+};
+
+/**
+ * @param {{
+ * annotations: (import('./annotation').IndexedBandAnnotation)[];
+ * categories: { code: string }[];
+ * areCategoriesNumbers: boolean;
+ * areCategoriesDates: boolean;
+ * categoriesFrequency: {
+ *   tryParse: (str: string) => Date | false;
+ *   getMiddle: (date: Date, step: number) => Date;
+ * } | null;
+ * }} options
+ * @returns {import('./annotation').PositionedBandAnnotation[]}
+ */
+export const createPositionedBandAnnotations = ({
+  annotations,
+  categories,
+  areCategoriesNumbers,
+  areCategoriesDates,
+  categoriesFrequency,
+}) => {
+  if (areCategoriesNumbers) {
+    return getContinuousBandAnnotations({ annotations });
+  }
+
+  if (areCategoriesDates && categoriesFrequency) {
+    return getTimeBandAnnotations({
+      annotations,
+      categoriesFrequency,
+    });
+  }
+
+  return getQualitativeBandAnnotations({
+    annotations,
+    categories,
+  });
+};

@@ -163,7 +163,20 @@ const anyVarRegExp = R.join(
 
 export const doesStringContainVar = R.test(new RegExp(anyVarRegExp, 'i'));
 
-export const createFooter = ({ source, note, stripLinks = false }) =>
+/**
+ * @param {{
+ * source?: string;
+ * note?: string;
+ * annotations?: string;
+ * stripLinks?: boolean;
+ }} options
+ */
+export const createFooter = ({
+  source,
+  note,
+  annotations,
+  stripLinks = false,
+}) =>
   R.compose(
     R.when(() => stripLinks, R.replace(/<a\b[^>]*>(.*?)<\/a>/g, '$1')),
     R.replace(/<p>/g, '<p style="margin: 0px 0px 5px 0px">'),
@@ -177,7 +190,7 @@ export const createFooter = ({ source, note, stripLinks = false }) =>
       }),
     R.join(''),
     R.reject(isNilOrEmpty),
-  )([note, source]);
+  )([annotations, note, source]);
 
 export const isParsedDataEmpty = (parsedData) =>
   R.isEmpty(parsedData?.categories) || R.isEmpty(parsedData?.series);

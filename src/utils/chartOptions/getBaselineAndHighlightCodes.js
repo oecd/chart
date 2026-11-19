@@ -1,6 +1,7 @@
 // @ts-check
 import * as R from 'ramda';
 import { codeOrLabelEquals } from '../configUtil';
+import { getIdentifyCodeOrLabel } from './getIdentifyCodeOrLabel';
 
 /**
  * @typedef {{
@@ -36,21 +37,13 @@ export const getBaselineAndHighlightCodes = (data, baseline, highlight) => {
   // Determine series and category codes while preserving the original order
 
   const seriesCodes = new Set(R.map(getLowercaseCode, data.series));
-  /** @param {{ label: string; code: string }} s */
-  const getCodeAndLabelLowercase = (s) => [
-    R.toLower(s.label),
-    R.toLower(s.code),
-  ];
-  const seriesCodesByLabel = new Map(
-    R.map(getCodeAndLabelLowercase, data.series),
-  );
   const categoryCodes = new Set(R.map(getLowercaseCode, data.categories));
-  const categoryCodesByLabel = new Map(
-    R.map(getCodeAndLabelLowercase, data.categories),
-  );
+
+  const identify = getIdentifyCodeOrLabel(data.series, data.categories);
 
   // List of highlight codes.
   // This is different from `highlight` which might contain codes *or* labels
+  // whether or not they are in the data.
   /** @type {string[]} */
   const highlightCodes = [];
   /** @type {string[]} */
@@ -59,35 +52,20 @@ export const getBaselineAndHighlightCodes = (data, baseline, highlight) => {
   const highlightCategoryCodes = [];
 
   highlight.forEach((codeOrLabel) => {
-    const codeOrLabelLowercase = R.toLower(codeOrLabel);
+    const result = identify(codeOrLabel);
 
-    // Is it a series code?
-    if (seriesCodes.has(codeOrLabelLowercase)) {
-      highlightCodes.push(codeOrLabelLowercase);
-      highlightSeriesCodes.push(codeOrLabelLowercase);
+    if (!result) return;
+    const { type, code } = result;
+
+    if (type === 'series') {
+      highlightCodes.push(code);
+      highlightSeriesCodes.push(code);
       return;
     }
 
-    // Is it a series label?
-    const seriesCode = seriesCodesByLabel.get(codeOrLabelLowercase);
-    if (seriesCode) {
-      highlightCodes.push(seriesCode);
-      highlightSeriesCodes.push(seriesCode);
-      return;
-    }
-
-    // Is it a category code?
-    if (categoryCodes.has(codeOrLabelLowercase)) {
-      highlightCodes.push(codeOrLabelLowercase);
-      highlightCategoryCodes.push(codeOrLabelLowercase);
-      return;
-    }
-
-    // Is it a category label?
-    const categoryCode = categoryCodesByLabel.get(codeOrLabelLowercase);
-    if (categoryCode) {
-      highlightCodes.push(categoryCode);
-      highlightCategoryCodes.push(categoryCode);
+    if (type === 'category') {
+      highlightCodes.push(code);
+      highlightCategoryCodes.push(code);
       return;
     }
   });

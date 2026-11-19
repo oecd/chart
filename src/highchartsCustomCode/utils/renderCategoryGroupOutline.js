@@ -45,7 +45,6 @@ export const renderCategoryGroupOutline = (chart, disableAnimation) => {
   /** @type {boolean} */
   const isCategoryGroupHighlighted =
     customChartOptions.isCategoryGroupHighlighted;
-
   if (!isCategoryGroupHighlighted) return NO_ELEMENTS;
 
   /** @type {string[]} */
