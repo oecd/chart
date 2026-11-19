@@ -38,6 +38,7 @@ import { exampleAnnotations } from '../../utils/chartOptions/exampleAnnotations'
 import { filterAndSortAnnotations } from '../../utils/chartOptions/filterAndSortAnnotations';
 import { getCreateOptionsFuncForChartType } from '../../utils/chartOptions/getCreateOptionsFuncForChartType';
 import { normalizeAnnotationCodes } from '../../utils/chartOptions/normalizeAnnotationCodes';
+import { translateAnnotations } from '../../utils/chartOptions/translateAnnotations';
 import {
   createFooter,
   doesStringContainVar,
@@ -946,20 +947,26 @@ const HighchartsChart = ({
     setAllHeightCalculationsHaveBeenDone,
   ] = useState(false);
 
-  const annotationsWithCodes = useMemo(() => {
-    let x = normalizeAnnotationCodes(usedAnnotations, parsedData);
-    return x;
+  const processedAnnotations = useMemo(() => {
+    () => R.compose();
+    const normalizedAnnotations = normalizeAnnotationCodes(
+      parsedData,
+      usedAnnotations,
+    );
+    const filteredAnnotations = filterAndSortAnnotations(
+      parsedData,
+      normalizedAnnotations,
+    );
+    const translatedAnnotations = translateAnnotations(
+      filteredAnnotations,
+      parsedData.codeLabelMapping,
+    );
+    return translatedAnnotations;
   }, [parsedData, usedAnnotations]);
 
-  // Filter annotations for those categories actually in the data
-  const sortedApplicableAnnotations = useMemo(
-    () => filterAndSortAnnotations(parsedData, annotationsWithCodes),
-    [parsedData, annotationsWithCodes],
-  );
-
   const annotationsForFooter = useMemo(() => {
-    return createAnnotationFooter(sortedApplicableAnnotations);
-  }, [sortedApplicableAnnotations]);
+    return createAnnotationFooter(processedAnnotations);
+  }, [processedAnnotations]);
 
   const annotationsShouldBeDisplayedInTooltip =
     annotationsForFooter && (footerHeight === 0 || displayAnnotationsAsTooltip);
@@ -1179,7 +1186,7 @@ const HighchartsChart = ({
         disableLegendInteraction,
         sortOrder,
         disableAnimation,
-        annotations: sortedApplicableAnnotations,
+        annotations: processedAnnotations,
       });
 
       setMergedOptions(
@@ -1247,7 +1254,7 @@ const HighchartsChart = ({
     disableLegendInteraction,
     id,
     sortOrder,
-    sortedApplicableAnnotations,
+    processedAnnotations,
     annotationsForFooter,
     disableAnimation,
   ]);

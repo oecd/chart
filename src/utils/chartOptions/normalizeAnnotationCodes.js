@@ -3,15 +3,17 @@ import * as R from 'ramda';
 import { getIdentifyCodeOrLabel } from './getIdentifyCodeOrLabel';
 
 /**
+ * Transforms annotations from case-insensitive codes or labels
+ * to lowercase codes.
  *
- * @param {import('./annotation').Annotation[]} annotations
  * @param {{
  * series: { code: string; label: string; }[];
  * categories: { code: string; label: string; }[];
  * }} data
+ * @param {import('./annotation').Annotation[]} annotations
  * @returns {import('./annotation').Annotation[]}
  */
-export const normalizeAnnotationCodes = (annotations, data) => {
+export const normalizeAnnotationCodes = (data, annotations) => {
   const identify = getIdentifyCodeOrLabel(data.series, data.categories);
 
   return annotations
