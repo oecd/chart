@@ -39,7 +39,7 @@ const positioningForChartType = {
     align: 'center',
     verticalAlign: 'bottom',
     x: 0,
-    y: -1 * distance,
+    y: distance,
   },
   'default': {
     align: 'left',

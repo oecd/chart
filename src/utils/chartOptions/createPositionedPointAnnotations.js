@@ -5,48 +5,6 @@ import { chartTypes } from '../../constants/chart';
 
 /**
  * @param {{
- *  category: string;
- *  value: number | null;
- * }[][]} lists
- * @returns {Map<string, number>}
- */
-const maximaPerCategory = (lists) => {
-  /** @type Map<string, number> */
-  const maxima = new Map();
-  for (const list of lists) {
-    for (const { category, value } of list) {
-      const current = maxima.get(category);
-      if (value !== null && (current === undefined || value > current)) {
-        maxima.set(category, value);
-      }
-    }
-  }
-  return maxima;
-};
-
-/**
- * @param {{
- *   category: string;
- * value: number | null;
- * }[][]} lists 
- * @returns {Map<string, number>}
- */
-const totalsPerCategory = (lists) => {
-  /** @type Map<string, number> */
-  const sums = new Map();
-  for (const list of lists) {
-    for (const {category, value} of list) {
-      const total = sums.get(category) ?? 0;
-      if (value !== null) {
-        sums.set(category, total + value);
-      }
-    }
-  }
-  return sums
-}
-
-/**
- * @param {{
  * annotations: import('./annotation').IndexedPointAnnotation[];
  * data: {
  *   series: { code: string; data: { value: number | null }[] }[];
@@ -65,23 +23,37 @@ export const createPositionedPointAnnotations = ({
   areCategoriesDates,
   chartType,
 }) => {
-  const listOfSeries = R.pluck('data', data.series);
-
-  /** @type {{category: string; value: number | null}[][]} */
-  const listOfSeriesWithCategories = R.map(
-    (series) =>
-      R.zipWith(
-        (category, point) => {
-          return { category: category.code.toLowerCase(), value: point.value };
-        },
-        data.categories,
-        series,
-      ),
-    listOfSeries,
+  /**
+   * @type {Map<string, {
+   *   datapoints: number[],
+   *   maximum: number,
+   *   midpoints: number[]
+   * }>}
+   */
+  const dataByCategories = new Map(
+      data.categories.map((category, index) => {
+       /** @type number[] */
+       const datapoints = [];
+       /** @type number[] */
+       const midpoints = [];
+       let currentSegmentBottomXPos = 0;
+       let maximum = 0;
+       
+       data.series.forEach((series) => {
+         const value = series.data[index].value ?? 0
+         datapoints.push(value);
+         midpoints.push(value / 2 + currentSegmentBottomXPos);
+         currentSegmentBottomXPos += value;
+         maximum = maximum > value ? maximum : value;
+       });
+       
+       return [category.code.toLowerCase(), {
+         datapoints,
+         maximum,
+         midpoints,
+       }];
+    })
   );
-
-  const maxima = maximaPerCategory(listOfSeriesWithCategories);
-  const totals = totalsPerCategory(listOfSeriesWithCategories);
 
   const positionedAnnotations = annotations
     .map((annotation) => {
@@ -92,18 +64,25 @@ export const createPositionedPointAnnotations = ({
         return;
       }
 
-      const seriesForAnnotation = data.series.find(
+      const seriesIndex = data.series.findIndex(
         (series) => series.code.toLowerCase() == annotation.seriesCode,
       );
-      if (!seriesForAnnotation) return;
+      if (seriesIndex === -1) {
+        return;
+      }
 
       let yValue;
       if (chartType === chartTypes.bar || chartType === chartTypes.row) {
-        yValue = maxima.get(annotation.categoryCode) ?? 0;
+        yValue = dataByCategories.get(annotation.categoryCode)?.maximum ?? 0;
       } else if (chartType === chartTypes.stackedBar) {
-        yValue = totals.get(annotation.categoryCode) ?? 0; 
+        // yValue = totals.get(annotation.categoryCode) ?? 0;
+        yValue =
+          dataByCategories.get(annotation.categoryCode)?.midpoints[
+            seriesIndex
+          ] ?? 0;
       } else {
-        yValue = seriesForAnnotation.data[categoryIndex].value ?? 0;
+        yValue =
+          dataByCategories.get(annotation.categoryCode)?.datapoints[seriesIndex] ?? 0;
       }
 
       let xValue;
