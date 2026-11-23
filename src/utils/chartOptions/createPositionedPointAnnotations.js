@@ -55,6 +55,8 @@ export const createPositionedPointAnnotations = ({
     })
   );
 
+  console.log('dataByCategories', dataByCategories); //DEBUG
+
   const positionedAnnotations = annotations
     .map((annotation) => {
       const categoryIndex = data.categories.findIndex(
@@ -74,8 +76,7 @@ export const createPositionedPointAnnotations = ({
       let yValue;
       if (chartType === chartTypes.bar || chartType === chartTypes.row) {
         yValue = dataByCategories.get(annotation.categoryCode)?.maximum ?? 0;
-      } else if (chartType === chartTypes.stackedBar) {
-        // yValue = totals.get(annotation.categoryCode) ?? 0;
+      } else if (chartType === chartTypes.stackedBar || chartType === chartTypes.stackedRow) {
         yValue =
           dataByCategories.get(annotation.categoryCode)?.midpoints[
             seriesIndex

@@ -24,7 +24,7 @@ const positioningForChartType = {
     y: -1 * distance,
   },
   [chartTypes.bar]: {
-    align: 'center',  
+    align: 'center',
     verticalAlign: 'bottom',
     x: 0,
     y: -1 * distance,
@@ -41,7 +41,13 @@ const positioningForChartType = {
     x: 0,
     y: distance,
   },
-  'default': {
+  [chartTypes.stackedRow]: {
+    align: 'left',
+    verticalAlign: 'middle',
+    x: -distance,
+    y: 0,
+  },
+  default: {
     align: 'left',
     verticalAlign: 'middle',
     x: 0,
