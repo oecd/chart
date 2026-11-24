@@ -4,11 +4,6 @@ import { getReferenceLetter } from './getReferenceLetter';
 import { referenceCssStyles } from './referenceSymbolStyles';
 
 /**
- * @param {import('./annotation').PositionedPointAnnotation[]} positionedPointAnnotations
- * @returns {import('highcharts').AnnotationsOptions[]}
- */
-
-/**
  * The distance the reference symbol keeps from its data point
  */
 const distance = 10;
