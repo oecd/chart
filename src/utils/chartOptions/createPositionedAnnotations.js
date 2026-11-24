@@ -19,6 +19,7 @@ import { createPositionedPointAnnotations } from './createPositionedPointAnnotat
  *   getMiddle: (date: Date, step: number) => Date;
  * } | null;
  * chartType: keyof typeof import('../../constants/chart').chartTypes;
+ * chartType: import('./annotation').ChartType;
  * }} options
  * @return {{
  * positionedBandAnnotations: import('./annotation').PositionedBandAnnotation[];

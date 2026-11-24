@@ -13,6 +13,7 @@ import { chartTypes } from '../../constants/chart';
  * categoriesFrequency: { tryParse: (str: string) => Date | false } | null;
  * areCategoriesDates: boolean;
  * chartType: typeof chartTypes[keyof typeof chartTypes];
+ * chartType: import("./annotation").ChartType;
  *}} options
  * @returns {import('./annotation').PositionedPointAnnotation[]}
  */

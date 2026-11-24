@@ -55,5 +55,13 @@
  * @typedef {PositionedBandAnnotation | PositionedPointAnnotation} PositionedAnnotation
  */
 
+/**
+ * @typedef {typeof import('../../constants/chart').chartTypes} ChartTypeObject
+ */
+
+/**
+ * @typedef {ChartTypeObject[keyof ChartTypeObject]} ChartType
+ */
+
 // Empty export so TypeScript recognizes the file as a module
 export {};
