@@ -26,10 +26,10 @@ export const chartTypesForWhichXAxisIsAlwaysTreatedAsCategories = [
   chartTypes.sankey,
 ];
 
-export const stackingOptions = {
+export const stackingOptions = /** @type {const} */ ({
   percent: { value: 'percent', label: 'Percent' },
   normal: { value: 'normal', label: 'Normal' },
-};
+});
 
 export const dataSourceTypes = {
   csv: { value: 'csv', label: 'CSV' },

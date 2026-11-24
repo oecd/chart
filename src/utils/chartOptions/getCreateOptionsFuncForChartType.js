@@ -84,6 +84,7 @@ const createChartOptionsFunc =
     hideLegend,
     annotations,
     disableAnimation,
+    stacking,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -187,6 +188,7 @@ const createChartOptionsFunc =
         annotations,
         categoriesFrequency,
         chartType,
+        stacking
       });
 
     const options = createOptionsFuncForChartType({
@@ -215,6 +217,7 @@ const createChartOptionsFunc =
       positionedBandAnnotations,
       positionedPointAnnotations,
       disableAnimation,
+      stacking,
     });
 
     const customChartRender = R.propOr(

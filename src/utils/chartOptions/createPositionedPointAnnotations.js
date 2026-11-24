@@ -1,7 +1,7 @@
 // @ts-check
 
 import * as R from 'ramda';
-import { chartTypes } from '../../constants/chart';
+import { chartTypes, stackingOptions } from '../../constants/chart';
 
 /**
  * @param {{
@@ -12,8 +12,8 @@ import { chartTypes } from '../../constants/chart';
  * };
  * categoriesFrequency: { tryParse: (str: string) => Date | false } | null;
  * areCategoriesDates: boolean;
- * chartType: typeof chartTypes[keyof typeof chartTypes];
  * chartType: import("./annotation").ChartType;
+ * stacking: import("./annotation").stackingOption;
  *}} options
  * @returns {import('./annotation').PositionedPointAnnotation[]}
  */
@@ -23,12 +23,14 @@ export const createPositionedPointAnnotations = ({
   categoriesFrequency,
   areCategoriesDates,
   chartType,
+  stacking
 }) => {
   /**
    * @type {Map<string, {
    *   datapoints: number[],
    *   maximum: number,
-   *   midpoints: number[]
+   *   midpoints: number[],
+   *   total: number,
    * }>}
    */
   const dataByCategories = new Map(
@@ -39,6 +41,7 @@ export const createPositionedPointAnnotations = ({
        const midpoints = [];
        let currentSegmentBottomXPos = 0;
        let maximum = 0;
+       let total = 0;
        
        data.series.forEach((series) => {
          const value = series.data[index].value ?? 0
@@ -46,17 +49,17 @@ export const createPositionedPointAnnotations = ({
          midpoints.push(value / 2 + currentSegmentBottomXPos);
          currentSegmentBottomXPos += value;
          maximum = maximum > value ? maximum : value;
+         total += value;
        });
        
        return [category.code.toLowerCase(), {
          datapoints,
          maximum,
          midpoints,
+         total,
        }];
     })
   );
-
-  console.log('dataByCategories', dataByCategories); //DEBUG
 
   const positionedAnnotations = annotations
     .map((annotation) => {
@@ -77,11 +80,16 @@ export const createPositionedPointAnnotations = ({
       let yValue;
       if (chartType === chartTypes.bar || chartType === chartTypes.row) {
         yValue = dataByCategories.get(annotation.categoryCode)?.maximum ?? 0;
-      } else if (chartType === chartTypes.stackedBar || chartType === chartTypes.stackedRow) {
+      } else if ((chartType === chartTypes.stackedBar || chartType === chartTypes.stackedRow)
+                 && stacking === stackingOptions.normal.value) {
         yValue =
           dataByCategories.get(annotation.categoryCode)?.midpoints[
             seriesIndex
           ] ?? 0;
+      } else if ((chartType === chartTypes.stackedBar || chartType === chartTypes.stackedRow)
+                 && stacking === stackingOptions.percent.value) {
+        const scalingFactor = (dataByCategories.get(annotation.categoryCode)?.total ?? 0) / 100;
+        yValue = (dataByCategories.get(annotation.categoryCode)?.midpoints[seriesIndex] ?? 0) / scalingFactor;
       } else {
         yValue =
           dataByCategories.get(annotation.categoryCode)?.datapoints[seriesIndex] ?? 0;

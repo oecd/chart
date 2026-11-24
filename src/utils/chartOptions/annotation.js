@@ -63,5 +63,13 @@
  * @typedef {ChartTypeObject[keyof ChartTypeObject]} ChartType
  */
 
+/**
+ * @typedef {typeof import('../../constants/chart').stackingOptions} StackingOptionsObject
+ */
+
+/**
+ * @typedef {StackingOptionsObject[keyof StackingOptionsObject]['value']} stackingOption
+ */
+
 // Empty export so TypeScript recognizes the file as a module
 export {};

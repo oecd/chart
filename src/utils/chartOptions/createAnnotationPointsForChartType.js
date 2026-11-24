@@ -32,14 +32,14 @@ const positioningForChartType = {
   },
   [chartTypes.stackedBar]: {
     align: 'center',
-    verticalAlign: 'bottom',
+    verticalAlign: 'middle',
     x: 0,
-    y: distance,
+    y: 0,
   },
   [chartTypes.stackedRow]: {
-    align: 'left',
+    align: 'center',
     verticalAlign: 'middle',
-    x: -distance,
+    x: 0,
     y: 0,
   },
   default: {

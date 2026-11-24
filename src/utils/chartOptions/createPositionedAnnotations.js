@@ -18,8 +18,8 @@ import { createPositionedPointAnnotations } from './createPositionedPointAnnotat
  *   tryParse: (str: string) => Date | false;
  *   getMiddle: (date: Date, step: number) => Date;
  * } | null;
- * chartType: keyof typeof import('../../constants/chart').chartTypes;
  * chartType: import('./annotation').ChartType;
+ * stacking: (typeof import('../../constants/chart').stackingOptions)[keyof typeof import('../../constants/chart').stackingOptions]['value'];
  * }} options
  * @return {{
  * positionedBandAnnotations: import('./annotation').PositionedBandAnnotation[];
@@ -31,6 +31,7 @@ export const createPositionedAnnotations = ({
   annotations,
   categoriesFrequency,
   chartType,
+  stacking
 }) => {
   if (data.series.length === 0) {
     return {
@@ -76,6 +77,7 @@ export const createPositionedAnnotations = ({
         categoriesFrequency,
         areCategoriesDates: data.areCategoriesDates,
         chartType,
+        stacking
       })
     : [];
 
