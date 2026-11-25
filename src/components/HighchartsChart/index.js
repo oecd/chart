@@ -948,7 +948,7 @@ const HighchartsChart = ({
   ] = useState(false);
 
   const processedAnnotations = useMemo(() => {
-    () => R.compose();
+    if (!parsedData) return [];
     const normalizedAnnotations = normalizeAnnotationCodes(
       parsedData,
       usedAnnotations,
