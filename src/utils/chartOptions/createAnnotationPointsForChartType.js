@@ -1,7 +1,7 @@
 //  @ts-check
 import { chartTypes } from '../../constants/chart';
 import { getReferenceLetter } from './getReferenceLetter';
-import { referenceCssStyles, referenceDiameter } from './referenceSymbolStyles';
+import { referenceCssStyles } from './referenceSymbolStyles';
 
 /**
  * The distance the reference symbol keeps from its data point
