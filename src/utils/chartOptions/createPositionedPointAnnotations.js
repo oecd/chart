@@ -69,6 +69,11 @@ export const createPositionedPointAnnotations = ({
     }),
   );
 
+  const scaledAsPercentage = (maxValue, value) => {
+    const scalingFactor = maxValue / 100;
+    return value / scalingFactor;
+  };
+
   const positionedAnnotations = annotations
     .map((annotation) => {
       const categoryIndex = data.categories.findIndex(
@@ -85,25 +90,29 @@ export const createPositionedPointAnnotations = ({
       if (!dataForCategory) return;
 
       let yValue;
-      if (chartType === chartTypes.bar || chartType === chartTypes.row) {
-        yValue = dataForCategory.maximum;
-      } else if (
-        (chartType === chartTypes.stackedBar ||
-          chartType === chartTypes.stackedRow) &&
-        stacking === stackingOptions.normal.value
-      ) {
-        yValue = dataForCategory.midpoints[seriesIndex];
-      } else if (
-        (chartType === chartTypes.stackedBar ||
-          chartType === chartTypes.stackedRow) &&
-        stacking === stackingOptions.percent.value
-      ) {
-        const scalingFactor = dataForCategory.total / 100;
-        yValue = dataForCategory.midpoints[seriesIndex] / scalingFactor;
-      } else if (chartType === chartTypes.stackedArea && stacking === stackingOptions.normal.value) {
-        yValue = dataForCategory?.midpoints[seriesIndex];
-      } else {
-        yValue = dataForCategory.datapoints[seriesIndex];
+
+      switch (chartType) {
+        case chartTypes.line:
+          yValue = dataForCategory.datapoints[seriesIndex];
+          break;
+        case chartTypes.bar:
+        case chartTypes.row:
+          yValue = dataForCategory.maximum;
+          break;
+        case chartTypes.stackedBar:
+        case chartTypes.stackedRow: {
+          let midpoint = dataForCategory.midpoints[seriesIndex];
+          yValue =
+            stacking === stackingOptions.normal.value
+              ? midpoint
+              : scaledAsPercentage(dataForCategory.total, midpoint);
+          break;
+        }
+        case chartTypes.stackedArea:
+          yValue = dataForCategory.stackedValues[seriesIndex];
+          break;
+        default:
+          yValue = dataForCategory.datapoints[seriesIndex];
       }
 
       let xValue;
