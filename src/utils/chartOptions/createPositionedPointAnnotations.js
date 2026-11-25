@@ -108,9 +108,14 @@ export const createPositionedPointAnnotations = ({
               : scaledAsPercentage(dataForCategory.total, midpoint);
           break;
         }
-        case chartTypes.stackedArea:
-          yValue = dataForCategory.stackedValues[seriesIndex];
+        case chartTypes.stackedArea: {
+          let stackedValue = dataForCategory.stackedValues[seriesIndex];
+          yValue =
+            stacking === stackingOptions.normal.value
+              ? stackedValue
+              : scaledAsPercentage(stackedValue);
           break;
+        }
         default:
           yValue = dataForCategory.datapoints[seriesIndex];
       }
