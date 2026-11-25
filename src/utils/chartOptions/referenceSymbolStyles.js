@@ -3,7 +3,7 @@
 import { fontColors } from '../../constants/styling';
 
 const referenceFontSize = '12px';
-const referenceDiameter = 16;
+export const referenceDiameter = 16;
 const referenceDiameterPx = `${referenceDiameter}px`;
 const referenceBorder = 1;
 

@@ -1,7 +1,7 @@
 //  @ts-check
 import { chartTypes } from '../../constants/chart';
 import { getReferenceLetter } from './getReferenceLetter';
-import { referenceCssStyles } from './referenceSymbolStyles';
+import { referenceCssStyles, referenceDiameter } from './referenceSymbolStyles';
 
 /**
  * The distance the reference symbol keeps from its data point
@@ -42,7 +42,13 @@ const positioningForChartType = {
     x: 0,
     y: 0,
   },
-  default: {
+  [chartTypes.stackedArea]: {
+    align: 'center',
+    verticalAlign: 'bottom',
+    x: 0,
+    y: -referenceDiameter,
+  },
+  'default': {
     align: 'left',
     verticalAlign: 'middle',
     x: 0,

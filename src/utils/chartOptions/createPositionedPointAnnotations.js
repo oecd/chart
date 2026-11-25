@@ -31,6 +31,7 @@ export const createPositionedPointAnnotations = ({
    *   maximum: number,
    *   midpoints: number[],
    *   total: number,
+   *   stackedValues: number[],
    * }>}
    */
   const dataByCategories = new Map(
@@ -42,6 +43,8 @@ export const createPositionedPointAnnotations = ({
       let currentSegmentBottomXPos = 0;
       let maximum = 0;
       let total = 0;
+      /** @type number[] */
+      let stackedValues = [];
 
       data.series.forEach((series) => {
         const value = series.data[index].value ?? 0;
@@ -50,6 +53,7 @@ export const createPositionedPointAnnotations = ({
         currentSegmentBottomXPos += value;
         maximum = maximum > value ? maximum : value;
         total += value;
+        stackedValues.push(total);
       });
 
       return [
@@ -59,6 +63,7 @@ export const createPositionedPointAnnotations = ({
           maximum,
           midpoints,
           total,
+          stackedValues,
         },
       ];
     }),
@@ -95,6 +100,8 @@ export const createPositionedPointAnnotations = ({
       ) {
         const scalingFactor = dataForCategory.total / 100;
         yValue = dataForCategory.midpoints[seriesIndex] / scalingFactor;
+      } else if (chartType === chartTypes.stackedArea && stacking === stackingOptions.normal.value) {
+        yValue = dataForCategory?.midpoints[seriesIndex];
       } else {
         yValue = dataForCategory.datapoints[seriesIndex];
       }
