@@ -113,7 +113,7 @@ export const createPositionedPointAnnotations = ({
           yValue =
             stacking === stackingOptions.normal.value
               ? stackedValue
-              : scaledAsPercentage(stackedValue);
+              : scaledAsPercentage(dataForCategory.total, stackedValue);
           break;
         }
         default:
