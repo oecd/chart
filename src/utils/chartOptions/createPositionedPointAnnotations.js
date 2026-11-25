@@ -69,6 +69,11 @@ export const createPositionedPointAnnotations = ({
     }),
   );
 
+  /**
+   * @param {number} maxValue 
+   * @param {number} value 
+   * @returns number
+   */
   const scaledAsPercentage = (maxValue, value) => {
     const scalingFactor = maxValue / 100;
     return value / scalingFactor;
