@@ -54,6 +54,12 @@ const positioningForChartType = {
     x: distance,
     y: 0,
   },
+  [chartTypes.scatter]: {
+    align: 'left',
+    verticalAlign: 'middle',
+    x: distance,
+    y: 0,
+  },
   'default': {
     align: 'left',
     verticalAlign: 'middle',
