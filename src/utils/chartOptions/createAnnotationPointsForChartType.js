@@ -9,7 +9,9 @@ import { referenceCssStyles } from './referenceSymbolStyles';
 const distance = 10;
 
 /**
- * @type {{[key in typeof chartTypes[keyof typeof chartTypes] | 'default']: import('highcharts').AnnotationsLabelOptions}}
+ * @type {{ [key in typeof chartTypes[keyof typeof chartTypes]
+ *           | 'Scatter.oneSeries' | 'Symbol.oneSeries'
+ *           | 'default']: import('highcharts').AnnotationsLabelOptions}}
  */
 const positioningForChartType = {
   [chartTypes.line]: {
@@ -60,7 +62,19 @@ const positioningForChartType = {
     x: distance,
     y: 0,
   },
-  'default': {
+  [chartTypes.scatter + '.oneSeries']: {
+    align: 'center',
+    verticalAlign: 'bottom',
+    x: 0,
+    y: -distance,
+  },
+  [chartTypes.symbol + '.oneSeries']: {
+    align: 'center',
+    verticalAlign: 'bottom',
+    x: 0,
+    y: -distance,
+  },
+  default: {
     align: 'left',
     verticalAlign: 'middle',
     x: 0,
@@ -69,13 +83,15 @@ const positioningForChartType = {
 };
 
 /**
- * @param {import('./annotation').PositionedPointAnnotation[]} positionedPointAnnotations,
+ * @param {import('./annotation').PositionedPointAnnotation[]} positionedPointAnnotations
  * @param {typeof chartTypes[keyof typeof chartTypes] | 'default'} chartType
+ * @param {boolean} onlyOneSeries
  */
 
 export const createAnnotationPointsForChartType = (
   positionedPointAnnotations,
   chartType,
+  onlyOneSeries = false,
 ) => {
   const points = positionedPointAnnotations.map((annotation) => {
     const referenceLetter = getReferenceLetter(annotation.referenceIndex);
@@ -91,6 +107,9 @@ export const createAnnotationPointsForChartType = (
     };
   });
 
+  if (onlyOneSeries) {
+    chartType = chartType + '.oneSeries';
+  }
   let result = [
     {
       labelOptions: {

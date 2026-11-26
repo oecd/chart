@@ -298,11 +298,17 @@ export const createOptionsForScatterChart = ({
       })
     : null;
 
-  const annotationPoints = createAnnotationPointsForChartType(positionedPointAnnotations, chartType);
+  const onlyOneSeries = data.series.length === 1 ? true : false;
+
+  const annotationPoints = createAnnotationPointsForChartType(
+    positionedPointAnnotations,
+    chartType,
+    onlyOneSeries,
+  );
 
   return {
     annotations: annotationPoints,
-    
+
     custom: {
       baselineCodes,
       highlightCategoryCodes,
