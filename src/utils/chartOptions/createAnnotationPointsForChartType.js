@@ -46,7 +46,7 @@ const positioningForChartType = {
     align: 'center',
     verticalAlign: 'bottom',
     x: 0,
-    y: 0,
+    y: -distance,
   },
   [chartTypes.symbol]: {
     align: 'left',
