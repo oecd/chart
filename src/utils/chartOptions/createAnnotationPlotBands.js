@@ -110,7 +110,7 @@ const getReferenceLabelOptions = (index, position) => {
  * @returns {import('highcharts').XAxisPlotBandsOptions[]}
  */
 export const createAnnotationPlotBands = ({
-  positionedBandAnnotations: positionedBandAnnotations,
+  positionedBandAnnotations,
   chartSize,
   showLabelsInline,
   position,
