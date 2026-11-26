@@ -71,7 +71,7 @@ export const createOptionsForScatterChart = ({
   disableLegendInteraction = false,
   chartSize,
   disableAnimation = false,
-  positionedAnnotations,
+  positionedBandAnnotations,
 }) => {
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
@@ -283,13 +283,13 @@ export const createOptionsForScatterChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
-  const showAnnotationLabelsInline = positionedAnnotations
-    ? R.any(R.prop('showLabelInline'), positionedAnnotations)
+  const showAnnotationLabelsInline = positionedBandAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedBandAnnotations)
     : false;
 
-  const plotBands = positionedAnnotations
+  const plotBands = positionedBandAnnotations
     ? createAnnotationPlotBands({
-        positionedBandAnnotations: positionedAnnotations,
+        positionedBandAnnotations: positionedBandAnnotations,
         chartSize,
         showLabelsInline: showAnnotationLabelsInline,
         position: 'top',
