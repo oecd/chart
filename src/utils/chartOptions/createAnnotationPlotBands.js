@@ -1,5 +1,6 @@
 // @ts-check
 
+import { TinyColor } from '@ctrl/tinycolor';
 import {
   fontColors,
   fontFamilies,
@@ -131,11 +132,16 @@ export const createAnnotationPlotBands = ({
         : // Reference annotation in footer
           getReferenceLabelOptions(annotation.referenceIndex, position);
 
+    const finalColor = color || BAND_COLOR;
+    const borderColor = new TinyColor(finalColor).darken(6).toRgbString();
+
     /** @type {import('highcharts').XAxisPlotBandsOptions} */
     const plotBand = {
       from,
       to,
-      color: color || BAND_COLOR,
+      color: finalColor,
+      borderColor,
+      borderWidth: 0.5,
       label: labelOptions,
     };
     return plotBand;
