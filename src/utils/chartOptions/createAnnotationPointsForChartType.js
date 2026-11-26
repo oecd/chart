@@ -48,6 +48,12 @@ const positioningForChartType = {
     x: 0,
     y: 0,
   },
+  [chartTypes.symbol]: {
+    align: 'left',
+    verticalAlign: 'middle',
+    x: distance,
+    y: 0,
+  },
   'default': {
     align: 'left',
     verticalAlign: 'middle',

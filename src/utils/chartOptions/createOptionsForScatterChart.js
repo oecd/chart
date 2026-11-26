@@ -25,6 +25,7 @@ import {
 } from '../stylingUtil';
 import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { parseCategories } from './parseCategories';
+import { createAnnotationPointsForChartType } from './createAnnotationPointsForChartType';
 
 // Symbol sizes
 const RADIUS = 6;
@@ -72,6 +73,7 @@ export const createOptionsForScatterChart = ({
   chartSize,
   disableAnimation = false,
   positionedBandAnnotations,
+  positionedPointAnnotations,
 }) => {
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
@@ -296,7 +298,11 @@ export const createOptionsForScatterChart = ({
       })
     : null;
 
+  const annotationPoints = createAnnotationPointsForChartType(positionedPointAnnotations, chartType);
+
   return {
+    annotations: annotationPoints,
+    
     custom: {
       baselineCodes,
       highlightCategoryCodes,
