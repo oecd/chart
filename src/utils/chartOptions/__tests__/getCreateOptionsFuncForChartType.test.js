@@ -65,6 +65,7 @@ describe('getCreateOptionsFuncForChartType', () => {
         '#853C1B',
         '#7B290B',
       ],
+      annotations: [],
     };
 
     const smallerColorPalettes = [

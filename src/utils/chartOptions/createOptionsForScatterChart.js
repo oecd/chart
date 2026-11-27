@@ -23,7 +23,9 @@ import {
   calcMarginTopDefault,
   fontStyleForTextElement,
 } from '../stylingUtil';
+import { createAnnotationPlotBands } from './createAnnotationPlotBands';
 import { parseCategories } from './parseCategories';
+import { createAnnotationPointsForChartType } from './createAnnotationPointsForChartType';
 
 // Symbol sizes
 const RADIUS = 6;
@@ -70,6 +72,8 @@ export const createOptionsForScatterChart = ({
   disableLegendInteraction = false,
   chartSize,
   disableAnimation = false,
+  positionedBandAnnotations,
+  positionedPointAnnotations,
 }) => {
   const symbolMinMaxLayout = chartType === chartTypes.symbolMinMax;
 
@@ -281,7 +285,30 @@ export const createOptionsForScatterChart = ({
     ? null
     : R.map(R.prop('parsedLabel'), parsedCategories);
 
+  const showAnnotationLabelsInline = positionedBandAnnotations
+    ? R.any(R.prop('showLabelInline'), positionedBandAnnotations)
+    : false;
+
+  const plotBands = positionedBandAnnotations
+    ? createAnnotationPlotBands({
+        positionedBandAnnotations: positionedBandAnnotations,
+        chartSize,
+        showLabelsInline: showAnnotationLabelsInline,
+        position: 'top',
+      })
+    : null;
+
+  const onlyOneSeries = data.series.length === 1 ? true : false;
+
+  const annotationPoints = createAnnotationPointsForChartType(
+    positionedPointAnnotations,
+    chartType,
+    onlyOneSeries,
+  );
+
   return {
+    annotations: annotationPoints,
+
     custom: {
       baselineCodes,
       highlightCategoryCodes,
@@ -324,6 +351,7 @@ export const createOptionsForScatterChart = ({
       lineColor: 'transparent',
       ...calcXAxisLayout(),
       tickWidth: 0,
+      plotBands,
     },
 
     yAxis: {
@@ -364,7 +392,9 @@ export const createOptionsForScatterChart = ({
       symbolWidth: 18,
       x: -7,
       verticalAlign: 'top',
-      margin: calcLegendMarginDefault(chartSize),
+      margin:
+        calcLegendMarginDefault(chartSize) +
+        (showAnnotationLabelsInline ? 15 : 0),
     },
 
     plotOptions: {

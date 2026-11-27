@@ -1,6 +1,7 @@
 // @ts-check
 import * as R from 'ramda';
 import {
+  chartSizes,
   chartTypes,
   chartTypesForWhichXAxisIsAlwaysTreatedAsCategories,
   defaultExportSize,
@@ -38,6 +39,7 @@ import { createOptionsForRadarChart } from './createOptionsForRadarChart';
 import { createOptionsForSankeyChart } from './createOptionsForSankeyChart';
 import { createOptionsForScatterChart } from './createOptionsForScatterChart';
 import { createOptionsForStackedChart } from './createOptionsForStackedChart';
+import { createPositionedAnnotations } from './createPositionedAnnotations';
 import { getBaselineAndHighlightCodes } from './getBaselineAndHighlightCodes';
 import { getSmallerPalette } from './getSmallerPalette';
 
@@ -80,7 +82,9 @@ const createChartOptionsFunc =
     chartSize,
     inlineLabels,
     hideLegend,
+    annotations,
     disableAnimation,
+    stacking,
     ...otherProps
   }) => {
     const parsedFixedColorIndexBySeries = isNilOrEmpty(fixedColorIndexBySeries)
@@ -153,7 +157,7 @@ const createChartOptionsFunc =
       decimalPoint,
       areCategoriesNumbers: data.areCategoriesNumbers,
       areCategoriesDates: data.areCategoriesDates,
-      categoriesDateFomat: data.categoriesDateFomat,
+      categoriesDateFormat: data.categoriesDateFormat,
       areSeriesNumbers: data.areSeriesNumbers,
       areSeriesDates: data.areSeriesDates,
       seriesDateFomat: data.seriesDateFomat,
@@ -171,12 +175,21 @@ const createChartOptionsFunc =
       );
 
     const categoriesFrequency = data.areCategoriesDates
-      ? R.prop(data.categoriesDateFomat, frequencies)
+      ? R.prop(data.categoriesDateFormat, frequencies)
       : null;
 
     const seriesFrequency = data.areSeriesDates
       ? R.prop(data.seriesDateFomat, frequencies)
       : null;
+
+    const { positionedBandAnnotations, positionedPointAnnotations } =
+      createPositionedAnnotations({
+        data,
+        annotations,
+        categoriesFrequency,
+        chartType,
+        stacking
+      });
 
     const options = createOptionsFuncForChartType({
       ...otherProps,
@@ -201,7 +214,10 @@ const createChartOptionsFunc =
       chartSize,
       inlineLabels,
       hideLegend,
+      positionedBandAnnotations,
+      positionedPointAnnotations,
       disableAnimation,
+      stacking,
     });
 
     const customChartRender = R.propOr(
@@ -259,6 +275,22 @@ const createChartOptionsFunc =
       }
     };
 
+    /**
+     * Callback that runs when Highcharts has completed the animation
+     */
+    const animationComplete = () => {
+      if (
+        customChartRender &&
+        chart &&
+        // The chart object might be destroyed, than it is empty
+        chart.renderer &&
+        !renderedAfterAnimation
+      ) {
+        customChartRender({ chart, cbType: chartType });
+        renderedAfterAnimation = true;
+      }
+    };
+
     return R.compose(
       R.when(
         () => !R.isNil(customChartRender),
@@ -272,6 +304,14 @@ const createChartOptionsFunc =
           ['plotOptions', 'series', 'events', 'afterAnimate'],
           afterAnimate,
         ),
+      ),
+      // Animation complete callback: Call render callback again once
+      // after the animation completed
+      R.when(
+        (options2) =>
+          customChartRender &&
+          R.path(['plotOptions', 'series', 'animation'], options2) !== false,
+        R.assocPath(['chart', 'animation', 'complete'], animationComplete),
       ),
       R.assoc('lang', {
         decimalPoint,
@@ -323,7 +363,7 @@ const createChartOptionsFunc =
       R.assoc('caption', {
         text: otherProps.footer,
         align: 'left',
-        margin: 25,
+        margin: chartSize === chartSizes.small ? 10 : 25,
         useHTML: true,
         style: fontStyleForTextElement(textElementTypes.source, chartSize),
       }),
