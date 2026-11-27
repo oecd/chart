@@ -57,6 +57,27 @@ export const filterAndSortAnnotations = (data, annotations) => {
     data.categories.map(({ code }, index) => [code.toLowerCase(), index]),
   );
 
+  const seriesCodeToIndex = new Map(
+    data.series.map(({ code }, index) => [code.toLowerCase(), index]),
+  );
+
+  /**
+   * @param {import('./annotation').PointAnnotation}} annotation
+   * @returns number
+   */
+  const getCorrespondingDataPointFor = (annotation) => {
+    const { categoryCode, seriesCode } = annotation;
+    const categoryIndex = categoryCodeToIndex.get(categoryCode);
+    const seriesIndex = seriesCodeToIndex.get(seriesCode);
+    if (R.any(R.isNil, [categoryIndex, seriesIndex])) return null;
+
+    return R.flow(data.series, [
+      R.pluck('data'),
+      R.pluck(categoryIndex),
+      R.pluck('value'),
+    ])[seriesIndex];
+  };
+
   return R.compose(
     // Sort annotations so alphabetical references appear left-to-right (A, B, C etc.)
     R.sortBy(
@@ -72,9 +93,10 @@ export const filterAndSortAnnotations = (data, annotations) => {
     // appear in the data range.
     R.filter((annotation) => {
       const { categoryCode, fromCategoryCode, toCategoryCode } = annotation;
-      // Point annotation: Point needs to appear in the data explicitly
+      // Point annotation: Point needs to appear in the categories explicitly
+      // and needs a corresponding datapoint in the series
       if (categoryCode) {
-        return categoryCodeToIndex.has(categoryCode);
+        return categoryCodeToIndex.has(categoryCode) && !R.isNil(getCorrespondingDataPointFor(annotation));
       }
       // Band annotation, categories are dates: from and to categories
       // need to appear in the time range implicitly.
