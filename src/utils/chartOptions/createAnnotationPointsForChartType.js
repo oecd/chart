@@ -93,11 +93,13 @@ const positioningForChartType = {
           y: 0,
         };
   },
-  [chartTypes.symbol + '.oneSeries']: {
-    align: 'center',
-    verticalAlign: 'bottom',
-    x: 0,
-    y: -distance,
+  [chartTypes.radar]: () => {
+    return {
+      align: 'center',
+      verticalAlign: 'bottom',
+      x: 0,
+      y: 0,
+    };
   },
   default: () => {
     return {
@@ -114,7 +116,6 @@ const positioningForChartType = {
  * @param {typeof chartTypes[keyof typeof chartTypes] | 'default'} chartType
  * @param {boolean} onlyOneSeries
  */
-
 export const createAnnotationPointsForChartType = (
   positionedPointAnnotations,
   chartType,
@@ -154,6 +155,7 @@ export const createAnnotationPointsForChartType = (
         distance: 0,
       },
       draggable: '',
+      // allowOverlap: true,
       labels: points,
     },
   ];

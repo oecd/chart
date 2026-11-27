@@ -6,6 +6,7 @@ import {
   baselineColor,
   chartSpacing,
   chartSpacingFullScreenAndExport,
+  chartTypes,
   nonHighlightedOpacity,
 } from '../../constants/chart';
 import { textElementTypes } from '../../constants/styling';
@@ -25,6 +26,7 @@ import {
 } from '../stylingUtil';
 import { highlightSymbols } from './highlightSymbols';
 import { parseCategories } from './parseCategories';
+import { createAnnotationPointsForChartType } from './createAnnotationPointsForChartType';
 
 const SYMBOL_RADIUS = 3;
 const HIGHLIGHTED_SYMBOL_RADIUS = 3.5;
@@ -107,8 +109,11 @@ export const createOptionsForRadarChart = ({
   disableLegendInteraction = false,
   chartSize,
   disableAnimation = false,
+  positionedPointAnnotations,
 }) => {
   const anySeriesHighlighted = highlightSeriesCodes.length > 0;
+
+  console.log('positionedPointAnnotations', positionedPointAnnotations); //DEBUG
 
   const allSeries = mapWithIndex((series, seriesIndex) => {
     const seriesCodeLowercase = series.code.toLowerCase();
@@ -179,6 +184,7 @@ export const createOptionsForRadarChart = ({
         );
         return {
           ...point,
+          id: `${seriesCodeLowercase}-${categoryCodeLowercase}`,
           marker: {
             radius: isSeriesHighlighted ? HIGHLIGHTED_SYMBOL_RADIUS : null,
             lineWidth: isCategoryHighlighted
@@ -237,7 +243,26 @@ export const createOptionsForRadarChart = ({
     areCategoriesDates: data.areCategoriesDates,
   };
 
+  const pointAnnotationsWithId = positionedPointAnnotations.map((annotation) => {
+    const seriesCodeLowercase = annotation.seriesCode.toLowerCase();
+    const categoryCodeLowercase = annotation.categoryCode.toLowerCase();
+    return {
+      categoryCode: annotation.categoryCode,
+      id: annotation.id,
+      label: annotation.label,
+      referenceIndex: annotation.referenceIndex,
+      seriesCode: annotation.seriesCode,
+      showLabelInline: annotation.showLabelInline,
+      type: annotation.type,
+      point: `${seriesCodeLowercase}-${categoryCodeLowercase}`,
+    }
+  });
+
+  const annotationPoints = createAnnotationPointsForChartType(pointAnnotationsWithId, chartTypes.radar)
+
   return {
+    annotations: annotationPoints,
+
     custom: customChartOptions,
     chart: {
       polar: true,
