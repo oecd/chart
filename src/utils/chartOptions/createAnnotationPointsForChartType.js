@@ -9,64 +9,89 @@ import { referenceCssStyles } from './referenceSymbolStyles';
 const distance = 10;
 
 /**
- * @type {{ [key in typeof chartTypes[keyof typeof chartTypes]
- *           | 'Scatter.oneSeries' | 'Symbol.oneSeries'
- *           | 'default']: import('highcharts').AnnotationsLabelOptions}}
+ * @typedef {typeof chartTypes[keyof typeof chartTypes] | 'default'} chartTypesKey
+ * @typedef {(annotation: import('./annotation').PositionedPointAnnotation, opts: any) => import('highcharts').AnnotationsLabelOptions} positioningFunc
+ *
+ * @type {{ [key in chartTypesKey]: positioningFunc }}
  */
 const positioningForChartType = {
-  [chartTypes.line]: {
-    align: 'center',
-    verticalAlign: 'bottom',
-    x: 0,
-    y: -1 * distance,
+  [chartTypes.line]: () => {
+    return {
+      align: 'center',
+      verticalAlign: 'bottom',
+      x: 0,
+      y: -1 * distance,
+    };
   },
-  [chartTypes.bar]: {
-    align: 'center',
-    verticalAlign: 'bottom',
-    x: 0,
-    y: -1 * distance,
+  [chartTypes.bar]: () => {
+    return {
+      align: 'center',
+      verticalAlign: 'bottom',
+      x: 0,
+      y: -1 * distance,
+    };
   },
-  [chartTypes.row]: {
-    align: 'left',
-    verticalAlign: 'middle',
-    x: distance,
-    y: 0,
+  [chartTypes.row]: () => {
+    return {
+      align: 'left',
+      verticalAlign: 'middle',
+      x: distance,
+      y: 0,
+    };
   },
-  [chartTypes.stackedBar]: {
-    align: 'center',
-    verticalAlign: 'middle',
-    x: 0,
-    y: 0,
+  [chartTypes.stackedBar]: () => {
+    return {
+      align: 'center',
+      verticalAlign: 'middle',
+      x: 0,
+      y: 0,
+    };
   },
-  [chartTypes.stackedRow]: {
-    align: 'center',
-    verticalAlign: 'middle',
-    x: 0,
-    y: 0,
+  [chartTypes.stackedRow]: () => {
+    return {
+      align: 'center',
+      verticalAlign: 'middle',
+      x: 0,
+      y: 0,
+    };
   },
-  [chartTypes.stackedArea]: {
-    align: 'center',
-    verticalAlign: 'bottom',
-    x: 0,
-    y: -distance,
+  [chartTypes.stackedArea]: () => {
+    return {
+      align: 'center',
+      verticalAlign: 'bottom',
+      x: 0,
+      y: -distance,
+    };
   },
-  [chartTypes.symbol]: {
-    align: 'left',
-    verticalAlign: 'middle',
-    x: distance,
-    y: 0,
+  [chartTypes.symbol]: (_, { onlyOneSeries }) => {
+    return onlyOneSeries
+      ? {
+          align: 'center',
+          verticalAlign: 'bottom',
+          x: 0,
+          y: -distance,
+        }
+      : {
+          align: 'left',
+          verticalAlign: 'middle',
+          x: distance,
+          y: 0,
+        };
   },
-  [chartTypes.scatter]: {
-    align: 'left',
-    verticalAlign: 'middle',
-    x: distance,
-    y: 0,
-  },
-  [chartTypes.scatter + '.oneSeries']: {
-    align: 'center',
-    verticalAlign: 'bottom',
-    x: 0,
-    y: -distance,
+  [chartTypes.scatter]: (_, { onlyOneSeries }) => {
+    return onlyOneSeries
+      ? {
+          align: 'center',
+          verticalAlign: 'bottom',
+          x: 0,
+          y: -distance,
+        }
+      : {
+          align: 'left',
+          verticalAlign: 'middle',
+          x: distance,
+          y: 0,
+        };
   },
   [chartTypes.symbol + '.oneSeries']: {
     align: 'center',
@@ -74,11 +99,13 @@ const positioningForChartType = {
     x: 0,
     y: -distance,
   },
-  default: {
-    align: 'left',
-    verticalAlign: 'middle',
-    x: 0,
-    y: 0,
+  default: () => {
+    return {
+      align: 'left',
+      verticalAlign: 'middle',
+      x: 0,
+      y: 0,
+    };
   },
 };
 
@@ -93,23 +120,29 @@ export const createAnnotationPointsForChartType = (
   chartType,
   onlyOneSeries = false,
 ) => {
+  const positioningFunc =
+    positioningForChartType[chartType] ?? positioningForChartType['default'];
+
   const points = positionedPointAnnotations.map((annotation) => {
     const referenceLetter = getReferenceLetter(annotation.referenceIndex);
-    /** @type {import('highcharts').AnnotationsLabelsOptions} */
+    const point =
+      chartType === chartTypes.radar
+        ? annotation.point
+        : {
+            x: annotation.x,
+            y: annotation.y,
+            xAxis: 0,
+            yAxis: 0,
+          };
     return {
       text: `<span style="${referenceCssStyles()}">${referenceLetter}</span>`,
-      point: {
-        x: annotation.x,
-        y: annotation.y,
-        xAxis: 0,
-        yAxis: 0,
-      },
+      point: point,
+      ...positioningFunc(annotation, {
+        onlyOneSeries,
+      }),
     };
   });
 
-  if (onlyOneSeries) {
-    chartType = chartType + '.oneSeries';
-  }
   let result = [
     {
       labelOptions: {
@@ -119,8 +152,6 @@ export const createAnnotationPointsForChartType = (
         borderWidth: 0,
         padding: 0,
         distance: 0,
-        ...(positioningForChartType[chartType] ??
-          positioningForChartType['default']),
       },
       draggable: '',
       labels: points,
