@@ -48,6 +48,7 @@
  * @typedef {IndexedPointAnnotation & {
  * x: number;
  * y: number;
+ * point?: string | { x: number, y: number, xAxis: 0, yAxis: 0 };
  * }} PositionedPointAnnotation
  */
 
